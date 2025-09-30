@@ -71,21 +71,17 @@ function App() {
               Pokedex
             </Button>
 
-            <Avatar variant="round" size="medium" onClick={toggleTheme} className="cursor-pointer">
-              <AvatarFallback className="flex items-center justify-center">
-                {isDarkMode ? (
-                  <SunIcon className="w-4 h-4" />
-                ) : (
-                  <MoonIcon className="w-4 h-4" />
-                )}
-              </AvatarFallback>
-            </Avatar>
+            <Button onClick={toggleTheme} className="p-2">
+              {isDarkMode ? (
+                <SunIcon className="w-4 h-4" />
+              ) : (
+                <MoonIcon className="w-4 h-4" />
+              )}
+            </Button>
 
-            <Avatar variant="round" size="medium" className="cursor-pointer">
-              <AvatarFallback className="flex items-center justify-center">
-                <UserIcon className="w-4 h-4" />
-              </AvatarFallback>
-            </Avatar>
+            <Button className="p-2">
+              <UserIcon className="w-4 h-4" />
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -108,21 +104,17 @@ function App() {
               </Button>
 
               <div className="flex items-center justify-center gap-4 mt-2">
-                <Avatar variant="round" size="medium" onClick={toggleTheme} className="cursor-pointer">
-                  <AvatarFallback className="flex items-center justify-center">
-                    {isDarkMode ? (
-                      <SunIcon className="w-4 h-4" />
-                    ) : (
-                      <MoonIcon className="w-4 h-4" />
-                    )}
-                  </AvatarFallback>
-                </Avatar>
+                <Button onClick={toggleTheme} className="p-2">
+                  {isDarkMode ? (
+                    <SunIcon className="w-4 h-4" />
+                  ) : (
+                    <MoonIcon className="w-4 h-4" />
+                  )}
+                </Button>
 
-                <Avatar variant="round" size="medium" className="cursor-pointer">
-                  <AvatarFallback className="flex items-center justify-center">
-                    <UserIcon className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
+                <Button className="p-2">
+                  <UserIcon className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           </div>
