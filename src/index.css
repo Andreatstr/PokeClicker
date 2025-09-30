@@ -108,6 +108,20 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Retro Color Palette */
+  --retro-primary: hsl(45 70% 82%);
+  --retro-secondary: hsl(45 39% 61%);
+  --retro-accent: hsl(20 30% 70%);
+  --retro-surface: hsl(50 70% 75.6%);
+  --retro-border: hsl(0 0% 0%);
+
+  /* Button Variant Colors */
+  --success: #4ade80;
+  --success-foreground: #000000;
+  --warning: #fb7185;
+  --warning-foreground: #000000;
+  --link: #3b82f6;
 }
 
 .dark {
@@ -146,10 +160,11 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: var(--retro-secondary);
   }
 }
 

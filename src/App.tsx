@@ -2,21 +2,18 @@ import { useState, useEffect } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Button } from '@/components/ui/pixelact-ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/pixelact-ui/avatar'
 import { Input } from '@/components/ui/pixelact-ui/input'
 import { Label } from '@/components/ui/pixelact-ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/pixelact-ui/select'
-import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/pixelact-ui/menubar'
-import React from 'react'
-import { SearchIcon, CloseIcon, UserIcon, SunIcon, MoonIcon, MenuIcon } from '@/components/ui/pixelact-ui/icons'
+import { SearchIcon, CloseIcon } from '@/components/ui/pixelact-ui/icons'
 import { PokeClicker } from './components/PokeClicker'
+import { Navbar } from './components/Navbar'
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
 
   const handlePokemonClick = (pokemon: Pokemon) => {
@@ -50,92 +47,16 @@ function App() {
     setIsDarkMode(!isDarkMode)
   }
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
-
   return (
     <>
-      <header className="bg-[#e8e8d0] p-2 sm:p-4 md:p-8">
-        <Menubar className="w-full justify-between h-14 sm:h-16 md:h-20 px-2 sm:px-4 py-2 sm:py-3 md:py-4">
-          <div className="flex items-center">
-            <h1 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl font-bold text-black pixel-font whitespace-nowrap flex-shrink-[2] min-w-0">
-              PokeClicker
-            </h1>
-          </div>
+      <Navbar
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
+      />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
-            <Button
-              className="text-xs md:text-sm"
-              onClick={() => setCurrentPage('clicker')}
-            >
-              PokeClicker
-            </Button>
-            <Button
-              className="text-xs md:text-sm"
-              onClick={() => setCurrentPage('pokedex')}
-            >
-              Pokedex
-            </Button>
-
-            <Button onClick={toggleTheme} className="p-2">
-              {isDarkMode ? (
-                <SunIcon className="w-4 h-4" />
-              ) : (
-                <MoonIcon className="w-4 h-4" />
-              )}
-            </Button>
-
-            <Button className="p-2">
-              <UserIcon className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button onClick={toggleMobileMenu} className="p-2">
-              <MenuIcon className="w-5 h-5" />
-            </Button>
-          </div>
-        </Menubar>
-
-        {/* Mobile Menu Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 bg-[#e8e8d0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4">
-            <div className="flex flex-col gap-3">
-              <Button
-                className="w-full text-sm"
-                onClick={() => setCurrentPage('clicker')}
-              >
-                PokeClicker
-              </Button>
-              <Button
-                className="w-full text-sm"
-                onClick={() => setCurrentPage('pokedex')}
-              >
-                Pokedex
-              </Button>
-
-              <div className="flex items-center justify-center gap-4 mt-2">
-                <Button onClick={toggleTheme} className="p-2">
-                  {isDarkMode ? (
-                    <SunIcon className="w-4 h-4" />
-                  ) : (
-                    <MoonIcon className="w-4 h-4" />
-                  )}
-                </Button>
-
-                <Button className="p-2">
-                  <UserIcon className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <main className="bg-[#e8e8d0] min-h-screen px-4 md:px-8 pb-8">
+      <main className="min-h-screen px-4 sm:px-6 md:px-8 pb-8 pt-0" style={{ backgroundColor: 'var(--retro-secondary)' }}>
         {currentPage === 'clicker' ? (
           <section className="py-8">
             <PokeClicker />
@@ -143,8 +64,12 @@ function App() {
         ) : (
           <>
             {/* Search Bar */}
-            <section className="mb-6 max-w-4xl mx-auto">
-              <form className="bg-[#e8e8d0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4" role="search" onSubmit={(e) => e.preventDefault()}>
+            <section className="mb-6 mt-6 sm:mt-4 max-w-4xl mx-auto">
+              <form className="p-4" style={{
+                backgroundColor: 'var(--retro-primary)',
+                border: '4px solid var(--retro-border)',
+                boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
+              }} role="search" onSubmit={(e) => e.preventDefault()}>
                 <Label htmlFor="pokemon-search" className="sr-only">Search Pokemon</Label>
                 <div className="relative">
                   <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -243,11 +168,25 @@ function App() {
                     {filteredPokemon.map((pokemon) => (
                       <li key={pokemon.id}>
                         <Card
-                          className="cursor-pointer hover:translate-y-[-4px] transition-transform duration-150 bg-[#e8e8d0] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 w-[280px]"
+                          className="cursor-pointer hover:translate-y-[-4px] transition-transform duration-150 p-6 w-[280px]"
+                          style={{
+                            backgroundColor: 'var(--retro-primary)',
+                            border: '4px solid var(--retro-border)',
+                            boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.boxShadow = '8px 8px 0px 0px rgba(0,0,0,1)'
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.boxShadow = '6px 6px 0px 0px rgba(0,0,0,1)'
+                          }}
                           onClick={() => handlePokemonClick(pokemon)}
                         >
                           <article className="text-center">
-                            <figure className="bg-white border-2 border-black p-6 mb-4 aspect-square flex items-center justify-center m-0">
+                            <figure className="p-6 mb-4 aspect-square flex items-center justify-center m-0" style={{
+                              backgroundColor: 'var(--retro-surface)',
+                              border: '2px solid var(--retro-border)'
+                            }}>
                               <img
                                 src={pokemon.sprite}
                                 alt={pokemon.name}
