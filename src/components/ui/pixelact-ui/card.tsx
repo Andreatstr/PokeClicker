@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
@@ -13,18 +13,7 @@ import {
 } from "@/components/ui/card";
 
 import "@/components/ui/pixelact-ui/styles/styles.css";
-
-export const cardVariants = cva("", {
-  variants: {
-    font: {
-      normal: "",
-      pixel: "pixel-font",
-    },
-  },
-  defaultVariants: {
-    font: "pixel",
-  },
-});
+import { cardVariants } from "./card-variants";
 
 export interface CardProps
   extends React.ComponentProps<"div">,
