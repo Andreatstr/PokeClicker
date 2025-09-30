@@ -24,30 +24,6 @@ body {
   width: 100%;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -132,6 +108,19 @@ button:focus-visible {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+--retro-primary: hsl(30 70% 55%);   /* burnt orange */
+--retro-secondary: hsl(200 35% 45%);/* muted teal */
+--retro-accent: hsl(350 40% 55%);   /* faded red */
+--retro-surface: hsl(45 40% 90%);   /* parchment cream */
+--retro-border: hsl(30 30% 20%);    /* dark brown */  /* white outline */ /* glowing outline */
+
+
+  --success: #4ade80;
+  --success-foreground: #000000;
+  --warning: #fb7185;
+  --warning-foreground: #000000;
+  --link: #3b82f6;
 }
 
 .dark {
@@ -170,9 +159,43 @@ button:focus-visible {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: var(--retro-secondary);
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-60px) scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-120px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes idle-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes walk-horizontal {
+  0%, 100% {
+    transform: translateX(-10%);
+  }
+  50% {
+    transform: translateX(10%);
   }
 }
