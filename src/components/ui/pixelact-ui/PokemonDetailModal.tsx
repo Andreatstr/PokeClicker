@@ -15,14 +15,6 @@ interface Props {
 export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }: Props) {
   if (!pokemon) return null
 
-  const fullEvolutionChain = [
-    {
-      name: pokemon.name,
-      sprite: pokemon.sprite,
-    },
-    ...(pokemon.evolution ?? []),
-  ]
-
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogBody>
@@ -48,7 +40,7 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }
               <div><strong>Weight:</strong> <span>{pokemon.weight ?? '—'}</span></div>
               <div><strong>Gender:</strong> <span>{pokemon.genderRatio ?? '—'}</span></div>
               <div><strong>Habitat:</strong> <span>{pokemon.habitat ?? '—'}</span></div>
-            
+
               <div className="abilitiesList">
                 <strong>Abilities:</strong>
                 <ul>

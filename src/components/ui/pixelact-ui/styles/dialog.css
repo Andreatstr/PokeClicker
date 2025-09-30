@@ -28,9 +28,3 @@
   min-height: 100vh;
   padding: 2rem;
 }
-
-.dialog-header,
-.dialog-body,
-.dialog-footer {
-  margin-bottom: 1rem;
-}

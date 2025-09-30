@@ -26,14 +26,6 @@ export function Dialog({ open, onClose, children }: DialogProps) {
   )
 }
 
-export function DialogHeader({ children }: { children: ReactNode }) {
-  return <header className="dialog-header">{children}</header>
-}
-
 export function DialogBody({ children, className = '' }: DialogSectionProps) {
   return <section className={`dialog-body ${className}`}>{children}</section>
-}
-
-export function DialogFooter({ children, className = '' }: DialogSectionProps) {
-  return <footer className={`dialog-footer ${className}`}>{children}</footer>
 }
