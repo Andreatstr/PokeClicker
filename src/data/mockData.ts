@@ -4,20 +4,13 @@ export interface Pokemon {
   types: string[];
   sprite: string;
   pokedexNumber: string;
-  stats?: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-  };
-  abilities?: string[];
-  moves?: string[];
-  evolution?: {
-    name: string;
-    sprite: string;
-  }[];
+  height?: string
+  weight?: string
+  genderRatio?: string
+  habitat?: string
+  abilities?: string[]
+  stats?: { hp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number }
+  evolution?: { name: string; sprite: string }[]
 }
 
 export const mockPokemonData: Pokemon[] = [
@@ -153,6 +146,11 @@ export const mockPokemonData: Pokemon[] = [
     types: ["normal"],
     sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
     pokedexNumber: "019",
+    height: "0.3 m",
+    weight: "3.5 kg",
+    genderRatio: "50% ♂ / 50% ♀",
+    habitat: "Grassland",
+    abilities: ["Run Away", "Guts", "Hustle"],
     stats: {
       hp: 30,
       attack: 56,
@@ -161,8 +159,6 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 35,
       speed: 72
     },
-    abilities: ["Run Away", "Guts", "Hustle"],
-    moves: ["Tackle", "Quick Attack", "Bite", "Hyper Fang"],
     evolution: [
       {
         name: "Raticate",

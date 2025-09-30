@@ -182,7 +182,11 @@ function App() {
       <PokemonDetailModal
         pokemon={selectedPokemon}
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => setModalOpen(false)}
+        onSelectPokemon={(name) => {
+          const next = mockPokemonData.find((p) => p.name === name)
+          if (next) setSelectedPokemon(next)
+        }}
       />
     </>
   )

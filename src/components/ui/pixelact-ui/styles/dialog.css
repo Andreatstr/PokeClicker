@@ -5,7 +5,7 @@
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
-  /* align-items: center; */
+  align-items: center;
   z-index: 50;
 }
 
@@ -18,7 +18,15 @@
   width: 90%;
   font-family: 'Press Start 2P', monospace;
   overflow-y: auto;
-  max-height: 95%;
+  max-height: 80%;
+}
+
+.dialogBody {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
 }
 
 .dialog-header,

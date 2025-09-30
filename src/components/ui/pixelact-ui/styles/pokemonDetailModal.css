@@ -1,3 +1,27 @@
+.modalHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.pokemonName {
+  font-size: 16px;
+  font-weight: bold;
+  font-family: "Press Start 2P", monospace;
+  text-align: center;
+}
+
+.closeButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+  margin-top: -0.5rem;
+}
+
 .modalContainer {
   display: flex;
   flex-direction: column;
@@ -8,24 +32,74 @@
   .modalContainer {
     flex-direction: row;
   }
+  
+  .leftBox {
+    width: 100%;
+  }
 }
 
 .leftBox {
-  background-color: #e2e2e2;
+  background-color: #f8b0c0;
   border: 4px solid black;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
   padding: 1rem;
   width: 100%;
   max-width: 320px;
   font-family: "Press Start 2P", monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.leftBox img {
-  image-rendering: pixelated;
+.spriteFrame {
+  background-color: #fff8dc;
+  border: 2px solid black;
+  padding: 0.5rem;
+  margin: 0 0 1rem 0;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+}
+
+.spriteImage {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.25);
+  transform-origin: center;
+  object-fit: contain;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.25rem 1rem;
+  font-size: 10px;
+  margin-bottom: 1rem;
+}
+
+.infoGrid strong {
+  font-weight: bold;
+}
+
+.infoGrid span {
+  font-weight: normal;
+}
+
+.abilitiesList {
+  font-size: 10px;
+}
+
+.abilitiesList ul {
+  list-style-type: disc;
+  padding-left: 1rem;
+  margin-top: 0.25rem;
 }
 
 .rightBox {
-  background-color: #c8f4c8;
+  background-color: #b0f0b0;
   border: 4px solid black;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
   padding: 1rem;
@@ -72,35 +146,52 @@
   gap: 0.5rem;
 }
 
-.evolutionSection {
-  margin-top: 1rem;
+.evolutionWrapper {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #a0c8ff;
+  border: 4px solid black;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  font-size: small;
 }
 
-.evolutionRow {
+.evolutionChain {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .evolutionItem {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 33%;
+  gap: 0.5rem;
 }
 
-.evolutionItem img {
+.evolutionImage {
   width: 64px;
   height: 64px;
+  transform: scale(1.25);
+  transform-origin: center;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .evolutionArrow {
-  font-size: 1.5rem;
-  margin-top: 0.5rem;
+  font-size: 16px;
 }
 
-.buttonRow {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
+.evolutionItem.invisible {
+  visibility: hidden;
+}
+
+.evolutionButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.evolutionButton:hover .evolutionImage {
+  transform: scale(1.1);
 }
