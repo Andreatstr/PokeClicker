@@ -1,6 +1,7 @@
 import { Dialog, DialogBody } from './dialog'
 import { Progress } from './progress'
 import { Button } from '@/components/ui/pixelact-ui/button'
+import { mockPokemonData } from '@/data/mockData'
 import type { Pokemon } from '@/data/mockData'
 import './styles/PokemonDetailModal.css'
 
@@ -99,11 +100,12 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }
             <div className="evolutionWrapper">
               <h3>Evolution</h3>
               <div className="evolutionChain">
-                {[0, 1, 2].map((i) => {
-                  const evo = fullEvolutionChain[i]
-                  const next = fullEvolutionChain[i + 1]
+                {[pokemon.id, ...(pokemon.evolution ?? [])].sort((a, b) => a - b).map((id, i, arr) => {
+                  const evo = mockPokemonData.find(p => p.id === id)
+                  const next = arr[i + 1] ? mockPokemonData.find(p => p.id === arr[i + 1]) : null
+
                   return (
-                    <div key={i} className={`evolutionItem ${!evo ? 'invisible' : ''}`}>
+                    <div key={id} className={`evolutionItem ${!evo ? 'invisible' : ''}`}>
                       {evo && (
                         <>
                           <button
@@ -113,7 +115,7 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }
                           >
                             <img src={evo.sprite} alt={evo.name} className="evolutionImage" />
                           </button>
-                          {i < 2 && next && <span className="evolutionArrow">→</span>}
+                          {next && <span className="evolutionArrow">→</span>}
                         </>
                       )}
                     </div>
