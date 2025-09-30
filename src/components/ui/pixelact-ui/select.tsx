@@ -1,5 +1,5 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { type VariantProps, cva } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
@@ -17,18 +17,7 @@ import {
 } from "@/components/ui/select";
 
 import "@/components/ui/pixelact-ui/styles/styles.css";
-
-export const inputVariants = cva("text-black select-none", {
-  variants: {
-    font: {
-      normal: "",
-      pixel: "pixel-font",
-    },
-  },
-  defaultVariants: {
-    font: "pixel",
-  },
-});
+import { inputVariants } from "./select-variants";
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement>,
