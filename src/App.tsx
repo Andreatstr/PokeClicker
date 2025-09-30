@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
+import { PokemonDetailModal } from './components/ui/pixelact-ui/PokemonDetailModal'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Button } from '@/components/ui/pixelact-ui/button'
 import { Input } from '@/components/ui/pixelact-ui/input'
@@ -7,8 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sun, User } from 'lucide-react'
 
 function App() {
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
+  const [isModalOpen, setModalOpen] = useState(false)
+
   const handlePokemonClick = (pokemon: Pokemon) => {
+    setSelectedPokemon(pokemon)
+    setModalOpen(true)
     console.log('Clicked on:', pokemon.name)
+  }
+
+  const closeModal = () => {
+    setSelectedPokemon(null)
+    setModalOpen(false)
   }
 
   return (
@@ -166,6 +178,12 @@ function App() {
           </footer>
         </section>
       </main>
+
+      <PokemonDetailModal
+        pokemon={selectedPokemon}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </>
   )
 }

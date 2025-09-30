@@ -4,6 +4,20 @@ export interface Pokemon {
   types: string[];
   sprite: string;
   pokedexNumber: string;
+  stats?: {
+    hp: number;
+    attack: number;
+    defense: number;
+    spAttack: number;
+    spDefense: number;
+    speed: number;
+  };
+  abilities?: string[];
+  moves?: string[];
+  evolution?: {
+    name: string;
+    sprite: string;
+  }[];
 }
 
 export const mockPokemonData: Pokemon[] = [
@@ -138,7 +152,23 @@ export const mockPokemonData: Pokemon[] = [
     name: "Rattata",
     types: ["normal"],
     sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
-    pokedexNumber: "019"
+    pokedexNumber: "019",
+    stats: {
+      hp: 30,
+      attack: 56,
+      defense: 35,
+      spAttack: 25,
+      spDefense: 35,
+      speed: 72
+    },
+    abilities: ["Run Away", "Guts", "Hustle"],
+    moves: ["Tackle", "Quick Attack", "Bite", "Hyper Fang"],
+    evolution: [
+      {
+        name: "Raticate",
+        sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/20.png"
+      }
+    ]
   },
   {
     id: 20,

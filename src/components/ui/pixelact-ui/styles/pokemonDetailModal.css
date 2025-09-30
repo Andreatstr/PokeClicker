@@ -1,0 +1,106 @@
+.modalContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .modalContainer {
+    flex-direction: row;
+  }
+}
+
+.leftBox {
+  background-color: #e2e2e2;
+  border: 4px solid black;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  padding: 1rem;
+  width: 100%;
+  max-width: 320px;
+  font-family: "Press Start 2P", monospace;
+}
+
+.leftBox img {
+  image-rendering: pixelated;
+}
+
+.rightBox {
+  background-color: #c8f4c8;
+  border: 4px solid black;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  padding: 1rem;
+  flex: 1;
+  font-family: "Press Start 2P", monospace;
+}
+
+.statsSection {
+  margin-top: 1rem;
+}
+
+.statsHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  margin-bottom: 0.5rem;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  gap: 0.5rem;
+}
+
+.statsLabels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.statsBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.evolutionSection {
+  margin-top: 1rem;
+}
+
+.evolutionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evolutionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 33%;
+}
+
+.evolutionItem img {
+  width: 64px;
+  height: 64px;
+}
+
+.evolutionArrow {
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
