@@ -109,14 +109,13 @@ body {
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Retro Color Palette */
-  --retro-primary: hsl(45 70% 82%);
-  --retro-secondary: hsl(45 39% 61%);
-  --retro-accent: hsl(20 30% 70%);
-  --retro-surface: hsl(50 70% 75.6%);
-  --retro-border: hsl(0 0% 0%);
+--retro-primary: hsl(30 70% 55%);   /* burnt orange */
+--retro-secondary: hsl(200 35% 45%);/* muted teal */
+--retro-accent: hsl(350 40% 55%);   /* faded red */
+--retro-surface: hsl(45 40% 90%);   /* parchment cream */
+--retro-border: hsl(30 30% 20%);    /* dark brown */  /* white outline */ /* glowing outline */
 
-  /* Button Variant Colors */
+
   --success: #4ade80;
   --success-foreground: #000000;
   --warning: #fb7185;
