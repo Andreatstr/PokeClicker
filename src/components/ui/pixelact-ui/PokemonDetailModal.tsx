@@ -1,6 +1,5 @@
 import { Dialog, DialogBody } from './dialog'
 import { Progress } from './progress'
-import { Badge } from './badge'
 import { Button } from '@/components/ui/pixelact-ui/button'
 import type { Pokemon } from '@/data/mockData'
 import './styles/PokemonDetailModal.css'
@@ -9,35 +8,58 @@ interface Props {
   pokemon: Pokemon | null
   isOpen: boolean
   onClose: () => void
+  onSelectPokemon?: (name: string) => void
 }
 
-export function PokemonDetailModal({ pokemon, isOpen, onClose }: Props) {
+export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }: Props) {
   if (!pokemon) return null
+
+  const fullEvolutionChain = [
+    {
+      name: pokemon.name,
+      sprite: pokemon.sprite,
+    },
+    ...(pokemon.evolution ?? []),
+  ]
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogBody>
+        <div className="modalHeader">
+          <h2 className="pokemonName">{pokemon.name}</h2>
+          <Button variant="default" className="closeButton" onClick={onClose}>X</Button>
+        </div>
+
         <div className="modalContainer">
           {/* Left Box */}
           <aside className="leftBox">
-            <div>
-              <img src={pokemon.sprite} alt={pokemon.name} />
-              <h2>{pokemon.name}</h2>
+            <figure className="spriteFrame">
+              <img
+                src={pokemon.sprite}
+                alt={pokemon.name}
+                className="spriteImage"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </figure>
+
+            <div className="infoGrid">
+              <div><strong>Height:</strong> <span>{pokemon.height ?? '—'}</span></div>
+              <div><strong>Weight:</strong> <span>{pokemon.weight ?? '—'}</span></div>
+              <div><strong>Gender:</strong> <span>{pokemon.genderRatio ?? '—'}</span></div>
+              <div><strong>Habitat:</strong> <span>{pokemon.habitat ?? '—'}</span></div>
+            
+              <div className="abilitiesList">
+                <strong>Abilities:</strong>
+                <ul>
+                  {pokemon.abilities?.map((a) => <li key={a}>{a}</li>)}
+                </ul>
+              </div>
             </div>
-            <ul>
-              <li>Height: 0.3 m</li>
-              <li>Weight: 3.5 kg</li>
-              <li>Gender: ♂ / ♀</li>
-              <li>Habitat: Grassland</li>
-              <li>Abilities:</li>
-              <ul>
-                {pokemon.abilities?.map((a) => <li key={a}>{a}</li>)}
-              </ul>
-            </ul>
           </aside>
 
           {/* Right Box */}
           <section className="rightBox">
+            {/* Stats Section */}
             <div className="statsSection">
               <div className="statsHeaderRow">
                 <span></span>
@@ -46,7 +68,6 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose }: Props) {
               </div>
 
               <div className="statsGrid">
-                {/* Labels */}
                 <div className="statsLabels">
                   <span>HP</span>
                   <span>Attack</span>
@@ -55,8 +76,6 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose }: Props) {
                   <span>Sp. Def</span>
                   <span>Speed</span>
                 </div>
-
-                {/* Default Stats */}
                 <div className="statsBars">
                   <Progress value={pokemon.stats?.hp ?? 0} max={255} />
                   <Progress value={pokemon.stats?.attack ?? 0} max={255} />
@@ -65,10 +84,7 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose }: Props) {
                   <Progress value={pokemon.stats?.spDefense ?? 0} max={255} />
                   <Progress value={pokemon.stats?.speed ?? 0} max={255} />
                 </div>
-
-                {/* Your Stats */}
                 <div className="statsBars">
-                  {/* These can be dynamic later */}
                   <Progress value={pokemon.stats?.hp ?? 0} max={255} />
                   <Progress value={pokemon.stats?.attack ?? 0} max={255} />
                   <Progress value={pokemon.stats?.defense ?? 0} max={255} />
@@ -79,33 +95,31 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose }: Props) {
               </div>
             </div>
 
-            <div className="evolutionSection">
+            {/* Evolution Section */}
+            <div className="evolutionWrapper">
               <h3>Evolution</h3>
-              <div className="evolutionRow">
+              <div className="evolutionChain">
                 {[0, 1, 2].map((i) => {
-                  const evo = pokemon.evolution?.[i]
+                  const evo = fullEvolutionChain[i]
+                  const next = fullEvolutionChain[i + 1]
                   return (
-                    <div key={i} className="evolutionItem">
-                      <p>{evo?.name || 'Empty'}</p>
-                      {evo ? (
-                        <Button variant="default">
-                          <img src={evo.sprite} alt={evo.name} />
-                        </Button>
-                      ) : (
-                        <div className="w-16 h-16 border-2 border-black bg-gray-100 flex items-center justify-center">
-                          <span>Empty</span>
-                        </div>
+                    <div key={i} className={`evolutionItem ${!evo ? 'invisible' : ''}`}>
+                      {evo && (
+                        <>
+                          <button
+                            className="evolutionButton"
+                            onClick={() => onSelectPokemon?.(evo.name)}
+                            title={`View ${evo.name}`}
+                          >
+                            <img src={evo.sprite} alt={evo.name} className="evolutionImage" />
+                          </button>
+                          {i < 2 && next && <span className="evolutionArrow">→</span>}
+                        </>
                       )}
-                      {i < 2 && <span className="evolutionArrow">→</span>}
                     </div>
                   )
                 })}
               </div>
-            </div>
-
-            <div className="buttonRow">
-              <Button variant="default">Click with {pokemon.name}</Button>
-              <Button variant="default" onClick={onClose}>Close</Button>
             </div>
           </section>
         </div>
