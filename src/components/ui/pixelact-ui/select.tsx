@@ -70,9 +70,13 @@ function SelectTrigger({
       <ShadcnSelectTrigger
         {...props}
         className={cn(
-          "rounded-none !bg-white dark:!bg-white ring-0 w-full border-0 !text-black dark:!text-black [&>span]:!text-black [&_svg]:!text-black",
+          "rounded-none ring-0 w-full border-0 !text-black dark:!text-black [&>span]:!text-black [&_svg]:!text-black select-none",
           className
         )}
+        style={{
+          backgroundColor: 'var(--retro-surface)',
+          ...props.style
+        }}
       >
         {children}
       </ShadcnSelectTrigger>
@@ -95,10 +99,14 @@ function SelectContent({
   return (
     <ShadcnSelectContent
       className={cn(
-        "relative !bg-white dark:!bg-white rounded-none border-none shadow-(--pixel-box-shadow) mt-2 !text-black dark:!text-black",
+        "relative rounded-none border-none shadow-(--pixel-box-shadow) mt-2 !text-black dark:!text-black select-none",
         inputVariants({ font }),
         className
       )}
+      style={{
+        backgroundColor: 'var(--retro-surface)',
+        ...props.style
+      }}
       {...props}
     >
       {children}
@@ -122,8 +130,17 @@ function SelectItem({
     <ShadcnSelectItem
       className={cn(
         className,
-        "rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring !text-black dark:!text-black hover:!bg-gray-200"
+        "rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring !text-black dark:!text-black select-none"
       )}
+      style={{
+        '--hover-bg': 'var(--retro-secondary)',
+      } as any}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'var(--retro-secondary)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = ''
+      }}
       {...props}
     >
       {children}

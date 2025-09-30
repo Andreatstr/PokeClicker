@@ -119,14 +119,6 @@ export function PokeClicker() {
     }
   }
 
-  const statColors = {
-    hp: 'bg-green-400 hover:bg-green-500',
-    attack: 'bg-orange-400 hover:bg-orange-500',
-    defense: 'bg-orange-300 hover:bg-orange-400',
-    spAttack: 'bg-blue-400 hover:bg-blue-500',
-    spDefense: 'bg-blue-300 hover:bg-blue-400',
-    speed: 'bg-purple-400 hover:bg-purple-500',
-  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
@@ -215,7 +207,8 @@ export function PokeClicker() {
                 <Button
                   size="sm"
                   onClick={handleClick}
-                  className="w-14 h-14 rounded-full bg-[#8B3A62] hover:bg-[#7A2F52] border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
+                  bgColor="#8B3A62"
+                  className="w-14 h-14 rounded-full border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
                 >
                   B
                 </Button>
@@ -224,7 +217,8 @@ export function PokeClicker() {
                 <Button
                   size="sm"
                   onClick={handleClick}
-                  className="w-14 h-14 rounded-full bg-[#8B3A62] hover:bg-[#7A2F52] border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
+                  bgColor="#8B3A62"
+                  className="w-14 h-14 rounded-full border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
                 >
                   A
                 </Button>
@@ -323,9 +317,15 @@ export function PokeClicker() {
                       size="sm"
                       onClick={() => handleUpgrade(key as keyof typeof stats)}
                       disabled={rareCandy < cost || key === 'spDefense' || key === 'speed'}
-                      className={`pixel-font text-xs border-2 border-black ${
-                        statColors[key as keyof typeof stats]
-                      } text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all`}
+                      bgColor={
+                        key === 'hp' ? '#4ade80' :
+                        key === 'attack' ? '#fb923c' :
+                        key === 'defense' ? '#fbbf24' :
+                        key === 'spAttack' ? '#60a5fa' :
+                        key === 'spDefense' ? '#93c5fd' :
+                        '#a855f7'
+                      }
+                      className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">↑ {cost}</span>
                     </Button>
