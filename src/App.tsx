@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useState, useEffect } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
 import { PokemonDetailModal } from './components/ui/pixelact-ui/PokemonDetailModal'
