@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
-import { Card } from '@/components/ui/pixelact-ui/card'
+import { PokemonCard } from './components/PokemonCard'
 import { Button } from '@/components/ui/pixelact-ui/button'
 import { Input } from '@/components/ui/pixelact-ui/input'
 import { Label } from '@/components/ui/pixelact-ui/label'
@@ -167,51 +167,7 @@ function App() {
                   }}>
                     {filteredPokemon.map((pokemon) => (
                       <li key={pokemon.id}>
-                        <Card
-                          className="cursor-pointer hover:translate-y-[-4px] transition-transform duration-150 p-6 w-[280px]"
-                          style={{
-                            backgroundColor: 'var(--retro-primary)',
-                            border: '4px solid var(--retro-border)',
-                            boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow = '8px 8px 0px 0px rgba(0,0,0,1)'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow = '6px 6px 0px 0px rgba(0,0,0,1)'
-                          }}
-                          onClick={() => handlePokemonClick(pokemon)}
-                        >
-                          <article className="text-center">
-                            <figure className="p-6 mb-4 aspect-square flex items-center justify-center m-0" style={{
-                              backgroundColor: 'var(--retro-surface)',
-                              border: '2px solid var(--retro-border)'
-                            }}>
-                              <img
-                                src={pokemon.sprite}
-                                alt={pokemon.name}
-                                className="w-full h-full object-contain"
-                                style={{ imageRendering: 'pixelated' }}
-                              />
-                            </figure>
-                            <p className="pixel-font text-xs text-gray-600 mb-1">
-                              #{pokemon.pokedexNumber}
-                            </p>
-                            <p className="pixel-font text-lg font-bold text-black mb-3">
-                              {pokemon.name}
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-2">
-                              {pokemon.types.map((type) => (
-                                <span
-                                  key={type}
-                                  className={`px-3 py-1 text-xs pixel-font font-bold text-white uppercase ${getTypeColor(type)}`}
-                                >
-                                  {type}
-                                </span>
-                              ))}
-                            </div>
-                          </article>
-                        </Card>
+                        <PokemonCard pokemon={pokemon} onClick={handlePokemonClick} />
                       </li>
                     ))}
                   </ul>
@@ -232,28 +188,6 @@ function App() {
   )
 }
 
-function getTypeColor(type: string): string {
-  const typeColors: Record<string, string> = {
-    normal: 'bg-gray-400',
-    fire: 'bg-red-500',
-    water: 'bg-blue-500',
-    electric: 'bg-yellow-400',
-    grass: 'bg-green-500',
-    ice: 'bg-blue-200',
-    fighting: 'bg-red-700',
-    poison: 'bg-purple-500',
-    ground: 'bg-yellow-600',
-    flying: 'bg-indigo-400',
-    psychic: 'bg-pink-500',
-    bug: 'bg-green-400',
-    rock: 'bg-yellow-800',
-    ghost: 'bg-purple-700',
-    dragon: 'bg-indigo-700',
-    dark: 'bg-gray-800',
-    steel: 'bg-gray-500',
-    fairy: 'bg-pink-300',
-  }
-  return typeColors[type] || 'bg-gray-400'
-}
+
 
 export default App
