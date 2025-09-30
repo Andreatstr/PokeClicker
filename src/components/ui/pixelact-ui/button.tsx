@@ -39,12 +39,12 @@ export interface PixelButtonProps
 const Button = React.forwardRef<
   React.ComponentRef<typeof ShadcnButton>,
   PixelButtonProps
->(({ className, variant, ...props }, ref) => {
+>(({ className, variant, size, ...props }, ref) => {
   return (
     <ShadcnButton
       className={cn(
-        buttonVariants({ variant }),
-        pixelButtonVariants({ variant }),
+        pixelButtonVariants({ variant, size }),
+        "!rounded-none",
         className
       )}
       ref={ref}

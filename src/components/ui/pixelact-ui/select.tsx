@@ -18,7 +18,7 @@ import {
 
 import "@/components/ui/pixelact-ui/styles/styles.css";
 
-export const inputVariants = cva("text-black", {
+export const inputVariants = cva("text-black select-none", {
   variants: {
     font: {
       normal: "",
@@ -81,7 +81,7 @@ function SelectTrigger({
       <ShadcnSelectTrigger
         {...props}
         className={cn(
-          "rounded-none !bg-white dark:!bg-white ring-0 w-full border-0 !text-black dark:!text-black [&>span]:!text-black [&_svg]:!text-black",
+          "rounded-none !bg-white dark:!bg-white ring-0 w-full border-0 !text-black dark:!text-black [&>span]:!text-black [&_svg]:!text-black select-none",
           className
         )}
       >
@@ -106,7 +106,7 @@ function SelectContent({
   return (
     <ShadcnSelectContent
       className={cn(
-        "relative !bg-white dark:!bg-white rounded-none border-none shadow-(--pixel-box-shadow) mt-2 !text-black dark:!text-black",
+        "relative !bg-white dark:!bg-white rounded-none border-none shadow-(--pixel-box-shadow) mt-2 !text-black dark:!text-black select-none",
         inputVariants({ font }),
         className
       )}
@@ -133,7 +133,7 @@ function SelectItem({
     <ShadcnSelectItem
       className={cn(
         className,
-        "rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring !text-black dark:!text-black hover:!bg-gray-200"
+        "rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring !text-black dark:!text-black hover:!bg-gray-200 select-none"
       )}
       {...props}
     >
