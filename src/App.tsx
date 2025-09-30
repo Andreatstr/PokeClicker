@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
 import { Card } from '@/components/ui/pixelact-ui/card'
 import { Button } from '@/components/ui/pixelact-ui/button'
@@ -5,8 +6,11 @@ import { Input } from '@/components/ui/pixelact-ui/input'
 import { Label } from '@/components/ui/pixelact-ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/pixelact-ui/select'
 import { Sun, User } from 'lucide-react'
+import { PokeClicker } from './components/PokeClicker'
 
 function App() {
+  const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
+
   const handlePokemonClick = (pokemon: Pokemon) => {
     console.log('Clicked on:', pokemon.name)
   }
@@ -22,12 +26,22 @@ function App() {
 
             <menu className="flex items-center gap-2 m-0 p-0 list-none flex-wrap justify-end">
               <li>
-                <Button variant="default" size="sm" className="text-xs md:text-sm">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="text-xs md:text-sm"
+                  onClick={() => setCurrentPage('clicker')}
+                >
                   PokeClicker
                 </Button>
               </li>
               <li>
-                <Button variant="default" size="sm" className="text-xs md:text-sm">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="text-xs md:text-sm"
+                  onClick={() => setCurrentPage('pokedex')}
+                >
                   Pokedex
                 </Button>
               </li>
@@ -47,8 +61,14 @@ function App() {
       </header>
 
       <main className="bg-[#e8e8d0] min-h-screen px-4 md:px-8 pb-8">
-        {/* Search Bar */}
-        <section className="mb-6 max-w-4xl mx-auto">
+        {currentPage === 'clicker' ? (
+          <section className="py-8">
+            <PokeClicker />
+          </section>
+        ) : (
+          <>
+            {/* Search Bar */}
+            <section className="mb-6 max-w-4xl mx-auto">
           <form className="bg-[#e8e8d0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4" role="search">
             <Label htmlFor="pokemon-search" className="sr-only">Search Pokemon</Label>
             <Input
@@ -165,6 +185,8 @@ function App() {
             </Button>
           </footer>
         </section>
+          </>
+        )}
       </main>
     </>
   )
