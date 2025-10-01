@@ -166,7 +166,7 @@ export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
       aria-label={`View details for ${pokemon.name}`}
     >
       <article className="text-center relative z-1 flex flex-col justify-between h-full">
-        <div>
+        <div className="bg-black/20 p-2 rounded-md">
           <p className="text-xs text-black mb-1 tracking-wider" style={{textShadow: '-1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF'}}>
             #{pokemon.pokedexNumber}
           </p>
@@ -188,22 +188,22 @@ export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
           />
         </figure>
 
-        <div className="flex flex-wrap justify-center gap-2">
-          {pokemon.types.map((type) => {
-            const typeColors = getTypeColors(type)
-            return (
-              <span
-                key={type}
-                className={`
-                  px-3 py-1 text-xs font-bold text-white uppercase tracking-wider
-                  border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                  ${typeColors.badge} drop-shadow-sm
-                `}
-              >
-                {type}
-              </span>
-            )
-          })}
+        <div className="flex flex-wrap justify-center gap-2 mt-2">
+            {pokemon.types.map((type) => {
+              const typeColors = getTypeColors(type)
+              return (
+                <span
+                  key={type}
+                  className={`
+                    px-3 py-1 text-xs font-bold text-white uppercase tracking-wider
+                    border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                    ${typeColors.badge} drop-shadow-sm
+                  `}
+                >
+                  {type}
+                </span>
+              )
+            })}
         </div>
       </article>
     </Card>

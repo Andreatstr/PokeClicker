@@ -10,7 +10,8 @@
 }
 
 .dialog-content {
-  background: #fff;
+  position: relative;
+  background: var(--retro-surface);
   border: 4px solid black;
   box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
   padding: 1.5rem;
@@ -21,10 +22,5 @@
   max-height: 80%;
 }
 
-.dialogBody {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 2rem;
+.dialog-body {
 }
