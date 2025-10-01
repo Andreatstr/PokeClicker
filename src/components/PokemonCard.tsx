@@ -148,7 +148,7 @@ export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
       font="pixel"
       className={`
         card-pattern
-        cursor-pointer w-[280px] p-6 border-4 shadow-lg
+        cursor-pointer w-[280px] p-6 border-8 shadow-lg
         transition-all duration-200 ease-in-out
         hover:translate-y-[-4px] hover:shadow-xl
         hover:scale-[1.02] active:scale-[0.98] active:translate-y-[0px]
