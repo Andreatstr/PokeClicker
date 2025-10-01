@@ -123,9 +123,6 @@ function getTypeColors(type: string) {
 }
 
 function getBackgroundImageUrl(types: string[]): string {
-  if (types.includes('grass') && types.includes('poison')) {
-    return '/pokemon-type-bg/grasspoison.png'
-  }
   const primaryType = types[0]
   return `/pokemon-type-bg/${primaryType}.png`
 }
@@ -176,36 +173,38 @@ export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
           <h2 className="text-lg font-bold text-white mb-3 tracking-wider" style={{textShadow: '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000'}}>
             {pokemon.name}
           </h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {pokemon.types.map((type) => {
-              const typeColors = getTypeColors(type)
-              return (
-                <span
-                  key={type}
-                  className={`
-                    px-3 py-1 text-xs font-bold text-white uppercase tracking-wider
-                    border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                    ${typeColors.badge} drop-shadow-sm
-                  `}
-                >
-                  {type}
-                </span>
-              )
-            })}
-          </div>
         </div>
 
         <figure
-          className="p-0 mt-4 aspect-square flex items-center justify-center m-0"
+          className="p-0 mt-4 aspect-square flex items-center justify-center m-0 relative"
         >
+          <div className="absolute inset-0" style={{background: 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%)'}}></div>
           <img
             src={pokemon.sprite}
             alt={pokemon.name}
-            className="w-full h-full object-contain transition-transform duration-200 [filter:drop-shadow(0_4px_3px_rgba(0,0,0,0.7))]"
+            className="w-full h-full object-contain transition-transform duration-200 [filter:drop-shadow(0_4px_3px_rgba(0,0,0,0.7))] relative z-10"
             style={{ imageRendering: 'pixelated' }}
             loading="lazy"
           />
         </figure>
+
+        <div className="flex flex-wrap justify-center gap-2">
+          {pokemon.types.map((type) => {
+            const typeColors = getTypeColors(type)
+            return (
+              <span
+                key={type}
+                className={`
+                  px-3 py-1 text-xs font-bold text-white uppercase tracking-wider
+                  border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                  ${typeColors.badge} drop-shadow-sm
+                `}
+              >
+                {type}
+              </span>
+            )
+          })}
+        </div>
       </article>
     </Card>
   )

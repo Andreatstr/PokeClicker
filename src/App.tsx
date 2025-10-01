@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { mockPokemonData, type Pokemon } from './data/mockData'
 import { PokemonCard } from './components/PokemonCard'
+import { PokemonDetailModal } from './components/ui/pixelact-ui/PokemonDetailModal'
 import { Button } from '@/components/ui/pixelact-ui/button'
 import { Input } from '@/components/ui/pixelact-ui/input'
 import { Label } from '@/components/ui/pixelact-ui/label'
@@ -10,6 +11,8 @@ import { PokeClicker } from './components/PokeClicker'
 import { Navbar } from './components/Navbar'
 
 function App() {
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
+  const [isModalOpen, setModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
@@ -17,6 +20,8 @@ function App() {
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
 
   const handlePokemonClick = (pokemon: Pokemon) => {
+    setSelectedPokemon(pokemon)
+    setModalOpen(true)
     console.log('Clicked on:', pokemon.name)
   }
 
@@ -184,10 +189,18 @@ function App() {
           </>
         )}
       </main>
+
+      <PokemonDetailModal
+        pokemon={selectedPokemon}
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onSelectPokemon={(name) => {
+          const next = mockPokemonData.find((p) => p.name === name)
+          if (next) setSelectedPokemon(next)
+        }}
+      />
     </>
   )
 }
-
-
 
 export default App
