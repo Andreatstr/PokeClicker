@@ -28,7 +28,7 @@ function Card({ ...props }: CardProps) {
     <ShadcnCard
       {...props}
       className={cn(
-        "rounded-none border-0 bg-card shadow-(--pixel-box-shadow) box-shadow-margin",
+        "relative overflow-hidden rounded-none border-0 bg-card shadow-(--pixel-box-shadow) box-shadow-margin",
         cardVariants({ font }),
         className
       )}

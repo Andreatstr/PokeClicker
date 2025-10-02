@@ -10,6 +10,7 @@ export interface Pokemon {
   habitat?: string
   abilities?: string[]
   stats?: { hp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number }
+  yourStats?: { hp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number }
   evolution?: number[];
 }
 
@@ -74,6 +75,14 @@ export const mockPokemonData: Pokemon[] = [
       spAttack: 100,
       spDefense: 100,
       speed: 80
+    },
+    yourStats: {
+      hp: 90,
+      attack: 92,
+      defense: 93,
+      spAttack: 110,
+      spDefense: 110,
+      speed: 90
     },
     evolution: [1, 2]
   },
