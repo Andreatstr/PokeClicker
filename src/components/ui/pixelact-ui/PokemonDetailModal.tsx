@@ -147,7 +147,7 @@ export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }
         </div>
 
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Left Box */}
+          {/* Left Side */}
           <aside className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[400px] font-press-start flex flex-col items-center ${typeColors.cardBg}`}>
             <figure className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full" style={{ backgroundImage: `url(${backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
               <img

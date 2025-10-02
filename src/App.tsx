@@ -161,8 +161,8 @@ function App() {
             <section className="max-w-[2000px] mx-auto">
               {filteredPokemon.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="pixel-font text-xl text-gray-600">No Pokemon found</p>
-                  <p className="pixel-font text-sm text-gray-500 mt-2">Try a different search term</p>
+                  <p className="pixel-font text-xl ">No Pokemon found</p>
+                  <p className="pixel-font text-sm text-[var(--retro-border)] mt-2">Try a different search term</p>
                 </div>
               ) : (
                 <>
