@@ -56,7 +56,7 @@ export function MultiSelect({
 
       {open && (
         <div
-          className="absolute z-10 mt-2 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] bg-[var(--retro-surface)] text-black dark:text-black max-h-60 overflow-y-auto"
+          className="absolute z-10 mt-2 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] bg-[var(--retro-surface)] text-black dark:text-black max-h-[160px] overflow-y-auto"
         >
           {options.map(type => (
             <label
