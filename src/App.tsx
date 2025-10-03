@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SearchIcon, CloseIcon } from '@/components/ui/pixelact-ui/icons'
 import { PokeClicker } from './components/PokeClicker'
 import { Navbar } from './components/Navbar'
+import { MultiSelect } from './components/ui/pixelact-ui/MultiSelect'
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
@@ -18,10 +19,38 @@ function App() {
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [displayedCount, setDisplayedCount] = useState(20)
   const [isLoading, setIsLoading] = useState(false)
 
   const ITEMS_PER_PAGE = 20
+
+  // Mobile
+  const [isMobile, setIsMobile] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [tempRegion, setTempRegion] = useState(selectedRegion)
+  const [tempTypes, setTempTypes] = useState(selectedTypes)
+  const [tempSortBy, setTempSortBy] = useState(sortBy)
+  const [tempSortOrder, setTempSortOrder] = useState(sortOrder)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+
+      if (!mobile) {
+        setShowMobileFilters(false)
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
 
   const handlePokemonClick = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
@@ -38,22 +67,40 @@ function App() {
   }, [searchTerm])
 
   useEffect(() => {
-    if (debouncedSearchTerm.trim() === '') {
-      setFilteredPokemon(mockPokemonData)
-    } else {
-      const filtered = mockPokemonData.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-      setFilteredPokemon(filtered)
-    }
-    setDisplayedCount(ITEMS_PER_PAGE)
-  }, [debouncedSearchTerm, ITEMS_PER_PAGE])
+    const filtered = mockPokemonData.filter(pokemon => {
+      const matchesSearch = debouncedSearchTerm === '' || pokemon.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      const matchesRegion = !selectedRegion || pokemon.region === selectedRegion
+      const matchesType = selectedTypes.length === 0 || selectedTypes.some(type => pokemon.types.includes(type))
+      return matchesSearch && matchesRegion && matchesType
+    })
 
-  useEffect(() => {
-    if (currentPage === 'pokedex') {
-      setDisplayedCount(ITEMS_PER_PAGE)
-    }
-  }, [currentPage, ITEMS_PER_PAGE])
+    const sorted = [...filtered].sort((a, b) => {
+      let valA: string | number
+      let valB: string | number
+
+      if (sortBy === 'id') {
+        valA = a.id
+        valB = b.id
+        return sortOrder === 'asc' ? valA - valB : valB - valA
+      } else {
+        valA = sortBy === 'name' ? a.name : a.types[0]
+        valB = sortBy === 'name' ? b.name : b.types[0]
+        return sortOrder === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA)
+      }
+    })
+
+    setFilteredPokemon(sorted)
+  }, [debouncedSearchTerm, selectedRegion, selectedTypes, sortBy, sortOrder])
+
+  const handleClearFilters = () => {
+    setSelectedRegion(null)
+    setSelectedTypes([])
+    setSortBy('id')
+    setSortOrder('asc')
+  }
+
 
   const handleClearSearch = () => {
     setSearchTerm('')
@@ -98,27 +145,39 @@ function App() {
                 boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
               }} role="search" onSubmit={(e) => e.preventDefault()}>
                 <Label htmlFor="pokemon-search" className="sr-only">Search Pokemon</Label>
-                <div className="relative">
-                  <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <Input
-                    id="pokemon-search"
-                    type="search"
-                    placeholder="search"
-                    className="w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  {searchTerm && (
-                    <div
-                      onClick={handleClearSearch}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer"
-                      role="button"
-                      tabIndex={0}
-                      aria-label="Clear search"
-                      onKeyDown={(e) => e.key === 'Enter' && handleClearSearch()}
-                    >
-                      <CloseIcon className="w-5 h-5 text-gray-600 hover:text-black" />
-                    </div>
+                <div className="flex flex-col gap-3">
+                  <div className="relative">
+                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <Input
+                      id="pokemon-search"
+                      type="search"
+                      placeholder="search"
+                      className="w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <div
+                        onClick={handleClearSearch}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Clear search"
+                        onKeyDown={(e) => e.key === 'Enter' && handleClearSearch()}
+                      >
+                        <CloseIcon className="w-5 h-5 text-gray-600 hover:text-black" />
+                      </div>
+                    )}
+                  </div>
+                  {isMobile && (
+                    <Button className="w-full mt-2 text-sm"
+                      aria-haspopup="dialog"
+                      aria-expanded={showMobileFilters}
+                      aria-controls="mobile-filter-dialog"
+                      aria-label="Open filter options"
+                      onClick={() => setShowMobileFilters(prev => !prev)}>
+                      Filters
+                    </Button>
                   )}
                 </div>
               </form>
@@ -126,57 +185,217 @@ function App() {
 
             {/* Filters and Count */}
             <section className="mb-6">
-              <form className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <p className="text-sm pixel-font text-black">
-                  Showing {displayedPokemon.length} of {filteredPokemon.length} Pokémon
-                </p>
+              {showMobileFilters && (
+                <div
+                  className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="filter-dialog-title"
+                  id="mobile-filter-dialog"
+                  onClick={() => setShowMobileFilters(false)}
+                >
+                  <div
+                    className="w-full max-w-md bg-[var(--retro-surface)] p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="w-full bg-[var(--retro-surface)] p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 id="filter-dialog-title" className="pixel-font text-lg text-black">Filter</h2>
+                        <button onClick={() => setShowMobileFilters(false)} aria-label="Close filter dialog">
+                          <span className="text-xl">×</span>
+                        </button>
+                      </div>
 
-                <fieldset className="flex flex-wrap gap-4 border-0 p-0 m-0">
-                  <div className="flex flex-col gap-1">
-                    <Label className="text-xs font-bold text-black">REGION</Label>
-                    <Select>
-                      <SelectTrigger className="w-[280px] text-sm">
-                        <SelectValue placeholder="Kanto (1-151)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="kanto">Kanto (1-151)</SelectItem>
-                        <SelectItem value="johto">Johto (152-251)</SelectItem>
-                        <SelectItem value="hoenn">Hoenn (252-386)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <div className="flex flex-col gap-4">
+                        {/* REGION */}
+                        <div>
+                          <Label className="text-xs font-bold text-black">Region</Label>
+                          <Select value={tempRegion ?? ''} onValueChange={setTempRegion}>
+                            <SelectTrigger className="w-full text-sm">
+                              <SelectValue placeholder="All regions" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="kanto">Kanto (1-151)</SelectItem>
+                              <SelectItem value="johto">Johto (152-251)</SelectItem>
+                              <SelectItem value="hoenn">Hoenn (252-386)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* TYPE */}
+                        <div>
+                          <Label className="text-xs font-bold text-black">Type</Label>
+                          <MultiSelect
+                            options={[
+                              "normal", "fire", "water", "electric", "grass", "ice",
+                              "fighting", "poison", "ground", "flying", "psychic", "bug",
+                              "rock", "ghost", "dragon", "dark", "steel", "fairy"
+                            ]}
+                            selected={tempTypes}
+                            onChange={setTempTypes}
+                            className="w-full"
+                          />
+                        </div>
+
+                        {/* SORT BY */}
+                        <div>
+                          <Label className="text-xs font-bold text-black">Sort by</Label>
+                          <Select value={tempSortBy} onValueChange={(v) => setTempSortBy(v as 'id' | 'name' | 'type')}>
+                            <SelectTrigger className="w-full text-sm">
+                              <SelectValue placeholder="ID" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="id">ID</SelectItem>
+                              <SelectItem value="name">Name</SelectItem>
+                              <SelectItem value="type">Type</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* ORDER */}
+                        <div>
+                          <Label className="text-xs font-bold text-black">Order</Label>
+                          <Select value={tempSortOrder} onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}>
+                            <SelectTrigger className="w-full text-sm">
+                              <SelectValue placeholder="Asc" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="asc">Asc</SelectItem>
+                              <SelectItem value="desc">Desc</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Footer Buttons */}
+                      <div className="flex justify-between mt-6">
+                        <Button variant="default" aria-label="Clear all filters" onClick={() => {
+                          setTempRegion(null)
+                          setTempTypes([])
+                          setTempSortBy('id')
+                          setTempSortOrder('asc')
+
+                          setSelectedRegion(null)
+                          setSelectedTypes([])
+                          setSortBy('id')
+                          setSortOrder('asc')
+                          setShowMobileFilters(false)
+                        }}>
+                          Clear
+                        </Button>
+                        <Button variant="default" aria-label="Cancel filter changes" onClick={() => setShowMobileFilters(false)}>
+                          Cancel
+                        </Button>
+                        <Button variant="default" aria-label="Apply selected filters" onClick={() => {
+                          setSelectedRegion(tempRegion)
+                          setSelectedTypes(tempTypes)
+                          setSortBy(tempSortBy)
+                          setSortOrder(tempSortOrder)
+                          setShowMobileFilters(false)
+                        }}>
+                          Apply
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isMobile && (
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm pixel-font text-black">
+                    Showing {displayedPokemon.length} of {filteredPokemon.length} Pokémon
+                  </p>
+                  <div>
+                    {selectedTypes.length > 0 ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs pixel-font text-black">
+                          {selectedTypes.length === 18
+                            ? 'Showing types: All types selected'
+                            : `Showing types: ${selectedTypes.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ')}`}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="default"
+                          className="text-xs w-fit px-2 py-1 mt-1"
+                          onClick={() => setSelectedTypes([])}
+                        >
+                          Clear Type
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-xs pixel-font text-black">Showing types: All types</p>
+                    )}
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <Label className="text-xs font-bold text-black">TYPE</Label>
-                    <Select>
-                      <SelectTrigger className="w-[220px] text-sm">
-                        <SelectValue placeholder="all types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">all types</SelectItem>
-                        <SelectItem value="fire">Fire</SelectItem>
-                        <SelectItem value="water">Water</SelectItem>
-                        <SelectItem value="grass">Grass</SelectItem>
-                        <SelectItem value="electric">Electric</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  <div className="flex flex-col gap-1">
-                    <Label className="text-xs font-bold text-black">SORT BY</Label>
-                    <Select>
-                      <SelectTrigger className="w-[220px] text-sm">
-                        <SelectValue placeholder="ID" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="id">ID</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="type">Type</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid gap-4" style={{
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  }}>
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs font-bold text-black">REGION</Label>
+                      <Select value={selectedRegion ?? ''} onValueChange={setSelectedRegion}>
+                        <SelectTrigger className="w-full text-sm">
+                          <SelectValue placeholder="All regions" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="kanto">Kanto (1-151)</SelectItem>
+                          <SelectItem value="johto">Johto (152-251)</SelectItem>
+                          <SelectItem value="hoenn">Hoenn (252-386)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs font-bold text-black">TYPE</Label>
+                      <MultiSelect
+                        options={[
+                          "normal", "fire", "water", "electric", "grass", "ice",
+                          "fighting", "poison", "ground", "flying", "psychic", "bug",
+                          "rock", "ghost", "dragon", "dark", "steel", "fairy"
+                        ]}
+                        selected={selectedTypes}
+                        onChange={setSelectedTypes}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs font-bold text-black">SORT BY</Label>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'id' | 'name' | 'type')}>
+                        <SelectTrigger className="w-full text-sm">
+                          <SelectValue placeholder="ID" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="id">ID</SelectItem>
+                          <SelectItem value="name">Name</SelectItem>
+                          <SelectItem value="type">Type</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs font-bold text-black">ORDER</Label>
+                      <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}>
+                        <SelectTrigger className="w-full text-sm">
+                          <SelectValue placeholder="Asc" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="asc">Asc</SelectItem>
+                          <SelectItem value="desc">Desc</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <Label className="text-xs font-bold text-black invisible">ACTIONS</Label>
+                      <Button type="button" className="w-full text-sm" onClick={handleClearFilters}>
+                        Clear Filters
+                      </Button>
+                    </div>
                   </div>
-                </fieldset>
-              </form>
+                </div>
+              )}
             </section>
 
             {/* Pokemon Grid */}

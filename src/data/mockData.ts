@@ -12,6 +12,7 @@ export interface Pokemon {
   stats?: { hp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number }
   yourStats?: { hp: number; attack: number; defense: number; spAttack: number; spDefense: number; speed: number }
   evolution?: number[];
+  region?: string
 }
 
 export const mockPokemonData: Pokemon[] = [
@@ -34,7 +35,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 65,
       speed: 45
     },
-    evolution: [2, 3]
+    evolution: [2, 3],
+    region: "kanto"
   },
   {
     id: 2,
@@ -55,7 +57,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 80,
       speed: 60
     },
-    evolution: [1, 3]
+    evolution: [1, 3],
+    region: "kanto"
   },
   {
     id: 3,
@@ -84,7 +87,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 110,
       speed: 90
     },
-    evolution: [1, 2]
+    evolution: [1, 2],
+    region: "kanto"
   },
   {
     id: 4,
@@ -105,7 +109,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 50,
       speed: 65
     },
-    evolution: [5, 6]
+    evolution: [5, 6],
+    region: "kanto"
   },
   {
     id: 5,
@@ -126,7 +131,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 65,
       speed: 80
     },
-    evolution: [4, 6]
+    evolution: [4, 6],
+    region: "kanto"
   },
   {
     id: 6,
@@ -147,7 +153,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 85,
       speed: 100
     },
-    evolution: [4, 5]
+    evolution: [4, 5],
+    region: "kanto"
   },
   {
     id: 7,
@@ -168,7 +175,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 64,
       speed: 43
     },
-    evolution: [8, 9]
+    evolution: [8, 9],
+    region: "kanto"
   },
   {
     id: 8,
@@ -189,7 +197,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 80,
       speed: 58
     },
-    evolution: [7, 9]
+    evolution: [7, 9],
+    region: "kanto"
   },
   {
     id: 9,
@@ -210,7 +219,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 105,
       speed: 78
     },
-    evolution: [7, 8]
+    evolution: [7, 8],
+    region: "kanto"
   },
   {
     id: 10,
@@ -231,7 +241,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 20,
       speed: 45
     },
-    evolution: [11, 12]
+    evolution: [11, 12],
+    region: "kanto"
   },
   {
     id: 11,
@@ -252,7 +263,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 25,
       speed: 30
     },
-    evolution: [10, 12]
+    evolution: [10, 12],
+    region: "kanto"
   },
   {
     id: 12,
@@ -273,7 +285,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 80,
       speed: 70
     },
-    evolution: [10, 11]
+    evolution: [10, 11],
+    region: "kanto"
   },
   {
     id: 13,
@@ -294,7 +307,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 20,
       speed: 50
     },
-    evolution: [14, 15]
+    evolution: [14, 15],
+    region: "kanto"
   },
   {
     id: 14,
@@ -315,7 +329,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 25,
       speed: 35
     },
-    evolution: [13, 15]
+    evolution: [13, 15],
+    region: "kanto"
   },
   {
     id: 15,
@@ -336,7 +351,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 80,
       speed: 75
     },
-    evolution: [13, 14]
+    evolution: [13, 14],
+    region: "kanto"
   },
   {
     id: 16,
@@ -357,7 +373,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 35,
       speed: 56
     },
-    evolution: [17, 18]
+    evolution: [17, 18],
+    region: "kanto"
   },
   {
     id: 17,
@@ -378,7 +395,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 50,
       speed: 71
     },
-    evolution: [16, 18]
+    evolution: [16, 18],
+    region: "kanto"
   },
   {
     id: 18,
@@ -399,7 +417,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 70,
       speed: 101
     },
-    evolution: [16, 17]
+    evolution: [16, 17],
+    region: "kanto"
   },
   {
     id: 19,
@@ -420,7 +439,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 35,
       speed: 72
     },
-    evolution: [20]
+    evolution: [20],
+    region: "kanto"
   },
   {
     id: 20,
@@ -441,7 +461,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 70,
       speed: 97
     },
-    evolution: [19]
+    evolution: [19],
+    region: "kanto"
   },
   {
     id: 21,
@@ -462,7 +483,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 31,
       speed: 70
     },
-    evolution: [22]
+    evolution: [22],
+    region: "kanto"
   },
   {
     id: 22,
@@ -483,7 +505,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 61,
       speed: 100
     },
-    evolution: [21]
+    evolution: [21],
+    region: "kanto"
   },
   {
     id: 23,
@@ -504,7 +527,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 54,
       speed: 55
     },
-    evolution: [24]
+    evolution: [24],
+    region: "kanto"
   },
   {
     id: 24,
@@ -525,7 +549,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 79,
       speed: 80
     },
-    evolution: [23]
+    evolution: [23],
+    region: "kanto"
   },
   {
     id: 25,
@@ -546,7 +571,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 50,
       speed: 90
     },
-    evolution: [26]
+    evolution: [26],
+    region: "kanto"
   },
   {
     id: 26,
@@ -567,7 +593,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 80,
       speed: 110
     },
-    evolution: [25]
+    evolution: [25],
+    region: "kanto"
   },
   {
     id: 27,
@@ -588,7 +615,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 30,
       speed: 40
     },
-    evolution: [28]
+    evolution: [28],
+    region: "kanto"
   },
   {
     id: 28,
@@ -609,7 +637,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 55,
       speed: 65
     },
-    evolution: [27]
+    evolution: [27],
+    region: "kanto"
   },
   {
     id: 29,
@@ -630,7 +659,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 40,
       speed: 41
     },
-    evolution: [30]
+    evolution: [30],
+    region: "kanto"
   },
   {
     id: 30,
@@ -651,7 +681,8 @@ export const mockPokemonData: Pokemon[] = [
       spDefense: 55,
       speed: 56
     },
-    evolution: [29]
+    evolution: [29],
+    region: "kanto"
   },
   {
     id: 31,
