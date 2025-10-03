@@ -18,6 +18,10 @@ function App() {
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
+  const [displayedCount, setDisplayedCount] = useState(20)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const ITEMS_PER_PAGE = 20
 
   const handlePokemonClick = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
@@ -42,7 +46,14 @@ function App() {
       )
       setFilteredPokemon(filtered)
     }
-  }, [debouncedSearchTerm])
+    setDisplayedCount(ITEMS_PER_PAGE)
+  }, [debouncedSearchTerm, ITEMS_PER_PAGE])
+
+  useEffect(() => {
+    if (currentPage === 'pokedex') {
+      setDisplayedCount(ITEMS_PER_PAGE)
+    }
+  }, [currentPage, ITEMS_PER_PAGE])
 
   const handleClearSearch = () => {
     setSearchTerm('')
@@ -51,6 +62,17 @@ function App() {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode)
   }
+
+  const handleLoadMore = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredPokemon.length))
+      setIsLoading(false)
+    }, 500)
+  }
+
+  const displayedPokemon = filteredPokemon.slice(0, displayedCount)
+  const hasMore = displayedCount < filteredPokemon.length
 
   return (
     <>
@@ -106,7 +128,7 @@ function App() {
             <section className="mb-6">
               <form className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <p className="text-sm pixel-font text-black">
-                  Showing: xx-xx
+                  Showing {displayedPokemon.length} of {filteredPokemon.length} Pokémon
                 </p>
 
                 <fieldset className="flex flex-wrap gap-4 border-0 p-0 m-0">
@@ -170,19 +192,31 @@ function App() {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
                     justifyContent: 'center'
                   }}>
-                    {filteredPokemon.map((pokemon) => (
-                      <li key={pokemon.id}>
+                    {displayedPokemon.map((pokemon, index) => (
+                      <li
+                        key={pokemon.id}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms` }}
+                      >
                         <PokemonCard pokemon={pokemon} onClick={handlePokemonClick} />
                       </li>
                     ))}
                   </ul>
 
                   {/* Load More Button */}
-                  <footer className="flex justify-center mt-8">
-                    <Button variant="default" size="lg">
-                      Load more
-                    </Button>
-                  </footer>
+                  {hasMore && (
+                    <footer className="flex flex-col items-center gap-4 mt-8">
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                        className="min-w-[200px]"
+                      >
+                        {isLoading ? 'Loading...' : 'Load more'}
+                      </Button>
+                    </footer>
+                  )}
                 </>
               )}
             </section>

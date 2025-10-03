@@ -652,5 +652,605 @@ export const mockPokemonData: Pokemon[] = [
       speed: 56
     },
     evolution: [29]
+  },
+  {
+    id: 31,
+    name: "Nidoqueen",
+    types: ["poison", "ground"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/31.png",
+    pokedexNumber: "031",
+    height: "1.3 m",
+    weight: "60.0 kg",
+    genderRatio: "0% ♂ / 100% ♀",
+    habitat: "Grassland",
+    abilities: ["Poison Point", "Rivalry", "Sheer Force"],
+    stats: {
+      hp: 90,
+      attack: 92,
+      defense: 87,
+      spAttack: 75,
+      spDefense: 85,
+      speed: 76
+    }
+  },
+  {
+    id: 32,
+    name: "Nidoran-m",
+    types: ["poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/32.png",
+    pokedexNumber: "032",
+    height: "0.5 m",
+    weight: "9.0 kg",
+    genderRatio: "100% ♂ / 0% ♀",
+    habitat: "Grassland",
+    abilities: ["Poison Point", "Rivalry", "Hustle"],
+    stats: {
+      hp: 46,
+      attack: 57,
+      defense: 40,
+      spAttack: 40,
+      spDefense: 40,
+      speed: 50
+    }
+  },
+  {
+    id: 33,
+    name: "Nidorino",
+    types: ["poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/33.png",
+    pokedexNumber: "033",
+    height: "0.9 m",
+    weight: "19.5 kg",
+    genderRatio: "100% ♂ / 0% ♀",
+    habitat: "Grassland",
+    abilities: ["Poison Point", "Rivalry", "Hustle"],
+    stats: {
+      hp: 61,
+      attack: 72,
+      defense: 57,
+      spAttack: 55,
+      spDefense: 55,
+      speed: 65
+    }
+  },
+  {
+    id: 34,
+    name: "Nidoking",
+    types: ["poison", "ground"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/34.png",
+    pokedexNumber: "034",
+    height: "1.4 m",
+    weight: "62.0 kg",
+    genderRatio: "100% ♂ / 0% ♀",
+    habitat: "Grassland",
+    abilities: ["Poison Point", "Rivalry", "Sheer Force"],
+    stats: {
+      hp: 81,
+      attack: 102,
+      defense: 77,
+      spAttack: 85,
+      spDefense: 75,
+      speed: 85
+    }
+  },
+  {
+    id: 35,
+    name: "Clefairy",
+    types: ["fairy"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/35.png",
+    pokedexNumber: "035",
+    height: "0.6 m",
+    weight: "7.5 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Mountain",
+    abilities: ["Cute Charm", "Magic Guard", "Friend Guard"],
+    stats: {
+      hp: 70,
+      attack: 45,
+      defense: 48,
+      spAttack: 60,
+      spDefense: 65,
+      speed: 35
+    }
+  },
+  {
+    id: 36,
+    name: "Clefable",
+    types: ["fairy"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/36.png",
+    pokedexNumber: "036",
+    height: "1.3 m",
+    weight: "40.0 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Mountain",
+    abilities: ["Cute Charm", "Magic Guard", "Unaware"],
+    stats: {
+      hp: 95,
+      attack: 70,
+      defense: 73,
+      spAttack: 95,
+      spDefense: 90,
+      speed: 60
+    }
+  },
+  {
+    id: 37,
+    name: "Vulpix",
+    types: ["fire"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/37.png",
+    pokedexNumber: "037",
+    height: "0.6 m",
+    weight: "9.9 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Flash Fire", "Drought"],
+    stats: {
+      hp: 38,
+      attack: 41,
+      defense: 40,
+      spAttack: 50,
+      spDefense: 65,
+      speed: 65
+    }
+  },
+  {
+    id: 38,
+    name: "Ninetales",
+    types: ["fire"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/38.png",
+    pokedexNumber: "038",
+    height: "1.1 m",
+    weight: "19.9 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Flash Fire", "Drought"],
+    stats: {
+      hp: 73,
+      attack: 76,
+      defense: 75,
+      spAttack: 81,
+      spDefense: 100,
+      speed: 100
+    }
+  },
+  {
+    id: 39,
+    name: "Jigglypuff",
+    types: ["normal", "fairy"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/39.png",
+    pokedexNumber: "039",
+    height: "0.5 m",
+    weight: "5.5 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Cute Charm", "Competitive", "Friend Guard"],
+    stats: {
+      hp: 115,
+      attack: 45,
+      defense: 20,
+      spAttack: 45,
+      spDefense: 25,
+      speed: 20
+    }
+  },
+  {
+    id: 40,
+    name: "Wigglytuff",
+    types: ["normal", "fairy"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/40.png",
+    pokedexNumber: "040",
+    height: "1.0 m",
+    weight: "12.0 kg",
+    genderRatio: "25.0% ♂ / 75.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Cute Charm", "Competitive", "Frisk"],
+    stats: {
+      hp: 140,
+      attack: 70,
+      defense: 45,
+      spAttack: 85,
+      spDefense: 50,
+      speed: 45
+    }
+  },
+  {
+    id: 41,
+    name: "Zubat",
+    types: ["poison", "flying"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/41.png",
+    pokedexNumber: "041",
+    height: "0.8 m",
+    weight: "7.5 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Cave",
+    abilities: ["Inner Focus", "Infiltrator"],
+    stats: {
+      hp: 40,
+      attack: 45,
+      defense: 35,
+      spAttack: 30,
+      spDefense: 40,
+      speed: 55
+    }
+  },
+  {
+    id: 42,
+    name: "Golbat",
+    types: ["poison", "flying"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/42.png",
+    pokedexNumber: "042",
+    height: "1.6 m",
+    weight: "55.0 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Cave",
+    abilities: ["Inner Focus", "Infiltrator"],
+    stats: {
+      hp: 75,
+      attack: 80,
+      defense: 70,
+      spAttack: 65,
+      spDefense: 75,
+      speed: 90
+    }
+  },
+  {
+    id: 43,
+    name: "Oddish",
+    types: ["grass", "poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/43.png",
+    pokedexNumber: "043",
+    height: "0.5 m",
+    weight: "5.4 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Chlorophyll", "Run Away"],
+    stats: {
+      hp: 45,
+      attack: 50,
+      defense: 55,
+      spAttack: 75,
+      spDefense: 65,
+      speed: 30
+    }
+  },
+  {
+    id: 44,
+    name: "Gloom",
+    types: ["grass", "poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/44.png",
+    pokedexNumber: "044",
+    height: "0.8 m",
+    weight: "8.6 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Chlorophyll", "Stench"],
+    stats: {
+      hp: 60,
+      attack: 65,
+      defense: 70,
+      spAttack: 85,
+      spDefense: 75,
+      speed: 40
+    }
+  },
+  {
+    id: 45,
+    name: "Vileplume",
+    types: ["grass", "poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/45.png",
+    pokedexNumber: "045",
+    height: "1.2 m",
+    weight: "18.6 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Chlorophyll", "Effect Spore"],
+    stats: {
+      hp: 75,
+      attack: 80,
+      defense: 85,
+      spAttack: 110,
+      spDefense: 90,
+      speed: 50
+    }
+  },
+  {
+    id: 46,
+    name: "Paras",
+    types: ["bug", "grass"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/46.png",
+    pokedexNumber: "046",
+    height: "0.3 m",
+    weight: "5.4 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Forest",
+    abilities: ["Effect Spore", "Dry Skin", "Damp"],
+    stats: {
+      hp: 35,
+      attack: 70,
+      defense: 55,
+      spAttack: 45,
+      spDefense: 55,
+      speed: 25
+    }
+  },
+  {
+    id: 47,
+    name: "Parasect",
+    types: ["bug", "grass"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/47.png",
+    pokedexNumber: "047",
+    height: "1.0 m",
+    weight: "29.5 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Forest",
+    abilities: ["Effect Spore", "Dry Skin", "Damp"],
+    stats: {
+      hp: 60,
+      attack: 95,
+      defense: 80,
+      spAttack: 60,
+      spDefense: 80,
+      speed: 30
+    }
+  },
+  {
+    id: 48,
+    name: "Venonat",
+    types: ["bug", "poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/48.png",
+    pokedexNumber: "048",
+    height: "1.0 m",
+    weight: "30.0 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Forest",
+    abilities: ["Compound Eyes", "Tinted Lens", "Run Away"],
+    stats: {
+      hp: 60,
+      attack: 55,
+      defense: 50,
+      spAttack: 40,
+      spDefense: 55,
+      speed: 45
+    }
+  },
+  {
+    id: 49,
+    name: "Venomoth",
+    types: ["bug", "poison"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/49.png",
+    pokedexNumber: "049",
+    height: "1.5 m",
+    weight: "12.5 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Forest",
+    abilities: ["Shield Dust", "Tinted Lens", "Wonder Skin"],
+    stats: {
+      hp: 70,
+      attack: 65,
+      defense: 60,
+      spAttack: 90,
+      spDefense: 75,
+      speed: 90
+    }
+  },
+  {
+    id: 50,
+    name: "Diglett",
+    types: ["ground"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/50.png",
+    pokedexNumber: "050",
+    height: "0.2 m",
+    weight: "0.8 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Cave",
+    abilities: ["Sand Veil", "Arena Trap", "Sand Force"],
+    stats: {
+      hp: 10,
+      attack: 55,
+      defense: 25,
+      spAttack: 35,
+      spDefense: 45,
+      speed: 95
+    }
+  },
+  {
+    id: 51,
+    name: "Dugtrio",
+    types: ["ground"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/51.png",
+    pokedexNumber: "051",
+    height: "0.7 m",
+    weight: "33.3 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Cave",
+    abilities: ["Sand Veil", "Arena Trap", "Sand Force"],
+    stats: {
+      hp: 35,
+      attack: 100,
+      defense: 50,
+      spAttack: 50,
+      spDefense: 70,
+      speed: 120
+    }
+  },
+  {
+    id: 52,
+    name: "Meowth",
+    types: ["normal"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/52.png",
+    pokedexNumber: "052",
+    height: "0.4 m",
+    weight: "4.2 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Urban",
+    abilities: ["Pickup", "Technician", "Unnerve"],
+    stats: {
+      hp: 40,
+      attack: 45,
+      defense: 35,
+      spAttack: 40,
+      spDefense: 40,
+      speed: 90
+    }
+  },
+  {
+    id: 53,
+    name: "Persian",
+    types: ["normal"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/53.png",
+    pokedexNumber: "053",
+    height: "1.0 m",
+    weight: "32.0 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Urban",
+    abilities: ["Limber", "Technician", "Unnerve"],
+    stats: {
+      hp: 65,
+      attack: 70,
+      defense: 60,
+      spAttack: 65,
+      spDefense: 65,
+      speed: 115
+    }
+  },
+  {
+    id: 54,
+    name: "Psyduck",
+    types: ["water"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/54.png",
+    pokedexNumber: "054",
+    height: "0.8 m",
+    weight: "19.6 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Waters Edge",
+    abilities: ["Damp", "Cloud Nine", "Swift Swim"],
+    stats: {
+      hp: 50,
+      attack: 52,
+      defense: 48,
+      spAttack: 65,
+      spDefense: 50,
+      speed: 55
+    }
+  },
+  {
+    id: 55,
+    name: "Golduck",
+    types: ["water"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/55.png",
+    pokedexNumber: "055",
+    height: "1.7 m",
+    weight: "76.6 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Waters Edge",
+    abilities: ["Damp", "Cloud Nine", "Swift Swim"],
+    stats: {
+      hp: 80,
+      attack: 82,
+      defense: 78,
+      spAttack: 95,
+      spDefense: 80,
+      speed: 85
+    }
+  },
+  {
+    id: 56,
+    name: "Mankey",
+    types: ["fighting"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/56.png",
+    pokedexNumber: "056",
+    height: "0.5 m",
+    weight: "28.0 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Mountain",
+    abilities: ["Vital Spirit", "Anger Point", "Defiant"],
+    stats: {
+      hp: 40,
+      attack: 80,
+      defense: 35,
+      spAttack: 35,
+      spDefense: 45,
+      speed: 70
+    }
+  },
+  {
+    id: 57,
+    name: "Primeape",
+    types: ["fighting"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/57.png",
+    pokedexNumber: "057",
+    height: "1.0 m",
+    weight: "32.0 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Mountain",
+    abilities: ["Vital Spirit", "Anger Point", "Defiant"],
+    stats: {
+      hp: 65,
+      attack: 105,
+      defense: 60,
+      spAttack: 60,
+      spDefense: 70,
+      speed: 95
+    }
+  },
+  {
+    id: 58,
+    name: "Growlithe",
+    types: ["fire"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/58.png",
+    pokedexNumber: "058",
+    height: "0.7 m",
+    weight: "19.0 kg",
+    genderRatio: "75.0% ♂ / 25.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Intimidate", "Flash Fire", "Justified"],
+    stats: {
+      hp: 55,
+      attack: 70,
+      defense: 45,
+      spAttack: 70,
+      spDefense: 50,
+      speed: 60
+    }
+  },
+  {
+    id: 59,
+    name: "Arcanine",
+    types: ["fire"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/59.png",
+    pokedexNumber: "059",
+    height: "1.9 m",
+    weight: "155.0 kg",
+    genderRatio: "75.0% ♂ / 25.0% ♀",
+    habitat: "Grassland",
+    abilities: ["Intimidate", "Flash Fire", "Justified"],
+    stats: {
+      hp: 90,
+      attack: 110,
+      defense: 80,
+      spAttack: 100,
+      spDefense: 80,
+      speed: 95
+    }
+  },
+  {
+    id: 60,
+    name: "Poliwag",
+    types: ["water"],
+    sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/60.png",
+    pokedexNumber: "060",
+    height: "0.6 m",
+    weight: "12.4 kg",
+    genderRatio: "50.0% ♂ / 50.0% ♀",
+    habitat: "Waters Edge",
+    abilities: ["Water Absorb", "Damp", "Swift Swim"],
+    stats: {
+      hp: 40,
+      attack: 50,
+      defense: 40,
+      spAttack: 40,
+      spDefense: 40,
+      speed: 90
+    }
   }
 ];
