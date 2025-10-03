@@ -49,6 +49,12 @@ function App() {
     setDisplayedCount(ITEMS_PER_PAGE)
   }, [debouncedSearchTerm, ITEMS_PER_PAGE])
 
+  useEffect(() => {
+    if (currentPage === 'pokedex') {
+      setDisplayedCount(ITEMS_PER_PAGE)
+    }
+  }, [currentPage, ITEMS_PER_PAGE])
+
   const handleClearSearch = () => {
     setSearchTerm('')
   }
