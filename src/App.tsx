@@ -51,6 +51,7 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+
   const handlePokemonClick = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
     setModalOpen(true)
@@ -99,6 +100,7 @@ function App() {
     setSortBy('id')
     setSortOrder('asc')
   }
+
 
   const handleClearSearch = () => {
     setSearchTerm('')
@@ -302,7 +304,7 @@ function App() {
               {!isMobile && (
                 <div className="flex flex-col gap-4">
                   <p className="text-sm pixel-font text-black">
-                    Showing: xx-xx
+                    Showing {displayedPokemon.length} of {filteredPokemon.length} Pokémon
                   </p>
                   <div>
                     {selectedTypes.length > 0 ? (
