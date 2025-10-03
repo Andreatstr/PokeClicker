@@ -196,7 +196,7 @@ function App() {
                     className="w-full max-w-md bg-[var(--retro-surface)] p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="w-full bg-[var(--retro-surface)] p-4 rounded-t-md shadow-[var(--pixel-box-shadow)]">
+                    <div className="w-full bg-[var(--retro-surface)] p-4">
                       <div className="flex justify-between items-center mb-4">
                         <h2 id="filter-dialog-title" className="pixel-font text-lg text-black">Filter</h2>
                         <button onClick={() => setShowMobileFilters(false)} aria-label="Close filter dialog">
@@ -210,7 +210,7 @@ function App() {
                           <Label className="text-xs font-bold text-black">Region</Label>
                           <Select value={tempRegion ?? ''} onValueChange={setTempRegion}>
                             <SelectTrigger className="w-full text-sm">
-                              <SelectValue placeholder="Kanto (1-151)" />
+                              <SelectValue placeholder="All regions" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="kanto">Kanto (1-151)</SelectItem>
@@ -334,7 +334,7 @@ function App() {
                       <Label className="text-xs font-bold text-black">REGION</Label>
                       <Select value={selectedRegion ?? ''} onValueChange={setSelectedRegion}>
                         <SelectTrigger className="w-full text-sm">
-                          <SelectValue placeholder="Kanto (1-151)" />
+                          <SelectValue placeholder="All regions" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="kanto">Kanto (1-151)</SelectItem>

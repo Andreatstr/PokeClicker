@@ -56,12 +56,12 @@ export function MultiSelect({
 
       {open && (
         <div
-          className="absolute z-10 mt-2 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] bg-[var(--retro-surface)] text-black dark:text-black max-h-[160px] overflow-y-auto"
+          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] bg-[var(--retro-surface)] text-black dark:text-black max-h-[160px] overflow-y-auto" role="listbox"
         >
           {options.map(type => (
             <label
               key={type}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring"
+              className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none"
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--retro-secondary)'
               }}
@@ -69,13 +69,16 @@ export function MultiSelect({
                 e.currentTarget.style.backgroundColor = ''
               }}
             >
-              <input
-                type="checkbox"
-                checked={selected.includes(type)}
-                onChange={() => toggleOption(type)}
-              />
-              <span className="capitalize">{type}</span>
-              {selected.includes(type) && <CheckIcon className="size-4 ml-auto opacity-70" />}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(type)}
+                  onChange={() => toggleOption(type)}
+                  className="appearance-none w-4 h-4 border border-black rounded-sm checked:bg-black checked:border-black"
+                />
+                <span className="capitalize text-black pixel-font">{type}</span>
+              </div>
+              {selected.includes(type) && <CheckIcon className="size-4 opacity-70" />}
             </label>
           ))}
         </div>
