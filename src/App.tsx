@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SearchIcon, CloseIcon } from '@/components/ui/pixelact-ui/icons'
 import { PokeClicker } from './components/PokeClicker'
 import { Navbar } from './components/Navbar'
+import { MultiSelect } from './components/ui/pixelact-ui/MultiSelect'
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null)
@@ -18,6 +19,10 @@ function App() {
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>('clicker')
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id')
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false)
 
   const handlePokemonClick = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
@@ -34,15 +39,40 @@ function App() {
   }, [searchTerm])
 
   useEffect(() => {
-    if (debouncedSearchTerm.trim() === '') {
-      setFilteredPokemon(mockPokemonData)
-    } else {
-      const filtered = mockPokemonData.filter(pokemon =>
-        pokemon.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      )
-      setFilteredPokemon(filtered)
-    }
-  }, [debouncedSearchTerm])
+    const filtered = mockPokemonData.filter(pokemon => {
+      const matchesSearch = debouncedSearchTerm === '' || pokemon.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      const matchesRegion = !selectedRegion || pokemon.region === selectedRegion
+      const matchesType = selectedTypes.length === 0 || selectedTypes.some(type => pokemon.types.includes(type))
+      return matchesSearch && matchesRegion && matchesType
+    })
+
+    const sorted = [...filtered].sort((a, b) => {
+      let valA: string | number
+      let valB: string | number
+
+      if (sortBy === 'id') {
+        valA = a.id
+        valB = b.id
+        return valA - valB
+      } else if (sortBy === 'name') {
+        valA = a.name
+        valB = b.name
+      } else {
+        valA = a.types[0]
+        valB = b.types[0]
+      }
+
+      return valA.localeCompare(valB)
+    })
+
+    setFilteredPokemon(sorted)
+  }, [debouncedSearchTerm, selectedRegion, selectedTypes, sortBy])
+
+  const handleClearFilters = () => {
+    setSelectedRegion(null)
+    setSelectedTypes([])
+    setSortBy('id')
+  }
 
   const handleClearSearch = () => {
     setSearchTerm('')
@@ -112,7 +142,7 @@ function App() {
                 <fieldset className="flex flex-wrap gap-4 border-0 p-0 m-0">
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">REGION</Label>
-                    <Select>
+                    <Select value={selectedRegion ?? ''} onValueChange={setSelectedRegion}>
                       <SelectTrigger className="w-[280px] text-sm">
                         <SelectValue placeholder="Kanto (1-151)" />
                       </SelectTrigger>
@@ -126,23 +156,20 @@ function App() {
 
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">TYPE</Label>
-                    <Select>
-                      <SelectTrigger className="w-[220px] text-sm">
-                        <SelectValue placeholder="all types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">all types</SelectItem>
-                        <SelectItem value="fire">Fire</SelectItem>
-                        <SelectItem value="water">Water</SelectItem>
-                        <SelectItem value="grass">Grass</SelectItem>
-                        <SelectItem value="electric">Electric</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <MultiSelect
+                        options={[
+                          "normal", "fire", "water", "electric", "grass", "ice",
+                          "fighting", "poison", "ground", "flying", "psychic", "bug",
+                          "rock", "ghost", "dragon", "dark", "steel", "fairy"
+                        ]}
+                        selected={selectedTypes}
+                        onChange={setSelectedTypes}
+                      />
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">SORT BY</Label>
-                    <Select>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'id' | 'name' | 'type')}>
                       <SelectTrigger className="w-[220px] text-sm">
                         <SelectValue placeholder="ID" />
                       </SelectTrigger>
@@ -153,6 +180,7 @@ function App() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <Button type="button" className="w-[200px] text-sm " onClick={handleClearFilters}> Clear Filters </Button> {/* TODO: fix positioning*/}
                 </fieldset>
               </form>
             </section>
