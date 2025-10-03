@@ -2,7 +2,6 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Button as ShadcnButton } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button-variants";
 import "@/components/ui/pixelact-ui/styles/styles.css";
 import "./button.css";
 

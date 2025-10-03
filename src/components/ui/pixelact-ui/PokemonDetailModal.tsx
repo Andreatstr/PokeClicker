@@ -1,6 +1,5 @@
 import { Dialog, DialogBody } from './dialog'
 import { StackedProgress } from './StackedProgress'
-import { Button } from '@/components/ui/pixelact-ui/button'
 import { mockPokemonData } from '@/data/mockData'
 import type { Pokemon } from '@/data/mockData'
 
@@ -128,7 +127,7 @@ function getTypeColors(type: string) {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0]
-  return `/pokemon-type-bg/${primaryType}.png`
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`
 }
 
 export function PokemonDetailModal({ pokemon, isOpen, onClose, onSelectPokemon }: Props) {

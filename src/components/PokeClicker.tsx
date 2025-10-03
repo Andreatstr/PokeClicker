@@ -60,7 +60,7 @@ export function PokeClicker() {
     const passiveIncome = Math.floor((stats.hp - 1) * 0.5) + Math.floor((stats.defense - 1) * 0.3)
     if (passiveIncome > 0) {
       const interval = setInterval(() => {
-        setRareCandy((prev) => prev + passiveIncome)
+        setRareCandy((prev: number) => prev + passiveIncome)
       }, 1000) // Every second
 
       return () => clearInterval(interval)
@@ -69,7 +69,7 @@ export function PokeClicker() {
 
   const handleClick = () => {
     const candiesEarned = getCandiesPerClick()
-    setRareCandy((prev) => prev + candiesEarned)
+    setRareCandy((prev: number) => prev + candiesEarned)
     setIsAnimating(true)
 
     // Add floating candy animation
@@ -90,8 +90,8 @@ export function PokeClicker() {
   const handleUpgrade = (stat: keyof typeof stats) => {
     const cost = getUpgradeCost(stat)
     if (rareCandy >= cost) {
-      setRareCandy((prev) => prev - cost)
-      setStats((prev) => ({ ...prev, [stat]: prev[stat] + 1 }))
+      setRareCandy((prev: number) => prev - cost)
+      setStats((prev: typeof stats) => ({ ...prev, [stat]: prev[stat] + 1 }))
     }
   }
 
@@ -143,7 +143,7 @@ export function PokeClicker() {
                 className="w-full aspect-[10/9] flex items-end justify-center border-none cursor-pointer p-0 pb-8 focus:outline-none focus:ring-2 focus:ring-yellow-400 relative overflow-hidden"
                 aria-label="Click Charizard to earn rare candy"
                 style={{
-                  backgroundImage: `url('/pokemon-bg.png')`,
+                  backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.png')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   imageRendering: 'pixelated',
@@ -310,7 +310,7 @@ export function PokeClicker() {
                             ? 'Sp. Defense'
                             : key.charAt(0).toUpperCase() + key.slice(1)}
                         </span>
-                        <span className="pixel-font text-lg font-bold text-black">LV {value}</span>
+                        <span className="pixel-font text-lg font-bold text-black">LV {String(value)}</span>
                       </div>
                     </div>
                     <Button

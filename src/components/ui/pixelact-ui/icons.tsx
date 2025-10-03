@@ -47,21 +47,3 @@ export const MoonIcon = createIcon(
 export const MenuIcon = createIcon(
   "M4 6h16v2H4V6zm0 5h16v2H4v-2zm16 5H4v2h16v-2z"
 )
-
-// Icon name map for easy reference
-export const icons = {
-  search: SearchIcon,
-  close: CloseIcon,
-  user: UserIcon,
-  sun: SunIcon,
-  moon: MoonIcon,
-  menu: MenuIcon,
-} as const
-
-export type IconName = keyof typeof icons
-
-// Convenience component to use icons by name
-export const Icon: React.FC<{ name: IconName } & IconProps> = ({ name, ...props }) => {
-  const IconComponent = icons[name]
-  return <IconComponent {...props} />
-}

@@ -124,7 +124,7 @@ function getTypeColors(type: string) {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0]
-  return `/pokemon-type-bg/${primaryType}.png`
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`
 }
 
 export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
