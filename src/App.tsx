@@ -154,6 +154,10 @@ function App() {
                   </div>
                   {isMobile && (
                     <Button className="w-full mt-2 text-sm"
+                      aria-haspopup="dialog"
+                      aria-expanded={showMobileFilters}
+                      aria-controls="mobile-filter-dialog"
+                      aria-label="Open filter options"
                       onClick={() => setShowMobileFilters(prev => !prev)}>
                       Filters
                     </Button>
@@ -167,6 +171,10 @@ function App() {
               {showMobileFilters && (
                 <div
                   className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="filter-dialog-title"
+                  id="mobile-filter-dialog"
                   onClick={() => setShowMobileFilters(false)}
                 >
                   <div
@@ -175,8 +183,8 @@ function App() {
                   >
                     <div className="w-full bg-[var(--retro-surface)] p-4 rounded-t-md shadow-[var(--pixel-box-shadow)]">
                       <div className="flex justify-between items-center mb-4">
-                        <h2 className="pixel-font text-lg text-black">Filter</h2>
-                        <button onClick={() => setShowMobileFilters(false)} aria-label="Close">
+                        <h2 id="filter-dialog-title" className="pixel-font text-lg text-black">Filter</h2>
+                        <button onClick={() => setShowMobileFilters(false)} aria-label="Close filter dialog">
                           <span className="text-xl">×</span>
                         </button>
                       </div>
@@ -244,7 +252,7 @@ function App() {
 
                       {/* Footer Buttons */}
                       <div className="flex justify-between mt-6">
-                        <Button variant="default" onClick={() => {
+                        <Button variant="default" aria-label="Clear all filters" onClick={() => {
                           setTempRegion(null)
                           setTempTypes([])
                           setTempSortBy('id')
@@ -258,10 +266,10 @@ function App() {
                         }}>
                           Clear
                         </Button>
-                        <Button variant="default" onClick={() => setShowMobileFilters(false)}>
+                        <Button variant="default" aria-label="Cancel filter changes" onClick={() => setShowMobileFilters(false)}>
                           Cancel
                         </Button>
-                        <Button variant="default" onClick={() => {
+                        <Button variant="default" aria-label="Apply selected filters" onClick={() => {
                           setSelectedRegion(tempRegion)
                           setSelectedTypes(tempTypes)
                           setSortBy(tempSortBy)
