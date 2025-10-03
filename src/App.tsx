@@ -23,6 +23,10 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [displayedCount, setDisplayedCount] = useState(20)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const ITEMS_PER_PAGE = 20
 
   // Mobile
   const [isMobile, setIsMobile] = useState(false)
@@ -103,6 +107,17 @@ function App() {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode)
   }
+
+  const handleLoadMore = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setDisplayedCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredPokemon.length))
+      setIsLoading(false)
+    }, 500)
+  }
+
+  const displayedPokemon = filteredPokemon.slice(0, displayedCount)
+  const hasMore = displayedCount < filteredPokemon.length
 
   return (
     <>
@@ -394,19 +409,31 @@ function App() {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
                     justifyContent: 'center'
                   }}>
-                    {filteredPokemon.map((pokemon) => (
-                      <li key={pokemon.id}>
+                    {displayedPokemon.map((pokemon, index) => (
+                      <li
+                        key={pokemon.id}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms` }}
+                      >
                         <PokemonCard pokemon={pokemon} onClick={handlePokemonClick} />
                       </li>
                     ))}
                   </ul>
 
                   {/* Load More Button */}
-                  <footer className="flex justify-center mt-8">
-                    <Button variant="default" size="lg">
-                      Load more
-                    </Button>
-                  </footer>
+                  {hasMore && (
+                    <footer className="flex flex-col items-center gap-4 mt-8">
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={handleLoadMore}
+                        disabled={isLoading}
+                        className="min-w-[200px]"
+                      >
+                        {isLoading ? 'Loading...' : 'Load more'}
+                      </Button>
+                    </footer>
+                  )}
                 </>
               )}
             </section>
