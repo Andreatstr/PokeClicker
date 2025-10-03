@@ -134,16 +134,18 @@ function App() {
 
             {/* Filters and Count */}
             <section className="mb-6">
-              <form className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex flex-col gap-4">
                 <p className="text-sm pixel-font text-black">
                   Showing: xx-xx
                 </p>
 
-                <fieldset className="flex flex-wrap gap-4 border-0 p-0 m-0">
+                <div className="grid gap-4" style={{
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                }}>
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">REGION</Label>
                     <Select value={selectedRegion ?? ''} onValueChange={setSelectedRegion}>
-                      <SelectTrigger className="w-[280px] text-sm">
+                      <SelectTrigger className="w-full text-sm">
                         <SelectValue placeholder="Kanto (1-151)" />
                       </SelectTrigger>
                       <SelectContent>
@@ -156,21 +158,22 @@ function App() {
 
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">TYPE</Label>
-                      <MultiSelect
-                        options={[
-                          "normal", "fire", "water", "electric", "grass", "ice",
-                          "fighting", "poison", "ground", "flying", "psychic", "bug",
-                          "rock", "ghost", "dragon", "dark", "steel", "fairy"
-                        ]}
-                        selected={selectedTypes}
-                        onChange={setSelectedTypes}
-                      />
+                    <MultiSelect
+                      options={[
+                        "normal", "fire", "water", "electric", "grass", "ice",
+                        "fighting", "poison", "ground", "flying", "psychic", "bug",
+                        "rock", "ghost", "dragon", "dark", "steel", "fairy"
+                      ]}
+                      selected={selectedTypes}
+                      onChange={setSelectedTypes}
+                      className="w-full"
+                    />
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs font-bold text-black">SORT BY</Label>
                     <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'id' | 'name' | 'type')}>
-                      <SelectTrigger className="w-[220px] text-sm">
+                      <SelectTrigger className="w-full text-sm">
                         <SelectValue placeholder="ID" />
                       </SelectTrigger>
                       <SelectContent>
@@ -180,9 +183,15 @@ function App() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="button" className="w-[200px] text-sm " onClick={handleClearFilters}> Clear Filters </Button> {/* TODO: fix positioning*/}
-                </fieldset>
-              </form>
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs font-bold text-black invisible">ACTIONS</Label>
+                    <Button type="button" className="w-full text-sm" onClick={handleClearFilters}>
+                      Clear Filters
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* Pokemon Grid */}
