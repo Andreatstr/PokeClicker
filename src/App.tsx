@@ -22,7 +22,7 @@ function App() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id')
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const handlePokemonClick = (pokemon: Pokemon) => {
     setSelectedPokemon(pokemon)
@@ -53,20 +53,18 @@ function App() {
       if (sortBy === 'id') {
         valA = a.id
         valB = b.id
-        return valA - valB
-      } else if (sortBy === 'name') {
-        valA = a.name
-        valB = b.name
+        return sortOrder === 'asc' ? valA - valB : valB - valA
       } else {
-        valA = a.types[0]
-        valB = b.types[0]
+        valA = sortBy === 'name' ? a.name : a.types[0]
+        valB = sortBy === 'name' ? b.name : b.types[0]
+        return sortOrder === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA)
       }
-
-      return valA.localeCompare(valB)
     })
 
     setFilteredPokemon(sorted)
-  }, [debouncedSearchTerm, selectedRegion, selectedTypes, sortBy])
+  }, [debouncedSearchTerm, selectedRegion, selectedTypes, sortBy, sortOrder])
 
   const handleClearFilters = () => {
     setSelectedRegion(null)
@@ -138,6 +136,28 @@ function App() {
                 <p className="text-sm pixel-font text-black">
                   Showing: xx-xx
                 </p>
+                <div>
+                  {selectedTypes.length > 0 ? (
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs pixel-font text-black">
+                        {selectedTypes.length === 18
+                          ? 'Showing types: All types selected'
+                          : `Showing types: ${selectedTypes.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ')}`}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="default"
+                        className="text-xs w-fit px-2 py-1 mt-1"
+                        onClick={() => setSelectedTypes([])}
+                      >
+                        Clear Type
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-xs pixel-font text-black">Showing types: All types</p>
+                  )}
+                </div>
+
 
                 <div className="grid gap-4" style={{
                   gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -180,6 +200,19 @@ function App() {
                         <SelectItem value="id">ID</SelectItem>
                         <SelectItem value="name">Name</SelectItem>
                         <SelectItem value="type">Type</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs font-bold text-black">ORDER</Label>
+                    <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}>
+                      <SelectTrigger className="w-full text-sm">
+                        <SelectValue placeholder="Asc" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asc">Asc</SelectItem>
+                        <SelectItem value="desc">Desc</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
