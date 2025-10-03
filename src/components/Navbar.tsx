@@ -31,7 +31,7 @@ export function Navbar({ currentPage, onPageChange, isDarkMode, onToggleTheme }:
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Button
               className="text-xs md:text-sm"
               onClick={() => onPageChange('clicker')}
@@ -59,7 +59,7 @@ export function Navbar({ currentPage, onPageChange, isDarkMode, onToggleTheme }:
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button onClick={toggleMobileMenu} className="px-3 py-4">
               <MenuIcon className="w-5 h-5" />
             </Button>
@@ -69,7 +69,7 @@ export function Navbar({ currentPage, onPageChange, isDarkMode, onToggleTheme }:
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden mt-4 p-4" style={{
+        <div className="lg:hidden mt-4 p-4" style={{
           backgroundColor: 'var(--retro-surface)',
           border: '4px solid var(--retro-border)',
           boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)'
