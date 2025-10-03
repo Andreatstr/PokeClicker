@@ -9,7 +9,7 @@ interface NavbarProps {
   onToggleTheme: () => void
 }
 
-export function Navbar({ currentPage, onPageChange, isDarkMode, onToggleTheme }: NavbarProps) {
+export function Navbar({ onPageChange, isDarkMode, onToggleTheme }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const toggleMobileMenu = () => {

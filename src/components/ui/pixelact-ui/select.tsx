@@ -134,7 +134,7 @@ function SelectItem({
       )}
       style={{
         '--hover-bg': 'var(--retro-secondary)',
-      } as any}
+      } as React.CSSProperties & Record<string, string>}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = 'var(--retro-secondary)'
       }}

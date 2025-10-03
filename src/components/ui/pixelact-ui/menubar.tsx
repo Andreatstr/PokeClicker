@@ -1,24 +1,9 @@
 import React from "react";
 import * as MenubarPrimitive from "@radix-ui/react-menubar";
-import { cva } from "class-variance-authority";
 import { Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { menubarVariants } from "./menubar-variants";
 import "@/components/ui/pixelact-ui/styles/styles.css";
-
-export const menubarVariants = cva(
-  "shadow-(--pixel-box-shadow) box-shadow-margin",
-  {
-    variants: {
-      font: {
-        normal: "",
-        pixel: "pixel-font",
-      },
-    },
-    defaultVariants: {
-      font: "pixel",
-    },
-  }
-);
 
 function MenubarMenu({
   ...props
