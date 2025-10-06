@@ -1,385 +1,137 @@
-# PokéClicker App
+# PokéClicker - Prosjekt 2
 
-A React-based Pokémon clicker game and Pokédex application built with TypeScript that features an interactive GameBoy-style clicker interface and comprehensive Pokémon browsing functionality.
+IT2810 Webutvikling - Gruppe 26
 
-## Link to webpage
+[Live Demo](http://it2810-26.idi.ntnu.no/project2/) (Krever eduroam VPN utenfor NTNU)
 
-[Live Demo](http://it2810-26.idi.ntnu.no/project2/)
+## Prosjektkonsept
 
-Make sure to connect to edoram VPN if you are accessing from outside NTNU.
+PokéClicker er en webapplikasjon som kombinerer et inkrementelt klikkespill med en søkbar Pokémon-database. Målet er å skape en interaktiv og engasjerende brukeropplevelse der spillmekanikk og datavisning fungerer sammen.
 
-## Project Overview
+### Hvordan spillet fungerer
 
-This project is part of the NTNU IT2810 web development course (Project 2), demonstrating modern React development practices, state management, local storage persistence, responsive design, and comprehensive user interaction patterns. The application combines gaming mechanics with data browsing, showcasing both interactive entertainment and information display capabilities.
+Brukere tjener "rare candy" ved å klikke på Pokémon i et GameBoy-inspirert grensesnitt. Rare candy kan brukes til å:
+- Kjøpe nye Pokémon til sin personlige samling
+- Oppgradere stats (HP, Attack, Defense, Sp. Attack, Sp. Defense, Speed)
+- Øke inntekt per klikk og passiv inntekt
 
-### Course Learning Objectives Demonstrated
+Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex og interagere med systemet over tid.
 
-- **Advanced React Patterns**: Complex state management with localStorage persistence
-- **Component Architecture**: Reusable components with proper TypeScript interfaces
-- **User Interaction Design**: Click mechanics, animations, and responsive feedback
-- **Data Management**: Local storage for game progress and session state
-- **Responsive Design**: Mobile-first design with GameBoy-inspired retro aesthetics
-- **Performance Optimization**: Debounced search, pagination, and efficient rendering
-- **Accessibility Features**: ARIA labels, keyboard navigation, and semantic HTML
-- **Modern Development Tools**: Vite, ESLint, Tailwind CSS, and Radix UI
-- **TypeScript Implementation**: Strict typing with custom interfaces and type safety
+## Oppfyllelse av kurskrav
 
-## Features
+### Funksjonalitet
 
-### Core Functionality
+| Krav | Implementasjon |
+|------|----------------|
+| **Søkemulighet** | Søkefelt med debouncing (300ms) for case-insensitive søk på Pokémon-navn |
+| **Listebasert presentasjon** | Grid-visning med "Load More" paginering (20 Pokémon per side) |
+| **Detaljvisning** | Modal med utvidet informasjon om stats, evolusjoner, habitat, abilities |
+| **Sortering og filtrering** | Filtrering på region (Kanto/Johto/Hoenn) og type, sortering på ID/navn/type |
+| **Brukergenererte data** | Brukerkontoer med personlige Pokémon-samlinger og upgrade-progresjon (planlagt) |
+| **Universell utforming** | ARIA-labels, tastaturnavigasjon, semantisk HTML, høy kontrast |
+| **Bærekraftig webutvikling** | Debounced søk, lazy loading, optimalisert rendering, effektiv dataoverføring |
 
-#### PokéClicker Game
-- **Interactive GameBoy Console**: Authentic retro design with click-responsive Charizard
-- **Incremental Mechanics**: Earn rare candy through clicking and passive income
-- **Stat Upgrades**: Six different stats (HP, Attack, Defense, Sp. Attack, Sp. Defense, Speed)
-- **Progress Persistence**: Automatic saving to localStorage with state restoration
-- **Visual Feedback**: Click animations, floating candy effects, and stat visualization
+### Teknologi
 
-#### Pokédex Browser
-- **Comprehensive Pokemon Grid**: Browse through extensive Pokémon collection
-- **Real-time Search**: Debounced search with instant filtering results
-- **Advanced Filtering**: Filter by region, type, and sorting options
-- **Load More Pagination**: Progressive loading with fade-in animations
-- **Detailed Modal Views**: In-depth Pokémon information with stats and evolution chains
+- **Frontend**: React 19 + TypeScript + Vite
+- **State management**: React hooks (planlagt: Redux/Apollo for brukersesjon)
+- **Styling**: Tailwind CSS + Radix UI komponenter
+- **Backend**: GraphQL API (Node.js + TypeScript) *(planlagt for del 2)*
+- **Database**: PostgreSQL/MongoDB på VM *(planlagt for del 2)*
+- **Testing**: Vitest for komponenter, Playwright for E2E *(planlagt for del 3)*
 
-### Technical Features
+## Status: Første underveisinnlevering
 
-- **Dual-mode Interface**: Seamless navigation between clicker game and Pokédex
-- **State Persistence**: localStorage integration for game progress retention
-- **Responsive Design**: Optimized for mobile, tablet, and desktop experiences
-- **Performance Optimization**: Debounced inputs and efficient rendering patterns
-- **Retro Aesthetics**: Pixel-perfect GameBoy styling with authentic feel
-- **Type Safety**: Comprehensive TypeScript interfaces and strict typing
+Denne innleveringen viser konseptet med mock data og statisk kodet eksempeldata. Vi demonstrerer:
 
-## Tech Stack
+**Implementert nå:**
+- Pokédex med søk, filtrering og sortering (mock data i `src/data/mockData.ts`)
+- Klikkespill med upgrade-system (localStorage for lokal lagring)
+- Responsiv design med GameBoy-estetikk
+- Paginering og debounced søk
+- Modal med detaljert Pokémon-informasjon
 
-- **Frontend**: React 19 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS + Custom CSS
-- **UI Components**: Radix UI + pixel-retroui
-- **Routing**: React Router DOM
-- **State Management**: React hooks with localStorage persistence
-- **Icons**: Lucide React
-- **Code Quality**: ESLint + TypeScript ESLint
+**Planlagt for neste innlevering:**
+- GraphQL backend på VM (port 3001)
+- Database for brukere og brukerdata
+- Autentisering/innlogging
+- Pokémon API-integrasjon (PokéAPI) for dynamiske data
 
-## Getting Started
+## Datamodell (planlagt)
 
-### Prerequisites
+### Bruker
+```typescript
+interface User {
+  id: string
+  username: string
+  password: string (hashed)
+  createdAt: Date
+}
+```
 
-- Node.js v18.0.x or higher
-- npm v8.x or higher / pnpm v7.x or higher
+### Bruker-Pokémon (eide Pokémon)
+```typescript
+interface UserPokemon {
+  userId: string
+  pokemonId: number
+  nickname?: string
+  acquiredAt: Date
+}
+```
 
-### Installation
+### Bruker-Stats (upgrade-progresjon)
+```typescript
+interface UserStats {
+  userId: string
+  rareCandy: number
+  stats: {
+    hp: number
+    attack: number
+    defense: number
+    spAttack: number
+    spDefense: number
+    speed: number
+  }
+  lastUpdated: Date
+}
+```
 
-1. Clone the repository
+### Pokémon-data (fra API)
+Pokémon-informasjon (navn, typer, stats, sprites) hentes fra [PokéAPI](https://pokeapi.co/) i stedet for å lagres i egen database. Dette reduserer duplisering og holder data oppdatert.
 
+## Kjøre prosjektet lokalt
+
+### Installasjon
 ```bash
 git clone https://git.ntnu.no/IT2810-H25/T26-Project-2.git
 cd T26-Project-2
+pnpm install  # eller npm install
 ```
 
-2. Install dependencies
-
+### Utviklingsmiljø
 ```bash
-pnpm install
+pnpm run dev     # Start dev server
+pnpm run build   # Bygg for produksjon
+pnpm run lint    # Kjør linting
 ```
 
-Alternatively, you can use npm:
-
-```bash
-npm install
-```
-
-3. Start the development server
-
-```bash
-pnpm run dev
-```
-
-Alternatively, you can use npm:
-
-```bash
-npm run dev
-```
-
-## Available Scripts
-
-- `pnpm run dev` - Start development server
-- `pnpm run build` - Build for production
-- `pnpm run preview` - Preview production build
-- `pnpm run lint` - Check for linting errors
-
-Can also use npm instead of pnpm for all scripts.
-Check `package.json` for details and quick access.
-
-## Project Structure
-
-```
-src/
-├── components/          # React components
-│   ├── PokeClicker.tsx  # Main clicker game component
-│   ├── PokemonCard.tsx  # Individual Pokémon display
-│   ├── Navbar.tsx       # Navigation component
-│   └── ui/              # Reusable UI components
-├── data/                # Data and type definitions
-│   └── mockData.ts      # Pokémon data and interfaces
-├── lib/                 # Utility functions
-└── styles/              # CSS stylesheets
-```
-
-## Game Mechanics
-
-### PokéClicker System
-
-The clicker game implements a sophisticated incremental progression system:
-
-#### Earning Mechanics
-- **Click Rewards**: Base reward calculated from Attack + (Sp. Attack × 0.5)
-- **Passive Income**: Continuous earnings from HP × 0.5 + Defense × 0.3 per second
-- **Visual Feedback**: Floating candy animations and click effects
-
-#### Upgrade System
-- **Exponential Costs**: Upgrade costs follow the formula: `10 × 1.5^(level-1)`
-- **Stat Effects**:
-  - **HP**: Increases passive income generation
-  - **Attack**: Direct multiplier for click rewards
-  - **Defense**: Contributes to passive income
-  - **Sp. Attack**: Bonus multiplier for click rewards
-  - **Sp. Defense & Speed**: Planned for future features
-
-#### Persistence
-- **Auto-Save**: Game state automatically saved to localStorage
-- **Cross-Session**: Progress maintained between browser sessions
-- **State Recovery**: Graceful handling of corrupted or missing save data
-
-### Pokédex Features
-
-#### Search and Filtering
-- **Debounced Search**: 300ms delay prevents excessive filtering
-- **Real-time Results**: Instant visual feedback on search queries
-- **Filter Categories**: Region (Kanto/Johto/Hoenn), Type, and Sort options
-- **Result Counting**: Live display of filtered results
-
-#### Pagination System
-- **Load More**: Progressive loading with 20 Pokémon per page
-- **Performance**: Prevents overwhelming initial load
-- **Smooth Transitions**: Fade-in animations for new content
-- **Responsive Grid**: Auto-adjusting layout for different screen sizes
-
-## Design Decisions and Architecture
-
-### Game Design Philosophy
-
-**Decision**: Retro GameBoy aesthetic with modern functionality
-
-**Rationale**: Creates nostalgic appeal while maintaining usability and accessibility
-
-**Implementation**:
-- Authentic GameBoy color palette and button layout
-- Pixel-perfect sprites and fonts
-- Responsive design that maintains visual integrity
-
-### State Management Strategy
-
-**Decision**: React hooks with localStorage persistence
-
-**Rationale**: Lightweight solution for game state without external dependencies
-
-**Implementation**:
-- Custom hooks for game mechanics
-- Automatic serialization/deserialization
-- Error handling for localStorage failures
-
-### Component Architecture
-
-**Decision**: Single-page application with conditional rendering
-
-**Rationale**: Maintains game state while allowing smooth navigation
-
-**Implementation**:
-- Navbar-driven page switching
-- Preserved state across mode changes
-- Optimized re-rendering patterns
-
-### Performance Optimizations
-
-**Decision**: Progressive loading and debounced interactions
-
-**Rationale**: Maintains smooth user experience with large data sets
-
-**Implementation**:
-- 300ms debounce on search inputs
-- 20-item pagination with load more
-- Optimized filtering algorithms
-- Efficient re-render prevention
-
-### Responsive Design Strategy
-
-**Decision**: Mobile-first with GameBoy-inspired breakpoints
-
-**Rationale**: Ensures usability across all device types while maintaining theme
-
-**Implementation**:
-- **Mobile**: Single-column layout with stacked components
-- **Tablet**: Improved spacing and larger interactive areas
-- **Desktop**: Side-by-side layout for clicker and upgrades
-
-### Accessibility Implementation
-
-**Decision**: WCAG 2.1 AA compliance with gaming considerations
-
-**Rationale**: Ensure inclusive access to both game and information features
-
-**Implementation**:
-- ARIA labels for all interactive elements
-- Keyboard navigation support
-- Screen reader friendly descriptions
-- High contrast ratios in retro color scheme
-
-## Component Design Decisions
-
-#### PokeClicker Component
-
-**Decision**: Authentic GameBoy replica with functional controls
-
-**Rationale**: Creates immersive retro gaming experience
-
-**Implementation**:
-- Detailed hardware recreation (D-pad, A/B buttons, speaker holes)
-- Functional screen with click interactions
-- Authentic color scheme and proportions
-- Responsive scaling for different devices
-
-#### PokemonCard Component
-
-**Decision**: Minimalist card design focusing on essential information
-
-**Rationale**: Quick browsing without information overload
-
-**Implementation**:
-- Type-based color coding
-- Clean typography hierarchy
-- Hover effects for interactivity
-- Consistent aspect ratios
-
-#### Modal System
-
-**Decision**: Detailed overlay for in-depth Pokémon information
-
-**Rationale**: Maintains browsing context while providing comprehensive data
-
-**Implementation**:
-- Full stat displays and evolution chains
-- Navigation between related Pokémon
-- Responsive layout adaptation
-- Escape key and overlay click dismissal
-
-## Browser and Device Compatibility
-
-### Browser Testing
-
-The application has been tested in development mode across modern browsers:
-
-- **Chrome** (Recommended)
-- **Firefox**
-- **Edge**
-- **Safari**
-
-### Device Testing
-
-- **Mobile**: iPhone and Android devices (responsive design)
-- **Tablet**: iPad and Android tablets (optimized layout)
-- **Desktop**: Multiple resolutions (1920x1080, 1366x768, ultrawide)
-
-### Responsive Breakpoints
-
-- **Mobile**: 480px and below
-- **Tablet**: 481px to 1023px
-- **Desktop**: 1024px and above
-
-## Data Structure
-
-### Pokemon Interface
-
-```typescript
-interface Pokemon {
-  id: number;
-  name: string;
-  types: string[];
-  sprite: string;
-  pokedexNumber: string;
-  height?: string;
-  weight?: string;
-  genderRatio?: string;
-  habitat?: string;
-  abilities?: string[];
-  stats?: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-  };
-  evolution?: number[];
-}
-```
-
-### Game State Structure
-
-```typescript
-interface GameState {
-  rareCandy: number;
-  stats: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-  };
-}
-```
-
-## Future Enhancements
-
-### Planned Features
-
-- **Battle System**: Turn-based combat mechanics
-- **Achievement System**: Progress tracking and rewards
-- **More Pokémon**: Expanded to later generations
-- **Enhanced Animations**: More sophisticated visual effects
-- **Sound Effects**: Authentic GameBoy audio experience
-- **Multiplayer Elements**: Leaderboards and sharing
-
-### Technical Improvements
-
-- **Unit Testing**: Comprehensive test coverage
-- **PWA Features**: Offline functionality and app installation
-- **Performance Monitoring**: Analytics and optimization
-- **Internationalization**: Multi-language support
-
-## Development Notes
-
-### LocalStorage Usage
-
-The application utilizes localStorage for:
-- Game progress persistence (rare candy count and stat levels)
-- Search term retention across sessions
-- Theme preferences (dark/light mode)
-
-### Performance Considerations
-
-- Debounced search prevents excessive filtering operations
-- Pagination reduces initial load time and memory usage
-- Efficient re-rendering through proper React patterns
-- Optimized image loading with proper sizing
-
-### Code Quality
-
-- Comprehensive TypeScript typing throughout
-- ESLint configuration for consistent code style
-- Component composition for reusability
-- Separation of concerns between game logic and UI
-
-This project demonstrates modern React development practices while creating an engaging user experience that combines gaming elements with information browsing in a cohesive, accessible application.
+## Fremtidig utvikling
+
+### Del 2 - Backend og database
+- Sette opp GraphQL backend på VM
+- Implementere database for brukerdata
+- Integrere med PokéAPI
+- Autentisering med JWT
+
+### Del 3 - Fullstendig prototype
+- Brukerregistrering og innlogging
+- Pokémon-kjøp med rare candy
+- Persistent upgrade-system per bruker
+- Leaderboard/statistikk
+- Tilgjengelighetstesting
+
+### Del 4 - Testing og kvalitetssikring
+- Vitest for komponenter og utilities
+- Playwright E2E-tester
+- Performance-optimalisering
+- Kodekvalitet og dokumentasjon
