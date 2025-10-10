@@ -4,12 +4,16 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema.js';
 import { resolvers } from './resolvers.js';
 import { connectToDatabase, closeDatabaseConnection } from './db.js';
+import { initializeSchema } from './initSchema.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
 async function startServer() {
   // Connect to MongoDB
-  await connectToDatabase();
+  const db = await connectToDatabase();
+
+  // Initialize database schema
+  await initializeSchema(db);
 
   const server = new ApolloServer({
     typeDefs,
