@@ -1,3 +1,5 @@
+import {getCachedPokemon, setCachedPokemon} from './cache.js';
+
 interface PokeAPIResource {
   name: string;
   url: string;
@@ -108,10 +110,21 @@ function transformPokemon(data: PokeAPIPokemon): Pokemon {
 }
 
 export async function fetchPokemonById(id: number): Promise<Pokemon> {
+  const cacheKey = `pokemon:${id}`;
+  const cached = getCachedPokemon(cacheKey);
+
+  if (cached) {
+    return cached as Pokemon;
+  }
+
   const data = await fetchFromAPI<PokeAPIPokemon>(
     `${BASE_URL}/pokemon/${id}`
   );
-  return transformPokemon(data);
+  const pokemon = transformPokemon(data);
+
+  setCachedPokemon(cacheKey, pokemon);
+
+  return pokemon;
 }
 
 export async function fetchPokemonByType(
@@ -119,17 +132,25 @@ export async function fetchPokemonByType(
   limit = 20,
   offset = 0
 ): Promise<{pokemon: Pokemon[]; total: number}> {
-  const typeData = await fetchFromAPI<{
-    pokemon: {pokemon: PokeAPIResource}[];
-  }>(`${BASE_URL}/type/${type.toLowerCase()}`);
+  const typeCacheKey = `type:${type.toLowerCase()}:urls`;
+  let allPokemonUrls: string[];
 
-  const allPokemonUrls = typeData.pokemon.map((p) => p.pokemon.url);
+  const cachedUrls = getCachedPokemon(typeCacheKey);
+  if (cachedUrls) {
+    allPokemonUrls = cachedUrls as string[];
+  } else {
+    const typeData = await fetchFromAPI<{
+      pokemon: {pokemon: PokeAPIResource}[];
+    }>(`${BASE_URL}/type/${type.toLowerCase()}`);
+
+    allPokemonUrls = typeData.pokemon.map((p) => p.pokemon.url);
+    setCachedPokemon(typeCacheKey, allPokemonUrls);
+  }
+
   const total = allPokemonUrls.length;
 
-  // Apply pagination
   const paginatedUrls = allPokemonUrls.slice(offset, offset + limit);
 
-  // Fetch detailed data for each Pokémon
   const pokemonPromises = paginatedUrls.map(async (url) => {
     const data = await fetchFromAPI<PokeAPIPokemon>(url);
     return transformPokemon(data);
