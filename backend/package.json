@@ -16,7 +16,9 @@
     "@apollo/server": "^5.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
-    "graphql": "^16.11.0"
+    "dotenv": "^17.2.3",
+    "graphql": "^16.11.0",
+    "mongodb": "^6.20.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
