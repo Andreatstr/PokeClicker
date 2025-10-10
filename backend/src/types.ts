@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb';
+import {ObjectId} from 'mongodb';
 
 export interface User {
   _id?: ObjectId;
@@ -27,5 +27,5 @@ export const DEFAULT_USER_STATS = {
     sp_defense: 1,
     speed: 1,
   },
-  owned_pokemon_ids: [],
+  owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
 };

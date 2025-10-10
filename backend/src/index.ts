@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import { typeDefs } from './schema.js';
-import { resolvers } from './resolvers.js';
-import { connectToDatabase, closeDatabaseConnection } from './db.js';
-import { initializeSchema } from './initSchema.js';
+import {ApolloServer} from '@apollo/server';
+import {startStandaloneServer} from '@apollo/server/standalone';
+import {typeDefs} from './schema.js';
+import {resolvers} from './resolvers.js';
+import {connectToDatabase, closeDatabaseConnection} from './db.js';
+import {initializeSchema} from './initSchema.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
@@ -20,12 +20,14 @@ async function startServer() {
     resolvers,
   });
 
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: PORT },
+  const {url} = await startStandaloneServer(server, {
+    listen: {port: PORT},
   });
 
   console.log(`GraphQL server ready at: ${url}`);
-  console.log(`Health check available at: ${url}?query={health{status,timestamp}}`);
+  console.log(
+    `Health check available at: ${url}?query={health{status,timestamp}}`
+  );
 }
 
 // Graceful shutdown

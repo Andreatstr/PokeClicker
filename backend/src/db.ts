@@ -1,4 +1,4 @@
-import { MongoClient, Db } from 'mongodb';
+import {MongoClient, Db} from 'mongodb';
 
 let client: MongoClient;
 let db: Db;
@@ -36,7 +36,9 @@ export async function closeDatabaseConnection(): Promise<void> {
 
 export function getDatabase(): Db {
   if (!db) {
-    throw new Error('Database not initialized. Call connectToDatabase() first.');
+    throw new Error(
+      'Database not initialized. Call connectToDatabase() first.'
+    );
   }
   return db;
 }
