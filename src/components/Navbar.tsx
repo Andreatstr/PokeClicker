@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/pixelact-ui/button'
 import { UserIcon, SunIcon, MoonIcon, MenuIcon } from '@/components/ui/pixelact-ui/icons'
 
 interface NavbarProps {
-  currentPage: 'clicker' | 'pokedex'
-  onPageChange: (page: 'clicker' | 'pokedex') => void
+  currentPage: 'clicker' | 'pokedex' | 'login'
+  onPageChange: (page: 'clicker' | 'pokedex' | 'login') => void
   isDarkMode: boolean
   onToggleTheme: () => void
 }
@@ -53,7 +53,7 @@ export function Navbar({ onPageChange, isDarkMode, onToggleTheme }: NavbarProps)
               )}
             </Button>
 
-            <Button className="p-2">
+            <Button className="p-2" onClick={() => onPageChange('login')}>
               <UserIcon className="w-4 h-4" />
             </Button>
           </div>
@@ -97,7 +97,7 @@ export function Navbar({ onPageChange, isDarkMode, onToggleTheme }: NavbarProps)
                 )}
               </Button>
 
-              <Button className="p-2">
+              <Button className="p-2" onClick={() => onPageChange('login')}>
                 <UserIcon className="w-4 h-4" />
               </Button>
             </div>
