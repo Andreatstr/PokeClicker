@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "./components/ui/pixelact-ui/styles/styles.css";
+@import 'tailwindcss';
+@import './components/ui/pixelact-ui/styles/styles.css';
 
 @plugin "tailwindcss-animate";
 
@@ -16,10 +16,10 @@ a:hover {
 
 img {
   user-select: none;
-  -webkit-user-drag: none;  
+  -webkit-user-drag: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-} 
+}
 
 body {
   margin: 0;
@@ -116,11 +116,11 @@ body {
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  --retro-primary: hsl(30 70% 55%);   
+  --retro-primary: hsl(30 70% 55%);
   --retro-secondary: hsl(200 35% 45%);
-  --retro-accent: hsl(350 40% 55%);   
-  --retro-surface: hsl(45 40% 90%);   
-  --retro-border: hsl(30 30% 20%);   
+  --retro-accent: hsl(350 40% 55%);
+  --retro-surface: hsl(45 40% 90%);
+  --retro-border: hsl(30 30% 20%);
 
   --success: #4ade80;
   --success-foreground: #000000;
@@ -189,7 +189,8 @@ body {
 }
 
 @keyframes idle-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -198,7 +199,8 @@ body {
 }
 
 @keyframes walk-horizontal {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(-10%);
   }
   50% {

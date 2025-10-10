@@ -7,12 +7,14 @@ GraphQL backend for the PokéClicker application.
 ### MongoDB Installation
 
 **Windows:**
+
 1. Download MongoDB Community Server from: https://www.mongodb.com/try/download/community
 2. Run the installer and follow the setup wizard
 3. Select "Install MongoDB as a Service" to run MongoDB automatically
 4. MongoDB will start on `mongodb://localhost:27017`
 
 **macOS (via Homebrew):**
+
 ```bash
 brew tap mongodb/brew
 brew install mongodb-community
@@ -20,6 +22,7 @@ brew services start mongodb-community
 ```
 
 **Linux (Ubuntu/Debian):**
+
 ```bash
 # Import MongoDB GPG key
 wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
@@ -39,11 +42,13 @@ sudo systemctl enable mongod
 ## Setup
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Create `.env` file (copy from `.env.example`):
+
 ```bash
 cp .env.example .env
 ```
@@ -53,6 +58,7 @@ cp .env.example .env
 ## Development
 
 Start the development server with hot-reload:
+
 ```bash
 npm run dev
 ```
@@ -62,6 +68,7 @@ The server will start at `http://localhost:3001/`
 ## Build
 
 Compile TypeScript to JavaScript:
+
 ```bash
 npm run build
 ```
@@ -69,6 +76,7 @@ npm run build
 ## Production
 
 Run the compiled server:
+
 ```bash
 npm start
 ```
@@ -76,6 +84,7 @@ npm start
 ## Available Queries
 
 ### Health Check
+
 ```graphql
 query {
   health {
@@ -86,6 +95,7 @@ query {
 ```
 
 ### Hello
+
 ```graphql
 query {
   hello
@@ -95,6 +105,7 @@ query {
 ## Testing
 
 You can test the GraphQL server using:
+
 - Apollo Studio Explorer at `http://localhost:3001/`
 - curl:
   ```bash

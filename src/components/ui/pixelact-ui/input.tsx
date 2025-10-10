@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import "@/components/ui/pixelact-ui/styles/styles.css";
+import * as React from 'react';
+import {cn} from '@/lib/utils';
+import '@/components/ui/pixelact-ui/styles/styles.css';
 
 export interface PixelInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -9,18 +9,18 @@ export interface PixelInputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, PixelInputProps>(
-  ({ className, disabled, ...props }, ref) => {
+  ({className, disabled, ...props}, ref) => {
     return (
       <input
         className={cn(
-          "pixel__input pixel-font max-w-full outline-none p-2 text-foreground shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin disabled:opacity-40",
-          disabled && "disabled:opacity-40 disabled:cursor-not-allowed",
+          'pixel__input pixel-font max-w-full outline-none p-2 text-foreground shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin disabled:opacity-40',
+          disabled && 'disabled:opacity-40 disabled:cursor-not-allowed',
           className
         )}
         style={{
           backgroundColor: 'var(--retro-surface)',
           color: 'black',
-          ...props.style
+          ...props.style,
         }}
         disabled={disabled}
         ref={ref}
@@ -29,6 +29,6 @@ const Input = React.forwardRef<HTMLInputElement, PixelInputProps>(
     );
   }
 );
-Input.displayName = "PixelInput";
+Input.displayName = 'PixelInput';
 
-export { Input };
+export {Input};
