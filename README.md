@@ -97,6 +97,28 @@ Vi valgte MongoDB fordi vår datamodell ikke krever relasjonelle joins. All bruk
 
 Pokémon-informasjon (navn, typer, stats, sprites) hentes fra [PokéAPI](https://pokeapi.co/) i stedet for å lagres i egen database. Dette reduserer duplisering og holder data oppdatert.
 
+### Caching-strategi
+
+For å redusere antall API-kall til PokéAPI og forbedre responstid, bruker vi `node-cache` med to separate caches:
+
+**API-cache (24 timer TTL):**
+- Individuelle Pokémon cachet per ID
+- Type-lister (alle Pokémon-URLer per type)
+- Lang TTL fordi PokéAPI-data er statisk
+
+**User-cache (5 minutters TTL):**
+- Brukerens eide Pokémon
+- Kortere TTL fordi data oppdateres oftere
+- Invalideres automatisk ved endringer (f.eks. Pokémon-kjøp)
+
+**Ytelsesgevinst:**
+- Første request: ~190ms (API-kall til PokéAPI)
+- Cachet request: ~3ms (fra minne)
+- **60x raskere** for individuelle Pokémon
+- Type-filtrering: ~270ms → ~90ms (3x raskere)
+
+Cachen fungerer også som fallback hvis PokéAPI skulle være nede, så lenge dataen har blitt hentet minst én gang tidligere.
+
 ## Kjøre prosjektet lokalt
 
 ### Installasjon
