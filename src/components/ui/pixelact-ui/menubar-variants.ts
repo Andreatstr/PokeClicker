@@ -1,16 +1,16 @@
-import { cva } from "class-variance-authority";
+import {cva} from 'class-variance-authority';
 
 export const menubarVariants = cva(
-  "shadow-(--pixel-box-shadow) box-shadow-margin",
+  'shadow-(--pixel-box-shadow) box-shadow-margin',
   {
     variants: {
       font: {
-        normal: "",
-        pixel: "pixel-font",
+        normal: '',
+        pixel: 'pixel-font',
       },
     },
     defaultVariants: {
-      font: "pixel",
+      font: 'pixel',
     },
   }
 );

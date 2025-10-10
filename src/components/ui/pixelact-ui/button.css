@@ -3,7 +3,7 @@
   box-shadow: var(--pixel-box-shadow);
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     bottom: 0;
     right: 0;

@@ -1,13 +1,13 @@
-import { cva } from "class-variance-authority"
+import {cva} from 'class-variance-authority';
 
-export const inputVariants = cva("text-black select-none", {
+export const inputVariants = cva('text-black select-none', {
   variants: {
     font: {
-      normal: "",
-      pixel: "pixel-font",
+      normal: '',
+      pixel: 'pixel-font',
     },
   },
   defaultVariants: {
-    font: "pixel",
+    font: 'pixel',
   },
-})
+});
