@@ -15,14 +15,14 @@ export async function connectToDatabase(): Promise<Db> {
     client = new MongoClient(mongoUri);
     await client.connect();
 
-    console.log('✅ Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
     db = client.db(dbName);
-    console.log(`📦 Using database: ${dbName}`);
+    console.log(`Using database: ${dbName}`);
 
     return db;
   } catch (error) {
-    console.error('❌ Failed to connect to MongoDB:', error);
+    console.error('Failed to connect to MongoDB:', error);
     throw error;
   }
 }
@@ -30,7 +30,7 @@ export async function connectToDatabase(): Promise<Db> {
 export async function closeDatabaseConnection(): Promise<void> {
   if (client) {
     await client.close();
-    console.log('🔌 MongoDB connection closed');
+    console.log('MongoDB connection closed');
   }
 }
 
