@@ -37,7 +37,7 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **State management**: React hooks (planlagt: Redux/Apollo for brukersesjon)
 - **Styling**: Tailwind CSS + Radix UI komponenter
 - **Backend**: GraphQL API (Node.js + TypeScript) *(planlagt for del 2)*
-- **Database**: PostgreSQL/MongoDB på VM *(planlagt for del 2)*
+- **Database**: MongoDB på VM
 - **Testing**: Vitest for komponenter, Playwright for E2E *(planlagt for del 3)*
 
 ## Status: Første underveisinnlevering
@@ -59,42 +59,35 @@ Denne innleveringen viser konseptet med mock data og statisk kodet eksempeldata.
 
 ## Datamodell (planlagt)
 
-### Bruker
+### User (MongoDB document)
 ```typescript
 interface User {
-  id: string
+  _id: ObjectId
   username: string
-  password: string (hashed)
-  createdAt: Date
-}
-```
+  password_hash: string
+  created_at: Date
 
-### Bruker-Pokémon (eide Pokémon)
-```typescript
-interface UserPokemon {
-  userId: string
-  pokemonId: number
-  nickname?: string
-  acquiredAt: Date
-}
-```
-
-### Bruker-Stats (upgrade-progresjon)
-```typescript
-interface UserStats {
-  userId: string
-  rareCandy: number
+  rare_candy: number
   stats: {
     hp: number
     attack: number
     defense: number
-    spAttack: number
-    spDefense: number
+    sp_attack: number
+    sp_defense: number
     speed: number
   }
-  lastUpdated: Date
+  owned_pokemon_ids: number[]  // Array av PokéAPI IDs
 }
 ```
+
+**Hvorfor MongoDB framfor PostgreSQL?**
+
+Vi valgte MongoDB fordi vår datamodell ikke krever relasjonelle joins. All brukerdata lagres i ett enkelt dokument per bruker, med nested objects (stats) og arrays (owned_pokemon_ids). Dette gjør MongoDB til et bedre valg:
+
+- **Ingen joins nødvendig**: Vi trenger aldri å slå sammen data fra flere tabeller
+- **Naturlig datastruktur**: Stats lagres som nested object, ikke som separate rader
+- **Array-operasjoner**: Legge til/sjekke Pokémon-eierskap er enklere med arrays
+- **Fleksibilitet**: Lettere å legge til nye felt senere uten migrasjoner
 
 ### Pokémon-data (fra API)
 Pokémon-informasjon (navn, typer, stats, sprites) hentes fra [PokéAPI](https://pokeapi.co/) i stedet for å lagres i egen database. Dette reduserer duplisering og holder data oppdatert.
@@ -119,7 +112,7 @@ pnpm run lint    # Kjør linting
 
 ### Del 2 - Backend og database
 - Sette opp GraphQL backend på VM
-- Implementere database for brukerdata
+- Implementere MongoDB database for brukerdata
 - Integrere med PokéAPI
 - Autentisering med JWT
 
