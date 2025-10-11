@@ -132,7 +132,7 @@ function App() {
       />
 
       {currentPage === 'login' ? (
-        <LoginScreen />
+        <LoginScreen onNavigate={setCurrentPage} />
       ) : (
         <>
           <main className="min-h-screen px-4 sm:px-6 md:px-8 pb-8 pt-0" style={{ backgroundColor: 'var(--retro-secondary)' }}>
@@ -140,7 +140,7 @@ function App() {
               <section className="py-8">
                 <PokeClicker />
               </section>
-            ) :  (
+            ) : (
               <>
                 {/* Search Bar */}
                 <section className="mb-6 mt-6 sm:mt-4 max-w-4xl mx-auto">
