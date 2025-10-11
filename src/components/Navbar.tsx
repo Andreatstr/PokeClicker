@@ -6,6 +6,7 @@ import {
   MoonIcon,
   MenuIcon,
 } from '@/components/ui/pixelact-ui/icons';
+import {useAuth} from '@/contexts/AuthContext';
 
 interface NavbarProps {
   currentPage: 'clicker' | 'pokedex' | 'login';
@@ -16,9 +17,15 @@ interface NavbarProps {
 
 export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {isAuthenticated, logout, user} = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    onPageChange('login');
   };
 
   return (
@@ -64,9 +71,19 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
               )}
             </Button>
 
-            <Button className="p-2" onClick={() => onPageChange('login')}>
-              <UserIcon className="w-4 h-4" />
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                className="text-xs md:text-sm"
+                onClick={handleLogout}
+                title={`Logged in as ${user?.username}`}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button className="p-2" onClick={() => onPageChange('login')}>
+                <UserIcon className="w-4 h-4" />
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -111,9 +128,15 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
                 )}
               </Button>
 
-              <Button className="p-2" onClick={() => onPageChange('login')}>
-                <UserIcon className="w-4 h-4" />
-              </Button>
+              {isAuthenticated ? (
+                <Button className="w-full text-sm" onClick={handleLogout}>
+                  Logout ({user?.username})
+                </Button>
+              ) : (
+                <Button className="p-2" onClick={() => onPageChange('login')}>
+                  <UserIcon className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
