@@ -1,5 +1,4 @@
-import {Collection, MongoClient, Db} from 'mongodb';
-import { UserDocument } from './types';
+import {MongoClient, Db} from 'mongodb';
 
 let client: MongoClient;
 let db: Db;
@@ -37,13 +36,9 @@ export async function closeDatabaseConnection(): Promise<void> {
   }
 }
 
-export function getDatabase() {
+export function getDatabase(): Db {
   if (!db) {
     throw new Error('Database not initialized');
   }
-  return {
-    collection(name: string): Collection<UserDocument> {
-      return db.collection(name);
-    }
-  };
+  return db;
 }
