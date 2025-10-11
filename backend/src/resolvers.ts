@@ -192,8 +192,8 @@ export const resolvers = {
       const paginatedPokemon = await Promise.all(pokemonPromises);
 
       const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
-        // If no userId is provided, show all Pokemon as owned for development
-        const isOwned = userId ? ownedPokemonIds.includes(p.id) : true;
+        // If no userId is provided, guest users see Pokemon as unowned
+        const isOwned = userId ? ownedPokemonIds.includes(p.id) : false;
 
         if (isOwned) {
           return {
