@@ -1,4 +1,5 @@
 import {getCachedPokemon, setCachedPokemon} from './cache.js';
+import fetch from 'node-fetch';
 
 interface PokeAPIResource {
   name: string;
@@ -30,13 +31,22 @@ interface PokeAPIPokemon {
     ability: PokeAPIResource;
     is_hidden: boolean;
   }[];
+  species: PokeAPIResource;
 }
 
-interface PokemonListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: PokeAPIResource[];
+interface PokemonSpecies {
+  evolution_chain: {
+    url: string;
+  };
+}
+
+interface EvolutionChainLink {
+  species: PokeAPIResource;
+  evolves_to: EvolutionChainLink[];
+}
+
+interface EvolutionChain {
+  chain: EvolutionChainLink;
 }
 
 export interface Pokemon {
@@ -55,6 +65,7 @@ export interface Pokemon {
   height: number;
   weight: number;
   abilities: string[];
+  evolution: number[];
 }
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
@@ -76,10 +87,57 @@ async function fetchFromAPI<T>(url: string): Promise<T> {
   if (!response.ok) {
     throw new Error(`PokéAPI request failed: ${response.statusText}`);
   }
-  return response.json();
+  return (await response.json()) as T;
 }
 
-function transformPokemon(data: PokeAPIPokemon): Pokemon {
+function extractPokemonIdFromUrl(url: string): number {
+  const matches = url.match(/\/pokemon-species\/(\d+)\//);
+  return matches ? parseInt(matches[1], 10) : 0;
+}
+
+function parseEvolutionChain(chain: EvolutionChainLink): number[] {
+  const ids: number[] = [];
+
+  function traverse(link: EvolutionChainLink) {
+    const id = extractPokemonIdFromUrl(link.species.url);
+    if (id > 0) {
+      ids.push(id);
+    }
+    link.evolves_to.forEach(traverse);
+  }
+
+  traverse(chain);
+  return ids;
+}
+
+async function fetchEvolutionChain(speciesUrl: string): Promise<number[]> {
+  try {
+    const cacheKey = `evolution:${speciesUrl}`;
+    const cached = getCachedPokemon(cacheKey);
+
+    if (cached) {
+      return cached as number[];
+    }
+
+    const speciesData = await fetchFromAPI<PokemonSpecies>(speciesUrl);
+    const evolutionData = await fetchFromAPI<EvolutionChain>(
+      speciesData.evolution_chain.url
+    );
+
+    const evolutionIds = parseEvolutionChain(evolutionData.chain);
+    setCachedPokemon(cacheKey, evolutionIds);
+
+    return evolutionIds;
+  } catch (error) {
+    console.error('Error fetching evolution chain:', error);
+    return [];
+  }
+}
+
+function transformPokemon(
+  data: PokeAPIPokemon,
+  evolution: number[] = []
+): Pokemon {
   const sprite =
     data.sprites.other?.['official-artwork']?.front_default ||
     data.sprites.front_default ||
@@ -106,21 +164,23 @@ function transformPokemon(data: PokeAPIPokemon): Pokemon {
     height: data.height,
     weight: data.weight,
     abilities: data.abilities.map((a) => a.ability.name),
+    evolution,
   };
 }
 
 export async function fetchPokemonById(id: number): Promise<Pokemon> {
-  const cacheKey = `pokemon:${id}`;
+  const cacheKey = `pokemon:v2:${id}`;
   const cached = getCachedPokemon(cacheKey);
 
   if (cached) {
     return cached as Pokemon;
   }
 
-  const data = await fetchFromAPI<PokeAPIPokemon>(
-    `${BASE_URL}/pokemon/${id}`
-  );
-  const pokemon = transformPokemon(data);
+  const data = await fetchFromAPI<PokeAPIPokemon>(`${BASE_URL}/pokemon/${id}`);
+  const evolutionChain = await fetchEvolutionChain(data.species.url);
+  // Filter out the current Pokemon from the evolution chain
+  const evolution = evolutionChain.filter((evoId) => evoId !== id);
+  const pokemon = transformPokemon(data, evolution);
 
   setCachedPokemon(cacheKey, pokemon);
 
@@ -153,7 +213,10 @@ export async function fetchPokemonByType(
 
   const pokemonPromises = paginatedUrls.map(async (url) => {
     const data = await fetchFromAPI<PokeAPIPokemon>(url);
-    return transformPokemon(data);
+    const evolutionChain = await fetchEvolutionChain(data.species.url);
+    // Filter out the current Pokemon from the evolution chain
+    const evolution = evolutionChain.filter((evoId) => evoId !== data.id);
+    return transformPokemon(data, evolution);
   });
 
   const pokemon = await Promise.all(pokemonPromises);
@@ -203,17 +266,6 @@ export async function fetchPokemon(
     return fetchPokemonByGeneration(generation, limit, offset);
   }
 
-  // Default: fetch by range (no filter)
-  const startId = 1 + offset;
-  const endId = startId + limit;
-
-  const pokemonPromises: Promise<Pokemon>[] = [];
-  for (let id = startId; id < endId; id++) {
-    pokemonPromises.push(fetchPokemonById(id));
-  }
-
-  const pokemon = await Promise.all(pokemonPromises);
-
-  // Total known Pokémon (approximate - could fetch from API if needed)
-  return {pokemon, total: 1025};
+  // Default: fetch Kanto generation to avoid non-existent Pokemon IDs
+  return fetchPokemonByGeneration('kanto', limit, offset);
 }
