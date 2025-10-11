@@ -1,13 +1,13 @@
 import {Dialog, DialogBody} from './dialog';
 import {StackedProgress} from './StackedProgress';
-import {mockPokemonData} from '@/data/mockData';
-import type {Pokemon} from '@/data/mockData';
+import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
+import {usePokemonById} from '@/hooks/usePokemonById';
 
 interface Props {
-  pokemon: Pokemon | null;
+  pokemon: PokedexPokemon | null;
   isOpen: boolean;
   onClose: () => void;
-  onSelectPokemon?: (name: string) => void;
+  onSelectPokemon?: (id: number) => void;
 }
 
 function getTypeColors(type: string) {
@@ -133,6 +133,47 @@ function getBackgroundImageUrl(types: string[]): string {
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
 
+function EvolutionPokemon({
+  id,
+  onSelectPokemon,
+  showArrow,
+}: {
+  id: number;
+  onSelectPokemon?: (id: number) => void;
+  showArrow: boolean;
+}) {
+  const {data, loading} = usePokemonById(id);
+
+  if (loading || !data?.pokemonById) {
+    return (
+      <div className="evolutionItem flex items-center gap-2">
+        <div className="w-24 h-24 bg-gray-200 animate-pulse" />
+        {showArrow && <span className="evolutionArrow text-base">→</span>}
+      </div>
+    );
+  }
+
+  const evo = data.pokemonById;
+
+  return (
+    <div className="evolutionItem flex items-center gap-2">
+      <button
+        className="evolutionButton bg-transparent border-none p-0 cursor-pointer"
+        onClick={() => onSelectPokemon?.(evo.id)}
+        title={`View ${evo.name}`}
+      >
+        <img
+          src={evo.sprite}
+          alt={evo.name}
+          className="evolutionImage w-24 h-24 scale-125 origin-center object-contain hover:scale-110"
+          style={{imageRendering: 'pixelated'}}
+        />
+      </button>
+      {showArrow && <span className="evolutionArrow text-base">→</span>}
+    </div>
+  );
+}
+
 export function PokemonDetailModal({
   pokemon,
   isOpen,
@@ -196,13 +237,11 @@ export function PokemonDetailModal({
                 </div>
                 <div>
                   <strong className="font-bold">Gender:</strong>{' '}
-                  <span className="font-normal">
-                    {pokemon.genderRatio ?? '—'}
-                  </span>
+                  <span className="font-normal">—</span>
                 </div>
                 <div>
                   <strong className="font-bold">Habitat:</strong>{' '}
-                  <span className="font-normal">{pokemon.habitat ?? '—'}</span>
+                  <span className="font-normal">—</span>
                 </div>
 
                 <div className="abilitiesList text-[10px]">
@@ -239,50 +278,32 @@ export function PokemonDetailModal({
                   <div className="statsBars col-start-2 row-start-1 flex flex-col gap-2">
                     <StackedProgress
                       baseValue={pokemon.stats?.hp ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.hp ?? pokemon.stats?.hp ?? 0
-                      }
+                      yourValue={pokemon.stats?.hp ?? 0}
                       max={255}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.attack ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.attack ?? pokemon.stats?.attack ?? 0
-                      }
+                      yourValue={pokemon.stats?.attack ?? 0}
                       max={255}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.defense ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.defense ??
-                        pokemon.stats?.defense ??
-                        0
-                      }
+                      yourValue={pokemon.stats?.defense ?? 0}
                       max={255}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spAttack ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.spAttack ??
-                        pokemon.stats?.spAttack ??
-                        0
-                      }
+                      yourValue={pokemon.stats?.spAttack ?? 0}
                       max={255}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spDefense ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.spDefense ??
-                        pokemon.stats?.spDefense ??
-                        0
-                      }
+                      yourValue={pokemon.stats?.spDefense ?? 0}
                       max={255}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.speed ?? 0}
-                      yourValue={
-                        pokemon.yourStats?.speed ?? pokemon.stats?.speed ?? 0
-                      }
+                      yourValue={pokemon.stats?.speed ?? 0}
                       max={255}
                     />
                   </div>
@@ -296,41 +317,14 @@ export function PokemonDetailModal({
               <div className="evolutionChain flex items-center justify-center gap-4">
                 {[pokemon.id, ...(pokemon.evolution ?? [])]
                   .sort((a, b) => a - b)
-                  .map((id, i, arr) => {
-                    const evo = mockPokemonData.find((p) => p.id === id);
-                    const next = arr[i + 1]
-                      ? mockPokemonData.find((p) => p.id === arr[i + 1])
-                      : null;
-
-                    return (
-                      <div
-                        key={id}
-                        className={`evolutionItem flex items-center gap-2 ${!evo ? 'invisible' : ''}`}
-                      >
-                        {evo && (
-                          <>
-                            <button
-                              className="evolutionButton bg-transparent border-none p-0 cursor-pointer"
-                              onClick={() => onSelectPokemon?.(evo.name)}
-                              title={`View ${evo.name}`}
-                            >
-                              <img
-                                src={evo.sprite}
-                                alt={evo.name}
-                                className="evolutionImage w-24 h-24 scale-125 origin-center object-contain hover:scale-110"
-                                style={{imageRendering: 'pixelated'}}
-                              />
-                            </button>
-                            {next && (
-                              <span className="evolutionArrow text-base">
-                                →
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
+                  .map((id, i, arr) => (
+                    <EvolutionPokemon
+                      key={id}
+                      id={id}
+                      onSelectPokemon={onSelectPokemon}
+                      showArrow={i < arr.length - 1}
+                    />
+                  ))}
               </div>
             </div>
           </div>

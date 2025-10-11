@@ -1,10 +1,10 @@
 import {Card} from '@/components/ui/pixelact-ui/card';
-import {type Pokemon} from '@/data/mockData';
+import {type PokedexPokemon} from '@/hooks/usePokedexQuery';
 import '@/components/ui/pixelact-ui/styles/patterns.css';
 
 interface PokemonCardProps {
-  pokemon: Pokemon;
-  onClick?: (pokemon: Pokemon) => void;
+  pokemon: PokedexPokemon;
+  onClick?: (pokemon: PokedexPokemon) => void;
 }
 
 function getTypeColors(type: string) {

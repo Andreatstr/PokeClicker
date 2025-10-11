@@ -12,7 +12,9 @@ export async function connectToDatabase(): Promise<Db> {
   const dbName = process.env.MONGODB_DB_NAME || 'pokeclicker_db';
 
   try {
-    client = new MongoClient(mongoUri);
+    client = new MongoClient(mongoUri, {
+      serverSelectionTimeoutMS: 3000,
+    });
     await client.connect();
 
     console.log('Connected to MongoDB');

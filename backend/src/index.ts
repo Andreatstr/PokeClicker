@@ -10,10 +10,12 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
 async function startServer() {
   // Connect to MongoDB
-  const db = await connectToDatabase();
-
-  // Initialize database schema
-  await initializeSchema(db);
+  try {
+    const db = await connectToDatabase();
+    await initializeSchema(db);
+  } catch (error) {
+    console.warn('MongoDB connection failed, running without database:', error);
+  }
 
   const server = new ApolloServer({
     typeDefs,
@@ -22,6 +24,7 @@ async function startServer() {
 
   const {url} = await startStandaloneServer(server, {
     listen: {port: PORT},
+    context: async ({req}) => ({req}),
   });
 
   console.log(`GraphQL server ready at: ${url}`);
