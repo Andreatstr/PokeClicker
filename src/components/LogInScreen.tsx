@@ -26,6 +26,11 @@ export function LoginScreen({ onNavigate }: Props) {
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>()
 
+  useEffect(() => {
+    reset({ username: '', password: '' })
+    setServerError(null)
+  }, [modalType, reset])
+
   const loginMutation = `
     mutation Login($username: String!, $password: String!) {
       login(username: $username, password: $password) {
