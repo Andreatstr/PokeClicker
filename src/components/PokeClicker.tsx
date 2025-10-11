@@ -1,124 +1,126 @@
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/pixelact-ui/button'
-import { Card } from '@/components/ui/pixelact-ui/card'
+import {useState, useEffect} from 'react';
+import {Button} from '@/components/ui/pixelact-ui/button';
+import {Card} from '@/components/ui/pixelact-ui/card';
 
 interface Candy {
-  id: number
-  x: number
+  id: number;
+  x: number;
 }
 
 export function PokeClicker() {
   // Load saved state from localStorage
   const loadSavedState = () => {
     try {
-      const saved = localStorage.getItem('pokeClickerState')
+      const saved = localStorage.getItem('pokeClickerState');
       if (saved) {
-        return JSON.parse(saved)
+        return JSON.parse(saved);
       }
     } catch (error) {
-      console.error('Failed to load saved state:', error)
+      console.error('Failed to load saved state:', error);
     }
-    return null
-  }
+    return null;
+  };
 
-  const savedState = loadSavedState()
+  const savedState = loadSavedState();
 
-  const [rareCandy, setRareCandy] = useState(savedState?.rareCandy || 0)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [candies, setCandies] = useState<Candy[]>([])
-  const [stats, setStats] = useState(savedState?.stats || {
-    hp: 1,
-    attack: 1,
-    defense: 1,
-    spAttack: 1,
-    spDefense: 1,
-    speed: 1,
-  })
+  const [rareCandy, setRareCandy] = useState(savedState?.rareCandy || 0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [candies, setCandies] = useState<Candy[]>([]);
+  const [stats, setStats] = useState(
+    savedState?.stats || {
+      hp: 1,
+      attack: 1,
+      defense: 1,
+      spAttack: 1,
+      spDefense: 1,
+      speed: 1,
+    }
+  );
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
     const stateToSave = {
       rareCandy,
       stats,
-    }
-    localStorage.setItem('pokeClickerState', JSON.stringify(stateToSave))
-  }, [rareCandy, stats])
+    };
+    localStorage.setItem('pokeClickerState', JSON.stringify(stateToSave));
+  }, [rareCandy, stats]);
 
   // Calculate candies per click based on attack and sp. attack
   const getCandiesPerClick = () => {
-    return stats.attack + Math.floor(stats.spAttack * 0.5)
-  }
+    return stats.attack + Math.floor(stats.spAttack * 0.5);
+  };
 
   // Calculate upgrade cost (exponential growth)
   const getUpgradeCost = (stat: keyof typeof stats) => {
-    const level = stats[stat]
-    return Math.floor(10 * Math.pow(1.5, level - 1))
-  }
+    const level = stats[stat];
+    return Math.floor(10 * Math.pow(1.5, level - 1));
+  };
 
   // Effect for passive income
   useEffect(() => {
-    const passiveIncome = Math.floor((stats.hp - 1) * 0.5) + Math.floor((stats.defense - 1) * 0.3)
+    const passiveIncome =
+      Math.floor((stats.hp - 1) * 0.5) + Math.floor((stats.defense - 1) * 0.3);
     if (passiveIncome > 0) {
       const interval = setInterval(() => {
-        setRareCandy((prev: number) => prev + passiveIncome)
-      }, 1000) // Every second
+        setRareCandy((prev: number) => prev + passiveIncome);
+      }, 1000); // Every second
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [stats.hp, stats.defense])
+  }, [stats.hp, stats.defense]);
 
   const handleClick = () => {
-    const candiesEarned = getCandiesPerClick()
-    setRareCandy((prev: number) => prev + candiesEarned)
-    setIsAnimating(true)
+    const candiesEarned = getCandiesPerClick();
+    setRareCandy((prev: number) => prev + candiesEarned);
+    setIsAnimating(true);
 
     // Add floating candy animation
     const newCandy: Candy = {
       id: Date.now() + Math.random(),
       x: Math.random() * 60 + 20, // Random position between 20% and 80%
-    }
-    setCandies((prev) => [...prev, newCandy])
+    };
+    setCandies((prev) => [...prev, newCandy]);
 
     // Remove candy after animation
     setTimeout(() => {
-      setCandies((prev) => prev.filter((c) => c.id !== newCandy.id))
-    }, 1000)
+      setCandies((prev) => prev.filter((c) => c.id !== newCandy.id));
+    }, 1000);
 
-    setTimeout(() => setIsAnimating(false), 150)
-  }
+    setTimeout(() => setIsAnimating(false), 150);
+  };
 
   const handleUpgrade = (stat: keyof typeof stats) => {
-    const cost = getUpgradeCost(stat)
+    const cost = getUpgradeCost(stat);
     if (rareCandy >= cost) {
-      setRareCandy((prev: number) => prev - cost)
-      setStats((prev: typeof stats) => ({ ...prev, [stat]: prev[stat] + 1 }))
+      setRareCandy((prev: number) => prev - cost);
+      setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
     }
-  }
+  };
 
   // Get stat description
   const getStatDescription = (stat: keyof typeof stats) => {
     switch (stat) {
       case 'hp': {
-        const hpPassive = (stats.hp - 1) * 0.5
-        return `+${hpPassive.toFixed(1)}/s passive`
+        const hpPassive = (stats.hp - 1) * 0.5;
+        return `+${hpPassive.toFixed(1)}/s passive`;
       }
       case 'attack':
-        return `+${stats.attack} per click`
+        return `+${stats.attack} per click`;
       case 'defense': {
-        const defPassive = (stats.defense - 1) * 0.3
-        return `+${defPassive.toFixed(1)}/s passive`
+        const defPassive = (stats.defense - 1) * 0.3;
+        return `+${defPassive.toFixed(1)}/s passive`;
       }
       case 'spAttack':
-        return `+${Math.floor(stats.spAttack * 0.5)} per click`
+        return `+${Math.floor(stats.spAttack * 0.5)} per click`;
       case 'spDefense':
-        return `Coming soon`
+        return `Coming soon`;
       case 'speed':
-        return `Coming soon`
+        return `Coming soon`;
       default:
-        return ''
+        return '';
     }
-  }
-
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
@@ -131,9 +133,13 @@ export function PokeClicker() {
             <div className="flex items-center justify-between mb-2 px-1">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-red-600 border border-black"></div>
-                <span className="text-[6px] pixel-font text-gray-300 tracking-wider">BATTERY</span>
+                <span className="text-[6px] pixel-font text-gray-300 tracking-wider">
+                  BATTERY
+                </span>
               </div>
-              <span className="text-[7px] pixel-font text-gray-300 tracking-wider">DOT MATRIX WITH STEREO SOUND</span>
+              <span className="text-[7px] pixel-font text-gray-300 tracking-wider">
+                DOT MATRIX WITH STEREO SOUND
+              </span>
             </div>
 
             {/* Screen */}
@@ -172,8 +178,11 @@ export function PokeClicker() {
                   }`}
                   style={{
                     imageRendering: 'pixelated',
-                    filter: isAnimating ? 'drop-shadow(0 0 8px rgba(255, 193, 7, 0.8))' : 'none',
-                    animation: 'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
+                    filter: isAnimating
+                      ? 'drop-shadow(0 0 8px rgba(255, 193, 7, 0.8))'
+                      : 'none',
+                    animation:
+                      'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
                   }}
                 />
               </button>
@@ -182,8 +191,12 @@ export function PokeClicker() {
 
           {/* Nintendo GAME BOY text */}
           <div className="mb-6 text-center">
-            <p className="pixel-font text-[10px] text-[#2a2a3e] tracking-wider mb-0.5">Nintendo</p>
-            <p className="pixel-font text-[8px] text-[#2a2a3e] font-bold tracking-widest italic">GAME BOY<span className="text-[6px]">™</span></p>
+            <p className="pixel-font text-[10px] text-[#2a2a3e] tracking-wider mb-0.5">
+              Nintendo
+            </p>
+            <p className="pixel-font text-[8px] text-[#2a2a3e] font-bold tracking-widest italic">
+              GAME BOY<span className="text-[6px]">™</span>
+            </p>
           </div>
 
           {/* Controls */}
@@ -243,7 +256,10 @@ export function PokeClicker() {
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col gap-1">
                 {[...Array(3)].map((_, j) => (
-                  <div key={j} className="w-1 h-1 rounded-full bg-[#6a6a6a]"></div>
+                  <div
+                    key={j}
+                    className="w-1 h-1 rounded-full bg-[#6a6a6a]"
+                  ></div>
                 ))}
               </div>
             ))}
@@ -263,13 +279,17 @@ export function PokeClicker() {
                   src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
                   alt="Rare Candy"
                   className="w-8 h-8"
-                  style={{ imageRendering: 'pixelated' }}
+                  style={{imageRendering: 'pixelated'}}
                 />
               </div>
-              <span className="pixel-font text-base font-bold text-black">Rare Candy</span>
+              <span className="pixel-font text-base font-bold text-black">
+                Rare Candy
+              </span>
             </div>
             <div className="bg-white border-2 border-black px-4 py-2 shadow-md">
-              <span className="pixel-font text-2xl font-bold text-black">{rareCandy}</span>
+              <span className="pixel-font text-2xl font-bold text-black">
+                {rareCandy}
+              </span>
             </div>
           </div>
         </Card>
@@ -283,8 +303,8 @@ export function PokeClicker() {
           </div>
           <div className="flex flex-col gap-3">
             {Object.entries(stats).map(([key, value]) => {
-              const cost = getUpgradeCost(key as keyof typeof stats)
-              const description = getStatDescription(key as keyof typeof stats)
+              const cost = getUpgradeCost(key as keyof typeof stats);
+              const description = getStatDescription(key as keyof typeof stats);
               return (
                 <div
                   key={key}
@@ -292,53 +312,75 @@ export function PokeClicker() {
                 >
                   <div className="flex items-center justify-between gap-4 mb-1">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className={`w-2 h-8 ${
-                        key === 'hp' ? 'bg-green-500' :
-                        key === 'attack' ? 'bg-orange-500' :
-                        key === 'defense' ? 'bg-orange-400' :
-                        key === 'spAttack' ? 'bg-blue-500' :
-                        key === 'spDefense' ? 'bg-blue-400' :
-                        'bg-purple-500'
-                      } border border-black`}></div>
+                      <div
+                        className={`w-2 h-8 ${
+                          key === 'hp'
+                            ? 'bg-green-500'
+                            : key === 'attack'
+                              ? 'bg-orange-500'
+                              : key === 'defense'
+                                ? 'bg-orange-400'
+                                : key === 'spAttack'
+                                  ? 'bg-blue-500'
+                                  : key === 'spDefense'
+                                    ? 'bg-blue-400'
+                                    : 'bg-purple-500'
+                        } border border-black`}
+                      ></div>
                       <div className="flex flex-col">
                         <span className="pixel-font text-xs text-gray-600">
                           {key === 'hp'
                             ? 'HP'
                             : key === 'spAttack'
-                            ? 'Sp. Attack'
-                            : key === 'spDefense'
-                            ? 'Sp. Defense'
-                            : key.charAt(0).toUpperCase() + key.slice(1)}
+                              ? 'Sp. Attack'
+                              : key === 'spDefense'
+                                ? 'Sp. Defense'
+                                : key.charAt(0).toUpperCase() + key.slice(1)}
                         </span>
-                        <span className="pixel-font text-lg font-bold text-black">LV {String(value)}</span>
+                        <span className="pixel-font text-lg font-bold text-black">
+                          LV {String(value)}
+                        </span>
                       </div>
                     </div>
                     <Button
                       size="sm"
                       onClick={() => handleUpgrade(key as keyof typeof stats)}
-                      disabled={rareCandy < cost || key === 'spDefense' || key === 'speed'}
+                      disabled={
+                        rareCandy < cost ||
+                        key === 'spDefense' ||
+                        key === 'speed'
+                      }
                       bgColor={
-                        key === 'hp' ? '#4ade80' :
-                        key === 'attack' ? '#fb923c' :
-                        key === 'defense' ? '#fbbf24' :
-                        key === 'spAttack' ? '#60a5fa' :
-                        key === 'spDefense' ? '#93c5fd' :
-                        '#a855f7'
+                        key === 'hp'
+                          ? '#4ade80'
+                          : key === 'attack'
+                            ? '#fb923c'
+                            : key === 'defense'
+                              ? '#fbbf24'
+                              : key === 'spAttack'
+                                ? '#60a5fa'
+                                : key === 'spDefense'
+                                  ? '#93c5fd'
+                                  : '#a855f7'
                       }
                       className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">↑ {cost}</span>
+                      <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                        ↑ {cost}
+                      </span>
                     </Button>
                   </div>
                   <div className="ml-5">
-                    <span className="pixel-font text-[10px] text-gray-500 italic">{description}</span>
+                    <span className="pixel-font text-[10px] text-gray-500 italic">
+                      {description}
+                    </span>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </Card>
       </div>
     </div>
-  )
+  );
 }
