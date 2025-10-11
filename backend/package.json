@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "seed": "tsx src/seedPokemon.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +22,8 @@
     "graphql": "^16.11.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

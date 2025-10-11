@@ -1,5 +1,4 @@
 import {useState, useEffect} from 'react';
-import {mockPokemonData, type Pokemon} from './data/mockData';
 import {PokemonCard} from './components/PokemonCard';
 import {PokemonDetailModal} from './components/ui/pixelact-ui/PokemonDetailModal';
 import {Button} from '@/components/ui/pixelact-ui/button';
@@ -17,14 +16,14 @@ import {PokeClicker} from './components/PokeClicker';
 import {LoginScreen} from '@/components/LogInScreen';
 import {Navbar} from './components/Navbar';
 import {MultiSelect} from './components/ui/pixelact-ui/MultiSelect';
+import {usePokedexQuery, type PokedexPokemon} from './hooks/usePokedexQuery';
 
 function App() {
-  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [selectedPokemon, setSelectedPokemon] =
+    useState<PokedexPokemon | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [filteredPokemon, setFilteredPokemon] =
-    useState<Pokemon[]>(mockPokemonData);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex' | 'login'>(
     'login'
@@ -34,7 +33,6 @@ function App() {
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [displayedCount, setDisplayedCount] = useState(20);
-  const [isLoading, setIsLoading] = useState(false);
 
   const ITEMS_PER_PAGE = 20;
 
@@ -45,6 +43,16 @@ function App() {
   const [tempTypes, setTempTypes] = useState(selectedTypes);
   const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
+
+  const {loading, error, data} = usePokedexQuery({
+    search: debouncedSearchTerm || undefined,
+    generation: selectedRegion || undefined,
+    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    sortBy,
+    sortOrder,
+    limit: displayedCount,
+    offset: 0,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,10 +69,9 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handlePokemonClick = (pokemon: Pokemon) => {
+  const handlePokemonClick = (pokemon: PokedexPokemon) => {
     setSelectedPokemon(pokemon);
     setModalOpen(true);
-    console.log('Clicked on:', pokemon.name);
   };
 
   useEffect(() => {
@@ -75,38 +82,8 @@ function App() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  useEffect(() => {
-    const filtered = mockPokemonData.filter((pokemon) => {
-      const matchesSearch =
-        debouncedSearchTerm === '' ||
-        pokemon.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      const matchesRegion =
-        !selectedRegion || pokemon.region === selectedRegion;
-      const matchesType =
-        selectedTypes.length === 0 ||
-        selectedTypes.some((type) => pokemon.types.includes(type));
-      return matchesSearch && matchesRegion && matchesType;
-    });
-
-    const sorted = [...filtered].sort((a, b) => {
-      let valA: string | number;
-      let valB: string | number;
-
-      if (sortBy === 'id') {
-        valA = a.id;
-        valB = b.id;
-        return sortOrder === 'asc' ? valA - valB : valB - valA;
-      } else {
-        valA = sortBy === 'name' ? a.name : a.types[0];
-        valB = sortBy === 'name' ? b.name : b.types[0];
-        return sortOrder === 'asc'
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
-      }
-    });
-
-    setFilteredPokemon(sorted);
-  }, [debouncedSearchTerm, selectedRegion, selectedTypes, sortBy, sortOrder]);
+  const filteredPokemon = data?.pokedex.pokemon || [];
+  const totalPokemon = data?.pokedex.total || 0;
 
   const handleClearFilters = () => {
     setSelectedRegion(null);
@@ -124,17 +101,11 @@ function App() {
   };
 
   const handleLoadMore = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setDisplayedCount((prev) =>
-        Math.min(prev + ITEMS_PER_PAGE, filteredPokemon.length)
-      );
-      setIsLoading(false);
-    }, 500);
+    setDisplayedCount((prev) => prev + ITEMS_PER_PAGE);
   };
 
-  const displayedPokemon = filteredPokemon.slice(0, displayedCount);
-  const hasMore = displayedCount < filteredPokemon.length;
+  const displayedPokemon = filteredPokemon;
+  const hasMore = displayedCount < totalPokemon;
 
   return (
     <>
@@ -269,6 +240,24 @@ function App() {
                               <SelectItem value="hoenn">
                                 Hoenn (252-386)
                               </SelectItem>
+                              <SelectItem value="sinnoh">
+                                Sinnoh (387-493)
+                              </SelectItem>
+                              <SelectItem value="unova">
+                                Unova (494-649)
+                              </SelectItem>
+                              <SelectItem value="kalos">
+                                Kalos (650-721)
+                              </SelectItem>
+                              <SelectItem value="alola">
+                                Alola (722-809)
+                              </SelectItem>
+                              <SelectItem value="galar">
+                                Galar (810-905)
+                              </SelectItem>
+                              <SelectItem value="paldea">
+                                Paldea (906-1025)
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -398,8 +387,9 @@ function App() {
               {!isMobile && (
                 <div className="flex flex-col gap-4">
                   <p className="text-sm pixel-font text-black">
-                    Showing {displayedPokemon.length} of{' '}
-                    {filteredPokemon.length} Pokémon
+                    {loading
+                      ? 'Loading...'
+                      : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
                   </p>
                   <div>
                     {selectedTypes.length > 0 ? (
@@ -447,6 +437,16 @@ function App() {
                           <SelectItem value="kanto">Kanto (1-151)</SelectItem>
                           <SelectItem value="johto">Johto (152-251)</SelectItem>
                           <SelectItem value="hoenn">Hoenn (252-386)</SelectItem>
+                          <SelectItem value="sinnoh">
+                            Sinnoh (387-493)
+                          </SelectItem>
+                          <SelectItem value="unova">Unova (494-649)</SelectItem>
+                          <SelectItem value="kalos">Kalos (650-721)</SelectItem>
+                          <SelectItem value="alola">Alola (722-809)</SelectItem>
+                          <SelectItem value="galar">Galar (810-905)</SelectItem>
+                          <SelectItem value="paldea">
+                            Paldea (906-1025)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -542,7 +542,16 @@ function App() {
 
             {/* Pokemon Grid */}
             <section className="max-w-[2000px] mx-auto">
-              {filteredPokemon.length === 0 ? (
+              {error ? (
+                <div className="text-center py-16">
+                  <p className="pixel-font text-xl text-red-600">
+                    Error loading Pokémon
+                  </p>
+                  <p className="pixel-font text-sm text-[var(--retro-border)] mt-2">
+                    {error.message}
+                  </p>
+                </div>
+              ) : filteredPokemon.length === 0 && !loading ? (
                 <div className="text-center py-16">
                   <p className="pixel-font text-xl ">No Pokemon found</p>
                   <p className="pixel-font text-sm text-[var(--retro-border)] mt-2">
@@ -575,33 +584,33 @@ function App() {
                     ))}
                   </ul>
 
-                      {/* Load More Button */}
-                      {hasMore && (
-                        <footer className="flex flex-col items-center gap-4 mt-8">
-                          <Button
-                            variant="default"
-                            size="lg"
-                            onClick={handleLoadMore}
-                            disabled={isLoading}
-                            className="min-w-[200px]"
-                          >
-                            {isLoading ? 'Loading...' : 'Load more'}
-                          </Button>
-                        </footer>
-                      )}
-                    </>
+                  {/* Load More Button */}
+                  {hasMore && (
+                    <footer className="flex flex-col items-center gap-4 mt-8">
+                      <Button
+                        variant="default"
+                        size="lg"
+                        onClick={handleLoadMore}
+                        disabled={loading}
+                        className="min-w-[200px]"
+                      >
+                        {loading ? 'Loading...' : 'Load more'}
+                      </Button>
+                    </footer>
                   )}
-                </section>
-              </>
-            )}
-          </main>
+                </>
+              )}
+            </section>
+          </>
+        )}
+      </main>
 
       <PokemonDetailModal
         pokemon={selectedPokemon}
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-        onSelectPokemon={(name) => {
-          const next = mockPokemonData.find((p) => p.name === name);
+        onSelectPokemon={(id) => {
+          const next = filteredPokemon.find((p) => p.id === id);
           if (next) setSelectedPokemon(next);
         }}
       />

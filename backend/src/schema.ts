@@ -9,6 +9,16 @@ export const typeDefs = `#graphql
       offset: Int
     ): PokemonResponse!
     pokemonById(id: Int!): Pokemon
+    pokedex(
+      search: String
+      generation: String
+      type: String
+      sortBy: String
+      sortOrder: String
+      limit: Int
+      offset: Int
+      userId: String
+    ): PokedexResponse!
   }
 
   type HealthCheck {
@@ -53,6 +63,7 @@ export const typeDefs = `#graphql
     height: Int!
     weight: Int!
     abilities: [String!]!
+    evolution: [Int!]!
   }
 
   type PokemonStats {
@@ -66,6 +77,25 @@ export const typeDefs = `#graphql
 
   type PokemonResponse {
     pokemon: [Pokemon!]!
+    total: Int!
+  }
+
+  type PokedexPokemon {
+    id: Int!
+    name: String!
+    types: [String!]!
+    sprite: String!
+    pokedexNumber: Int!
+    stats: PokemonStats
+    height: Int
+    weight: Int
+    abilities: [String!]
+    evolution: [Int!]
+    isOwned: Boolean!
+  }
+
+  type PokedexResponse {
+    pokemon: [PokedexPokemon!]!
     total: Int!
   }
 `;

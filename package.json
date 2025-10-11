@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\" --names \"frontend,backend\" --prefix-colors \"cyan,magenta\"",
+    "dev:backend": "cd backend && npm run dev",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -12,6 +14,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@apollo/client": "^3.11.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-menubar": "^1.1.16",
@@ -19,6 +22,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "graphql": "^16.11.0",
     "lucide-react": "^0.544.0",
     "pixel-retroui": "^2.1.0",
     "react": "^19.1.1",
@@ -37,6 +41,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.3",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
