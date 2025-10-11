@@ -19,7 +19,7 @@ function App() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [filteredPokemon, setFilteredPokemon] = useState<Pokemon[]>(mockPokemonData)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex' | 'login'>('clicker')
+  const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex' | 'login'>('login')
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id')
