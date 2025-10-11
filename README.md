@@ -102,16 +102,19 @@ Pokémon-informasjon (navn, typer, stats, sprites) hentes fra [PokéAPI](https:/
 For å redusere antall API-kall til PokéAPI og forbedre responstid, bruker vi `node-cache` med to separate caches:
 
 **API-cache (24 timer TTL):**
+
 - Individuelle Pokémon cachet per ID
 - Type-lister (alle Pokémon-URLer per type)
 - Lang TTL fordi PokéAPI-data er statisk
 
 **User-cache (5 minutters TTL):**
+
 - Brukerens eide Pokémon
 - Kortere TTL fordi data oppdateres oftere
 - Invalideres automatisk ved endringer (f.eks. Pokémon-kjøp)
 
 **Ytelsesgevinst:**
+
 - Første request: ~190ms (API-kall til PokéAPI)
 - Cachet request: ~3ms (fra minne)
 - **60x raskere** for individuelle Pokémon
@@ -119,22 +122,203 @@ For å redusere antall API-kall til PokéAPI og forbedre responstid, bruker vi `
 
 Cachen fungerer også som fallback hvis PokéAPI skulle være nede, så lenge dataen har blitt hentet minst én gang tidligere.
 
+### Arkitektonisk beslutning: Pokédex-spørring med MongoDB
+
+**Problemet vi møtte:**
+
+Når vi skulle implementere Pokédex med søk, filtrering og sortering, møtte vi på en fundamental skaleringsproblematikk:
+
+1. **PokéAPI REST begrensninger:**
+   - Ingen server-side filtrering eller sortering
+   - Kun individuelle oppslag (ett Pokémon per API-kall)
+   - For å sortere 151 Kanto-Pokémon alfabetisk: Hent alle 151 (151 API-kall) → sorter i minne → vis 20
+   - **Resultat**: 151+ API-kall for å vise 20 Pokémon
+
+2. **PokéAPI GraphQL:**
+   - Støtter filtrering/sortering på server-side
+   - **Men**: 100 calls/time rate limit (gratis tier)
+   - **Problem**: Med flere brukere og utviklere ville vi raskt treffe limit
+
+3. **Naive løsning (vår første implementasjon):**
+   ```javascript
+   // Hent ALLE Pokémon → filtrer → sorter → returner 20
+   const allPokemon = await fetchPokemon({limit: 1025});
+   const filtered = allPokemon.filter(...);
+   const sorted = filtered.sort(...);
+   return sorted.slice(0, 20);
+   ```
+   - **Fungerer med 1025 Pokémon**, men...
+   - **Skalerer IKKE**: Med 1 million Pokémon → Out of Memory
+   - **Ineffektivt**: Henter 1005 Pokémon vi aldri viser
+   - **Tregt**: Første load krever 1025 × 3 = ~3075 API-kall
+
+**Vår løsning: MongoDB Metadata + PokéAPI Details**
+
+```
+Bruker → MongoDB (filtrer/sorter/paginer) → 20 Pokemon-IDer
+      → PokéAPI (hent full data) → 20 Pokémon til bruker
+```
+
+**Implementasjon:**
+
+1. **Seed Pokemon metadata til MongoDB** (`npm run seed` i backend/):
+   - Basis-info: id, name, types, generation, sprite URL
+   - Kjøres én gang for å populere databasen
+   - ~1KB per Pokémon (minimalt lagringsbehov)
+
+2. **MongoDB håndterer spørring:**
+   ```javascript
+   const pokemonMeta = await collection
+     .find({generation: "kanto", types: "fire"})
+     .sort({name: 1})
+     .skip(0)
+     .limit(20)
+     .toArray();
+   ```
+   - Indeksert for rask søk
+   - Støtter regex-søk, multi-felt filtrering
+   - **Fungerer like raskt med 1 milliard poster** (med riktige indekser)
+
+3. **Hent full data kun for de 20:**
+   ```javascript
+   const fullPokemon = await Promise.all(
+     pokemonMeta.map(meta => fetchPokemonById(meta.id))
+   );
+   ```
+   - 20 API-kall i stedet for 1025+
+   - Med caching: ~3ms per Pokémon etter første gang
+
+**Hvorfor dette er skalerbart:**
+
+- ✅ **O(log n) queries**: MongoDB bruker B-tree indekser
+- ✅ **Konstant API-bruk**: Alltid kun 20 API-kall per side (limit-parameter)
+- ✅ **Lav minnebruk**: Kun 20 Pokémon i minne, ikke alle 1025
+- ✅ **Rask respons**: Database-query < 10ms, API-kall paralleliseres
+- ✅ **Fungerer med milliarder**: Arkitekturen endrer seg ikke med datavolum
+
+
 ## Kjøre prosjektet lokalt
 
-### Installasjon
+### 1. Installere Node.js og MongoDB
+
+**Node.js:**
+- Last ned og installer fra [nodejs.org](https://nodejs.org/) (LTS versjon anbefales)
+- Sjekk at det virker: åpne terminal og skriv `node --version`
+
+**MongoDB:**
+
+<details>
+<summary><b>Windows</b></summary>
+
+1. Last ned MongoDB Community Server fra [mongodb.com/try/download/community](https://www.mongodb.com/try/download/community)
+2. Kjør installeren (.msi filen)
+3. Velg "Complete" installation
+4. **Viktig:** Huk av "Install MongoDB as a Service" (slik at den starter automatisk)
+5. Sjekk at MongoDB kjører:
+   - Åpne "Services" (søk etter det i start-menyen)
+   - Finn "MongoDB Server" - den skal vise "Running"
+6. Hvis den ikke kjører, høyreklikk og velg "Start"
+
+</details>
+
+<details>
+<summary><b>macOS</b></summary>
 
 ```bash
+# Installer Homebrew hvis du ikke har det:
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Installer MongoDB:
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Start MongoDB:
+brew services start mongodb-community
+
+# Sjekk at den kjører:
+brew services list | grep mongodb
+```
+
+</details>
+
+<details>
+<summary><b>Linux (Ubuntu/Debian)</b></summary>
+
+```bash
+# Importer MongoDB public GPG Key:
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
+
+# Legg til MongoDB repository:
+echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+# Installer MongoDB:
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+# Start MongoDB:
+sudo systemctl start mongod
+sudo systemctl enable mongod  # Start automatisk ved oppstart
+
+# Sjekk at den kjører:
+sudo systemctl status mongod
+```
+
+</details>
+
+### 2. Klone og installere prosjektet
+
+```bash
+# Klon prosjektet
 git clone https://git.ntnu.no/IT2810-H25/T26-Project-2.git
 cd T26-Project-2
-pnpm install  # eller npm install
+
+# Installer frontend dependencies
+npm install
+
+# Installer backend dependencies
+cd backend
+npm install
+cd ..
 ```
+
+### 3. Populer databasen med Pokemon (PÅKREVD!)
+
+Dette steget er **påkrevd** første gang du setter opp prosjektet:
+
+```bash
+cd backend
+npm run seed
+```
+
+Dette henter metadata for ~1024 Pokemon fra PokéAPI og lagrer i MongoDB. Tar ca. **1-2 minutter**. Du ser fremdrift i terminalen.
+
+**Du trenger kun å gjøre dette én gang.** Neste gang du starter prosjektet kan du hoppe over dette steget.
+
+### 4. Sett opp miljøvariabler (valgfritt)
+
+Hvis du vil bruke en annen database-URL, opprett `backend/.env`:
+
+```env
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=pokeclicker_db
+PORT=3001
+```
+
+Standard-verdiene over fungerer uten `.env`-fil.
 
 ### Utviklingsmiljø
 
 ```bash
-pnpm run dev     # Start dev server
-pnpm run build   # Bygg for produksjon
-pnpm run lint    # Kjør linting
+# Fra root-directory:
+npm run dev:all   # Start både frontend og backend
+
+# Eller kjør separat:
+npm run dev       # Kun frontend (port 5173)
+cd backend && npm run dev  # Kun backend (port 3001)
+
+# Andre kommandoer:
+npm run build     # Bygg for produksjon
+npm run lint      # Kjør linting
 ```
 
 ## Fremtidig utvikling
