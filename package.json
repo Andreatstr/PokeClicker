@@ -14,7 +14,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@apollo/client": "^3.11.0",
+    "@apollo/client": "^3.14.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-menubar": "^1.1.16",
