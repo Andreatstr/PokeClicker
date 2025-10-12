@@ -195,29 +195,14 @@ export const resolvers = {
         // If no userId is provided, guest users see Pokemon as unowned
         const isOwned = userId ? ownedPokemonIds.includes(p.id) : false;
 
-        if (isOwned) {
-          return {
-            ...p,
-            pokedexNumber: p.id,
-            evolution: p.evolution || [],
-            isOwned: true,
-          };
-        } else {
-          return {
-            id: p.id,
-            name: p.name,
-            types: p.types,
-            sprite:
-              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/0.png',
-            pokedexNumber: p.id,
-            stats: null,
-            height: null,
-            weight: null,
-            abilities: null,
-            evolution: [],
-            isOwned: false,
-          };
-        }
+        // Return full Pokemon data regardless of ownership status
+        // The isOwned flag allows frontend to show ownership indicators
+        return {
+          ...p,
+          pokedexNumber: p.id,
+          evolution: p.evolution || [],
+          isOwned,
+        };
       });
 
       return {
