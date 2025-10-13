@@ -6,7 +6,7 @@ import {
   MoonIcon,
   MenuIcon,
 } from '@/components/ui/pixelact-ui/icons';
-import {useAuth} from '@/contexts/AuthContext';
+import {useAuth} from '@/hooks/useAuth';
 
 interface NavbarProps {
   currentPage: 'clicker' | 'pokedex' | 'login';

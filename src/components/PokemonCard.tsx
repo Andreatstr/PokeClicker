@@ -10,7 +10,7 @@ interface PokemonCardProps {
 
 // Helper to calculate Pokemon purchase cost (matches backend)
 function getPokemonCost(pokemonId: number): number {
-  return Math.floor(100 + (pokemonId / 10));
+  return Math.floor(100 + pokemonId / 10);
 }
 
 function getContrastColor(bgColor: string): string {
@@ -49,7 +49,8 @@ function getContrastColor(bgColor: string): string {
     return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   };
 
-  const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  const luminance =
+    0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 
   // Return black for light backgrounds (luminance > 0.179 gives ~4.5:1 contrast), white for dark
   return luminance > 0.179 ? 'text-black' : 'text-white';
@@ -206,9 +207,11 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       await purchasePokemon({
         variables: {pokemonId: pokemon.id},
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to purchase Pokémon');
-      // Clear error after 3 seconds
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
+      setError(errorMessage);
+      // Clear error after 1.2 seconds
       setTimeout(() => setError(null), 1200);
     }
   };

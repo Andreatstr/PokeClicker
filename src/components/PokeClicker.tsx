@@ -1,7 +1,7 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import {Button} from '@/components/ui/pixelact-ui/button';
 import {Card} from '@/components/ui/pixelact-ui/card';
-import {useAuth} from '@/contexts/AuthContext';
+import {useAuth} from '@/hooks/useAuth';
 import {useGameMutations} from '@/hooks/useGameMutations';
 
 interface Candy {
@@ -11,7 +11,7 @@ interface Candy {
 
 export function PokeClicker() {
   const {user, isAuthenticated, updateUser} = useAuth();
-  const {updateRareCandy, upgradeStat, loading, error} = useGameMutations();
+  const {updateRareCandy, upgradeStat, loading} = useGameMutations();
 
   // Optimistic local state
   const [rareCandy, setRareCandy] = useState(user?.rare_candy || 0);
@@ -30,7 +30,7 @@ export function PokeClicker() {
 
   // Batching state
   const [pendingCandyAmount, setPendingCandyAmount] = useState(0);
-  const batchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncRef = useRef<number>(Date.now());
 
   // Error state
@@ -44,42 +44,7 @@ export function PokeClicker() {
     }
   }, [user]);
 
-  // Batch update clicks every 5 seconds or after 10 clicks
-  useEffect(() => {
-    if (pendingCandyAmount === 0 || !isAuthenticated) return;
-
-    const shouldFlush =
-      pendingCandyAmount >= 10 ||
-      Date.now() - lastSyncRef.current >= 5000;
-
-    if (shouldFlush) {
-      flushPendingCandy();
-    } else if (!batchTimerRef.current) {
-      // Set a timer to flush after 5 seconds
-      batchTimerRef.current = setTimeout(() => {
-        flushPendingCandy();
-      }, 5000);
-    }
-
-    return () => {
-      if (batchTimerRef.current) {
-        clearTimeout(batchTimerRef.current);
-        batchTimerRef.current = null;
-      }
-    };
-  }, [pendingCandyAmount, isAuthenticated]);
-
-  // Flush any pending candy updates before unmounting
-  useEffect(() => {
-    return () => {
-      if (pendingCandyAmount > 0 && isAuthenticated) {
-        // Use a synchronous update if possible
-        updateRareCandy(pendingCandyAmount);
-      }
-    };
-  }, []);
-
-  const flushPendingCandy = async () => {
+  const flushPendingCandy = useCallback(async () => {
     if (pendingCandyAmount === 0 || !isAuthenticated) return;
 
     const amountToSync = pendingCandyAmount;
@@ -103,7 +68,31 @@ export function PokeClicker() {
       // Revert optimistic update
       setRareCandy((prev) => prev - amountToSync);
     }
-  };
+  }, [pendingCandyAmount, isAuthenticated, updateRareCandy, updateUser]);
+
+  // Batch update clicks every 5 seconds or after 10 clicks
+  useEffect(() => {
+    if (pendingCandyAmount === 0 || !isAuthenticated) return;
+
+    const shouldFlush =
+      pendingCandyAmount >= 10 || Date.now() - lastSyncRef.current >= 5000;
+
+    if (shouldFlush) {
+      flushPendingCandy();
+    } else if (!batchTimerRef.current) {
+      // Set a timer to flush after 5 seconds
+      batchTimerRef.current = setTimeout(() => {
+        flushPendingCandy();
+      }, 5000);
+    }
+
+    return () => {
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
+    };
+  }, [pendingCandyAmount, isAuthenticated, flushPendingCandy]);
 
   // Calculate candies per click based on attack and sp. attack
   const getCandiesPerClick = () => {
@@ -191,9 +180,13 @@ export function PokeClicker() {
         setRareCandy(updatedUser.rare_candy);
         setStats(updatedUser.stats);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to upgrade stat:', err);
-      setDisplayError(err.message || 'Failed to upgrade stat. Please try again.');
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Failed to upgrade stat. Please try again.';
+      setDisplayError(errorMessage);
       // Revert optimistic update
       setRareCandy(oldCandy);
       setStats((prev: typeof stats) => ({...prev, [stat]: oldStat}));
@@ -434,91 +427,91 @@ export function PokeClicker() {
             </h2>
           </div>
           {isLoading && (
-            <div className="text-center pixel-font text-sm mb-2">
-              Saving...
-            </div>
+            <div className="text-center pixel-font text-sm mb-2">Saving...</div>
           )}
           <div className="flex flex-col gap-3">
             {Object.entries(stats)
               .filter(([key]) => key !== '__typename')
               .map(([key, value]) => {
                 const cost = getUpgradeCost(key as keyof typeof stats);
-                const description = getStatDescription(key as keyof typeof stats);
+                const description = getStatDescription(
+                  key as keyof typeof stats
+                );
                 return (
-                <div
-                  key={key}
-                  className="bg-gradient-to-br from-white to-gray-100 border-2 border-black p-3 shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-center justify-between gap-4 mb-1">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div
-                        className={`w-2 h-8 ${
-                          key === 'hp'
-                            ? 'bg-green-500'
-                            : key === 'attack'
-                              ? 'bg-orange-500'
-                              : key === 'defense'
-                                ? 'bg-orange-400'
-                                : key === 'spAttack'
-                                  ? 'bg-blue-500'
-                                  : key === 'spDefense'
-                                    ? 'bg-blue-400'
-                                    : 'bg-purple-500'
-                        } border border-black`}
-                      ></div>
-                      <div className="flex flex-col">
-                        <span className="pixel-font text-xs text-gray-600">
-                          {key === 'hp'
-                            ? 'HP'
-                            : key === 'spAttack'
-                              ? 'Sp. Attack'
-                              : key === 'spDefense'
-                                ? 'Sp. Defense'
-                                : key.charAt(0).toUpperCase() + key.slice(1)}
-                        </span>
-                        <span className="pixel-font text-lg font-bold text-black">
-                          LV {String(value)}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleUpgrade(key as keyof typeof stats)}
-                      disabled={
-                        !isAuthenticated ||
-                        rareCandy < cost ||
-                        isLoading ||
-                        key === 'spDefense' ||
-                        key === 'speed'
-                      }
-                      bgColor={
-                        key === 'hp'
-                          ? '#4ade80'
-                          : key === 'attack'
-                            ? '#fb923c'
-                            : key === 'defense'
-                              ? '#fbbf24'
+                  <div
+                    key={key}
+                    className="bg-gradient-to-br from-white to-gray-100 border-2 border-black p-3 shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex items-center justify-between gap-4 mb-1">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div
+                          className={`w-2 h-8 ${
+                            key === 'hp'
+                              ? 'bg-green-500'
+                              : key === 'attack'
+                                ? 'bg-orange-500'
+                                : key === 'defense'
+                                  ? 'bg-orange-400'
+                                  : key === 'spAttack'
+                                    ? 'bg-blue-500'
+                                    : key === 'spDefense'
+                                      ? 'bg-blue-400'
+                                      : 'bg-purple-500'
+                          } border border-black`}
+                        ></div>
+                        <div className="flex flex-col">
+                          <span className="pixel-font text-xs text-gray-600">
+                            {key === 'hp'
+                              ? 'HP'
                               : key === 'spAttack'
-                                ? '#60a5fa'
+                                ? 'Sp. Attack'
                                 : key === 'spDefense'
-                                  ? '#93c5fd'
-                                  : '#a855f7'
-                      }
-                      className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                        ↑ {cost}
+                                  ? 'Sp. Defense'
+                                  : key.charAt(0).toUpperCase() + key.slice(1)}
+                          </span>
+                          <span className="pixel-font text-lg font-bold text-black">
+                            LV {String(value)}
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleUpgrade(key as keyof typeof stats)}
+                        disabled={
+                          !isAuthenticated ||
+                          rareCandy < cost ||
+                          isLoading ||
+                          key === 'spDefense' ||
+                          key === 'speed'
+                        }
+                        bgColor={
+                          key === 'hp'
+                            ? '#4ade80'
+                            : key === 'attack'
+                              ? '#fb923c'
+                              : key === 'defense'
+                                ? '#fbbf24'
+                                : key === 'spAttack'
+                                  ? '#60a5fa'
+                                  : key === 'spDefense'
+                                    ? '#93c5fd'
+                                    : '#a855f7'
+                        }
+                        className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                          ↑ {cost}
+                        </span>
+                      </Button>
+                    </div>
+                    <div className="ml-5">
+                      <span className="pixel-font text-[10px] text-gray-500 italic">
+                        {description}
                       </span>
-                    </Button>
+                    </div>
                   </div>
-                  <div className="ml-5">
-                    <span className="pixel-font text-[10px] text-gray-500 italic">
-                      {description}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </Card>
       </div>

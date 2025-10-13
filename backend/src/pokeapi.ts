@@ -138,9 +138,7 @@ function transformPokemon(
   data: PokeAPIPokemon,
   evolution: number[] = []
 ): Pokemon {
-  const sprite =
-    data.sprites.front_default ||
-    '';
+  const sprite = data.sprites.front_default || '';
 
   const statsMap: Record<string, number> = {};
   data.stats.forEach((s) => {

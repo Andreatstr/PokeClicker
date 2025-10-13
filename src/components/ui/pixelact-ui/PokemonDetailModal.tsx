@@ -24,7 +24,7 @@ interface Props {
 
 // Helper to calculate Pokemon purchase cost (matches backend)
 function getPokemonCost(pokemonId: number): number {
-  return Math.floor(100 + (pokemonId / 10));
+  return Math.floor(100 + pokemonId / 10);
 }
 
 function getTypeColors(type: string) {
@@ -224,9 +224,11 @@ export function PokemonDetailModal({
       await purchasePokemon({
         variables: {pokemonId: pokemon.id},
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to purchase Pokémon');
-      // Clear error after 3 seconds
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
+      setError(errorMessage);
+      // Clear error after 1.2 seconds
       setTimeout(() => setError(null), 1200);
     }
   };

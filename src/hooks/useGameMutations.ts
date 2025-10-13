@@ -46,7 +46,10 @@ export function useGameMutations() {
   const [upgradeStatMutation, {loading: upgradingStat, error: statError}] =
     useMutation<{upgradeStat: User}>(UPGRADE_STAT);
 
-  const updateRareCandy = async (amount: number, onCompleted?: (user: User) => void) => {
+  const updateRareCandy = async (
+    amount: number,
+    onCompleted?: (user: User) => void
+  ) => {
     try {
       const result = await updateRareCandyMutation({
         variables: {amount},
@@ -63,7 +66,10 @@ export function useGameMutations() {
     }
   };
 
-  const upgradeStat = async (stat: string, onCompleted?: (user: User) => void) => {
+  const upgradeStat = async (
+    stat: string,
+    onCompleted?: (user: User) => void
+  ) => {
     try {
       const result = await upgradeStatMutation({
         variables: {stat},

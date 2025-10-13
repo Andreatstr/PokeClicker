@@ -35,7 +35,10 @@ export function authenticateToken(authHeader?: string): JWTPayload | undefined {
     return decoded;
   } catch (error) {
     // Token is invalid or expired
-    console.error('JWT verification failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error(
+      'JWT verification failed:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
     return undefined;
   }
 }
