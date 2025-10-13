@@ -26,6 +26,34 @@ export const typeDefs = `#graphql
     timestamp: String!
   }
 
+	type User {
+    _id: ID!
+    username: String!
+    rare_candy: Int!
+    created_at: String!
+    stats: UserStats!
+    owned_pokemon_ids: [Int!]!
+  }
+
+	type UserStats {
+    hp: Int!
+    attack: Int!
+    defense: Int!
+    spAttack: Int!
+    spDefense: Int!
+    speed: Int!
+  }
+
+	type AuthResponse {
+    token: String!
+    user: User!
+  }
+
+	type Mutation {
+    signup(username: String!, password: String!): AuthResponse!
+    login(username: String!, password: String!): AuthResponse!
+  }
+
   type Pokemon {
     id: Int!
     name: String!

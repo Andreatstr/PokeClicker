@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/pixelact-ui/select';
 import {SearchIcon, CloseIcon} from '@/components/ui/pixelact-ui/icons';
 import {PokeClicker} from './components/PokeClicker';
+import {LoginScreen} from '@/components/LogInScreen';
 import {Navbar} from './components/Navbar';
 import {MultiSelect} from './components/ui/pixelact-ui/MultiSelect';
 import {usePokedexQuery, type PokedexPokemon} from './hooks/usePokedexQuery';
@@ -24,8 +25,8 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex'>(
-    'clicker'
+  const [currentPage, setCurrentPage] = useState<'clicker' | 'pokedex' | 'login'>(
+    'login'
   );
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -114,7 +115,10 @@ function App() {
         isDarkMode={isDarkMode}
         onToggleTheme={toggleTheme}
       />
-
+{currentPage === 'login' ? (
+        <LoginScreen onNavigate={setCurrentPage} />
+      ) : (
+        <>
       <main
         className="min-h-screen px-4 sm:px-6 md:px-8 pb-8 pt-0"
         style={{backgroundColor: 'var(--retro-secondary)'}}
@@ -610,6 +614,8 @@ function App() {
           if (next) setSelectedPokemon(next);
         }}
       />
+      </>
+      )}
     </>
   );
 }
