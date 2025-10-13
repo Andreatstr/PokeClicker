@@ -53,6 +53,8 @@ export const typeDefs = `#graphql
 	type Mutation {
     signup(username: String!, password: String!): AuthResponse!
     login(username: String!, password: String!): AuthResponse!
+    updateRareCandy(amount: Int!): User!
+    upgradeStat(stat: String!): User!
   }
 
   type Pokemon {

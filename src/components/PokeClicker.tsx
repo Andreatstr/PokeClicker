@@ -1,6 +1,8 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {Button} from '@/components/ui/pixelact-ui/button';
 import {Card} from '@/components/ui/pixelact-ui/card';
+import {useAuth} from '@/contexts/AuthContext';
+import {useGameMutations} from '@/hooks/useGameMutations';
 
 interface Candy {
   id: number;
@@ -8,26 +10,15 @@ interface Candy {
 }
 
 export function PokeClicker() {
-  // Load saved state from localStorage
-  const loadSavedState = () => {
-    try {
-      const saved = localStorage.getItem('pokeClickerState');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (error) {
-      console.error('Failed to load saved state:', error);
-    }
-    return null;
-  };
+  const {user, isAuthenticated, updateUser} = useAuth();
+  const {updateRareCandy, upgradeStat, loading, error} = useGameMutations();
 
-  const savedState = loadSavedState();
-
-  const [rareCandy, setRareCandy] = useState(savedState?.rareCandy || 0);
+  // Optimistic local state
+  const [rareCandy, setRareCandy] = useState(user?.rare_candy || 0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [candies, setCandies] = useState<Candy[]>([]);
   const [stats, setStats] = useState(
-    savedState?.stats || {
+    user?.stats || {
       hp: 1,
       attack: 1,
       defense: 1,
@@ -37,14 +28,82 @@ export function PokeClicker() {
     }
   );
 
-  // Save state to localStorage whenever it changes
+  // Batching state
+  const [pendingCandyAmount, setPendingCandyAmount] = useState(0);
+  const batchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSyncRef = useRef<number>(Date.now());
+
+  // Error state
+  const [displayError, setDisplayError] = useState<string | null>(null);
+
+  // Sync local state with user data when it changes
   useEffect(() => {
-    const stateToSave = {
-      rareCandy,
-      stats,
+    if (user) {
+      setRareCandy(user.rare_candy);
+      setStats(user.stats);
+    }
+  }, [user]);
+
+  // Batch update clicks every 5 seconds or after 10 clicks
+  useEffect(() => {
+    if (pendingCandyAmount === 0 || !isAuthenticated) return;
+
+    const shouldFlush =
+      pendingCandyAmount >= 10 ||
+      Date.now() - lastSyncRef.current >= 5000;
+
+    if (shouldFlush) {
+      flushPendingCandy();
+    } else if (!batchTimerRef.current) {
+      // Set a timer to flush after 5 seconds
+      batchTimerRef.current = setTimeout(() => {
+        flushPendingCandy();
+      }, 5000);
+    }
+
+    return () => {
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
     };
-    localStorage.setItem('pokeClickerState', JSON.stringify(stateToSave));
-  }, [rareCandy, stats]);
+  }, [pendingCandyAmount, isAuthenticated]);
+
+  // Flush any pending candy updates before unmounting
+  useEffect(() => {
+    return () => {
+      if (pendingCandyAmount > 0 && isAuthenticated) {
+        // Use a synchronous update if possible
+        updateRareCandy(pendingCandyAmount);
+      }
+    };
+  }, []);
+
+  const flushPendingCandy = async () => {
+    if (pendingCandyAmount === 0 || !isAuthenticated) return;
+
+    const amountToSync = pendingCandyAmount;
+    setPendingCandyAmount(0);
+    lastSyncRef.current = Date.now();
+
+    if (batchTimerRef.current) {
+      clearTimeout(batchTimerRef.current);
+      batchTimerRef.current = null;
+    }
+
+    try {
+      const updatedUser = await updateRareCandy(amountToSync, updateUser);
+      if (updatedUser) {
+        // Server is the source of truth
+        setRareCandy(updatedUser.rare_candy);
+      }
+    } catch (err) {
+      console.error('Failed to sync candy:', err);
+      setDisplayError('Failed to save progress. Please check your connection.');
+      // Revert optimistic update
+      setRareCandy((prev) => prev - amountToSync);
+    }
+  };
 
   // Calculate candies per click based on attack and sp. attack
   const getCandiesPerClick = () => {
@@ -59,20 +118,32 @@ export function PokeClicker() {
 
   // Effect for passive income
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const passiveIncome =
       Math.floor((stats.hp - 1) * 0.5) + Math.floor((stats.defense - 1) * 0.3);
+
     if (passiveIncome > 0) {
       const interval = setInterval(() => {
         setRareCandy((prev: number) => prev + passiveIncome);
+        setPendingCandyAmount((prev) => prev + passiveIncome);
       }, 1000); // Every second
 
       return () => clearInterval(interval);
     }
-  }, [stats.hp, stats.defense]);
+  }, [stats.hp, stats.defense, isAuthenticated]);
 
   const handleClick = () => {
+    if (!isAuthenticated) {
+      setDisplayError('Please log in to play the game');
+      return;
+    }
+
     const candiesEarned = getCandiesPerClick();
+
+    // Optimistic update
     setRareCandy((prev: number) => prev + candiesEarned);
+    setPendingCandyAmount((prev) => prev + candiesEarned);
     setIsAnimating(true);
 
     // Add floating candy animation
@@ -90,11 +161,42 @@ export function PokeClicker() {
     setTimeout(() => setIsAnimating(false), 150);
   };
 
-  const handleUpgrade = (stat: keyof typeof stats) => {
+  const handleUpgrade = async (stat: keyof typeof stats) => {
+    if (!isAuthenticated) {
+      setDisplayError('Please log in to upgrade stats');
+      return;
+    }
+
     const cost = getUpgradeCost(stat);
-    if (rareCandy >= cost) {
-      setRareCandy((prev: number) => prev - cost);
-      setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
+    if (rareCandy < cost) {
+      return; // Not enough candy
+    }
+
+    // Flush pending candy updates before upgrading
+    if (pendingCandyAmount > 0) {
+      await flushPendingCandy();
+    }
+
+    // Optimistic update
+    const oldCandy = rareCandy;
+    const oldStat = stats[stat];
+
+    setRareCandy((prev: number) => prev - cost);
+    setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
+
+    try {
+      const updatedUser = await upgradeStat(stat, updateUser);
+      if (updatedUser) {
+        // Server is the source of truth
+        setRareCandy(updatedUser.rare_candy);
+        setStats(updatedUser.stats);
+      }
+    } catch (err: any) {
+      console.error('Failed to upgrade stat:', err);
+      setDisplayError(err.message || 'Failed to upgrade stat. Please try again.');
+      // Revert optimistic update
+      setRareCandy(oldCandy);
+      setStats((prev: typeof stats) => ({...prev, [stat]: oldStat}));
     }
   };
 
@@ -122,8 +224,34 @@ export function PokeClicker() {
     }
   };
 
+  // Show loading state while mutations are in progress
+  const isLoading = loading;
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+      {/* Display errors */}
+      {displayError && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          {displayError}
+          <button
+            onClick={() => setDisplayError(null)}
+            className="ml-4 text-white font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Show unauthenticated message */}
+      {!isAuthenticated && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-xl z-50 text-center">
+          <h2 className="pixel-font text-2xl mb-4">Please Log In</h2>
+          <p className="pixel-font text-sm mb-4">
+            You need to log in to play the clicker game and save your progress.
+          </p>
+        </div>
+      )}
+
       {/* GameBoy Console */}
       <Card className="bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 w-full max-w-md lg:max-w-lg">
         <div className="flex flex-col items-center">
@@ -148,11 +276,13 @@ export function PokeClicker() {
                 onClick={handleClick}
                 className="w-full aspect-[10/9] flex items-end justify-center border-none cursor-pointer p-0 pb-8 focus:outline-none focus:ring-2 focus:ring-yellow-400 relative overflow-hidden"
                 aria-label="Click Charizard to earn rare candy"
+                disabled={!isAuthenticated}
                 style={{
                   backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.png')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   imageRendering: 'pixelated',
+                  opacity: !isAuthenticated ? 0.5 : 1,
                 }}
               >
                 {/* Floating candies */}
@@ -220,6 +350,7 @@ export function PokeClicker() {
                 <Button
                   size="sm"
                   onClick={handleClick}
+                  disabled={!isAuthenticated}
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
                 >
@@ -230,6 +361,7 @@ export function PokeClicker() {
                 <Button
                   size="sm"
                   onClick={handleClick}
+                  disabled={!isAuthenticated}
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 border-[#2a2a3e] shadow-lg pixel-font text-sm text-white font-bold p-0"
                 >
@@ -288,7 +420,7 @@ export function PokeClicker() {
             </div>
             <div className="bg-white border-2 border-black px-4 py-2 shadow-md">
               <span className="pixel-font text-2xl font-bold text-black">
-                {rareCandy}
+                {Math.floor(rareCandy)}
               </span>
             </div>
           </div>
@@ -301,11 +433,18 @@ export function PokeClicker() {
               POKEMON UPGRADES
             </h2>
           </div>
+          {isLoading && (
+            <div className="text-center pixel-font text-sm mb-2">
+              Saving...
+            </div>
+          )}
           <div className="flex flex-col gap-3">
-            {Object.entries(stats).map(([key, value]) => {
-              const cost = getUpgradeCost(key as keyof typeof stats);
-              const description = getStatDescription(key as keyof typeof stats);
-              return (
+            {Object.entries(stats)
+              .filter(([key]) => key !== '__typename')
+              .map(([key, value]) => {
+                const cost = getUpgradeCost(key as keyof typeof stats);
+                const description = getStatDescription(key as keyof typeof stats);
+                return (
                 <div
                   key={key}
                   className="bg-gradient-to-br from-white to-gray-100 border-2 border-black p-3 shadow-md hover:shadow-lg transition-shadow"
@@ -346,7 +485,9 @@ export function PokeClicker() {
                       size="sm"
                       onClick={() => handleUpgrade(key as keyof typeof stats)}
                       disabled={
+                        !isAuthenticated ||
                         rareCandy < cost ||
+                        isLoading ||
                         key === 'spDefense' ||
                         key === 'speed'
                       }
