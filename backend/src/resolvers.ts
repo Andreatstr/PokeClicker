@@ -5,6 +5,7 @@ import {getDatabase} from './db.js';
 import {DEFAULT_USER_STATS} from './types.js';
 import {UserDocument, AuthResponse, PokemonQueryArgs} from './types';
 import {Collection, ObjectId} from 'mongodb';
+import {type AuthContext, requireAuth} from './auth.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
@@ -97,6 +98,20 @@ export const resolvers = {
       timestamp: new Date().toISOString(),
     }),
     hello: () => 'Hello from PokéClicker GraphQL API!',
+    me: async (_: unknown, __: unknown, context: AuthContext) => {
+      // Protected query - requires valid authentication token
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users');
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      return sanitizeUserForClient(userDoc);
+    },
     pokemon: async (_: unknown, args: PokemonQueryArgs) => {
       return fetchPokemon(args);
     },
@@ -114,7 +129,8 @@ export const resolvers = {
         limit?: number;
         offset?: number;
         userId?: string;
-      }
+      },
+      context: AuthContext
     ) => {
       const {
         search,
@@ -129,12 +145,15 @@ export const resolvers = {
 
       let ownedPokemonIds: number[] = [];
 
-      if (userId) {
+      // Use authenticated user if available, otherwise fall back to userId parameter
+      const effectiveUserId = context.user?.id || userId;
+
+      if (effectiveUserId) {
         try {
           const db = getDatabase();
           const usersCollection = db.collection('users');
           const user = await usersCollection.findOne({
-            _id: new ObjectId(userId),
+            _id: new ObjectId(effectiveUserId),
           });
 
           if (user && user.owned_pokemon_ids) {
@@ -192,8 +211,8 @@ export const resolvers = {
       const paginatedPokemon = await Promise.all(pokemonPromises);
 
       const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
-        // If no userId is provided, guest users see Pokemon as unowned
-        const isOwned = userId ? ownedPokemonIds.includes(p.id) : false;
+        // If no user is authenticated, guest users see Pokemon as unowned
+        const isOwned = effectiveUserId ? ownedPokemonIds.includes(p.id) : false;
 
         // Return full Pokemon data regardless of ownership status
         // The isOwned flag allows frontend to show ownership indicators
