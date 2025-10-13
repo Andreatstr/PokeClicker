@@ -349,7 +349,7 @@ export const resolvers = {
       // Check if user has enough rare candy
       if (userDoc.rare_candy < cost) {
         throw new Error(
-          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`
+          `Not enough candy.`
         );
       }
 

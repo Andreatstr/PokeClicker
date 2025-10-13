@@ -182,7 +182,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
   const typeColors = getTypeColors(primaryType);
   const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
-  const [purchasePokemon, {loading: purchasing}] = usePurchasePokemon();
+  const [purchasePokemon] = usePurchasePokemon();
   const [error, setError] = useState<string | null>(null);
 
   const cost = getPokemonCost(pokemon.id);
@@ -209,13 +209,13 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
     } catch (err: any) {
       setError(err.message || 'Failed to purchase Pokémon');
       // Clear error after 3 seconds
-      setTimeout(() => setError(null), 3000);
+      setTimeout(() => setError(null), 1200);
     }
   };
 
   return (
     <aside
-      className={`cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] pixel-font flex flex-col items-center ${typeColors.cardBg}
+      className={`relative cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
         hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]`}
       onClick={handleClick}
@@ -244,35 +244,29 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
         className="bg-black/20 p-2 rounded-md w-full"
         style={{textShadow: '1px 1px 0 #FFF'}}
       >
-        <div className="infoGrid grid grid-cols-1 gap-x-4 gap-y-1 text-[10px] mb-4">
-          <div>
+        <div className="infoGrid grid grid-cols-1 grid-rows-[auto_minmax(28px,auto)_auto] gap-y-1 text-[10px] mb-4">
+          <div className="row-start-1">
             <strong className="font-bold text-sm capitalize">{pokemon.name}</strong>
           </div>
 
           {/* Purchase Button or Pokemon Number */}
-          {!pokemon.isOwned ? (
-            <button
-              onClick={handlePurchase}
-              disabled={purchasing}
-              className="w-full px-3 py-1 text-[10px] font-bold bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
-            >
-              {purchasing ? 'Purchasing...' : `Buy (${cost} 🍬)`}
-            </button>
-          ) : (
-            <div>
+          <div className="row-start-2 flex items-center">
+            {!pokemon.isOwned ? (
+              <button
+                onClick={handlePurchase}
+                className={`w-full cursor-pointer px-3 py-1 text-[10px] font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all ${
+                  error ? 'bg-red-500 text-white' : 'bg-yellow-400 text-black'
+                }`}
+                aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
+              >
+                {error || `Buy (${cost} 🍬)`}
+              </button>
+            ) : (
               <span className="font-normal">#{pokemon.pokedexNumber}</span>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mt-1 w-full px-2 py-1 text-[8px] bg-red-500 text-white border-2 border-black">
-              {error}
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div className="row-start-3 flex flex-wrap gap-1 mt-2">
             {pokemon.types.map((type) => {
               const typeColors = getTypeColors(type);
               const textColor = getContrastColor(typeColors.badge);

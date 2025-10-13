@@ -187,7 +187,7 @@ export function PokemonDetailModal({
   onClose,
   onSelectPokemon,
 }: Props) {
-  const [purchasePokemon, {loading: purchasing}] = usePurchasePokemon();
+  const [purchasePokemon] = usePurchasePokemon();
   const [error, setError] = useState<string | null>(null);
 
   if (!pokemon) return null;
@@ -207,7 +207,7 @@ export function PokemonDetailModal({
     } catch (err: any) {
       setError(err.message || 'Failed to purchase Pokémon');
       // Clear error after 3 seconds
-      setTimeout(() => setError(null), 3000);
+      setTimeout(() => setError(null), 1200);
     }
   };
 
@@ -283,25 +283,19 @@ export function PokemonDetailModal({
               {!pokemon.isOwned && (
                 <button
                   onClick={handlePurchase}
-                  disabled={purchasing}
-                  className="mt-3 w-full px-4 py-2 text-xs font-bold bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className={`mt-3 w-full px-4 py-2 text-xs font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all ${
+                    error ? 'bg-red-500 text-white' : 'bg-yellow-400 text-black'
+                  }`}
                   aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
                 >
-                  {purchasing ? 'Purchasing...' : `Purchase for ${cost} 🍬`}
+                  {error || `Purchase for ${cost} 🍬`}
                 </button>
-              )}
-
-              {/* Error Message */}
-              {error && (
-                <div className="mt-2 w-full px-2 py-1 text-[8px] bg-red-500 text-white border-2 border-black">
-                  {error}
-                </div>
               )}
 
               {/* Owned Badge */}
               {pokemon.isOwned && (
-                <div className="mt-3 w-full px-4 py-2 text-xs font-bold bg-green-500 text-white border-2 border-black text-center">
-                  ✓ Owned
+                <div className="mt-3 w-full px-4 py-2 text-xs font-bold bg-green-500 text-Black border-2 border-black text-center">
+                  Owned
                 </div>
               )}
             </div>
