@@ -45,7 +45,7 @@ function App() {
   const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
 
-  const {loading, error, data} = usePokedexQuery({
+  const {loading, error, data, refetch} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
     generation: selectedRegion || undefined,
     type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
@@ -627,6 +627,12 @@ function App() {
             onSelectPokemon={(id) => {
               const next = filteredPokemon.find((p) => p.id === id);
               if (next) setSelectedPokemon(next);
+            }}
+            onPurchase={(id) => {
+              if (selectedPokemon && selectedPokemon.id === id) {
+                setSelectedPokemon({...selectedPokemon, isOwned: true});
+              }
+              refetch();
             }}
           />
         </>

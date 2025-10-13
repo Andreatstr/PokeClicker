@@ -86,8 +86,10 @@ interface PokedexVariables {
 }
 
 export function usePokedexQuery(variables: PokedexVariables) {
-  return useQuery<PokedexData, PokedexVariables>(POKEDEX_QUERY, {
+  const {data, loading, error, refetch} = useQuery<PokedexData, PokedexVariables>(POKEDEX_QUERY, {
     variables,
     fetchPolicy: 'cache-and-network',
   });
+
+  return {data, loading, error, refetch};
 }

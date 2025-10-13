@@ -1,0 +1,33 @@
+/* animations.css */
+
+@keyframes dopamine-release {
+  0% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+  10% {
+    transform: scale(1.05) rotate(-5deg);
+    filter: brightness(1.5) saturate(1.5);
+  }
+  20% {
+    transform: scale(1.05) rotate(5deg);
+  }
+  30% {
+    transform: scale(1.05) rotate(-5deg);
+  }
+  40% {
+    transform: scale(1.05) rotate(5deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+    filter: brightness(2) saturate(2);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+.animate-dopamine-release {
+  animation: dopamine-release 0.8s ease-in-out;
+}
