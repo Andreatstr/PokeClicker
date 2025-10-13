@@ -2,6 +2,7 @@ export const typeDefs = `#graphql
   type Query {
     health: HealthCheck!
     hello: String!
+    me: User!
     pokemon(
       type: String
       generation: String

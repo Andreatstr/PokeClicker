@@ -5,6 +5,7 @@ import {typeDefs} from './schema.js';
 import {resolvers} from './resolvers.js';
 import {connectToDatabase, closeDatabaseConnection} from './db.js';
 import {initializeSchema} from './initSchema.js';
+import {authenticateToken, type AuthContext} from './auth.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
@@ -24,7 +25,15 @@ async function startServer() {
 
   const {url} = await startStandaloneServer(server, {
     listen: {port: PORT},
-    context: async ({req}) => ({req}),
+    context: async ({req}): Promise<AuthContext> => {
+      // Extract Authorization header
+      const authHeader = req.headers.authorization;
+
+      // Verify token and extract user
+      const user = authenticateToken(authHeader);
+
+      return {user};
+    },
   });
 
   console.log(`GraphQL server ready at: ${url}`);
