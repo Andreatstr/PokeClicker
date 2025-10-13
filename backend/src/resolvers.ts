@@ -91,6 +91,11 @@ const authMutations = {
   },
 };
 
+// Helper to get upgrade cost
+function getUpgradeCost(currentLevel: number): number {
+  return Math.floor(10 * Math.pow(1.5, currentLevel - 1));
+}
+
 export const resolvers = {
   Query: {
     health: () => ({
@@ -232,5 +237,81 @@ export const resolvers = {
   },
   Mutation: {
     ...authMutations,
+
+    // Update rare candy count (increment/decrement by amount)
+    updateRareCandy: async (
+      _: unknown,
+      {amount}: {amount: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Update rare candy atomically
+      const result = await users.findOneAndUpdate(
+        {_id: new ObjectId(user.id)},
+        {$inc: {rare_candy: amount}},
+        {returnDocument: 'after'}
+      );
+
+      if (!result) {
+        throw new Error('User not found');
+      }
+
+      return sanitizeUserForClient(result);
+    },
+
+    // Upgrade a specific stat
+    upgradeStat: async (
+      _: unknown,
+      {stat}: {stat: string},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      // Validate stat name
+      const validStats = ['hp', 'attack', 'defense', 'spAttack', 'spDefense', 'speed'];
+      if (!validStats.includes(stat)) {
+        throw new Error(`Invalid stat: ${stat}. Must be one of: ${validStats.join(', ')}`);
+      }
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // Calculate cost
+      const currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats];
+      const cost = getUpgradeCost(currentLevel);
+
+      // Check if user has enough rare candy
+      if (userDoc.rare_candy < cost) {
+        throw new Error(`Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`);
+      }
+
+      // Update stat and deduct cost atomically
+      const result = await users.findOneAndUpdate(
+        {_id: new ObjectId(user.id)},
+        {
+          $inc: {
+            [`stats.${stat}`]: 1,
+            rare_candy: -cost,
+          },
+        },
+        {returnDocument: 'after'}
+      );
+
+      if (!result) {
+        throw new Error('Failed to upgrade stat');
+      }
+
+      return sanitizeUserForClient(result);
+    },
   },
 };
