@@ -132,7 +132,7 @@ export function LoginScreen({onNavigate}: Props) {
       >
         <h1
           className={`pixel-font text-white ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl'} mb-3 drop-shadow-lg`}
-          style={{WebkitTextStroke: '1.2px black', color: 'white'}}
+          style={{WebkitTextStroke: '2px black', color: 'white'}}
         >
           PokeClicker
         </h1>
@@ -141,19 +141,19 @@ export function LoginScreen({onNavigate}: Props) {
           className={`flex flex-col items-center justify-center gap-4 ${isMobile ? 'w-3/4' : 'w-full'}`}
         >
           <Button
-            className={`${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('login')}
           >
             Log in
           </Button>
           <Button
-            className={`${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('signup')}
           >
             Sign up
           </Button>
           <Button
-            className={`${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => onNavigate('clicker')}
           >
             Guest user
