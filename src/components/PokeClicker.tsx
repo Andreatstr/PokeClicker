@@ -282,14 +282,19 @@ export function PokeClicker() {
                 {candies.map((candy) => (
                   <div
                     key={candy.id}
-                    className="absolute text-2xl pointer-events-none"
+                    className="absolute pointer-events-none"
                     style={{
                       left: `${candy.x}%`,
                       bottom: '40%',
                       animation: 'float-up 1s ease-out forwards',
                     }}
                   >
-                    🍬
+                    <img
+                      src={`${import.meta.env.BASE_URL}candy.png`}
+                      alt="candy"
+                      className="w-8 h-8"
+                      style={{imageRendering: 'pixelated'}}
+                    />
                   </div>
                 ))}
 

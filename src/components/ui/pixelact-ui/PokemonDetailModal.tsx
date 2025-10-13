@@ -212,8 +212,17 @@ export function PokemonDetailModal({
   if (!pokemon) return null;
 
   const primaryType = pokemon.types[0];
-  const typeColors = getTypeColors(primaryType);
-  const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
+  const typeColors = pokemon.isOwned
+    ? getTypeColors(primaryType)
+    : {
+        badge: 'bg-gray-400',
+        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+        cardBorder: 'border-gray-400',
+        shadow: 'shadow-gray-400/50',
+      };
+  const backgroundImageUrl = pokemon.isOwned
+    ? getBackgroundImageUrl(pokemon.types)
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
 
@@ -254,7 +263,7 @@ export function PokemonDetailModal({
             className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[400px] font-press-start flex flex-col items-center ${typeColors.cardBg}`}
           >
             <figure
-              className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full"
+              className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full relative"
               style={{
                 backgroundImage: `url(${backgroundImageUrl})`,
                 backgroundSize: 'cover',
@@ -308,12 +317,38 @@ export function PokemonDetailModal({
               {!pokemon.isOwned && (
                 <button
                   onClick={handlePurchase}
-                  className={`mt-3 w-full px-4 py-2 text-xs font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all ${
-                    error ? 'bg-red-500 text-white' : 'bg-yellow-400 text-black'
+                  className={`group mt-4 w-full px-6 py-4 text-base font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 relative overflow-hidden ${
+                    error ? 'bg-red-500 text-white animate-shake' : 'bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 text-black'
                   }`}
                   aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
                 >
-                  {error || `Purchase for ${cost} 🍬`}
+                  {!error && (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent"></div>
+                    </>
+                  )}
+                  {error ? (
+                    <span className="relative z-10">{error}</span>
+                  ) : (
+                    <div className="relative z-10 flex flex-col gap-2">
+                      <span className="text-lg uppercase tracking-wider drop-shadow-[2px_2px_0px_rgba(255,255,255,0.5)]">
+                        🔓 Unlock Pokemon
+                      </span>
+                      <div className="flex items-center justify-center gap-2 bg-black/20 px-4 py-2 rounded border-2 border-black/40">
+                        <span className="text-xs">Price:</span>
+                        <span className="text-2xl font-bold drop-shadow-[1px_1px_0px_rgba(0,0,0,0.3)]">
+                          {cost}
+                        </span>
+                        <img
+                          src={`${import.meta.env.BASE_URL}candy.png`}
+                          alt="candy"
+                          className="w-6 h-6 inline-block group-hover:scale-125 group-hover:rotate-12 transition-all"
+                          style={{imageRendering: 'pixelated'}}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </button>
               )}
 

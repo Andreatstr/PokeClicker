@@ -181,8 +181,17 @@ function getBackgroundImageUrl(types: string[]): string {
 
 export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
-  const typeColors = getTypeColors(primaryType);
-  const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
+  const typeColors = pokemon.isOwned
+    ? getTypeColors(primaryType)
+    : {
+        badge: 'bg-gray-400',
+        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+        cardBorder: 'border-gray-400',
+        shadow: 'shadow-gray-400/50',
+      };
+  const backgroundImageUrl = pokemon.isOwned
+    ? getBackgroundImageUrl(pokemon.types)
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const [purchasePokemon] = usePurchasePokemon();
   const [error, setError] = useState<string | null>(null);
 
@@ -218,7 +227,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
 
   return (
     <aside
-      className={`relative cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] pixel-font flex flex-col items-center ${typeColors.cardBg}
+      className={`relative cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] h-[420px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
         hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]`}
       onClick={handleClick}
@@ -228,7 +237,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       aria-label={`View details for ${pokemon.name}`}
     >
       <figure
-        className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full"
+        className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full h-[200px] relative flex-shrink-0"
         style={{
           backgroundImage: `url(${backgroundImageUrl})`,
           backgroundSize: 'cover',
@@ -247,48 +256,105 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       </figure>
 
       <div
-        className="bg-black/20 p-2 rounded-md w-full"
+        className="bg-black/20 p-2 rounded-md w-full flex-1 flex flex-col"
         style={{textShadow: '1px 1px 0 #FFF'}}
       >
-        <div className="infoGrid grid grid-cols-1 grid-rows-[auto_minmax(28px,auto)_auto] gap-y-1 text-[10px] mb-4">
-          <div className="row-start-1">
-            <strong className="font-bold text-sm capitalize">
+        <div className="infoGrid flex flex-col gap-2 text-[10px] flex-1">
+          {/* Pokemon Name */}
+          <div className="flex items-center justify-between min-h-[20px]">
+            <strong className="font-bold text-sm capitalize truncate">
               {pokemon.isOwned ? pokemon.name : '???'}
             </strong>
-          </div>
-
-          {/* Purchase Button or Pokemon Number */}
-          <div className="row-start-2 flex items-center">
-            {!pokemon.isOwned ? (
-              <button
-                onClick={handlePurchase}
-                className={`w-full cursor-pointer px-3 py-1 text-[10px] font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all ${
-                  error ? 'bg-red-500 text-white' : 'bg-yellow-400 text-black'
-                }`}
-                aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
-              >
-                {error || `Buy (${cost} 🍬)`}
-              </button>
-            ) : (
-              <span className="font-normal">#{pokemon.pokedexNumber}</span>
+            {pokemon.isOwned && (
+              <span className="font-normal text-[9px] bg-black/10 border border-black/30 px-2 py-0.5 rounded whitespace-nowrap ml-2">
+                #{pokemon.pokedexNumber}
+              </span>
             )}
           </div>
 
-          <div className="row-start-3 flex flex-wrap gap-1 mt-2">
-            {pokemon.types.map((type) => {
-              const typeColors = getTypeColors(type);
-              const textColor = getContrastColor(typeColors.badge);
-              return (
-                <span
-                  key={type}
-                  className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${typeColors.badge} ${textColor}`}
-                  style={{textShadow: 'none'}}
-                >
-                  {type}
+          {/* Purchase Button or Info Grid */}
+          {!pokemon.isOwned ? (
+            <button
+              onClick={handlePurchase}
+              className={`group w-full cursor-pointer px-4 py-3 text-sm font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 relative overflow-hidden ${
+                error ? 'bg-red-500 text-white animate-shake' : 'bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 text-black'
+              }`}
+              aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
+            >
+              {!error && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+              )}
+              {error ? (
+                <span className="relative z-10">{error}</span>
+              ) : (
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span className="text-xs uppercase tracking-wider drop-shadow-[1px_1px_0px_rgba(255,255,255,0.5)]">
+                    Unlock
+                  </span>
+                  <span className="flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-black/30">
+                    <span className="text-lg font-bold">{cost}</span>
+                    <img
+                      src={`${import.meta.env.BASE_URL}candy.png`}
+                      alt="candy"
+                      className="w-5 h-5 inline-block group-hover:scale-110 transition-transform"
+                      style={{imageRendering: 'pixelated'}}
+                    />
+                  </span>
                 </span>
-              );
-            })}
-          </div>
+              )}
+            </button>
+          ) : (
+            <>
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]">
+                <div>
+                  <strong className="font-bold">Height:</strong>{' '}
+                  <span className="font-normal">{pokemon.height ?? '—'}</span>
+                </div>
+                <div>
+                  <strong className="font-bold">Weight:</strong>{' '}
+                  <span className="font-normal">{pokemon.weight ?? '—'}</span>
+                </div>
+              </div>
+
+              {/* Abilities */}
+              {pokemon.abilities && pokemon.abilities.length > 0 && (
+                <div className="text-[9px] min-h-[36px]">
+                  <strong className="font-bold">Abilities:</strong>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {pokemon.abilities.slice(0, 3).map((ability) => (
+                      <span
+                        key={ability}
+                        className="px-1.5 py-0.5 bg-white/50 border border-black/20 rounded text-[8px] truncate max-w-[90px]"
+                        title={ability}
+                      >
+                        {ability}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Type Tags */}
+          {pokemon.isOwned && (
+            <div className="flex flex-wrap gap-1 mt-auto pt-2 min-h-[24px]">
+              {pokemon.types.map((type) => {
+                const typeColors = getTypeColors(type);
+                const textColor = getContrastColor(typeColors.badge);
+                return (
+                  <span
+                    key={type}
+                    className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${typeColors.badge} ${textColor}`}
+                    style={{textShadow: 'none'}}
+                  >
+                    {type}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </aside>
