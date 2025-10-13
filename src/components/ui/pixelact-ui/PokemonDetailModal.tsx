@@ -2,12 +2,19 @@ import {Dialog, DialogBody} from './dialog';
 import {StackedProgress} from './StackedProgress';
 import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePokemonById} from '@/hooks/usePokemonById';
+import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
+import {useState} from 'react';
 
 interface Props {
   pokemon: PokedexPokemon | null;
   isOpen: boolean;
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
+}
+
+// Helper to calculate Pokemon purchase cost (matches backend)
+function getPokemonCost(pokemonId: number): number {
+  return Math.floor(100 + (pokemonId / 10));
 }
 
 function getTypeColors(type: string) {
@@ -180,11 +187,29 @@ export function PokemonDetailModal({
   onClose,
   onSelectPokemon,
 }: Props) {
+  const [purchasePokemon, {loading: purchasing}] = usePurchasePokemon();
+  const [error, setError] = useState<string | null>(null);
+
   if (!pokemon) return null;
 
   const primaryType = pokemon.types[0];
   const typeColors = getTypeColors(primaryType);
   const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
+  const cost = getPokemonCost(pokemon.id);
+
+  const handlePurchase = async () => {
+    setError(null);
+
+    try {
+      await purchasePokemon({
+        variables: {pokemonId: pokemon.id},
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to purchase Pokémon');
+      // Clear error after 3 seconds
+      setTimeout(() => setError(null), 3000);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -253,6 +278,32 @@ export function PokemonDetailModal({
                   </ul>
                 </div>
               </div>
+
+              {/* Purchase Button */}
+              {!pokemon.isOwned && (
+                <button
+                  onClick={handlePurchase}
+                  disabled={purchasing}
+                  className="mt-3 w-full px-4 py-2 text-xs font-bold bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
+                >
+                  {purchasing ? 'Purchasing...' : `Purchase for ${cost} 🍬`}
+                </button>
+              )}
+
+              {/* Error Message */}
+              {error && (
+                <div className="mt-2 w-full px-2 py-1 text-[8px] bg-red-500 text-white border-2 border-black">
+                  {error}
+                </div>
+              )}
+
+              {/* Owned Badge */}
+              {pokemon.isOwned && (
+                <div className="mt-3 w-full px-4 py-2 text-xs font-bold bg-green-500 text-white border-2 border-black text-center">
+                  ✓ Owned
+                </div>
+              )}
             </div>
           </aside>
 

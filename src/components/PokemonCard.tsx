@@ -1,10 +1,16 @@
-import {Card} from '@/components/ui/pixelact-ui/card';
 import {type PokedexPokemon} from '@/hooks/usePokedexQuery';
+import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
 import '@/components/ui/pixelact-ui/styles/patterns.css';
+import {useState} from 'react';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
   onClick?: (pokemon: PokedexPokemon) => void;
+}
+
+// Helper to calculate Pokemon purchase cost (matches backend)
+function getPokemonCost(pokemonId: number): number {
+  return Math.floor(100 + (pokemonId / 10));
 }
 
 function getContrastColor(bgColor: string): string {
@@ -176,6 +182,10 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
   const typeColors = getTypeColors(primaryType);
   const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
+  const [purchasePokemon, {loading: purchasing}] = usePurchasePokemon();
+  const [error, setError] = useState<string | null>(null);
+
+  const cost = getPokemonCost(pokemon.id);
 
   const handleClick = () => {
     onClick?.(pokemon);
@@ -185,6 +195,21 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleClick();
+    }
+  };
+
+  const handlePurchase = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    setError(null);
+
+    try {
+      await purchasePokemon({
+        variables: {pokemonId: pokemon.id},
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to purchase Pokémon');
+      // Clear error after 3 seconds
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -223,9 +248,30 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
           <div>
             <strong className="font-bold text-sm capitalize">{pokemon.name}</strong>
           </div>
-          <div>
-            <span className="font-normal">#{pokemon.pokedexNumber}</span>
-          </div>
+
+          {/* Purchase Button or Pokemon Number */}
+          {!pokemon.isOwned ? (
+            <button
+              onClick={handlePurchase}
+              disabled={purchasing}
+              className="w-full px-3 py-1 text-[10px] font-bold bg-yellow-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-2px] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              aria-label={`Purchase ${pokemon.name} for ${cost} rare candy`}
+            >
+              {purchasing ? 'Purchasing...' : `Buy (${cost} 🍬)`}
+            </button>
+          ) : (
+            <div>
+              <span className="font-normal">#{pokemon.pokedexNumber}</span>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-1 w-full px-2 py-1 text-[8px] bg-red-500 text-white border-2 border-black">
+              {error}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-1 mt-2">
             {pokemon.types.map((type) => {
               const typeColors = getTypeColors(type);
