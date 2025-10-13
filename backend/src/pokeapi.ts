@@ -139,7 +139,6 @@ function transformPokemon(
   evolution: number[] = []
 ): Pokemon {
   const sprite =
-    data.sprites.other?.['official-artwork']?.front_default ||
     data.sprites.front_default ||
     '';
 

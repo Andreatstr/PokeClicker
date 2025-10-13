@@ -7,6 +7,48 @@ interface PokemonCardProps {
   onClick?: (pokemon: PokedexPokemon) => void;
 }
 
+function getContrastColor(bgColor: string): string {
+  // Map Tailwind color classes to their hex values
+  const colorMap: Record<string, string> = {
+    'bg-gray-400': '#9ca3af',
+    'bg-red-500': '#ef4444',
+    'bg-blue-500': '#3b82f6',
+    'bg-yellow-400': '#facc15',
+    'bg-green-500': '#22c55e',
+    'bg-blue-200': '#bfdbfe',
+    'bg-red-700': '#b91c1c',
+    'bg-purple-500': '#a855f7',
+    'bg-yellow-600': '#ca8a04',
+    'bg-indigo-400': '#818cf8',
+    'bg-pink-500': '#ec4899',
+    'bg-green-400': '#4ade80',
+    'bg-yellow-800': '#854d0e',
+    'bg-purple-700': '#7e22ce',
+    'bg-indigo-700': '#4338ca',
+    'bg-gray-800': '#1f2937',
+    'bg-gray-500': '#6b7280',
+    'bg-pink-300': '#f9a8d4',
+  };
+
+  const hex = colorMap[bgColor] || '#000000';
+
+  // Convert hex to RGB
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  // Calculate relative luminance using proper sRGB formula
+  const toLinear = (c: number) => {
+    const val = c / 255;
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+  };
+
+  const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+
+  // Return black for light backgrounds (luminance > 0.179 gives ~4.5:1 contrast), white for dark
+  return luminance > 0.179 ? 'text-black' : 'text-white';
+}
+
 function getTypeColors(type: string) {
   const typeColorMap: Record<
     string,
@@ -20,7 +62,7 @@ function getTypeColors(type: string) {
     },
     fire: {
       badge: 'bg-red-500',
-      cardBg: 'bg-gradient-to-br from-red-50 to-red-100',
+      cardBg: 'bg-red-300',
       cardBorder: 'border-red-400',
       shadow: 'shadow-red-400/50',
     },
@@ -38,7 +80,7 @@ function getTypeColors(type: string) {
     },
     grass: {
       badge: 'bg-green-500',
-      cardBg: 'bg-gradient-to-br from-green-50 to-green-100',
+      cardBg: 'bg-green-200',
       cardBorder: 'border-green-400',
       shadow: 'shadow-green-400/50',
     },
@@ -147,84 +189,60 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
   };
 
   return (
-    <Card
-      font="pixel"
-      className={`
-        card-pattern
-        cursor-pointer w-[280px] p-6 border-8 shadow-lg
+    <aside
+      className={`cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
-        hover:translate-y-[-4px] hover:shadow-xl
-        hover:scale-[1.02] active:scale-[0.98] active:translate-y-[0px]
-        ${typeColors.cardBg} ${typeColors.cardBorder} ${typeColors.shadow}
-      `}
-      style={{
-        backgroundImage: `url(${backgroundImageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+        hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-label={`View details for ${pokemon.name}`}
     >
-      <article className="text-center relative z-1 flex flex-col justify-between h-full">
-        <div className="bg-black/20 p-2 rounded-md">
-          <p
-            className="text-xs text-black mb-1 tracking-wider"
-            style={{
-              textShadow:
-                '-1px -1px 0 #FFF, 1px -1px 0 #FFF, -1px 1px 0 #FFF, 1px 1px 0 #FFF',
-            }}
-          >
-            #{pokemon.pokedexNumber}
-          </p>
-          <h2
-            className="text-lg font-bold text-white mb-3 tracking-wider"
-            style={{
-              textShadow:
-                '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000',
-            }}
-          >
-            {pokemon.name}
-          </h2>
-        </div>
+      <figure
+        className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full"
+        style={{
+          backgroundImage: `url(${backgroundImageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <img
+          src={pokemon.sprite}
+          alt={pokemon.name}
+          className="w-full h-full object-contain origin-center"
+          style={{imageRendering: 'pixelated'}}
+        />
+      </figure>
 
-        <figure className="p-0 mt-4 aspect-square flex items-center justify-center m-0 relative">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%)',
-            }}
-          ></div>
-          <img
-            src={pokemon.sprite}
-            alt={pokemon.name}
-            className="w-full h-full object-contain transition-transform duration-200 [filter:drop-shadow(0_4px_3px_rgba(0,0,0,0.7))] relative z-10"
-            style={{imageRendering: 'pixelated'}}
-            loading="lazy"
-          />
-        </figure>
-
-        <div className="flex flex-wrap justify-center gap-2 mt-2">
-          {pokemon.types.map((type) => {
-            const typeColors = getTypeColors(type);
-            return (
-              <span
-                key={type}
-                className={`
-                    px-3 py-1 text-xs font-bold text-white uppercase tracking-wider
-                    border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
-                    ${typeColors.badge} drop-shadow-sm
-                  `}
-              >
-                {type}
-              </span>
-            );
-          })}
+      <div
+        className="bg-black/20 p-2 rounded-md w-full"
+        style={{textShadow: '1px 1px 0 #FFF'}}
+      >
+        <div className="infoGrid grid grid-cols-1 gap-x-4 gap-y-1 text-[10px] mb-4">
+          <div>
+            <strong className="font-bold text-sm capitalize">{pokemon.name}</strong>
+          </div>
+          <div>
+            <span className="font-normal">#{pokemon.pokedexNumber}</span>
+          </div>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {pokemon.types.map((type) => {
+              const typeColors = getTypeColors(type);
+              const textColor = getContrastColor(typeColors.badge);
+              return (
+                <span
+                  key={type}
+                  className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${typeColors.badge} ${textColor}`}
+                  style={{textShadow: 'none'}}
+                >
+                  {type}
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </article>
-    </Card>
+      </div>
+    </aside>
   );
 }
