@@ -249,7 +249,9 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       >
         <div className="infoGrid grid grid-cols-1 grid-rows-[auto_minmax(28px,auto)_auto] gap-y-1 text-[10px] mb-4">
           <div className="row-start-1">
-            <strong className="font-bold text-sm capitalize">{pokemon.name}</strong>
+            <strong className="font-bold text-sm capitalize">
+              {pokemon.isOwned ? pokemon.name : '???'}
+            </strong>
           </div>
 
           {/* Purchase Button or Pokemon Number */}

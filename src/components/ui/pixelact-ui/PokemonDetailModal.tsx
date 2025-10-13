@@ -3,7 +3,17 @@ import {StackedProgress} from './StackedProgress';
 import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePokemonById} from '@/hooks/usePokemonById';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
+import {useQuery, gql} from '@apollo/client';
 import {useState} from 'react';
+
+const ME_QUERY = gql`
+  query Me {
+    me {
+      _id
+      owned_pokemon_ids
+    }
+  }
+`;
 
 interface Props {
   pokemon: PokedexPokemon | null;
@@ -144,10 +154,12 @@ function EvolutionPokemon({
   id,
   onSelectPokemon,
   showArrow,
+  isOwned,
 }: {
   id: number;
   onSelectPokemon?: (id: number) => void;
   showArrow: boolean;
+  isOwned: boolean;
 }) {
   const {data, loading} = usePokemonById(id);
 
@@ -165,16 +177,22 @@ function EvolutionPokemon({
   return (
     <div className="evolutionItem flex items-center gap-2">
       <button
-        className="evolutionButton bg-transparent border-none p-0 cursor-pointer"
+        className="evolutionButton bg-transparent border-none p-0 cursor-pointer relative"
         onClick={() => onSelectPokemon?.(evo.id)}
-        title={`View ${evo.name}`}
+        title={isOwned ? `View ${evo.name}` : 'Unknown Pokémon'}
       >
-        <img
-          src={evo.sprite}
-          alt={evo.name}
-          className="evolutionImage w-24 h-24 scale-125 origin-center object-contain hover:scale-110"
-          style={{imageRendering: 'pixelated'}}
-        />
+        {isOwned ? (
+          <img
+            src={evo.sprite}
+            alt={evo.name}
+            className="evolutionImage w-24 h-24 scale-125 origin-center object-contain hover:scale-110"
+            style={{imageRendering: 'pixelated'}}
+          />
+        ) : (
+          <div className="w-24 h-24 flex items-center justify-center">
+            <span className="text-6xl font-bold">?</span>
+          </div>
+        )}
       </button>
       {showArrow && <span className="evolutionArrow text-base">→</span>}
     </div>
@@ -189,6 +207,7 @@ export function PokemonDetailModal({
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
   const [error, setError] = useState<string | null>(null);
+  const {data: userData} = useQuery(ME_QUERY);
 
   if (!pokemon) return null;
 
@@ -196,6 +215,7 @@ export function PokemonDetailModal({
   const typeColors = getTypeColors(primaryType);
   const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
   const cost = getPokemonCost(pokemon.id);
+  const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
 
   const handlePurchase = async () => {
     setError(null);
@@ -222,7 +242,7 @@ export function PokemonDetailModal({
       <DialogBody>
         <div className="flex items-center justify-center relative mb-4">
           <h2 className="text-base font-bold font-press-start text-center">
-            {pokemon.name}
+            {pokemon.isOwned ? pokemon.name : '???'}
           </h2>
         </div>
 
@@ -371,6 +391,7 @@ export function PokemonDetailModal({
                       id={id}
                       onSelectPokemon={onSelectPokemon}
                       showArrow={i < arr.length - 1}
+                      isOwned={ownedPokemonIds.includes(id)}
                     />
                   ))}
               </div>
