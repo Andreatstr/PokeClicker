@@ -13,8 +13,7 @@ export function PokeClicker() {
   const {user, isAuthenticated, updateUser} = useAuth();
   const {updateRareCandy, upgradeStat, loading} = useGameMutations();
 
-  // Optimistic local state
-  const [rareCandy, setRareCandy] = useState(user?.rare_candy || 0);
+  // Local state for visual feedback only
   const [isAnimating, setIsAnimating] = useState(false);
   const [candies, setCandies] = useState<Candy[]>([]);
   const [stats, setStats] = useState(
@@ -39,10 +38,15 @@ export function PokeClicker() {
   // Sync local state with user data when it changes
   useEffect(() => {
     if (user) {
-      setRareCandy(user.rare_candy);
       setStats(user.stats);
+      // Reset pending candy when we get fresh data from server
+      setPendingCandyAmount(0);
     }
   }, [user]);
+
+  // Get the reliable candy count (server value + pending)
+  const getCurrentCandy = () => (user?.rare_candy || 0) + pendingCandyAmount;
+  const getSyncedCandy = () => user?.rare_candy || 0;
 
   const flushPendingCandy = useCallback(async () => {
     if (pendingCandyAmount === 0 || !isAuthenticated) return;
@@ -59,31 +63,31 @@ export function PokeClicker() {
     try {
       const updatedUser = await updateRareCandy(amountToSync, updateUser);
       if (updatedUser) {
-        // Server is the source of truth
-        setRareCandy(updatedUser.rare_candy);
+        // Server is the source of truth - this will trigger the useEffect to update
       }
     } catch (err) {
       console.error('Failed to sync candy:', err);
-      setDisplayError('Failed to save progress. Please check your connection.');
-      // Revert optimistic update
-      setRareCandy((prev) => prev - amountToSync);
+      setDisplayError('Failed to save progress. Retrying...');
+      // Re-add the pending amount to try again
+      setPendingCandyAmount(amountToSync);
+      setTimeout(() => setDisplayError(null), 3000);
     }
   }, [pendingCandyAmount, isAuthenticated, updateRareCandy, updateUser]);
 
-  // Batch update clicks every 5 seconds or after 10 clicks
+  // Batch update clicks every 2 seconds or after 10 clicks
   useEffect(() => {
     if (pendingCandyAmount === 0 || !isAuthenticated) return;
 
     const shouldFlush =
-      pendingCandyAmount >= 10 || Date.now() - lastSyncRef.current >= 5000;
+      pendingCandyAmount >= 10 || Date.now() - lastSyncRef.current >= 2000;
 
     if (shouldFlush) {
       flushPendingCandy();
     } else if (!batchTimerRef.current) {
-      // Set a timer to flush after 5 seconds
+      // Set a timer to flush after 2 seconds
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
-      }, 5000);
+      }, 2000);
     }
 
     return () => {
@@ -114,7 +118,6 @@ export function PokeClicker() {
 
     if (passiveIncome > 0) {
       const interval = setInterval(() => {
-        setRareCandy((prev: number) => prev + passiveIncome);
         setPendingCandyAmount((prev) => prev + passiveIncome);
       }, 1000); // Every second
 
@@ -130,8 +133,7 @@ export function PokeClicker() {
 
     const candiesEarned = getCandiesPerClick();
 
-    // Optimistic update
-    setRareCandy((prev: number) => prev + candiesEarned);
+    // Add to pending candy
     setPendingCandyAmount((prev) => prev + candiesEarned);
     setIsAnimating(true);
 
@@ -157,27 +159,25 @@ export function PokeClicker() {
     }
 
     const cost = getUpgradeCost(stat);
-    if (rareCandy < cost) {
+    const currentCandy = getCurrentCandy();
+
+    if (currentCandy < cost) {
       return; // Not enough candy
     }
 
-    // Flush pending candy updates before upgrading
+    // Flush pending candy updates before upgrading to ensure server has latest amount
     if (pendingCandyAmount > 0) {
       await flushPendingCandy();
     }
 
-    // Optimistic update
-    const oldCandy = rareCandy;
+    // Optimistic update for stats only
     const oldStat = stats[stat];
-
-    setRareCandy((prev: number) => prev - cost);
     setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
 
     try {
       const updatedUser = await upgradeStat(stat, updateUser);
       if (updatedUser) {
-        // Server is the source of truth
-        setRareCandy(updatedUser.rare_candy);
+        // Server is the source of truth - useEffect will sync
         setStats(updatedUser.stats);
       }
     } catch (err) {
@@ -188,8 +188,8 @@ export function PokeClicker() {
           : 'Failed to upgrade stat. Please try again.';
       setDisplayError(errorMessage);
       // Revert optimistic update
-      setRareCandy(oldCandy);
       setStats((prev: typeof stats) => ({...prev, [stat]: oldStat}));
+      setTimeout(() => setDisplayError(null), 3000);
     }
   };
 
@@ -418,7 +418,7 @@ export function PokeClicker() {
             </div>
             <div className="bg-white border-2 border-black px-4 py-2 shadow-md">
               <span className="pixel-font text-2xl font-bold text-black">
-                {Math.floor(rareCandy)}
+                {Math.floor(getCurrentCandy())}
               </span>
             </div>
           </div>
@@ -431,9 +431,6 @@ export function PokeClicker() {
               POKEMON UPGRADES
             </h2>
           </div>
-          {isLoading && (
-            <div className="text-center pixel-font text-sm mb-2">Saving...</div>
-          )}
           <div className="flex flex-col gap-3">
             {Object.entries(stats)
               .filter(([key]) => key !== '__typename')
@@ -484,7 +481,7 @@ export function PokeClicker() {
                         onClick={() => handleUpgrade(key as keyof typeof stats)}
                         disabled={
                           !isAuthenticated ||
-                          rareCandy < cost ||
+                          getCurrentCandy() < cost ||
                           isLoading ||
                           key === 'spDefense' ||
                           key === 'speed'

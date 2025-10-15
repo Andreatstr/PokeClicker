@@ -3,6 +3,7 @@ import {StackedProgress} from './StackedProgress';
 import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePokemonById} from '@/hooks/usePokemonById';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
+import {useAuth} from '@/hooks/useAuth';
 import {useQuery, gql} from '@apollo/client';
 import {useState, useEffect} from 'react';
 import {UnlockButton} from '@/components/UnlockButton';
@@ -210,6 +211,7 @@ export function PokemonDetailModal({
   onPurchase,
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
+  const {updateUser} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const {data: userData} = useQuery(ME_QUERY);
@@ -236,9 +238,15 @@ export function PokemonDetailModal({
     setError(null);
 
     try {
-      await purchasePokemon({
+      const result = await purchasePokemon({
         variables: {pokemonId: pokemon.id},
       });
+
+      // Immediately update AuthContext with the server response
+      if (result.data?.purchasePokemon) {
+        updateUser(result.data.purchasePokemon);
+      }
+
       onPurchase?.(pokemon.id);
       // Trigger animation after successful purchase
       setIsAnimating(true);

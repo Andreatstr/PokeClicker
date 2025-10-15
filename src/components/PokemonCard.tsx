@@ -1,5 +1,6 @@
 import {type PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
+import {useAuth} from '@/hooks/useAuth';
 import '@/components/ui/pixelact-ui/styles/patterns.css';
 import {useState, useEffect} from 'react';
 import {UnlockButton} from '@/components/UnlockButton';
@@ -194,6 +195,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const [purchasePokemon] = usePurchasePokemon();
+  const {updateUser} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -215,9 +217,15 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
     setError(null);
 
     try {
-      await purchasePokemon({
+      const result = await purchasePokemon({
         variables: {pokemonId: pokemon.id},
       });
+
+      // Immediately update AuthContext with the server response
+      if (result.data?.purchasePokemon) {
+        updateUser(result.data.purchasePokemon);
+      }
+
       // Trigger animation after successful purchase
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 800); // Animation duration
