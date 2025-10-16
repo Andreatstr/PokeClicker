@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {gql, useMutation} from '@apollo/client';
 import {Button} from '@/components/ui/pixelact-ui/button';
-import {useAuth} from '@/contexts/AuthContext';
+import {useAuth} from '@/hooks/useAuth';
 
 type Props = {
   onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;

@@ -140,6 +140,7 @@ Når vi skulle implementere Pokédex med søk, filtrering og sortering, møtte v
    - **Problem**: Med flere brukere og utviklere ville vi raskt treffe limit
 
 3. **Naive løsning (vår første implementasjon):**
+
    ```javascript
    // Hent ALLE Pokémon → filtrer → sorter → returner 20
    const allPokemon = await fetchPokemon({limit: 1025});
@@ -147,6 +148,7 @@ Når vi skulle implementere Pokédex med søk, filtrering og sortering, møtte v
    const sorted = filtered.sort(...);
    return sorted.slice(0, 20);
    ```
+
    - **Fungerer med 1025 Pokémon**, men...
    - **Skalerer IKKE**: Med 1 million Pokémon → Out of Memory
    - **Ineffektivt**: Henter 1005 Pokémon vi aldri viser
@@ -167,24 +169,28 @@ Bruker → MongoDB (filtrer/sorter/paginer) → 20 Pokemon-IDer
    - ~1KB per Pokémon (minimalt lagringsbehov)
 
 2. **MongoDB håndterer spørring:**
+
    ```javascript
    const pokemonMeta = await collection
-     .find({generation: "kanto", types: "fire"})
+     .find({generation: 'kanto', types: 'fire'})
      .sort({name: 1})
      .skip(0)
      .limit(20)
      .toArray();
    ```
+
    - Indeksert for rask søk
    - Støtter regex-søk, multi-felt filtrering
    - **Fungerer like raskt med 1 milliard poster** (med riktige indekser)
 
 3. **Hent full data kun for de 20:**
+
    ```javascript
    const fullPokemon = await Promise.all(
-     pokemonMeta.map(meta => fetchPokemonById(meta.id))
+     pokemonMeta.map((meta) => fetchPokemonById(meta.id))
    );
    ```
+
    - 20 API-kall i stedet for 1025+
    - Med caching: ~3ms per Pokémon etter første gang
 
@@ -196,12 +202,12 @@ Bruker → MongoDB (filtrer/sorter/paginer) → 20 Pokemon-IDer
 - ✅ **Rask respons**: Database-query < 10ms, API-kall paralleliseres
 - ✅ **Fungerer med milliarder**: Arkitekturen endrer seg ikke med datavolum
 
-
 ## Kjøre prosjektet lokalt
 
 ### 1. Installere Node.js og MongoDB
 
 **Node.js:**
+
 - Last ned og installer fra [nodejs.org](https://nodejs.org/) (LTS versjon anbefales)
 - Sjekk at det virker: åpne terminal og skriv `node --version`
 

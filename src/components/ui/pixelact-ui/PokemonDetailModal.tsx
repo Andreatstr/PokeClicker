@@ -2,12 +2,33 @@ import {Dialog, DialogBody} from './dialog';
 import {StackedProgress} from './StackedProgress';
 import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePokemonById} from '@/hooks/usePokemonById';
+import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
+import {useAuth} from '@/hooks/useAuth';
+import {useQuery, gql} from '@apollo/client';
+import {useState, useEffect} from 'react';
+import {UnlockButton} from '@/components/UnlockButton';
+import './styles/animations.css';
+
+const ME_QUERY = gql`
+  query Me {
+    me {
+      _id
+      owned_pokemon_ids
+    }
+  }
+`;
 
 interface Props {
   pokemon: PokedexPokemon | null;
   isOpen: boolean;
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
+  onPurchase?: (id: number) => void;
+}
+
+// Helper to calculate Pokemon purchase cost (matches backend)
+function getPokemonCost(pokemonId: number): number {
+  return Math.floor(100 + pokemonId / 10);
 }
 
 function getTypeColors(type: string) {
@@ -137,18 +158,20 @@ function EvolutionPokemon({
   id,
   onSelectPokemon,
   showArrow,
+  isOwned,
 }: {
   id: number;
   onSelectPokemon?: (id: number) => void;
   showArrow: boolean;
+  isOwned: boolean;
 }) {
   const {data, loading} = usePokemonById(id);
 
   if (loading || !data?.pokemonById) {
     return (
-      <div className="evolutionItem flex items-center gap-2">
-        <div className="w-24 h-24 bg-gray-200 animate-pulse" />
-        {showArrow && <span className="evolutionArrow text-base">→</span>}
+      <div className="evolutionItem flex items-center gap-1 md:gap-2">
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
+        {showArrow && <span className="evolutionArrow text-sm md:text-base">→</span>}
       </div>
     );
   }
@@ -156,20 +179,26 @@ function EvolutionPokemon({
   const evo = data.pokemonById;
 
   return (
-    <div className="evolutionItem flex items-center gap-2">
+    <div className="evolutionItem flex items-center gap-1 md:gap-2">
       <button
-        className="evolutionButton bg-transparent border-none p-0 cursor-pointer"
+        className="evolutionButton bg-transparent border-none p-0 cursor-pointer relative"
         onClick={() => onSelectPokemon?.(evo.id)}
-        title={`View ${evo.name}`}
+        title={isOwned ? `View ${evo.name}` : 'Unknown Pokémon'}
       >
-        <img
-          src={evo.sprite}
-          alt={evo.name}
-          className="evolutionImage w-24 h-24 scale-125 origin-center object-contain hover:scale-110"
-          style={{imageRendering: 'pixelated'}}
-        />
+        {isOwned ? (
+          <img
+            src={evo.sprite}
+            alt={evo.name}
+            className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
+            style={{imageRendering: 'pixelated'}}
+          />
+        ) : (
+          <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
+            <span className="text-3xl md:text-4xl font-bold">?</span>
+          </div>
+        )}
       </button>
-      {showArrow && <span className="evolutionArrow text-base">→</span>}
+      {showArrow && <span className="evolutionArrow text-2xl md:text-3xl">→</span>}
     </div>
   );
 }
@@ -179,35 +208,86 @@ export function PokemonDetailModal({
   isOpen,
   onClose,
   onSelectPokemon,
+  onPurchase,
 }: Props) {
+  const [purchasePokemon] = usePurchasePokemon();
+  const {updateUser} = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const {data: userData} = useQuery(ME_QUERY);
+
   if (!pokemon) return null;
 
   const primaryType = pokemon.types[0];
-  const typeColors = getTypeColors(primaryType);
-  const backgroundImageUrl = getBackgroundImageUrl(pokemon.types);
+  const typeColors = pokemon.isOwned
+    ? getTypeColors(primaryType)
+    : {
+        badge: 'bg-gray-400',
+        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+        cardBorder: 'border-gray-400',
+        shadow: 'shadow-gray-400/50',
+      };
+  const backgroundImageUrl = pokemon.isOwned
+    ? getBackgroundImageUrl(pokemon.types)
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
+  const cost = getPokemonCost(pokemon.id);
+  const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
+
+  const handlePurchase = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setError(null);
+
+    try {
+      const result = await purchasePokemon({
+        variables: {pokemonId: pokemon.id},
+      });
+
+      // Immediately update AuthContext with the server response
+      if (result.data?.purchasePokemon) {
+        updateUser(result.data.purchasePokemon);
+      }
+
+      onPurchase?.(pokemon.id);
+      // Trigger animation after successful purchase
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 800); // Animation duration
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
+      setError(errorMessage);
+      // Clear error after 1.2 seconds
+      setTimeout(() => setError(null), 1200);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <button
-        className="absolute top-2 right-2 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black"
-        onClick={onClose}
-      >
-        X
-      </button>
       <DialogBody>
-        <div className="flex items-center justify-center relative mb-4">
-          <h2 className="text-base font-bold font-press-start text-center">
-            {pokemon.name}
-          </h2>
+        {/* Mobile drawer handle */}
+        <div className="md:hidden flex justify-center mb-2">
+          <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Left Side */}
+        <div className="flex flex-col gap-3 md:gap-4 items-center">
+          {/* Pokemon Card */}
           <aside
-            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[400px] font-press-start flex flex-col items-center ${typeColors.cardBg}`}
+            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
           >
+            {/* Close Button */}
+            <button
+              className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+              onClick={onClose}
+            >
+              X
+            </button>
+
+            {/* Pokemon Name */}
+            <h2 className="text-sm md:text-base font-bold text-center mb-2 md:mb-3 capitalize">
+              {pokemon.isOwned ? pokemon.name : '???'}
+            </h2>
+
             <figure
-              className="spriteFrame border-2 border-black p-2 mb-4 flex items-center justify-center w-full"
+              className="spriteFrame border-2 border-black p-2 mb-2 md:mb-3 flex items-center justify-center w-full h-[140px] md:h-[180px] relative"
               style={{
                 backgroundImage: `url(${backgroundImageUrl})`,
                 backgroundSize: 'cover',
@@ -216,58 +296,25 @@ export function PokemonDetailModal({
             >
               <img
                 src={pokemon.sprite}
-                alt={pokemon.name}
+                alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
                 className="w-full h-full object-contain origin-center"
-                style={{imageRendering: 'pixelated'}}
+                style={{
+                  imageRendering: 'pixelated',
+                  filter: pokemon.isOwned ? 'none' : 'brightness(0)',
+                }}
               />
             </figure>
 
-            <div
-              className="bg-black/20 p-2 rounded-md w-full"
-              style={{textShadow: '1px 1px 0 #FFF'}}
-            >
-              <div className="infoGrid grid grid-cols-1 gap-x-4 gap-y-1 text-[10px] mb-4">
-                <div>
-                  <strong className="font-bold">Height:</strong>{' '}
-                  <span className="font-normal">{pokemon.height ?? '—'}</span>
-                </div>
-                <div>
-                  <strong className="font-bold">Weight:</strong>{' '}
-                  <span className="font-normal">{pokemon.weight ?? '—'}</span>
-                </div>
-                <div>
-                  <strong className="font-bold">Gender:</strong>{' '}
-                  <span className="font-normal">—</span>
-                </div>
-                <div>
-                  <strong className="font-bold">Habitat:</strong>{' '}
-                  <span className="font-normal">—</span>
-                </div>
-
-                <div className="abilitiesList text-[10px]">
-                  <strong className="font-bold">Abilities:</strong>
-                  <ul className="list-disc pl-4 mt-1">
-                    {pokemon.abilities?.map((a) => (
-                      <li key={a}>{a}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </aside>
-
-          {/* Right Side */}
-          <div className="flex flex-col gap-6 flex-1">
-            <section className="rightBox bg-[#b0f0b0] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 font-press-start">
-              {/* Stats Section */}
+            {/* Stats Section */}
+            <section className="w-full bg-[#b0f0b0] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-2 md:p-3 mb-2 md:mb-3 font-press-start">
               <div className="statsSection">
-                <div className="statsHeaderRow grid grid-cols-[1fr,4fr] mb-2 text-xs font-bold text-center">
+                <div className="statsHeaderRow grid grid-cols-[1fr,4fr] mb-1 text-[10px] md:text-xs font-bold text-center">
                   <span></span>
                   <span>Stats</span>
                 </div>
 
-                <div className="statsGrid grid grid-cols-[1fr,4fr] grid-rows-auto gap-2">
-                  <div className="statsLabels col-start-1 row-start-1 flex flex-col justify-between font-bold text-xs">
+                <div className="statsGrid grid grid-cols-[1fr,4fr] grid-rows-auto gap-1">
+                  <div className="statsLabels col-start-1 row-start-1 flex flex-col justify-between font-bold text-[10px] md:text-xs">
                     <span>HP</span>
                     <span>Attack</span>
                     <span>Defense</span>
@@ -275,7 +322,7 @@ export function PokemonDetailModal({
                     <span>Sp. Def</span>
                     <span>Speed</span>
                   </div>
-                  <div className="statsBars col-start-2 row-start-1 flex flex-col gap-2">
+                  <div className="statsBars col-start-2 row-start-1 flex flex-col gap-1">
                     <StackedProgress
                       baseValue={pokemon.stats?.hp ?? 0}
                       yourValue={pokemon.stats?.hp ?? 0}
@@ -311,21 +358,37 @@ export function PokemonDetailModal({
               </div>
             </section>
 
-            {/* Evolution Section */}
-            <div className="evolutionWrapper p-4 bg-[#a0c8ff] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] text-sm">
-              <h3>Evolution</h3>
-              <div className="evolutionChain flex items-center justify-center gap-4">
-                {[pokemon.id, ...(pokemon.evolution ?? [])]
-                  .sort((a, b) => a - b)
-                  .map((id, i, arr) => (
-                    <EvolutionPokemon
-                      key={id}
-                      id={id}
-                      onSelectPokemon={onSelectPokemon}
-                      showArrow={i < arr.length - 1}
-                    />
-                  ))}
+            {/* Purchase Button or Owned Badge */}
+            {!pokemon.isOwned ? (
+              <UnlockButton
+                onClick={handlePurchase}
+                cost={cost}
+                error={error}
+                pokemonName={pokemon.name}
+                size="small"
+              />
+            ) : (
+              <div className="w-full px-4 py-3 text-sm font-bold bg-green-500 text-white border-4 border-black text-center shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center h-16">
+                  ✓ Owned
               </div>
+            )}
+          </aside>
+
+          {/* Evolution Section */}
+          <div className="evolutionWrapper p-3 bg-[#a0c8ff] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] text-xs md:text-sm w-full max-w-[400px] font-press-start">
+            <h3 className="font-bold mb-2">Evolution</h3>
+            <div className="evolutionChain flex items-center justify-center gap-2 md:gap-3">
+              {[pokemon.id, ...(pokemon.evolution ?? [])]
+                .sort((a, b) => a - b)
+                .map((id, i, arr) => (
+                  <EvolutionPokemon
+                    key={id}
+                    id={id}
+                    onSelectPokemon={onSelectPokemon}
+                    showArrow={i < arr.length - 1}
+                    isOwned={ownedPokemonIds.includes(id)}
+                  />
+                ))}
             </div>
           </div>
         </div>

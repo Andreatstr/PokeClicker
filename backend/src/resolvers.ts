@@ -59,8 +59,15 @@ const authMutations = {
       );
 
       return {token, user: sanitizeUserForClient(userDoc)};
-    } catch (err: any) {
-      if (err && err.code === 11000) throw new Error('Username already exists');
+    } catch (err) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        err.code === 11000
+      ) {
+        throw new Error('Username already exists');
+      }
       console.error('Signup error', err);
       throw new Error('Server error during signup');
     }
@@ -94,6 +101,13 @@ const authMutations = {
 // Helper to get upgrade cost
 function getUpgradeCost(currentLevel: number): number {
   return Math.floor(10 * Math.pow(1.5, currentLevel - 1));
+}
+
+// Helper to get Pokemon purchase cost
+function getPokemonCost(pokemonId: number): number {
+  // Base cost of 100 rare candy
+  // Increases slightly with Pokemon ID (rarer Pokemon cost more)
+  return Math.floor(100 + pokemonId / 10);
 }
 
 export const resolvers = {
@@ -217,7 +231,9 @@ export const resolvers = {
 
       const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
         // If no user is authenticated, guest users see Pokemon as unowned
-        const isOwned = effectiveUserId ? ownedPokemonIds.includes(p.id) : false;
+        const isOwned = effectiveUserId
+          ? ownedPokemonIds.includes(p.id)
+          : false;
 
         // Return full Pokemon data regardless of ownership status
         // The isOwned flag allows frontend to show ownership indicators
@@ -272,9 +288,18 @@ export const resolvers = {
       const user = requireAuth(context);
 
       // Validate stat name
-      const validStats = ['hp', 'attack', 'defense', 'spAttack', 'spDefense', 'speed'];
+      const validStats = [
+        'hp',
+        'attack',
+        'defense',
+        'spAttack',
+        'spDefense',
+        'speed',
+      ];
       if (!validStats.includes(stat)) {
-        throw new Error(`Invalid stat: ${stat}. Must be one of: ${validStats.join(', ')}`);
+        throw new Error(
+          `Invalid stat: ${stat}. Must be one of: ${validStats.join(', ')}`
+        );
       }
 
       const db = getDatabase();
@@ -292,7 +317,9 @@ export const resolvers = {
 
       // Check if user has enough rare candy
       if (userDoc.rare_candy < cost) {
-        throw new Error(`Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`);
+        throw new Error(
+          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`
+        );
       }
 
       // Update stat and deduct cost atomically
@@ -309,6 +336,56 @@ export const resolvers = {
 
       if (!result) {
         throw new Error('Failed to upgrade stat');
+      }
+
+      return sanitizeUserForClient(result);
+    },
+
+    // Purchase a Pokemon
+    purchasePokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // Check if user already owns this Pokemon
+      if (
+        userDoc.owned_pokemon_ids &&
+        userDoc.owned_pokemon_ids.includes(pokemonId)
+      ) {
+        throw new Error('You already own this Pokémon');
+      }
+
+      // Calculate cost
+      const cost = getPokemonCost(pokemonId);
+
+      // Check if user has enough rare candy
+      if (userDoc.rare_candy < cost) {
+        throw new Error(`Not enough candy.`);
+      }
+
+      // Purchase Pokemon atomically: deduct rare candy and add to owned list
+      const result = await users.findOneAndUpdate(
+        {_id: new ObjectId(user.id)},
+        {
+          $inc: {rare_candy: -cost},
+          $addToSet: {owned_pokemon_ids: pokemonId},
+        },
+        {returnDocument: 'after'}
+      );
+
+      if (!result) {
+        throw new Error('Failed to purchase Pokémon');
       }
 
       return sanitizeUserForClient(result);

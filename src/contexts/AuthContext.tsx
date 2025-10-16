@@ -1,4 +1,5 @@
-import {createContext, useContext, useState, useEffect, ReactNode} from 'react';
+import {useState, useEffect, type ReactNode} from 'react';
+import {AuthContext} from './auth-context';
 
 export interface User {
   _id: string;
@@ -15,17 +16,6 @@ export interface User {
   };
   owned_pokemon_ids: number[];
 }
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-  updateUser: (user: User) => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);
@@ -73,11 +63,3 @@ export function AuthProvider({children}: {children: ReactNode}) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
