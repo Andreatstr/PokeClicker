@@ -2,7 +2,7 @@ import {type PokedexPokemon} from '@/hooks/usePokedexQuery';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
 import {useAuth} from '@/hooks/useAuth';
 import '@/components/ui/pixelact-ui/styles/patterns.css';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {UnlockButton} from '@/components/UnlockButton';
 
 interface PokemonCardProps {
@@ -299,12 +299,20 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
               {/* Info Grid */}
               <div className="flex gap-2 text-[9px]">
                 <div className="flex-1 bg-white/30 border border-black/20 rounded px-2 py-1">
-                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">Height</div>
-                  <div className="font-bold text-[11px] tabular-nums">{pokemon.height ?? '—'}</div>
+                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">
+                    Height
+                  </div>
+                  <div className="font-bold text-[11px] tabular-nums">
+                    {pokemon.height ?? '—'}
+                  </div>
                 </div>
                 <div className="flex-1 bg-white/30 border border-black/20 rounded px-2 py-1">
-                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">Weight</div>
-                  <div className="font-bold text-[11px] tabular-nums">{pokemon.weight ?? '—'}</div>
+                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">
+                    Weight
+                  </div>
+                  <div className="font-bold text-[11px] tabular-nums">
+                    {pokemon.weight ?? '—'}
+                  </div>
                 </div>
               </div>
 

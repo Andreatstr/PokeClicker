@@ -46,7 +46,6 @@ export function PokeClicker() {
 
   // Get the reliable candy count (server value + pending)
   const getCurrentCandy = () => (user?.rare_candy || 0) + pendingCandyAmount;
-  const getSyncedCandy = () => user?.rare_candy || 0;
 
   const flushPendingCandy = useCallback(async () => {
     if (pendingCandyAmount === 0 || !isAuthenticated) return;

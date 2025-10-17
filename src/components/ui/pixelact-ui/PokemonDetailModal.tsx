@@ -5,7 +5,7 @@ import {usePokemonById} from '@/hooks/usePokemonById';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
 import {useAuth} from '@/hooks/useAuth';
 import {useQuery, gql} from '@apollo/client';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {UnlockButton} from '@/components/UnlockButton';
 import './styles/animations.css';
 
@@ -171,7 +171,9 @@ function EvolutionPokemon({
     return (
       <div className="evolutionItem flex items-center gap-1 md:gap-2">
         <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
-        {showArrow && <span className="evolutionArrow text-sm md:text-base">→</span>}
+        {showArrow && (
+          <span className="evolutionArrow text-sm md:text-base">→</span>
+        )}
       </div>
     );
   }
@@ -198,7 +200,9 @@ function EvolutionPokemon({
           </div>
         )}
       </button>
-      {showArrow && <span className="evolutionArrow text-2xl md:text-3xl">→</span>}
+      {showArrow && (
+        <span className="evolutionArrow text-2xl md:text-3xl">→</span>
+      )}
     </div>
   );
 }
@@ -369,7 +373,7 @@ export function PokemonDetailModal({
               />
             ) : (
               <div className="w-full px-4 py-3 text-sm font-bold bg-green-500 text-white border-4 border-black text-center shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center h-16">
-                  ✓ Owned
+                ✓ Owned
               </div>
             )}
           </aside>
