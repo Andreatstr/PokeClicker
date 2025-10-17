@@ -171,7 +171,9 @@ function EvolutionPokemon({
     return (
       <div className="evolutionItem flex items-center gap-1 md:gap-2">
         <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
-        {showArrow && <span className="evolutionArrow text-sm md:text-base">→</span>}
+        {showArrow && (
+          <span className="evolutionArrow text-sm md:text-base">→</span>
+        )}
       </div>
     );
   }
@@ -198,7 +200,9 @@ function EvolutionPokemon({
           </div>
         )}
       </button>
-      {showArrow && <span className="evolutionArrow text-2xl md:text-3xl">→</span>}
+      {showArrow && (
+        <span className="evolutionArrow text-2xl md:text-3xl">→</span>
+      )}
     </div>
   );
 }

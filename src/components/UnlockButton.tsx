@@ -14,9 +14,7 @@ export function UnlockButton({
   size = 'small',
 }: UnlockButtonProps) {
   const sizeClasses =
-    size === 'large'
-      ? 'px-6 py-4 text-base'
-      : 'px-4 py-3 text-sm';
+    size === 'large' ? 'px-6 py-4 text-base' : 'px-4 py-3 text-sm';
 
   const priceTextSize = size === 'large' ? 'text-2xl' : 'text-lg';
   const candySize = size === 'large' ? 'w-6 h-6' : 'w-5 h-5';
