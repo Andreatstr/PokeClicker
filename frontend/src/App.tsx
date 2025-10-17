@@ -10,6 +10,7 @@ import {
 import {Button} from '@ui/pixelact';
 import {PokeClicker} from '@features/clicker';
 import {LoginScreen} from '@features/auth';
+import {PokemonMap} from '@features/map';
 import {Navbar, BackgroundMusic} from '@/components';
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<
-    'clicker' | 'pokedex' | 'login'
+    'clicker' | 'pokedex' | 'login' | 'map'
   >('login');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -121,6 +122,10 @@ function App() {
             {currentPage === 'clicker' ? (
               <section className="py-8">
                 <PokeClicker />
+              </section>
+            ) : currentPage === 'map' ? (
+              <section className="py-8">
+                <PokemonMap />
               </section>
             ) : (
               <>

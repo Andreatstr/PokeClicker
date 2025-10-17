@@ -3,8 +3,8 @@ import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
 interface NavbarProps {
-  currentPage: 'clicker' | 'pokedex' | 'login';
-  onPageChange: (page: 'clicker' | 'pokedex' | 'login') => void;
+  currentPage: 'clicker' | 'pokedex' | 'login' | 'map';
+  onPageChange: (page: 'clicker' | 'pokedex' | 'login' | 'map') => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -55,6 +55,12 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
               onClick={() => onPageChange('pokedex')}
             >
               Pokedex
+            </Button>
+            <Button
+              className="text-xs md:text-sm"
+              onClick={() => onPageChange('map')}
+            >
+              Map
             </Button>
 
             <Button onClick={onToggleTheme} className="p-2">
@@ -111,6 +117,12 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
               onClick={() => onPageChange('pokedex')}
             >
               Pokedex
+            </Button>
+            <Button
+              className="w-full text-sm"
+              onClick={() => onPageChange('map')}
+            >
+              Map
             </Button>
 
             <div className="flex items-center justify-center gap-4 mt-2">
