@@ -1,0 +1,364 @@
+import {
+  Button,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  MultiSelect,
+} from '@ui/pixelact';
+import type {PokedexPokemon} from '@features/pokedex';
+
+interface FiltersAndCountProps {
+  loading: boolean;
+  displayedPokemon: PokedexPokemon[];
+  totalPokemon: number;
+  selectedTypes: string[];
+  selectedRegion: string | null;
+  sortBy: 'id' | 'name' | 'type';
+  sortOrder: 'asc' | 'desc';
+  isMobile: boolean;
+  showMobileFilters: boolean;
+  tempRegion: string | null;
+  tempTypes: string[];
+  tempSortBy: 'id' | 'name' | 'type';
+  tempSortOrder: 'asc' | 'desc';
+  setSelectedRegion: (value: string | null) => void;
+  setSelectedTypes: (value: string[]) => void;
+  setSortBy: (value: 'id' | 'name' | 'type') => void;
+  setSortOrder: (value: 'asc' | 'desc') => void;
+  setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
+  setTempRegion: (value: string | null) => void;
+  setTempTypes: (value: string[]) => void;
+  setTempSortBy: (value: 'id' | 'name' | 'type') => void;
+  setTempSortOrder: (value: 'asc' | 'desc') => void;
+  handleClearFilters: () => void;
+}
+
+const typeOptions = [
+  'normal',
+  'fire',
+  'water',
+  'electric',
+  'grass',
+  'ice',
+  'fighting',
+  'poison',
+  'ground',
+  'flying',
+  'psychic',
+  'bug',
+  'rock',
+  'ghost',
+  'dragon',
+  'dark',
+  'steel',
+  'fairy',
+];
+
+const regionOptions = [
+  {value: 'kanto', label: 'Kanto (1-151)'},
+  {value: 'johto', label: 'Johto (152-251)'},
+  {value: 'hoenn', label: 'Hoenn (252-386)'},
+  {value: 'sinnoh', label: 'Sinnoh (387-493)'},
+  {value: 'unova', label: 'Unova (494-649)'},
+  {value: 'kalos', label: 'Kalos (650-721)'},
+  {value: 'alola', label: 'Alola (722-809)'},
+  {value: 'galar', label: 'Galar (810-905)'},
+  {value: 'paldea', label: 'Paldea (906-1025)'},
+];
+
+export function FiltersAndCount({
+  loading,
+  displayedPokemon,
+  totalPokemon,
+  selectedTypes,
+  selectedRegion,
+  sortBy,
+  sortOrder,
+  isMobile,
+  showMobileFilters,
+  tempRegion,
+  tempTypes,
+  tempSortBy,
+  tempSortOrder,
+  setSelectedRegion,
+  setSelectedTypes,
+  setSortBy,
+  setSortOrder,
+  setShowMobileFilters,
+  setTempRegion,
+  setTempTypes,
+  setTempSortBy,
+  setTempSortOrder,
+  handleClearFilters,
+}: FiltersAndCountProps) {
+  return (
+    <section className="mb-6">
+      {showMobileFilters && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="filter-dialog-title"
+          id="mobile-filter-dialog"
+          onClick={() => setShowMobileFilters(false)}
+        >
+          <div
+            className="w-full max-w-md bg-[var(--retro-surface)] p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full bg-[var(--retro-surface)] p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2
+                  id="filter-dialog-title"
+                  className="pixel-font text-lg text-black"
+                >
+                  Filter
+                </h2>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  aria-label="Close filter dialog"
+                >
+                  <span className="text-xl">×</span>
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {/* REGION */}
+                <div>
+                  <Label className="text-xs font-bold text-black">Region</Label>
+                  <Select
+                    value={tempRegion ?? ''}
+                    onValueChange={setTempRegion}
+                  >
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="All regions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {regionOptions.map((region) => (
+                        <SelectItem key={region.value} value={region.value}>
+                          {region.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* TYPE */}
+                <div>
+                  <Label className="text-xs font-bold text-black">Type</Label>
+                  <MultiSelect
+                    options={typeOptions}
+                    selected={tempTypes}
+                    onChange={setTempTypes}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* SORT BY */}
+                <div>
+                  <Label className="text-xs font-bold text-black">
+                    Sort by
+                  </Label>
+                  <Select
+                    value={tempSortBy}
+                    onValueChange={(v) =>
+                      setTempSortBy(v as 'id' | 'name' | 'type')
+                    }
+                  >
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="ID" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="id">ID</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="type">Type</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* ORDER */}
+                <div>
+                  <Label className="text-xs font-bold text-black">Order</Label>
+                  <Select
+                    value={tempSortOrder}
+                    onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
+                  >
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue placeholder="Asc" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="asc">Asc</SelectItem>
+                      <SelectItem value="desc">Desc</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-between mt-6">
+                <Button
+                  variant="default"
+                  aria-label="Clear all filters"
+                  onClick={() => {
+                    setTempRegion(null);
+                    setTempTypes([]);
+                    setTempSortBy('id');
+                    setTempSortOrder('asc');
+
+                    setSelectedRegion(null);
+                    setSelectedTypes([]);
+                    setSortBy('id');
+                    setSortOrder('asc');
+                    setShowMobileFilters(false);
+                  }}
+                >
+                  Clear
+                </Button>
+                <Button
+                  variant="default"
+                  aria-label="Cancel filter changes"
+                  onClick={() => setShowMobileFilters(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="default"
+                  aria-label="Apply selected filters"
+                  onClick={() => {
+                    setSelectedRegion(tempRegion);
+                    setSelectedTypes(tempTypes);
+                    setSortBy(tempSortBy);
+                    setSortOrder(tempSortOrder);
+                    setShowMobileFilters(false);
+                  }}
+                >
+                  Apply
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isMobile && (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm pixel-font text-black">
+            {loading
+              ? 'Loading...'
+              : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
+          </p>
+          <div>
+            {selectedTypes.length > 0 ? (
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs pixel-font text-black">
+                  {selectedTypes.length === 18
+                    ? 'Showing types: All types selected'
+                    : `Showing types: ${selectedTypes.map((type) => type.charAt(0).toUpperCase() + type.slice(1)).join(', ')}`}
+                </p>
+                <Button
+                  type="button"
+                  variant="default"
+                  className="text-xs w-fit px-2 py-1 mt-1"
+                  onClick={() => setSelectedTypes([])}
+                >
+                  Clear Type
+                </Button>
+              </div>
+            ) : (
+              <p className="text-xs pixel-font text-black">
+                Showing types: All types
+              </p>
+            )}
+          </div>
+
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            }}
+          >
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs font-bold text-black">REGION</Label>
+              <Select
+                value={selectedRegion ?? ''}
+                onValueChange={setSelectedRegion}
+              >
+                <SelectTrigger className="w-full text-sm">
+                  <SelectValue placeholder="All regions" />
+                </SelectTrigger>
+                <SelectContent>
+                  {regionOptions.map((region) => (
+                    <SelectItem key={region.value} value={region.value}>
+                      {region.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs font-bold text-black">TYPE</Label>
+              <MultiSelect
+                options={typeOptions}
+                selected={selectedTypes}
+                onChange={setSelectedTypes}
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs font-bold text-black">SORT BY</Label>
+              <Select
+                value={sortBy}
+                onValueChange={(value) =>
+                  setSortBy(value as 'id' | 'name' | 'type')
+                }
+              >
+                <SelectTrigger className="w-full text-sm">
+                  <SelectValue placeholder="ID" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="id">ID</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="type">Type</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs font-bold text-black">ORDER</Label>
+              <Select
+                value={sortOrder}
+                onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
+              >
+                <SelectTrigger className="w-full text-sm">
+                  <SelectValue placeholder="Asc" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asc">Asc</SelectItem>
+                  <SelectItem value="desc">Desc</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs font-bold text-black invisible">
+                ACTIONS
+              </Label>
+              <Button
+                type="button"
+                className="w-full text-sm"
+                onClick={handleClearFilters}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
