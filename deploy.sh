@@ -36,11 +36,12 @@ echo ""
 echo -e "${BLUE}Step 3: Checking MongoDB and Seeding if Needed${NC}"
 cd backend
 echo "Checking if database needs seeding..."
-seed_output=$(timeout 5 pnpm run seed 2>&1 || true)
-if echo "$seed_output" | grep -q "already contains"; then
-    echo "Database already seeded, skipping..."
+# Check by directly querying MongoDB for pokemon count
+pokemon_count=$(mongosh pokeclicker --quiet --eval "db.pokemon_metadata.countDocuments()" 2>/dev/null || echo "0")
+if [ "$pokemon_count" -gt "0" ]; then
+    echo "Database already contains $pokemon_count Pokemon, skipping seed..."
 else
-    echo "Database needs seeding. This will take a few minutes..."
+    echo "Database is empty. Seeding Pokemon (this will take a few minutes)..."
     pnpm run seed
 fi
 echo -e "${GREEN}Database check complete!${NC}"
