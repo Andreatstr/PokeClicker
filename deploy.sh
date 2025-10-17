@@ -21,8 +21,8 @@ DEPLOY_DIR="/var/www/html/project2"
 BACKEND_DIR="$HOME/project2-backend"
 
 echo -e "${BLUE}Step 1: Pulling Latest Changes${NC}"
-echo "Running: git pull origin main"
-git pull origin main
+echo "Running: git pull"
+git pull
 echo -e "${GREEN}Git pull complete!${NC}"
 echo ""
 
@@ -35,10 +35,14 @@ echo ""
 
 echo -e "${BLUE}Step 3: Checking MongoDB and Seeding if Needed${NC}"
 cd backend
-if pnpm run seed 2>&1 | grep -q "already seeded"; then
-    echo "Database already seeded, skipping..."
+echo "Checking if database needs seeding..."
+# Check by directly querying MongoDB for pokemon count
+pokemon_count=$(mongosh pokeclicker --quiet --eval "db.pokemon_metadata.countDocuments()" 2>/dev/null || echo "0")
+if [ "$pokemon_count" -gt "0" ]; then
+    echo "Database already contains $pokemon_count Pokemon, skipping seed..."
 else
-    echo "Seeding database..."
+    echo "Database is empty. Seeding Pokemon (this will take a few minutes)..."
+    pnpm run seed
 fi
 echo -e "${GREEN}Database check complete!${NC}"
 echo ""
@@ -84,10 +88,8 @@ echo -e "${GREEN}=========================================${NC}"
 echo -e "${GREEN}Deployment Complete!${NC}"
 echo -e "${GREEN}=========================================${NC}"
 echo ""
-echo "Frontend: http://it2810-26.idi.ntnu.no/project2/"
-echo "GraphQL: http://it2810-26.idi.ntnu.no/project2/graphql"
+echo "Your application is now live:"
+echo "  Frontend: http://it2810-26.idi.ntnu.no/project2/"
+echo "  GraphQL: http://it2810-26.idi.ntnu.no/project2/graphql"
 echo ""
-echo "Don't forget to:"
-echo "  1. Apply Apache configuration (see Step 5)"
-echo "  2. Start the backend service (see Step 6)"
-echo "  3. Configure backend .env file with MongoDB connection"
+echo "To check backend status: cd backend && ./manage-backend.sh status"
