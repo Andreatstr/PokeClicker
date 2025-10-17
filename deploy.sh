@@ -35,10 +35,13 @@ echo ""
 
 echo -e "${BLUE}Step 3: Checking MongoDB and Seeding if Needed${NC}"
 cd backend
-if pnpm run seed 2>&1 | grep -q "already seeded"; then
+echo "Checking if database needs seeding..."
+seed_output=$(timeout 5 pnpm run seed 2>&1 || true)
+if echo "$seed_output" | grep -q "already contains"; then
     echo "Database already seeded, skipping..."
 else
-    echo "Seeding database..."
+    echo "Database needs seeding. This will take a few minutes..."
+    pnpm run seed
 fi
 echo -e "${GREEN}Database check complete!${NC}"
 echo ""
