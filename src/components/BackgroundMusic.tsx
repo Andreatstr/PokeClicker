@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -63,7 +63,10 @@ export function BackgroundMusic() {
     return (
       <div className="fixed bottom-4 left-4 bg-background border-4 border-foreground p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <audio ref={audioRef} loop>
-          <source src={`${import.meta.env.BASE_URL}music/background-music.mp3`} type="audio/mpeg" />
+          <source
+            src={`${import.meta.env.BASE_URL}music/background-music.mp3`}
+            type="audio/mpeg"
+          />
           Your browser does not support the audio element.
         </audio>
 
@@ -91,7 +94,10 @@ export function BackgroundMusic() {
   return (
     <div className="fixed bottom-4 left-4 flex items-center gap-2 bg-background border-4 border-foreground p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       <audio ref={audioRef} loop>
-        <source src={`${import.meta.env.BASE_URL}music/background-music.mp3`} type="audio/mpeg" />
+        <source
+          src={`${import.meta.env.BASE_URL}music/background-music.mp3`}
+          type="audio/mpeg"
+        />
         Your browser does not support the audio element.
       </audio>
 
@@ -158,7 +164,7 @@ export function BackgroundMusic() {
       <div className="ml-2 w-12 h-1 bg-foreground/20 relative">
         <div
           className="absolute top-0 left-0 h-full bg-foreground transition-all"
-          style={{ width: `${volume * 100}%` }}
+          style={{width: `${volume * 100}%`}}
         />
       </div>
 

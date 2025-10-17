@@ -356,6 +356,7 @@ graph TB
 ```
 
 **Data Flow**:
+
 1. Frontend queries GraphQL endpoint
 2. Backend checks cache (Pokemon: 24h, User: 5min TTL)
 3. Cache miss → fetch from PokéAPI
@@ -369,11 +370,13 @@ Full API documentation: [GRAPHQL.md](./docs/GRAPHQL.md)
 **Endpoint**: `http://it2810-26.idi.ntnu.no/project2/graphql`
 
 **Key Queries**:
+
 - `pokedex()` - Search, filter, sort Pokemon with ownership tracking
 - `pokemonById(id)` - Detailed Pokemon info
 - `me` - Current user data
 
 **Key Mutations**:
+
 - `signup/login` - User authentication (JWT)
 - `purchasePokemon(id)` - Buy Pokemon with rare candy
 - `upgradeStat(stat)` - Upgrade user stats
@@ -392,6 +395,7 @@ MONGODB_DB_NAME=pokeclicker_db
 ```
 
 **Notes**:
+
 - Default values work out-of-the-box for local development
 - Production deployment uses same MongoDB on VM
 - No secrets required (authentication planned for future)
@@ -399,6 +403,7 @@ MONGODB_DB_NAME=pokeclicker_db
 ### Frontend
 
 No environment variables needed. API endpoint auto-detected:
+
 - Development: `http://localhost:3001/`
 - Production: `/project2/graphql` (proxied by Apache)
 
