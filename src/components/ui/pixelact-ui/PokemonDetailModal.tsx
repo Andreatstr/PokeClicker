@@ -5,7 +5,7 @@ import {usePokemonById} from '@/hooks/usePokemonById';
 import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
 import {useAuth} from '@/hooks/useAuth';
 import {useQuery, gql} from '@apollo/client';
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {UnlockButton} from '@/components/UnlockButton';
 import './styles/animations.css';
 
@@ -211,7 +211,7 @@ export function PokemonDetailModal({
   onPurchase,
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
-  const {updateUser} = useAuth();
+  const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const {data: userData} = useQuery(ME_QUERY);
@@ -243,8 +243,11 @@ export function PokemonDetailModal({
       });
 
       // Immediately update AuthContext with the server response
-      if (result.data?.purchasePokemon) {
-        updateUser(result.data.purchasePokemon);
+      if (result.data?.purchasePokemon && user) {
+        updateUser({
+          ...result.data.purchasePokemon,
+          created_at: user.created_at, // Preserve the created_at field
+        });
       }
 
       onPurchase?.(pokemon.id);
@@ -271,8 +274,20 @@ export function PokemonDetailModal({
         <div className="flex flex-col gap-3 md:gap-4 items-center">
           {/* Pokemon Card */}
           <aside
-            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
           >
+            {/* Owned Corner Tape Badge */}
+            {pokemon.isOwned && (
+              <div className="absolute top-0 left-0 z-20 overflow-visible">
+                <div className="relative w-0 h-0">
+                  {/* Main tape */}
+                  <div className="bg-green-500 text-white text-[11px] md:text-sm font-bold px-8 md:px-10 py-1.5 md:py-2 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.4)] transform -rotate-45 origin-top-left translate-x-[-28px] translate-y-[62px] md:translate-x-[-33px] md:translate-y-[75px] min-w-[140px] md:min-w-[160px] text-center">
+                    OWNED
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Close Button */}
             <button
               className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
@@ -285,6 +300,23 @@ export function PokemonDetailModal({
             <h2 className="text-sm md:text-base font-bold text-center mb-2 md:mb-3 capitalize">
               {pokemon.isOwned ? pokemon.name : '???'}
             </h2>
+
+            {/* Type Badges */}
+            {pokemon.isOwned && (
+              <div className="flex gap-2 mb-2 md:mb-3">
+                {pokemon.types.map((type) => {
+                  const colors = getTypeColors(type);
+                  return (
+                    <span
+                      key={type}
+                      className={`${colors.badge} text-white text-[10px] md:text-xs font-bold px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase`}
+                    >
+                      {type}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
 
             <figure
               className="spriteFrame border-2 border-black p-2 mb-2 md:mb-3 flex items-center justify-center w-full h-[140px] md:h-[180px] relative"
@@ -306,11 +338,10 @@ export function PokemonDetailModal({
             </figure>
 
             {/* Stats Section */}
-            <section className="w-full bg-[#b0f0b0] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-2 md:p-3 mb-2 md:mb-3 font-press-start">
+            <section className="w-full bg-tranparent border-none p-2 md:p-3 mb-2 md:mb-3 font-press-start">
               <div className="statsSection">
                 <div className="statsHeaderRow grid grid-cols-[1fr,4fr] mb-1 text-[10px] md:text-xs font-bold text-center">
                   <span></span>
-                  <span>Stats</span>
                 </div>
 
                 <div className="statsGrid grid grid-cols-[1fr,4fr] grid-rows-auto gap-1">
@@ -327,39 +358,51 @@ export function PokemonDetailModal({
                       baseValue={pokemon.stats?.hp ?? 0}
                       yourValue={pokemon.stats?.hp ?? 0}
                       max={255}
+                      color="bg-red-300"
+                      upgradeColor="bg-red-600"
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.attack ?? 0}
                       yourValue={pokemon.stats?.attack ?? 0}
                       max={255}
+                      color="bg-orange-300"
+                      upgradeColor="bg-orange-600"
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.defense ?? 0}
                       yourValue={pokemon.stats?.defense ?? 0}
                       max={255}
+                      color="bg-blue-300"
+                      upgradeColor="bg-blue-600"
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spAttack ?? 0}
                       yourValue={pokemon.stats?.spAttack ?? 0}
                       max={255}
+                      color="bg-purple-300"
+                      upgradeColor="bg-purple-600"
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spDefense ?? 0}
                       yourValue={pokemon.stats?.spDefense ?? 0}
                       max={255}
+                      color="bg-yellow-300"
+                      upgradeColor="bg-yellow-600"
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.speed ?? 0}
                       yourValue={pokemon.stats?.speed ?? 0}
                       max={255}
+                      color="bg-pink-300"
+                      upgradeColor="bg-pink-600"
                     />
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Purchase Button or Owned Badge */}
-            {!pokemon.isOwned ? (
+            {/* Purchase Button */}
+            {!pokemon.isOwned && (
               <UnlockButton
                 onClick={handlePurchase}
                 cost={cost}
@@ -367,10 +410,6 @@ export function PokemonDetailModal({
                 pokemonName={pokemon.name}
                 size="small"
               />
-            ) : (
-              <div className="w-full px-4 py-3 text-sm font-bold bg-green-500 text-white border-4 border-black text-center shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center h-16">
-                  ✓ Owned
-              </div>
             )}
           </aside>
 
