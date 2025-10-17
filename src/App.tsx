@@ -1,14 +1,16 @@
 import {useState, useEffect} from 'react';
-import {PokemonCard} from './components/PokemonCard';
-import {PokemonDetailModal} from './components/ui/pixelact-ui/PokemonDetailModal';
-import {Button} from '@/components/ui/pixelact-ui/button';
-import {PokeClicker} from './components/PokeClicker';
-import {LoginScreen} from '@/components/LogInScreen';
-import {Navbar} from './components/Navbar';
-import {SearchBar} from './components/SearchBar';
-import {FiltersAndCount} from './components/FiltersAndCount';
-import {usePokedexQuery, type PokedexPokemon} from './hooks/usePokedexQuery';
-import {BackgroundMusic} from './components/BackgroundMusic';
+import {
+  PokemonCard,
+  PokemonDetailModal,
+  SearchBar,
+  FiltersAndCount,
+  usePokedexQuery,
+  type PokedexPokemon,
+} from '@features/pokedex';
+import {Button} from '@ui/pixelact';
+import {PokeClicker} from '@features/clicker';
+import {LoginScreen} from '@features/auth';
+import {Navbar, BackgroundMusic} from '@/components';
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(

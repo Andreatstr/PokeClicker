@@ -1,9 +1,8 @@
-import {type PokedexPokemon} from '@/hooks/usePokedexQuery';
-import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
-import {useAuth} from '@/hooks/useAuth';
-import '@/components/ui/pixelact-ui/styles/patterns.css';
+import {type PokedexPokemon, usePurchasePokemon} from '@features/pokedex';
+import {useAuth} from '@features/auth';
+import '@ui/pixelact/styles/patterns.css';
 import {useState} from 'react';
-import {UnlockButton} from '@/components/UnlockButton';
+import {UnlockButton} from '@ui/pixelact';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;

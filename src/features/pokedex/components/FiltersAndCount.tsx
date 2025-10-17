@@ -1,14 +1,14 @@
-import {Button} from '@/components/ui/pixelact-ui/button';
-import {Label} from '@/components/ui/pixelact-ui/label';
 import {
+  Button,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/pixelact-ui/select';
-import {MultiSelect} from './ui/pixelact-ui/MultiSelect';
-import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
+  MultiSelect,
+} from '@ui/pixelact';
+import type {PokedexPokemon} from '@features/pokedex';
 
 interface FiltersAndCountProps {
   loading: boolean;

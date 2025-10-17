@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import './components/ui/pixelact-ui/styles/styles.css';
+@import './ui/pixelact/styles/styles.css';
 
 @plugin "tailwindcss-animate";
 

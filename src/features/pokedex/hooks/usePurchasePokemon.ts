@@ -1,5 +1,5 @@
 import {useMutation, gql} from '@apollo/client';
-import {type User} from '@/contexts/AuthContext';
+import {type User} from '@features/auth';
 
 const PURCHASE_POKEMON_MUTATION = gql`
   mutation PurchasePokemon($pokemonId: Int!) {

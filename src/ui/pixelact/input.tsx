@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {cn} from '@/lib/utils';
-import '@/components/ui/pixelact-ui/styles/styles.css';
+import {cn} from '@lib/utils';
+import '@ui/pixelact/styles/styles.css';
 
 export interface PixelInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -1,6 +1,6 @@
 import {useState, useRef, useEffect} from 'react';
 import {CheckIcon, ChevronDownIcon} from 'lucide-react';
-import {cn} from '@/lib/utils';
+import {cn} from '@lib/utils';
 
 type MultiSelectProps = {
   options: string[];

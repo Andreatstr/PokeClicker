@@ -1,5 +1,5 @@
 import {gql, useMutation} from '@apollo/client';
-import type {User} from '@/contexts/AuthContext';
+import type {User} from '@features/auth';
 
 const UPDATE_RARE_CANDY = gql`
   mutation UpdateRareCandy($amount: Int!) {

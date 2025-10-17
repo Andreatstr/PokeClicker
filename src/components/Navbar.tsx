@@ -1,12 +1,6 @@
 import {useState} from 'react';
-import {Button} from '@/components/ui/pixelact-ui/button';
-import {
-  UserIcon,
-  SunIcon,
-  MoonIcon,
-  MenuIcon,
-} from '@/components/ui/pixelact-ui/icons';
-import {useAuth} from '@/hooks/useAuth';
+import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
+import {useAuth} from '@features/auth';
 
 interface NavbarProps {
   currentPage: 'clicker' | 'pokedex' | 'login';

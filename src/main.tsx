@@ -3,8 +3,8 @@ import {createRoot} from 'react-dom/client';
 import {ApolloProvider} from '@apollo/client';
 import './index.css';
 import App from './App.tsx';
-import {apolloClient} from './lib/apolloClient';
-import {AuthProvider} from './contexts/AuthContext';
+import {apolloClient} from '@lib/apolloClient';
+import {AuthProvider} from '@features/auth';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

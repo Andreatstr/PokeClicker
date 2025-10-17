@@ -1,5 +1,4 @@
-import {useState, useEffect, type ReactNode} from 'react';
-import {AuthContext} from './auth-context';
+import {createContext, useState, useEffect, type ReactNode} from 'react';
 import {apolloClient} from '@/lib/apolloClient';
 
 export interface User {
@@ -17,6 +16,19 @@ export interface User {
   };
   owned_pokemon_ids: number[];
 }
+
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  login: (token: string, user: User) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (user: User) => void;
+  isAuthenticated: boolean;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);

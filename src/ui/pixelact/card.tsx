@@ -1,6 +1,6 @@
 import {type VariantProps} from 'class-variance-authority';
 
-import {cn} from '@/lib/utils';
+import {cn} from '@lib/utils';
 
 import {
   Card as ShadcnCard,
@@ -10,9 +10,9 @@ import {
   CardFooter as ShadcnCardFooter,
   CardHeader as ShadcnCardHeader,
   CardTitle as ShadcnCardTitle,
-} from '@/components/ui/card';
+} from '@ui/primitives';
 
-import '@/components/ui/pixelact-ui/styles/styles.css';
+import '@ui/pixelact/styles/styles.css';
 import {cardVariants} from './card-variants';
 
 export interface CardProps

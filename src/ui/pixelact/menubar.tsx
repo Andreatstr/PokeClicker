@@ -1,9 +1,9 @@
 import React from 'react';
 import * as MenubarPrimitive from '@radix-ui/react-menubar';
 import {Circle} from 'lucide-react';
-import {cn} from '@/lib/utils';
+import {cn} from '@lib/utils';
 import {menubarVariants} from './menubar-variants';
-import '@/components/ui/pixelact-ui/styles/styles.css';
+import '@ui/pixelact/styles/styles.css';
 
 function MenubarMenu({
   ...props

@@ -1,13 +1,11 @@
-import {Dialog, DialogBody} from './dialog';
-import {StackedProgress} from './StackedProgress';
-import type {PokedexPokemon} from '@/hooks/usePokedexQuery';
-import {usePokemonById} from '@/hooks/usePokemonById';
-import {usePurchasePokemon} from '@/hooks/usePurchasePokemon';
-import {useAuth} from '@/hooks/useAuth';
+import {Dialog, DialogBody, UnlockButton} from '@ui/pixelact';
+import {StackedProgress} from '@features/clicker';
+import type {PokedexPokemon} from '@features/pokedex';
+import {usePokemonById, usePurchasePokemon} from '@features/pokedex';
+import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState} from 'react';
-import {UnlockButton} from '@/components/UnlockButton';
-import './styles/animations.css';
+import '@ui/pixelact/styles/animations.css';
 
 const ME_QUERY = gql`
   query Me {

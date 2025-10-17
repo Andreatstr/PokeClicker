@@ -1,8 +1,7 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import {Button} from '@/components/ui/pixelact-ui/button';
-import {Card} from '@/components/ui/pixelact-ui/card';
-import {useAuth} from '@/hooks/useAuth';
-import {useGameMutations} from '@/hooks/useGameMutations';
+import {Button, Card} from '@ui/pixelact';
+import {useAuth} from '@features/auth';
+import {useGameMutations} from '@features/clicker';
 
 interface Candy {
   id: number;

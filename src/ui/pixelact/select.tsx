@@ -1,7 +1,7 @@
 import * as SelectPrimitive from '@radix-ui/react-select';
 import {type VariantProps} from 'class-variance-authority';
 
-import {cn} from '@/lib/utils';
+import {cn} from '@lib/utils';
 
 import {
   Select as ShadcnSelect,
@@ -14,9 +14,9 @@ import {
   SelectSeparator as ShadcnSelectSeparator,
   SelectTrigger as ShadcnSelectTrigger,
   SelectValue as ShadcnSelectValue,
-} from '@/components/ui/select';
+} from '@ui/primitives';
 
-import '@/components/ui/pixelact-ui/styles/styles.css';
+import '@ui/pixelact/styles/styles.css';
 import {inputVariants} from './select-variants';
 
 export interface SelectProps
