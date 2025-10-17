@@ -27,16 +27,28 @@ pnpm run build
 echo -e "${GREEN}Frontend build complete!${NC}"
 echo ""
 
-echo -e "${BLUE}Step 2: Building Backend${NC}"
-echo "Running: cd backend && npm install && npm run build"
+echo -e "${BLUE}Step 2: Pulling Latest Changes${NC}"
+echo "Running: git pull origin main"
+git pull origin main
+echo -e "${GREEN}Git pull complete!${NC}"
+echo ""
+
+echo -e "${BLUE}Step 3: Building Backend${NC}"
+echo "Running: cd backend && pnpm install && pnpm run build"
 cd backend
-npm install
-npm run build
-cd ..
+pnpm install
+pnpm run build
 echo -e "${GREEN}Backend build complete!${NC}"
 echo ""
 
-echo -e "${BLUE}Step 3: Deploying Frontend to ${DEPLOY_DIR}${NC}"
+echo -e "${BLUE}Step 4: Restarting Backend with PM2${NC}"
+echo "Running: ./manage-backend.sh restart"
+./manage-backend.sh restart
+cd ..
+echo -e "${GREEN}Backend restarted!${NC}"
+echo ""
+
+echo -e "${BLUE}Step 5: Deploying Frontend to ${DEPLOY_DIR}${NC}"
 if [ -d "$DEPLOY_DIR" ]; then
     echo "Removing old deployment..."
     sudo rm -rf "$DEPLOY_DIR"
@@ -46,36 +58,6 @@ sudo cp -r dist "$DEPLOY_DIR"
 sudo chown -R www-data:www-data "$DEPLOY_DIR"
 sudo chmod -R 755 "$DEPLOY_DIR"
 echo -e "${GREEN}Frontend deployed!${NC}"
-echo ""
-
-echo -e "${BLUE}Step 4: Deploying Backend to ${BACKEND_DIR}${NC}"
-if [ ! -d "$BACKEND_DIR" ]; then
-    echo "Creating backend directory..."
-    mkdir -p "$BACKEND_DIR"
-fi
-echo "Copying backend build to ${BACKEND_DIR}..."
-cp -r backend/dist "$BACKEND_DIR/"
-cp -r backend/node_modules "$BACKEND_DIR/"
-cp backend/package.json "$BACKEND_DIR/"
-cp backend/.env.example "$BACKEND_DIR/"
-echo -e "${GREEN}Backend deployed!${NC}"
-echo ""
-
-echo -e "${BLUE}Step 5: Apache Configuration${NC}"
-echo "Apache configuration file: apache-config.conf"
-echo "To apply the configuration:"
-echo "  1. sudo cp apache-config.conf /etc/apache2/sites-available/project2.conf"
-echo "  2. sudo a2enmod proxy proxy_http headers rewrite"
-echo "  3. sudo a2ensite project2"
-echo "  4. sudo systemctl reload apache2"
-echo ""
-
-echo -e "${BLUE}Step 6: Backend Service${NC}"
-echo "To run the backend service:"
-echo "  cd ${BACKEND_DIR}"
-echo "  cp .env.example .env"
-echo "  nano .env  # Configure your environment variables"
-echo "  npm start  # Or use pm2 for production: pm2 start dist/index.js --name project2-backend"
 echo ""
 
 echo -e "${GREEN}=========================================${NC}"
