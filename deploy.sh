@@ -21,8 +21,8 @@ DEPLOY_DIR="/var/www/html/project2"
 BACKEND_DIR="$HOME/project2-backend"
 
 echo -e "${BLUE}Step 1: Pulling Latest Changes${NC}"
-echo "Running: git pull origin main"
-git pull origin main
+echo "Running: git pull"
+git pull
 echo -e "${GREEN}Git pull complete!${NC}"
 echo ""
 
