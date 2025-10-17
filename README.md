@@ -327,22 +327,88 @@ npm run build     # Bygg for produksjon
 npm run lint      # Kjør linting
 ```
 
+## Arkitektur
+
+```mermaid
+graph TB
+    User[👤 User Browser]
+    Frontend[React Frontend<br/>Port 5173 dev / /project2 prod]
+    Apache[Apache Web Server<br/>it2810-26.idi.ntnu.no]
+    Backend[GraphQL Backend<br/>Node.js + TypeScript<br/>Port 3001]
+    Cache[node-cache<br/>In-Memory Cache]
+    MongoDB[(MongoDB<br/>User Data)]
+    PokeAPI[PokéAPI<br/>pokeapi.co]
+
+    User -->|HTTP| Apache
+    Apache -->|Serve Static| Frontend
+    Frontend -->|GraphQL Query| Apache
+    Apache -->|Proxy /project2/graphql| Backend
+    Backend -->|Check Cache| Cache
+    Cache -->|Cache Miss| PokeAPI
+    Backend -->|User Data| MongoDB
+    Backend -->|Pokemon Metadata| MongoDB
+
+    style Frontend fill:#61dafb
+    style Backend fill:#68a063
+    style MongoDB fill:#4db33d
+    style Cache fill:#ff6b6b
+    style PokeAPI fill:#ffcc00
+```
+
+**Data Flow**:
+1. Frontend queries GraphQL endpoint
+2. Backend checks cache (Pokemon: 24h, User: 5min TTL)
+3. Cache miss → fetch from PokéAPI
+4. MongoDB stores user data + Pokemon metadata for search/filter
+5. Results returned to frontend
+
+## GraphQL API
+
+Full API documentation: [GRAPHQL.md](./docs/GRAPHQL.md)
+
+**Endpoint**: `http://it2810-26.idi.ntnu.no/project2/graphql`
+
+**Key Queries**:
+- `pokedex()` - Search, filter, sort Pokemon with ownership tracking
+- `pokemonById(id)` - Detailed Pokemon info
+- `me` - Current user data
+
+**Key Mutations**:
+- `signup/login` - User authentication (JWT)
+- `purchasePokemon(id)` - Buy Pokemon with rare candy
+- `upgradeStat(stat)` - Upgrade user stats
+
+## Environment Variables
+
+### Backend (`.env` in `backend/`)
+
+```env
+# Server Configuration
+PORT=3001
+
+# MongoDB Configuration
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=pokeclicker_db
+```
+
+**Notes**:
+- Default values work out-of-the-box for local development
+- Production deployment uses same MongoDB on VM
+- No secrets required (authentication planned for future)
+
+### Frontend
+
+No environment variables needed. API endpoint auto-detected:
+- Development: `http://localhost:3001/`
+- Production: `/project2/graphql` (proxied by Apache)
+
 ## Fremtidig utvikling
-
-### Del 2 - Backend og database
-
-- Sette opp GraphQL backend på VM
-- Implementere MongoDB database for brukerdata
-- Integrere med PokéAPI
-- Autentisering med JWT
 
 ### Del 3 - Fullstendig prototype
 
-- Brukerregistrering og innlogging
-- Pokémon-kjøp med rare candy
-- Persistent upgrade-system per bruker
 - Leaderboard/statistikk
 - Tilgjengelighetstesting
+- Achievements system
 
 ### Del 4 - Testing og kvalitetssikring
 
