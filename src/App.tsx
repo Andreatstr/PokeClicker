@@ -8,6 +8,7 @@ import {Navbar} from './components/Navbar';
 import {SearchBar} from './components/SearchBar';
 import {FiltersAndCount} from './components/FiltersAndCount';
 import {usePokedexQuery, type PokedexPokemon} from './hooks/usePokedexQuery';
+import {BackgroundMusic} from './components/BackgroundMusic';
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -240,6 +241,7 @@ function App() {
           />
         </>
       )}
+      <BackgroundMusic />
     </>
   );
 }
