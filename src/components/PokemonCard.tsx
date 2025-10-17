@@ -195,7 +195,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const [purchasePokemon] = usePurchasePokemon();
-  const {updateUser} = useAuth();
+  const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -222,8 +222,11 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       });
 
       // Immediately update AuthContext with the server response
-      if (result.data?.purchasePokemon) {
-        updateUser(result.data.purchasePokemon);
+      if (result.data?.purchasePokemon && user) {
+        updateUser({
+          ...result.data.purchasePokemon,
+          created_at: user.created_at, // Preserve the created_at field
+        });
       }
 
       // Trigger animation after successful purchase
