@@ -137,3 +137,49 @@ Create a `.env` file based on `.env.example`:
 - `PORT` - Server port (default: 3001)
 - `MONGODB_URI` - MongoDB connection string (default: mongodb://localhost:27017)
 - `MONGODB_DB_NAME` - Database name (default: pokeclicker_db)
+
+## VM Deployment
+
+For deploying to the NTNU VM with PM2 and auto-start, see the comprehensive [VM Deployment Guide](../VM-DEPLOYMENT.md).
+
+### Quick VM Deployment
+
+```bash
+# On VM, in backend directory
+
+# Setup (first time only)
+./manage-backend.sh setup
+
+# Configure .env file
+nano .env
+
+# Start backend
+./manage-backend.sh start
+
+# Check status
+./manage-backend.sh status
+
+# View logs
+./manage-backend.sh logs
+```
+
+### Management Commands
+
+The `manage-backend.sh` script provides these commands:
+
+- `setup` - Install dependencies and build
+- `start` - Start the backend with PM2
+- `stop` - Stop the backend
+- `restart` - Restart the backend
+- `status` - Show backend status
+- `logs` - View live logs
+
+### PM2 Configuration
+
+Backend is configured to run with PM2 using `ecosystem.config.js`:
+
+- Runs on port 3001
+- Logs to `logs/` directory
+- Auto-restarts on crash
+- Persists across SSH logout
+- Can be configured to auto-start on VM reboot
