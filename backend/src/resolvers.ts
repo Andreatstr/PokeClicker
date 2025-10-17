@@ -49,16 +49,20 @@ const authMutations = {
     };
 
     try {
-      const insertResult = await users.insertOne(newUser);
+      const insertResult = await users.insertOne(newUser as UserDocument);
       const userDoc = await users.findOne({_id: insertResult.insertedId});
+
+      if (!userDoc) {
+        throw new Error('Failed to create user');
+      }
 
       const token = jwt.sign(
         {id: userDoc._id.toString(), username: userDoc.username},
         JWT_SECRET,
-        {expiresIn: JWT_EXPIRES}
+        {expiresIn: JWT_EXPIRES} as jwt.SignOptions
       );
 
-      return {token, user: sanitizeUserForClient(userDoc)};
+      return {token, user: sanitizeUserForClient(userDoc as UserDocument)};
     } catch (err) {
       if (
         err &&
@@ -91,10 +95,10 @@ const authMutations = {
     const token = jwt.sign(
       {id: userDoc._id.toString(), username: userDoc.username},
       JWT_SECRET,
-      {expiresIn: JWT_EXPIRES}
+      {expiresIn: JWT_EXPIRES} as jwt.SignOptions
     );
 
-    return {token, user: sanitizeUserForClient(userDoc)};
+    return {token, user: sanitizeUserForClient(userDoc as UserDocument)};
   },
 };
 
@@ -129,7 +133,7 @@ export const resolvers = {
         throw new Error('User not found');
       }
 
-      return sanitizeUserForClient(userDoc);
+      return sanitizeUserForClient(userDoc as UserDocument);
     },
     pokemon: async (_: unknown, args: PokemonQueryArgs) => {
       return fetchPokemon(args);
