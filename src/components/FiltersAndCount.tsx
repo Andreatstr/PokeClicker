@@ -129,7 +129,10 @@ export function FiltersAndCount({
                 {/* REGION */}
                 <div>
                   <Label className="text-xs font-bold text-black">Region</Label>
-                  <Select value={tempRegion ?? ''} onValueChange={setTempRegion}>
+                  <Select
+                    value={tempRegion ?? ''}
+                    onValueChange={setTempRegion}
+                  >
                     <SelectTrigger className="w-full text-sm">
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
@@ -329,9 +332,7 @@ export function FiltersAndCount({
               <Label className="text-xs font-bold text-black">ORDER</Label>
               <Select
                 value={sortOrder}
-                onValueChange={(value) =>
-                  setSortOrder(value as 'asc' | 'desc')
-                }
+                onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
               >
                 <SelectTrigger className="w-full text-sm">
                   <SelectValue placeholder="Asc" />

@@ -83,7 +83,7 @@ type Pokemon {
 
 type PokedexPokemon {
   # Samme som Pokemon, men med:
-  isOwned: Boolean!  # Om brukeren eier denne Pokémon
+  isOwned: Boolean! # Om brukeren eier denne Pokémon
   pokedexNumber: Int!
 }
 ```
