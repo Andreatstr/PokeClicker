@@ -27,9 +27,11 @@ echo -e "${GREEN}Git pull complete!${NC}"
 echo ""
 
 echo -e "${BLUE}Step 2: Building Frontend${NC}"
-echo "Running: pnpm install && pnpm run build"
+echo "Running: cd frontend && pnpm install && pnpm run build"
+cd frontend
 pnpm install
 pnpm run build
+cd ..
 echo -e "${GREEN}Frontend build complete!${NC}"
 echo ""
 
@@ -78,7 +80,7 @@ if [ -d "$DEPLOY_DIR" ]; then
     sudo rm -rf "$DEPLOY_DIR"
 fi
 echo "Copying frontend build to ${DEPLOY_DIR}..."
-sudo cp -r dist "$DEPLOY_DIR"
+sudo cp -r frontend/dist "$DEPLOY_DIR"
 sudo chown -R www-data:www-data "$DEPLOY_DIR"
 sudo chmod -R 755 "$DEPLOY_DIR"
 echo -e "${GREEN}Frontend deployed!${NC}"
