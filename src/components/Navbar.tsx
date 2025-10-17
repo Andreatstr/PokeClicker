@@ -23,8 +23,8 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     onPageChange('login');
   };
 
