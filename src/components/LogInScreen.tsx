@@ -101,7 +101,7 @@ export function LoginScreen({onNavigate}: Props) {
         result.data?.[modalType === 'login' ? 'login' : 'signup'];
 
       if (authData?.token && authData?.user) {
-        authLogin(authData.token, authData.user);
+        await authLogin(authData.token, authData.user);
         reset();
         setModalType(null);
         onNavigate('clicker');
