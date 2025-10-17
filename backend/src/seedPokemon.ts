@@ -84,7 +84,7 @@ async function seedPokemon() {
     console.log(
       `Database already contains ${count} Pokemon. Skipping seed. Delete the collection to re-seed.`
     );
-    return;
+    process.exit(0);
   }
 
   console.log('Fetching Pokemon metadata from PokéAPI...');
