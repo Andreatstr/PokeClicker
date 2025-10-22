@@ -41,24 +41,47 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **Database**: MongoDB på VM
 - **Testing**: Vitest for komponenter, Playwright for E2E _(planlagt for del 3)_
 
-## Status: Første underveisinnlevering
-
-Denne innleveringen viser konseptet med mock data og statisk kodet eksempeldata. Vi demonstrerer:
+## Status: Tredje underveisinnlevering (Del3)
 
 **Implementert nå:**
 
-- Pokédex med søk, filtrering og sortering (mock data i `src/data/mockData.ts`)
-- Klikkespill med upgrade-system (localStorage for lokal lagring)
-- Responsiv design med GameBoy-estetikk
-- Paginering og debounced søk
-- Modal med detaljert Pokémon-informasjon
+- **Fullstendig GraphQL backend** med MongoDB database
+- **Autentisering og brukerhåndtering** (JWT tokens)
+- **Pokédex med søk, filtrering og sortering** (live data fra PokéAPI)
+- **Klikkespill med upgrade-system** (persistent lagring i database)
+- **Responsiv design med GameBoy-estetikk**
+- **Sikkerhet og infrastruktur** (JWT secret validation, environment variables, rate limiting)
+- **Bærekraftig utvikling** (dark mode, performance optimization)
 
-**Planlagt for neste innlevering:**
+**Del3 fokusområder:**
 
-- GraphQL backend på VM (port 3001)
-- Database for brukere og brukerdata
-- Autentisering/innlogging
-- Pokémon API-integrasjon (PokéAPI) for dynamiske data
+- **Sikkerhet**: JWT secret validation, environment variables, rate limiting
+- **Bærekraft**: Dark mode (60% energi-reduksjon), performance optimization
+- **Tilgjengelighet**: WCAG 2.1 AA compliance, keyboard navigation
+- **Testing**: Vitest + Playwright setup
+- **Kjernefunksjoner**: Map feature, Battle system, Profile dashboard
+
+## Sikkerhet og infrastruktur (Del3 - Fullført)
+
+### Issue #64: JWT Secret Security Vulnerability
+- **Fikset**: Fjernet hardkodet fallback `'change_me'` som var sikkerhetsrisiko
+- **Implementert**: Proper environment variable validation med feilhåndtering
+- **Resultat**: Applikasjonen feiler gracefully hvis JWT_SECRET ikke er satt
+
+### Issue #65: Environment Variable Configuration  
+- **Fikset**: Erstattet hardkodede URLs med `VITE_GRAPHQL_URL` environment variable
+- **Implementert**: Frontend og backend environment configuration
+- **Resultat**: Bedre deployment fleksibilitet og environment-specific config
+
+### Issue #66: Rate Limiting Implementation
+- **Fikset**: Implementert rate limiting optimalisert for clicker game
+- **Konfigurert**: 1000 requests per 15 minutter (mye høyere enn typiske web apps)
+- **Resultat**: Beskyttelse mot misbruk samtidig som normal spillaktivitet tillates
+
+### Sikkerhetsforbedringer
+- **Environment files**: Alle `.env` filer er gitignored for å forhindre utilsiktet commit av sensitive data
+- **Rate limiting**: Game-optimized limits som tillater høyfrekvent klikking
+- **JWT security**: Ingen hardkodede secrets, proper validation
 
 ## Datamodell (planlagt)
 
@@ -392,32 +415,64 @@ PORT=3001
 # MongoDB Configuration
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB_NAME=pokeclicker_db
+
+# JWT Configuration (REQUIRED - no fallback)
+JWT_SECRET=your_secure_jwt_secret_here
+JWT_EXPIRES=7d
+
+# Bcrypt Configuration
+BCRYPT_SALT_ROUNDS=10
+
+# Rate Limiting Configuration (optimized for clicker game)
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=1000
+RATE_LIMIT_BURST=50
+```
+
+**Security Notes**:
+
+- **JWT_SECRET is REQUIRED** - application fails to start without it
+- **No hardcoded secrets** - all sensitive data in environment variables
+- **Rate limiting configured** for clicker game (1000 requests/15min)
+- **Environment files gitignored** - prevents accidental commit of secrets
+
+### Frontend (`.env` in `frontend/`)
+
+```env
+# GraphQL API Configuration
+VITE_GRAPHQL_URL=http://localhost:3001/
+
+# Production GraphQL URL (for deployment)
+# VITE_GRAPHQL_URL=/project2/graphql
 ```
 
 **Notes**:
 
-- Default values work out-of-the-box for local development
-- Production deployment uses same MongoDB on VM
-- No secrets required (authentication planned for future)
-
-### Frontend
-
-No environment variables needed. API endpoint auto-detected:
-
-- Development: `http://localhost:3001/`
-- Production: `/project2/graphql` (proxied by Apache)
+- Development: Uses `http://localhost:3001/` (direct backend connection)
+- Production: Uses `/project2/graphql` (proxied by Apache)
+- Fallback to localhost if environment variable not set
 
 ## Fremtidig utvikling
 
-### Del 3 - Fullstendig prototype
+### Del 3 - Pågående utvikling
 
+**Fullført:**
+- Sikkerhet og infrastruktur (JWT, environment variables, rate limiting)
+- Bærekraftig utvikling (dark mode, performance optimization)
+
+**Pågående:**
+- Tilgjengelighetstesting (WCAG 2.1 AA compliance)
+- Testing infrastruktur (Vitest + Playwright)
+- Kjernefunksjoner (Map feature, Battle system, Profile dashboard)
+
+**Planlagt:**
 - Leaderboard/statistikk
-- Tilgjengelighetstesting
 - Achievements system
+- Performance-optimalisering
 
 ### Del 4 - Testing og kvalitetssikring
 
-- Vitest for komponenter og utilities
-- Playwright E2E-tester
-- Performance-optimalisering
+- Comprehensive test coverage
+- Performance monitoring
 - Kodekvalitet og dokumentasjon
+- Production deployment optimization
