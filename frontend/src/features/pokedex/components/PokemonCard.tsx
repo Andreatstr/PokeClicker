@@ -204,22 +204,22 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
         transition-all duration-200 ease-in-out
         hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}`}
       style={{
-        borderColor: isDarkMode ? 'white' : 'black',
+        borderColor: isDarkMode ? '#333333' : 'black',
         boxShadow: isDarkMode 
-          ? '4px 4px 0px rgba(255,255,255,1)' 
+          ? '4px 4px 0px rgba(51,51,51,1)' 
           : '4px 4px 0px rgba(0,0,0,1)',
       }}
       onMouseEnter={(e) => {
         if (!isAnimating) {
           e.currentTarget.style.boxShadow = isDarkMode 
-            ? '6px 6px 0px rgba(255,255,255,1)' 
+            ? '6px 6px 0px rgba(51,51,51,1)' 
             : '6px 6px 0px rgba(0,0,0,1)';
         }
       }}
       onMouseLeave={(e) => {
         if (!isAnimating) {
           e.currentTarget.style.boxShadow = isDarkMode 
-            ? '4px 4px 0px rgba(255,255,255,1)' 
+            ? '4px 4px 0px rgba(51,51,51,1)' 
             : '4px 4px 0px rgba(0,0,0,1)';
         }
       }}
@@ -232,7 +232,7 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
       <figure
         className="spriteFrame border-2 p-2 mb-3 flex items-center justify-center w-full h-[210px] relative flex-shrink-0"
         style={{
-          borderColor: isDarkMode ? 'white' : 'black',
+          borderColor: isDarkMode ? '#333333' : 'black',
           backgroundImage: `url(${backgroundImageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -263,8 +263,8 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
               <span 
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
                 style={{
-                  backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                  border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(0, 0, 0, 0.3)',
+                  backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                  border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.3)' : '1px solid rgba(0, 0, 0, 0.3)',
                   color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
                   textShadow: isDarkMode ? '1px 1px 0 rgba(0, 0, 0, 0.8)' : '1px 1px 0 rgba(255, 255, 255, 0.8)'
                 }}
@@ -291,8 +291,8 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
                 <div 
                   className="flex-1 rounded px-2 py-1"
                   style={{
-                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-                    border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                    backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   <div className="font-bold text-[8px] uppercase tracking-wide" style={{color: 'var(--muted-foreground)'}}>
@@ -305,8 +305,8 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
                 <div 
                   className="flex-1 rounded px-2 py-1"
                   style={{
-                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-                    border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                    backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   <div className="font-bold text-[8px] uppercase tracking-wide" style={{color: 'var(--muted-foreground)'}}>
@@ -328,8 +328,8 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
                         key={ability}
                         className="px-1.5 py-0.5 rounded text-[7.5px] whitespace-nowrap leading-tight"
                         style={{
-                          backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.5)',
-                          border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                          backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.2)' : 'rgba(255, 255, 255, 0.5)',
+                          border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
                         }}
                       >
                         {ability}
@@ -353,9 +353,9 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
                     className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 ${typeColors.badge} ${textColor}`}
                     style={{
                       textShadow: 'none',
-                      borderColor: isDarkMode ? 'white' : 'black',
+                      borderColor: isDarkMode ? '#333333' : 'black',
                       boxShadow: isDarkMode 
-                        ? '2px 2px 0px 0px rgba(255,255,255,1)' 
+                        ? '2px 2px 0px 0px rgba(51,51,51,1)' 
                         : '2px 2px 0px 0px rgba(0,0,0,1)',
                     }}
                   >

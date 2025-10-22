@@ -42,9 +42,9 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--color-secondary) 70%, var(--button-border-color-secondary));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-secondary));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--color-secondary) 70%, var(--button-border-color-secondary));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-secondary));
   }
 
   &:hover {
@@ -69,8 +69,10 @@
   color: var(--success-foreground);
 
   &::after {
-    border-right: 4px solid color-mix(in hsl, var(--success) 70%, var(--button-border-color));
-    border-bottom: 4px solid color-mix(in hsl, var(--success) 70%, var(--button-border-color));
+    border-right: 4px solid
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color));
+    border-bottom: 4px solid
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color));
   }
 
   &:hover {
@@ -88,9 +90,9 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--destructive) 70%, var(--button-border-color-destructive));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-destructive));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--destructive) 70%, var(--button-border-color-destructive));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-destructive));
   }
 
   &:hover {
@@ -116,9 +118,9 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--warning) 70%, var(--button-border-color-warning));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-warning));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--warning) 70%, var(--button-border-color-warning));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color-warning));
   }
 
   &:hover {

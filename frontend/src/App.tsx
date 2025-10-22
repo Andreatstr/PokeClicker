@@ -148,7 +148,7 @@ function App() {
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
-                <PokeClicker />
+                <PokeClicker isDarkMode={isDarkMode} />
               </section>
             ) : (
               <>

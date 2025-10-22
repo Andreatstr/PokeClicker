@@ -81,7 +81,7 @@ const Button = React.forwardRef<
   const buttonStyle = {
     backgroundColor: bgColor,
     ...(bgColor && {
-      '--custom-inner-border-color': darkenColor(bgColor),
+      '--custom-inner-border-color': darkenColor(bgColor, 90), // Much darker
     }),
     ...style,
   } as React.CSSProperties & Record<string, string>;

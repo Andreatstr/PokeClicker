@@ -1,3 +1,97 @@
+export function getContrastColor(bgColor: string): string {
+  // Map Tailwind color classes to their hex values
+  const colorMap: Record<string, string> = {
+    'bg-gray-400': '#9ca3af',
+    'bg-red-500': '#ef4444',
+    'bg-blue-500': '#3b82f6',
+    'bg-yellow-400': '#facc15',
+    'bg-green-500': '#22c55e',
+    'bg-green-600': '#16a34a',
+    'bg-blue-200': '#bfdbfe',
+    'bg-red-700': '#b91c1c',
+    'bg-purple-500': '#a855f7',
+    'bg-yellow-600': '#ca8a04',
+    'bg-indigo-400': '#818cf8',
+    'bg-pink-500': '#ec4899',
+    'bg-green-400': '#4ade80',
+    'bg-yellow-800': '#854d0e',
+    'bg-purple-700': '#7e22ce',
+    'bg-indigo-700': '#4338ca',
+    'bg-gray-800': '#1f2937',
+    'bg-gray-500': '#6b7280',
+    'bg-pink-300': '#f9a8d4',
+    'bg-red-600': '#dc2626',
+    'bg-blue-600': '#2563eb',
+    'bg-purple-600': '#9333ea',
+    'bg-pink-600': '#db2777',
+    'bg-cyan-500': '#06b6d4',
+    'bg-indigo-600': '#4f46e5',
+    'bg-lime-600': '#65a30d',
+    'bg-stone-600': '#57534e',
+    'bg-violet-600': '#7c3aed',
+    'bg-slate-700': '#334155',
+    'bg-gray-600': '#4b5563',
+    'bg-amber-600': '#d97706',
+  };
+
+  const hex = colorMap[bgColor] || '#000000';
+
+  // Convert hex to RGB
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  // Calculate relative luminance using proper sRGB formula
+  const toLinear = (c: number) => {
+    const val = c / 255;
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+  };
+
+  const luminance =
+    0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+
+  // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
+  return luminance > 0.5 ? 'text-black' : 'text-white';
+}
+
+export function getStatBarColors(isDarkMode: boolean) {
+  if (isDarkMode) {
+    return {
+      hp: { color: 'bg-red-500/60', upgradeColor: 'bg-red-400/80' },
+      attack: { color: 'bg-orange-500/60', upgradeColor: 'bg-orange-400/80' },
+      defense: { color: 'bg-blue-500/60', upgradeColor: 'bg-blue-400/80' },
+      spAttack: { color: 'bg-purple-500/60', upgradeColor: 'bg-purple-400/80' },
+      spDefense: { color: 'bg-yellow-500/60', upgradeColor: 'bg-yellow-400/80' },
+      speed: { color: 'bg-pink-500/60', upgradeColor: 'bg-pink-400/80' },
+    };
+  } else {
+    return {
+      hp: { color: 'bg-red-300', upgradeColor: 'bg-red-600' },
+      attack: { color: 'bg-orange-300', upgradeColor: 'bg-orange-600' },
+      defense: { color: 'bg-blue-300', upgradeColor: 'bg-blue-600' },
+      spAttack: { color: 'bg-purple-300', upgradeColor: 'bg-purple-600' },
+      spDefense: { color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600' },
+      speed: { color: 'bg-pink-300', upgradeColor: 'bg-pink-600' },
+    };
+  }
+}
+
+export function getUnknownPokemonColors(isDarkMode: boolean) {
+  return isDarkMode
+    ? {
+        badge: 'bg-gray-500',
+        cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
+        cardBorder: 'border-gray-600',
+        shadow: 'shadow-gray-600/50',
+      }
+    : {
+        badge: 'bg-gray-400',
+        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+        cardBorder: 'border-gray-400',
+        shadow: 'shadow-gray-400/50',
+      };
+}
+
 export function getTypeColors(type: string, isDarkMode: boolean = false) {
   const lightModeColors: Record<
     string,
@@ -118,112 +212,112 @@ export function getTypeColors(type: string, isDarkMode: boolean = false) {
     {badge: string; cardBg: string; cardBorder: string; shadow: string}
   > = {
     normal: {
-      badge: 'bg-gray-800',
-      cardBg: 'bg-gradient-to-br from-gray-800/20 to-gray-900/20',
-      cardBorder: 'border-gray-600/40',
-      shadow: 'shadow-gray-600/20',
+      badge: 'bg-gray-600',
+      cardBg: 'bg-gradient-to-br from-gray-600/40 to-gray-700/30',
+      cardBorder: 'border-gray-500/60',
+      shadow: 'shadow-gray-500/30',
     },
     fire: {
-      badge: 'bg-red-800',
-      cardBg: 'bg-gradient-to-br from-red-900/15 to-red-800/15',
-      cardBorder: 'border-red-700/30',
-      shadow: 'shadow-red-700/15',
+      badge: 'bg-red-600',
+      cardBg: 'bg-gradient-to-br from-red-600/40 to-red-700/30',
+      cardBorder: 'border-red-500/60',
+      shadow: 'shadow-red-500/30',
     },
     water: {
-      badge: 'bg-blue-800',
-      cardBg: 'bg-gradient-to-br from-blue-900/15 to-blue-800/15',
-      cardBorder: 'border-blue-700/30',
-      shadow: 'shadow-blue-700/15',
+      badge: 'bg-blue-600',
+      cardBg: 'bg-gradient-to-br from-blue-600/40 to-blue-700/30',
+      cardBorder: 'border-blue-500/60',
+      shadow: 'shadow-blue-500/30',
     },
     electric: {
-      badge: 'bg-yellow-800',
-      cardBg: 'bg-gradient-to-br from-yellow-900/15 to-yellow-800/15',
-      cardBorder: 'border-yellow-700/30',
-      shadow: 'shadow-yellow-700/15',
+      badge: 'bg-yellow-600',
+      cardBg: 'bg-gradient-to-br from-yellow-600/40 to-yellow-700/30',
+      cardBorder: 'border-yellow-500/60',
+      shadow: 'shadow-yellow-500/30',
     },
     grass: {
-      badge: 'bg-green-800',
-      cardBg: 'bg-gradient-to-br from-green-900/15 to-green-800/15',
-      cardBorder: 'border-green-700/30',
-      shadow: 'shadow-green-700/15',
+      badge: 'bg-green-600',
+      cardBg: 'bg-gradient-to-br from-green-600/40 to-green-700/30',
+      cardBorder: 'border-green-500/60',
+      shadow: 'shadow-green-500/30',
     },
     ice: {
-      badge: 'bg-cyan-700',
-      cardBg: 'bg-gradient-to-br from-cyan-800/15 to-cyan-700/15',
-      cardBorder: 'border-cyan-600/30',
-      shadow: 'shadow-cyan-600/15',
+      badge: 'bg-cyan-500',
+      cardBg: 'bg-gradient-to-br from-cyan-500/40 to-cyan-600/30',
+      cardBorder: 'border-cyan-400/60',
+      shadow: 'shadow-cyan-400/30',
     },
     fighting: {
-      badge: 'bg-red-900',
-      cardBg: 'bg-gradient-to-br from-red-900/15 to-red-800/15',
-      cardBorder: 'border-red-700/30',
-      shadow: 'shadow-red-700/15',
+      badge: 'bg-red-700',
+      cardBg: 'bg-gradient-to-br from-red-600/40 to-red-700/30',
+      cardBorder: 'border-red-500/60',
+      shadow: 'shadow-red-500/30',
     },
     poison: {
-      badge: 'bg-purple-800',
-      cardBg: 'bg-gradient-to-br from-purple-900/15 to-purple-800/15',
-      cardBorder: 'border-purple-700/30',
-      shadow: 'shadow-purple-700/15',
+      badge: 'bg-purple-600',
+      cardBg: 'bg-gradient-to-br from-purple-600/40 to-purple-700/30',
+      cardBorder: 'border-purple-500/60',
+      shadow: 'shadow-purple-500/30',
     },
     ground: {
-      badge: 'bg-amber-800',
-      cardBg: 'bg-gradient-to-br from-amber-900/15 to-amber-800/15',
-      cardBorder: 'border-amber-700/30',
-      shadow: 'shadow-amber-700/15',
+      badge: 'bg-amber-600',
+      cardBg: 'bg-gradient-to-br from-amber-600/40 to-amber-700/30',
+      cardBorder: 'border-amber-500/60',
+      shadow: 'shadow-amber-500/30',
     },
     flying: {
-      badge: 'bg-indigo-800',
-      cardBg: 'bg-gradient-to-br from-indigo-900/15 to-indigo-800/15',
-      cardBorder: 'border-indigo-700/30',
-      shadow: 'shadow-indigo-700/15',
+      badge: 'bg-indigo-600',
+      cardBg: 'bg-gradient-to-br from-indigo-600/40 to-indigo-700/30',
+      cardBorder: 'border-indigo-500/60',
+      shadow: 'shadow-indigo-500/30',
     },
     psychic: {
-      badge: 'bg-pink-800',
-      cardBg: 'bg-gradient-to-br from-pink-900/15 to-pink-800/15',
-      cardBorder: 'border-pink-700/30',
-      shadow: 'shadow-pink-700/15',
+      badge: 'bg-pink-600',
+      cardBg: 'bg-gradient-to-br from-pink-600/40 to-pink-700/30',
+      cardBorder: 'border-pink-500/60',
+      shadow: 'shadow-pink-500/30',
     },
     bug: {
-      badge: 'bg-lime-800',
-      cardBg: 'bg-gradient-to-br from-lime-900/15 to-lime-800/15',
-      cardBorder: 'border-lime-700/30',
-      shadow: 'shadow-lime-700/15',
+      badge: 'bg-lime-600',
+      cardBg: 'bg-gradient-to-br from-lime-600/40 to-lime-700/30',
+      cardBorder: 'border-lime-500/60',
+      shadow: 'shadow-lime-500/30',
     },
     rock: {
-      badge: 'bg-stone-800',
-      cardBg: 'bg-gradient-to-br from-stone-900/15 to-stone-800/15',
-      cardBorder: 'border-stone-700/30',
-      shadow: 'shadow-stone-700/15',
+      badge: 'bg-stone-600',
+      cardBg: 'bg-gradient-to-br from-stone-600/40 to-stone-700/30',
+      cardBorder: 'border-stone-500/60',
+      shadow: 'shadow-stone-500/30',
     },
     ghost: {
-      badge: 'bg-violet-800',
-      cardBg: 'bg-gradient-to-br from-violet-900/15 to-violet-800/15',
-      cardBorder: 'border-violet-700/30',
-      shadow: 'shadow-violet-700/15',
+      badge: 'bg-violet-600',
+      cardBg: 'bg-gradient-to-br from-violet-600/40 to-violet-700/30',
+      cardBorder: 'border-violet-500/60',
+      shadow: 'shadow-violet-500/30',
     },
     dragon: {
-      badge: 'bg-indigo-900',
-      cardBg: 'bg-gradient-to-br from-indigo-900/15 to-indigo-800/15',
-      cardBorder: 'border-indigo-700/30',
-      shadow: 'shadow-indigo-700/15',
+      badge: 'bg-indigo-700',
+      cardBg: 'bg-gradient-to-br from-indigo-600/40 to-indigo-700/30',
+      cardBorder: 'border-indigo-500/60',
+      shadow: 'shadow-indigo-500/30',
     },
     dark: {
-      badge: 'bg-slate-900',
-      cardBg: 'bg-gradient-to-br from-slate-900/15 to-slate-800/15',
-      cardBorder: 'border-slate-700/30',
-      shadow: 'shadow-slate-700/15',
+      badge: 'bg-slate-700',
+      cardBg: 'bg-gradient-to-br from-slate-600/40 to-slate-700/30',
+      cardBorder: 'border-slate-500/60',
+      shadow: 'shadow-slate-500/30',
     },
     steel: {
-      badge: 'bg-gray-800',
-      cardBg: 'bg-gradient-to-br from-gray-800/15 to-gray-900/15',
-      cardBorder: 'border-gray-700/30',
-      shadow: 'shadow-gray-700/15',
+      badge: 'bg-gray-600',
+      cardBg: 'bg-gradient-to-br from-gray-600/40 to-gray-700/30',
+      cardBorder: 'border-gray-500/60',
+      shadow: 'shadow-gray-500/30',
     },
     fairy: {
-      badge: 'bg-pink-700',
-      cardBg: 'bg-gradient-to-br from-pink-800/15 to-pink-700/15',
-      cardBorder: 'border-pink-600/30',
-      shadow: 'shadow-pink-600/15',
+      badge: 'bg-pink-500',
+      cardBg: 'bg-gradient-to-br from-pink-500/40 to-pink-600/30',
+      cardBorder: 'border-pink-400/60',
+      shadow: 'shadow-pink-400/30',
     },
   };
 

@@ -33,7 +33,7 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
           backgroundColor: 'var(--card)',
           border: '4px solid var(--border)',
           boxShadow: isDarkMode 
-            ? '8px 8px 0px 0px rgba(255,255,255,1)' 
+            ? '8px 8px 0px 0px rgba(51,51,51,1)' 
             : '8px 8px 0px 0px rgba(0,0,0,1)',
         }}
       >
@@ -99,7 +99,7 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
             backgroundColor: 'var(--card)',
             border: '4px solid var(--border)',
             boxShadow: isDarkMode 
-              ? '8px 8px 0px 0px rgba(255,255,255,1)' 
+              ? '8px 8px 0px 0px rgba(51,51,51,1)' 
               : '8px 8px 0px 0px rgba(0,0,0,1)',
           }}
         >
