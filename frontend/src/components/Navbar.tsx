@@ -32,9 +32,9 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
         style={{
           backgroundColor: 'var(--card)',
           border: '4px solid var(--border)',
-          boxShadow: isDarkMode 
-            ? '8px 8px 0px 0px rgba(51,51,51,1)' 
-            : '8px 8px 0px 0px rgba(0,0,0,1)',
+          boxShadow: isDarkMode
+            ? '8px 8px 0px 0px rgba(55,65,81,1)'
+            : '8px 8px 0px 0px rgba(187,183,178,1)',
         }}
       >
         <div className="flex items-center justify-between h-full">
@@ -98,9 +98,9 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
           style={{
             backgroundColor: 'var(--card)',
             border: '4px solid var(--border)',
-            boxShadow: isDarkMode 
-              ? '8px 8px 0px 0px rgba(51,51,51,1)' 
-              : '8px 8px 0px 0px rgba(0,0,0,1)',
+            boxShadow: isDarkMode
+              ? '8px 8px 0px 0px rgba(55,65,81,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
         >
           <div className="flex flex-col gap-3">

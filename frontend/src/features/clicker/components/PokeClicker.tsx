@@ -416,8 +416,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
                   style={{
-                    borderColor: '#2a2a3e'
-                  }}
+                    borderColor: '#2a2a3e',
+                    '--custom-inner-border-color': '#2a2a3e',
+                  } as React.CSSProperties}
                 >
                   B
                 </Button>
@@ -430,8 +431,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
                   style={{
-                    borderColor: '#2a2a3e'
-                  }}
+                    borderColor: '#2a2a3e',
+                    '--custom-inner-border-color': '#2a2a3e',
+                  } as React.CSSProperties}
                 >
                   A
                 </Button>
@@ -482,13 +484,13 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         <Card 
           className="border-4 p-6 relative overflow-hidden"
           style={{
-            background: isDarkMode 
-              ? 'linear-gradient(to bottom right, #2a2a2a, #1a1a1a)' 
-              : 'linear-gradient(to bottom right, #f0e6d2, #e8d8b8)',
-            borderColor: isDarkMode ? '#333333' : 'black',
-            boxShadow: isDarkMode 
-              ? '8px 8px 0px 0px rgba(100,100,100,1)' 
-              : '8px 8px 0px 0px rgba(0,0,0,1)'
+            background: isDarkMode
+              ? 'linear-gradient(to bottom right, #1f2937, #111827)'
+              : 'linear-gradient(to bottom right, #ebe9e5, #e0deda)',
+            borderColor: isDarkMode ? '#374151' : '#bbb7b2',
+            boxShadow: isDarkMode
+              ? '8px 8px 0px 0px rgba(55,65,81,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)'
           }}
         >
           <div 
@@ -500,8 +502,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               <div 
                 className="border-2 p-2 rounded-md shadow-md"
                 style={{
-                  backgroundColor: isDarkMode ? 'var(--card)' : 'white',
-                  borderColor: isDarkMode ? '#333333' : 'black'
+                  backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
+                  borderColor: isDarkMode ? '#374151' : '#bbb7b2'
                 }}
               >
                 <img
@@ -511,23 +513,23 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   style={{imageRendering: 'pixelated'}}
                 />
               </div>
-              <span 
+              <span
                 className="pixel-font text-base font-bold"
-                style={{color: isDarkMode ? 'white' : 'black'}}
+                style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
               >
                 Rare Candy
               </span>
             </div>
-            <div 
+            <div
               className="border-2 px-4 py-2 shadow-md"
               style={{
-                backgroundColor: isDarkMode ? 'var(--card)' : 'white',
-                borderColor: isDarkMode ? '#333333' : 'black'
+                backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
+                borderColor: isDarkMode ? '#374151' : '#bbb7b2'
               }}
             >
-              <span 
+              <span
                 className="pixel-font text-2xl font-bold"
-                style={{color: isDarkMode ? 'white' : 'black'}}
+                style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
               >
                 {Math.floor(getCurrentCandy())}
               </span>
@@ -539,22 +541,22 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         <Card 
           className="border-4 p-6"
           style={{
-            background: isDarkMode 
-              ? 'linear-gradient(to bottom right, #2a2a2a, #1a1a1a, #2a2a2a)' 
-              : 'linear-gradient(to bottom right, #e8e8d0, #d8d8c0, #e8e8d0)',
-            borderColor: isDarkMode ? '#333333' : 'black',
-            boxShadow: isDarkMode 
-              ? '8px 8px 0px 0px rgba(100,100,100,1)' 
-              : '8px 8px 0px 0px rgba(0,0,0,1)'
+            background: isDarkMode
+              ? 'linear-gradient(to bottom right, #1f2937, #111827, #1f2937)'
+              : 'linear-gradient(to bottom right, #ebe9e5, #dbd9d5, #ebe9e5)',
+            borderColor: isDarkMode ? '#374151' : '#bbb7b2',
+            boxShadow: isDarkMode
+              ? '8px 8px 0px 0px rgba(55,65,81,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)'
           }}
         >
           <div 
             className="border-2 p-3 mb-4 shadow-inner"
             style={{
-              background: isDarkMode 
-                ? 'linear-gradient(to right, #dc2626, #ea580c, #ca8a04)' 
+              background: isDarkMode
+                ? 'linear-gradient(to right, #dc2626, #ea580c, #ca8a04)'
                 : 'linear-gradient(to right, #ef4444, #fb923c, #fde047)',
-              borderColor: isDarkMode ? '#333333' : 'black'
+              borderColor: isDarkMode ? '#374151' : '#bbb7b2'
             }}
           >
             <h2 
@@ -577,10 +579,10 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                     key={key}
                     className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
                     style={{
-                      background: isDarkMode 
-                        ? 'linear-gradient(to bottom right, #2a2a2a, #1a1a1a)' 
-                        : 'linear-gradient(to bottom right, white, #f3f4f6)',
-                      borderColor: isDarkMode ? '#333333' : 'black'
+                      background: isDarkMode
+                        ? 'linear-gradient(to bottom right, #1f2937, #111827)'
+                        : 'linear-gradient(to bottom right, var(--card), #e0deda)',
+                      borderColor: isDarkMode ? '#374151' : '#bbb7b2'
                     }}
                   >
                     <div className="flex items-center justify-between gap-4 mb-1">
@@ -599,13 +601,13 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                                     : key === 'spDefense'
                                       ? (isDarkMode ? '#1d4ed8' : '#60a5fa')
                                       : (isDarkMode ? '#7c3aed' : '#a855f7'),
-                            borderColor: isDarkMode ? '#333333' : 'black'
+                            borderColor: isDarkMode ? '#374151' : '#bbb7b2'
                           }}
                         ></div>
                         <div className="flex flex-col">
-                          <span 
+                          <span
                             className="pixel-font text-xs"
-                            style={{color: isDarkMode ? '#d1d5db' : '#6b7280'}}
+                            style={{color: isDarkMode ? 'var(--muted-foreground)' : 'var(--muted-foreground)'}}
                           >
                             {key === 'hp'
                               ? 'HP'
@@ -615,9 +617,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                                   ? 'Sp. Defense'
                                   : key.charAt(0).toUpperCase() + key.slice(1)}
                           </span>
-                          <span 
+                          <span
                             className="pixel-font text-lg font-bold"
-                            style={{color: isDarkMode ? 'white' : 'black'}}
+                            style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
                           >
                             LV {String(value)}
                           </span>

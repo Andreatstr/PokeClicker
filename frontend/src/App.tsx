@@ -275,7 +275,7 @@ function App() {
           />
         </>
       )}
-      <BackgroundMusic />
+      <BackgroundMusic isDarkMode={isDarkMode} />
     </>
   );
 }

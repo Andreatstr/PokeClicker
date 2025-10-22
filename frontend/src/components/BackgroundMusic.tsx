@@ -1,6 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 
-export function BackgroundMusic() {
+interface BackgroundMusicProps {
+  isDarkMode?: boolean;
+}
+
+export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState(0.5);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -61,7 +65,15 @@ export function BackgroundMusic() {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 left-4 bg-background border-4 border-foreground p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div
+        className="fixed bottom-4 left-4 bg-background border-4 p-3"
+        style={{
+          borderColor: 'var(--border)',
+          boxShadow: isDarkMode
+            ? '8px 8px 0px 0px rgba(55,65,81,1)'
+            : '8px 8px 0px 0px rgba(0,0,0,1)'
+        }}
+      >
         <audio ref={audioRef} loop>
           <source
             src={`${import.meta.env.BASE_URL}music/background-music.mp3`}
@@ -92,7 +104,15 @@ export function BackgroundMusic() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 flex items-center gap-2 bg-background border-4 border-foreground p-3 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <div
+      className="fixed bottom-4 left-4 flex items-center gap-2 bg-background border-4 p-3"
+      style={{
+        borderColor: 'var(--border)',
+        boxShadow: isDarkMode
+          ? '8px 8px 0px 0px rgba(55,65,81,1)'
+          : '8px 8px 0px 0px rgba(0,0,0,1)'
+      }}
+    >
       <audio ref={audioRef} loop>
         <source
           src={`${import.meta.env.BASE_URL}music/background-music.mp3`}

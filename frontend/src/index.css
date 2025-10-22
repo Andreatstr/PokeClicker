@@ -34,13 +34,13 @@ body {
 @media (prefers-color-scheme: light) {
   :root {
     color: #2d2d2d;
-    background-color: #f1f0ed;
+    background-color: #e6e4e0;
   }
   a:hover {
     color: #4b5563;
   }
   button {
-    background-color: #e8e6e3;
+    background-color: #d8d6d2;
   }
 }
 
@@ -84,36 +84,36 @@ body {
 
 :root {
   --radius: 0.625rem;
-  --background: #f1f0ed;
+  --background: #e6e4e0;
   --foreground: #2d2d2d;
-  --card: #f7f6f4;
+  --card: #ebe9e5;
   --card-foreground: #2d2d2d;
-  --popover: #f7f6f4;
+  --popover: #ebe9e5;
   --popover-foreground: #2d2d2d;
-  --primary: #e0dfdc;
+  --primary: #d4d2ce;
   --primary-foreground: #2d2d2d;
-  --secondary: #ebe9e6;
+  --secondary: #dbd9d5;
   --secondary-foreground: #3d3d3d;
-  --muted: #e8e6e3;
+  --muted: #d8d6d2;
   --muted-foreground: #6b6b6b;
-  --accent: #efedea;
+  --accent: #e0deda;
   --accent-foreground: #2d2d2d;
   --destructive: #ef4444;
-  --border: #ccc9c4;
-  --input: #ddd9d4;
+  --border: #bbb7b2;
+  --input: #ccc8c3;
   --ring: #6b7280;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #efedea;
+  --sidebar: #e0deda;
   --sidebar-foreground: #2d2d2d;
   --sidebar-primary: #3d3d3d;
-  --sidebar-primary-foreground: #efedea;
-  --sidebar-accent: #e8e6e3;
+  --sidebar-primary-foreground: #e0deda;
+  --sidebar-accent: #d8d6d2;
   --sidebar-accent-foreground: #3d3d3d;
-  --sidebar-border: #ccc9c4;
+  --sidebar-border: #bbb7b2;
   --sidebar-ring: #6b7280;
 
   --retro-primary: hsl(30 70% 55%);
