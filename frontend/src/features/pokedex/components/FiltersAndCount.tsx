@@ -28,6 +28,7 @@ interface FiltersAndCountProps {
   setSelectedTypes: (value: string[]) => void;
   setSortBy: (value: 'id' | 'name' | 'type') => void;
   setSortOrder: (value: 'asc' | 'desc') => void;
+  isDarkMode?: boolean;
   setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
   setTempRegion: (value: string | null) => void;
   setTempTypes: (value: string[]) => void;
@@ -89,6 +90,7 @@ export function FiltersAndCount({
   setSortOrder,
   setShowMobileFilters,
   setTempRegion,
+  isDarkMode = false,
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
@@ -106,14 +108,16 @@ export function FiltersAndCount({
           onClick={() => setShowMobileFilters(false)}
         >
           <div
-            className="w-full max-w-md bg-[var(--retro-surface)] p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-md p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
+            style={{backgroundColor: 'var(--card)'}}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full bg-[var(--retro-surface)] p-4">
+            <div className="w-full p-4" style={{backgroundColor: 'var(--card)'}}>
               <div className="flex justify-between items-center mb-4">
                 <h2
                   id="filter-dialog-title"
-                  className="pixel-font text-lg text-black"
+                  className="pixel-font text-lg"
+                  style={{color: 'var(--foreground)'}}
                 >
                   Filter
                 </h2>
@@ -128,7 +132,7 @@ export function FiltersAndCount({
               <div className="flex flex-col gap-4">
                 {/* REGION */}
                 <div>
-                  <Label className="text-xs font-bold text-black">Region</Label>
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>Region</Label>
                   <Select
                     value={tempRegion ?? ''}
                     onValueChange={setTempRegion}
@@ -148,7 +152,7 @@ export function FiltersAndCount({
 
                 {/* TYPE */}
                 <div>
-                  <Label className="text-xs font-bold text-black">Type</Label>
+                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">Type</Label>
                   <MultiSelect
                     options={typeOptions}
                     selected={tempTypes}
@@ -159,7 +163,7 @@ export function FiltersAndCount({
 
                 {/* SORT BY */}
                 <div>
-                  <Label className="text-xs font-bold text-black">
+                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
                     Sort by
                   </Label>
                   <Select
@@ -181,7 +185,7 @@ export function FiltersAndCount({
 
                 {/* ORDER */}
                 <div>
-                  <Label className="text-xs font-bold text-black">Order</Label>
+                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">Order</Label>
                   <Select
                     value={tempSortOrder}
                     onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
@@ -245,7 +249,7 @@ export function FiltersAndCount({
 
       {!isMobile && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm pixel-font text-black">
+          <p className="text-sm pixel-font style={{color: 'var(--foreground)'}}">
             {loading
               ? 'Loading...'
               : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
@@ -253,7 +257,7 @@ export function FiltersAndCount({
           <div>
             {selectedTypes.length > 0 ? (
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs pixel-font text-black">
+                <p className="text-xs pixel-font style={{color: 'var(--foreground)'}}">
                   {selectedTypes.length === 18
                     ? 'Showing types: All types selected'
                     : `Showing types: ${selectedTypes.map((type) => type.charAt(0).toUpperCase() + type.slice(1)).join(', ')}`}
@@ -268,7 +272,7 @@ export function FiltersAndCount({
                 </Button>
               </div>
             ) : (
-              <p className="text-xs pixel-font text-black">
+              <p className="text-xs pixel-font style={{color: 'var(--foreground)'}}">
                 Showing types: All types
               </p>
             )}
@@ -281,7 +285,7 @@ export function FiltersAndCount({
             }}
           >
             <div className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-black">REGION</Label>
+              <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">REGION</Label>
               <Select
                 value={selectedRegion ?? ''}
                 onValueChange={setSelectedRegion}
@@ -300,7 +304,7 @@ export function FiltersAndCount({
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-black">TYPE</Label>
+              <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">TYPE</Label>
               <MultiSelect
                 options={typeOptions}
                 selected={selectedTypes}
@@ -310,7 +314,7 @@ export function FiltersAndCount({
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-black">SORT BY</Label>
+              <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">SORT BY</Label>
               <Select
                 value={sortBy}
                 onValueChange={(value) =>
@@ -329,7 +333,7 @@ export function FiltersAndCount({
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-black">ORDER</Label>
+              <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">ORDER</Label>
               <Select
                 value={sortOrder}
                 onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
@@ -345,7 +349,7 @@ export function FiltersAndCount({
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-black invisible">
+              <Label className="text-xs font-bold style={{color: 'var(--foreground)'}} invisible">
                 ACTIONS
               </Label>
               <Button

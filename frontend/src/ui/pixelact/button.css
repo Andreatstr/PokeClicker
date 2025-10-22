@@ -17,20 +17,22 @@
 }
 
 .pixel-default__button {
-  background-color: var(--retro-surface);
-  color: black;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--default-inner-border-color) 70%, rgba(0, 0, 0));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--default-inner-border-color) 70%, rgba(0, 0, 0));
+      color-mix(in hsl, var(--default-inner-border-color) 70%, var(--button-border-color));
   }
   &:hover {
-    background-color: var(--retro-primary);
+    background-color: var(--accent);
+    color: var(--accent-foreground);
   }
 
   &:active {
-    background-color: var(--retro-secondary);
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
   }
 }
 
@@ -40,16 +42,16 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--color-secondary) 70%, rgb(0, 0, 0));
+      color-mix(in hsl, var(--color-secondary) 70%, var(--button-border-color-secondary));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--color-secondary) 70%, rgb(0, 0, 0));
+      color-mix(in hsl, var(--color-secondary) 70%, var(--button-border-color-secondary));
   }
 
   &:hover {
     background-color: color-mix(
       in hsl,
       var(--color-secondary) 90%,
-      rgb(0, 0, 0)
+      var(--button-border-color-secondary)
     );
   }
 
@@ -57,7 +59,7 @@
     background-color: color-mix(
       in hsl,
       var(--color-secondary) 70%,
-      rgb(0, 0, 0)
+      var(--button-border-color-secondary)
     );
   }
 }
@@ -67,16 +69,16 @@
   color: var(--success-foreground);
 
   &::after {
-    border-right: 4px solid color-mix(in hsl, var(--success) 70%, rgb(0, 0, 0));
-    border-bottom: 4px solid color-mix(in hsl, var(--success) 70%, rgb(0, 0, 0));
+    border-right: 4px solid color-mix(in hsl, var(--success) 70%, var(--button-border-color));
+    border-bottom: 4px solid color-mix(in hsl, var(--success) 70%, var(--button-border-color));
   }
 
   &:hover {
-    background-color: color-mix(in hsl, var(--success) 90%, rgb(0, 0, 0));
+    background-color: color-mix(in hsl, var(--success) 90%, var(--button-border-color));
   }
 
   &:active {
-    background-color: color-mix(in hsl, var(--success) 70%, rgb(0, 0, 0));
+    background-color: color-mix(in hsl, var(--success) 70%, var(--button-border-color));
   }
 }
 
@@ -86,16 +88,16 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--destructive) 70%, rgb(77, 77, 77));
+      color-mix(in hsl, var(--destructive) 70%, var(--button-border-color-destructive));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--destructive) 70%, rgb(77, 77, 77));
+      color-mix(in hsl, var(--destructive) 70%, var(--button-border-color-destructive));
   }
 
   &:hover {
     background-color: color-mix(
       in hsl,
       var(--destructive) 90%,
-      rgb(77, 77, 77)
+      var(--button-border-color-destructive)
     );
   }
 
@@ -103,7 +105,7 @@
     background-color: color-mix(
       in hsl,
       var(--destructive) 70%,
-      rgb(77, 77, 77)
+      var(--button-border-color-destructive)
     );
   }
 }
@@ -114,17 +116,17 @@
 
   &::after {
     border-right: 4px solid
-      color-mix(in hsl, var(--warning) 70%, rgb(32, 32, 32));
+      color-mix(in hsl, var(--warning) 70%, var(--button-border-color-warning));
     border-bottom: 4px solid
-      color-mix(in hsl, var(--warning) 70%, rgb(32, 32, 32));
+      color-mix(in hsl, var(--warning) 70%, var(--button-border-color-warning));
   }
 
   &:hover {
-    background-color: color-mix(in hsl, var(--warning) 90%, rgb(32, 32, 32));
+    background-color: color-mix(in hsl, var(--warning) 90%, var(--button-border-color-warning));
   }
 
   &:active {
-    background-color: color-mix(in hsl, var(--warning) 70%, rgb(32, 32, 32));
+    background-color: color-mix(in hsl, var(--warning) 70%, var(--button-border-color-warning));
   }
 }
 
@@ -136,15 +138,15 @@
 
   &:hover {
     background-color: transparent;
-    color: color-mix(in hsl, var(--link) 70%, rgb(0, 0, 0));
+    color: color-mix(in hsl, var(--link) 70%, var(--button-border-color));
   }
 
   &:active {
-    color: color-mix(in hsl, var(--link) 90%, rgb(0, 0, 0));
+    color: color-mix(in hsl, var(--link) 90%, var(--button-border-color));
   }
 
   &:visited {
-    color: color-mix(in hsl, var(--link) 70%, rgb(0, 0, 0));
+    color: color-mix(in hsl, var(--link) 70%, var(--button-border-color));
   }
 }
 

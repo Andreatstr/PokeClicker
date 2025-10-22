@@ -6,6 +6,7 @@ import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState} from 'react';
 import '@ui/pixelact/styles/animations.css';
+import {getTypeColors} from '../utils/typeColors';
 
 const ME_QUERY = gql`
   query Me {
@@ -22,6 +23,7 @@ interface Props {
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchase?: (id: number) => void;
+  isDarkMode?: boolean;
 }
 
 // Helper to calculate Pokemon purchase cost (matches backend)
@@ -29,127 +31,141 @@ function getPokemonCost(pokemonId: number): number {
   return Math.floor(100 + pokemonId / 10);
 }
 
-function getTypeColors(type: string) {
-  const typeColorMap: Record<
-    string,
-    {badge: string; cardBg: string; cardBorder: string; shadow: string}
-  > = {
-    normal: {
-      badge: 'bg-gray-400',
-      cardBg: 'bg-gradient-to-br from-gray-100 to-gray-200',
-      cardBorder: 'border-gray-400',
-      shadow: 'shadow-gray-400/50',
-    },
-    fire: {
-      badge: 'bg-red-500',
-      cardBg: 'bg-gradient-to-br from-red-50 to-red-100',
-      cardBorder: 'border-red-400',
-      shadow: 'shadow-red-400/50',
-    },
-    water: {
-      badge: 'bg-blue-500',
-      cardBg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-      cardBorder: 'border-blue-400',
-      shadow: 'shadow-blue-400/50',
-    },
-    electric: {
-      badge: 'bg-yellow-400',
-      cardBg: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
-      cardBorder: 'border-yellow-400',
-      shadow: 'shadow-yellow-400/50',
-    },
-    grass: {
-      badge: 'bg-green-500',
-      cardBg: 'bg-gradient-to-br from-green-50 to-green-100',
-      cardBorder: 'border-green-400',
-      shadow: 'shadow-green-400/50',
-    },
-    ice: {
-      badge: 'bg-blue-200',
-      cardBg: 'bg-gradient-to-br from-cyan-50 to-cyan-100',
-      cardBorder: 'border-cyan-300',
-      shadow: 'shadow-cyan-300/50',
-    },
-    fighting: {
-      badge: 'bg-red-700',
-      cardBg: 'bg-gradient-to-br from-red-100 to-red-200',
-      cardBorder: 'border-red-600',
-      shadow: 'shadow-red-600/50',
-    },
-    poison: {
-      badge: 'bg-purple-500',
-      cardBg: 'bg-gradient-to-br from-purple-50 to-purple-100',
-      cardBorder: 'border-purple-400',
-      shadow: 'shadow-purple-400/50',
-    },
-    ground: {
-      badge: 'bg-yellow-600',
-      cardBg: 'bg-gradient-to-br from-amber-50 to-amber-100',
-      cardBorder: 'border-amber-400',
-      shadow: 'shadow-amber-400/50',
-    },
-    flying: {
-      badge: 'bg-indigo-400',
-      cardBg: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
-      cardBorder: 'border-indigo-300',
-      shadow: 'shadow-indigo-300/50',
-    },
-    psychic: {
-      badge: 'bg-pink-500',
-      cardBg: 'bg-gradient-to-br from-pink-50 to-pink-100',
-      cardBorder: 'border-pink-400',
-      shadow: 'shadow-pink-400/50',
-    },
-    bug: {
-      badge: 'bg-green-400',
-      cardBg: 'bg-gradient-to-br from-lime-50 to-lime-100',
-      cardBorder: 'border-lime-400',
-      shadow: 'shadow-lime-400/50',
-    },
-    rock: {
-      badge: 'bg-yellow-800',
-      cardBg: 'bg-gradient-to-br from-stone-50 to-stone-100',
-      cardBorder: 'border-stone-400',
-      shadow: 'shadow-stone-400/50',
-    },
-    ghost: {
-      badge: 'bg-purple-700',
-      cardBg: 'bg-gradient-to-br from-violet-50 to-violet-100',
-      cardBorder: 'border-violet-400',
-      shadow: 'shadow-violet-400/50',
-    },
-    dragon: {
-      badge: 'bg-indigo-700',
-      cardBg: 'bg-gradient-to-br from-indigo-100 to-indigo-200',
-      cardBorder: 'border-indigo-600',
-      shadow: 'shadow-indigo-600/50',
-    },
-    dark: {
-      badge: 'bg-gray-800',
-      cardBg: 'bg-gradient-to-br from-slate-100 to-slate-200',
-      cardBorder: 'border-slate-600',
-      shadow: 'shadow-slate-600/50',
-    },
-    steel: {
-      badge: 'bg-gray-500',
-      cardBg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-      cardBorder: 'border-gray-500',
-      shadow: 'shadow-gray-500/50',
-    },
-    fairy: {
-      badge: 'bg-pink-300',
-      cardBg: 'bg-gradient-to-br from-pink-25 to-pink-50',
-      cardBorder: 'border-pink-300',
-      shadow: 'shadow-pink-300/50',
-    },
-  };
-
-  return typeColorMap[type] || typeColorMap.normal;
-}
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
+}
+
+function getContrastColor(bgColor: string): string {
+  // Map Tailwind color classes to their hex values
+  const colorMap: Record<string, string> = {
+    'bg-gray-400': '#9ca3af',
+    'bg-red-500': '#ef4444',
+    'bg-blue-500': '#3b82f6',
+    'bg-yellow-400': '#facc15',
+    'bg-green-500': '#22c55e',
+    'bg-green-600': '#16a34a',
+    'bg-blue-200': '#bfdbfe',
+    'bg-red-700': '#b91c1c',
+    'bg-purple-500': '#a855f7',
+    'bg-yellow-600': '#ca8a04',
+    'bg-indigo-400': '#818cf8',
+    'bg-pink-500': '#ec4899',
+    'bg-green-400': '#4ade80',
+    'bg-yellow-800': '#854d0e',
+    'bg-purple-700': '#7e22ce',
+    'bg-indigo-700': '#4338ca',
+    'bg-gray-800': '#1f2937',
+    'bg-gray-500': '#6b7280',
+    'bg-pink-300': '#f9a8d4',
+    // Dark mode colors (solid)
+    'bg-red-600': '#dc2626',
+    'bg-blue-600': '#2563eb',
+    'bg-yellow-600': '#ca8a04',
+    'bg-green-600': '#16a34a',
+    'bg-purple-600': '#9333ea',
+    'bg-pink-600': '#db2777',
+    'bg-cyan-500': '#06b6d4',
+    'bg-indigo-600': '#4f46e5',
+    'bg-lime-600': '#65a30d',
+    'bg-stone-600': '#57534e',
+    'bg-violet-600': '#7c3aed',
+    'bg-slate-700': '#334155',
+    'bg-gray-600': '#4b5563',
+    'bg-pink-500': '#ec4899',
+    'bg-red-700': '#b91c1c',
+    'bg-amber-600': '#d97706',
+    // Additional dark mode colors
+    'bg-lime-500': '#84cc16',
+    'bg-lime-600': '#65a30d',
+    'bg-stone-500': '#78716c',
+    'bg-stone-600': '#57534e',
+    'bg-violet-500': '#8b5cf6',
+    'bg-violet-600': '#7c3aed',
+    'bg-indigo-700': '#4338ca',
+    'bg-slate-600': '#475569',
+    'bg-slate-700': '#334155',
+    'bg-cyan-400': '#22d3ee',
+    'bg-cyan-500': '#06b6d4',
+    'bg-pink-400': '#f472b6',
+    'bg-pink-500': '#ec4899',
+    // Darker dark mode colors (700-800 range)
+    'bg-red-700': '#b91c1c',
+    'bg-red-800': '#991b1b',
+    'bg-blue-700': '#1d4ed8',
+    'bg-yellow-700': '#a16207',
+    'bg-green-700': '#15803d',
+    'bg-cyan-600': '#0891b2',
+    'bg-purple-700': '#7e22ce',
+    'bg-amber-700': '#a16207',
+    'bg-indigo-700': '#4338ca',
+    'bg-indigo-800': '#3730a3',
+    'bg-pink-700': '#be185d',
+    'bg-lime-700': '#4d7c0f',
+    'bg-stone-700': '#44403c',
+    'bg-violet-700': '#6d28d9',
+    'bg-slate-800': '#1e293b',
+    'bg-gray-700': '#374151',
+    // Even darker dark mode colors (800-900 range)
+    'bg-red-800': '#991b1b',
+    'bg-red-900': '#7f1d1d',
+    'bg-blue-800': '#1e40af',
+    'bg-yellow-800': '#854d0e',
+    'bg-green-800': '#166534',
+    'bg-cyan-700': '#0e7490',
+    'bg-purple-800': '#6b21a8',
+    'bg-amber-800': '#92400e',
+    'bg-indigo-800': '#3730a3',
+    'bg-indigo-900': '#312e81',
+    'bg-pink-800': '#9d174d',
+    'bg-lime-800': '#365314',
+    'bg-stone-800': '#292524',
+    'bg-violet-800': '#5b21b6',
+    'bg-slate-900': '#0f172a',
+    'bg-gray-800': '#1f2937',
+  };
+
+  const hex = colorMap[bgColor] || '#000000';
+
+  // Convert hex to RGB
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  // Calculate relative luminance using proper sRGB formula
+  const toLinear = (c: number) => {
+    const val = c / 255;
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+  };
+
+  const luminance =
+    0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+
+  // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
+  return luminance > 0.5 ? 'text-black' : 'text-white';
+}
+
+function getStatBarColors(isDarkMode: boolean) {
+  if (isDarkMode) {
+    return {
+      hp: { color: 'bg-red-500/60', upgradeColor: 'bg-red-400/80' },
+      attack: { color: 'bg-orange-500/60', upgradeColor: 'bg-orange-400/80' },
+      defense: { color: 'bg-blue-500/60', upgradeColor: 'bg-blue-400/80' },
+      spAttack: { color: 'bg-purple-500/60', upgradeColor: 'bg-purple-400/80' },
+      spDefense: { color: 'bg-yellow-500/60', upgradeColor: 'bg-yellow-400/80' },
+      speed: { color: 'bg-pink-500/60', upgradeColor: 'bg-pink-400/80' },
+    };
+  } else {
+    return {
+      hp: { color: 'bg-red-300', upgradeColor: 'bg-red-600' },
+      attack: { color: 'bg-orange-300', upgradeColor: 'bg-orange-600' },
+      defense: { color: 'bg-blue-300', upgradeColor: 'bg-blue-600' },
+      spAttack: { color: 'bg-purple-300', upgradeColor: 'bg-purple-600' },
+      spDefense: { color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600' },
+      speed: { color: 'bg-pink-300', upgradeColor: 'bg-pink-600' },
+    };
+  }
 }
 
 function EvolutionPokemon({
@@ -211,6 +227,7 @@ export function PokemonDetailModal({
   onClose,
   onSelectPokemon,
   onPurchase,
+  isDarkMode = false,
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
@@ -222,7 +239,14 @@ export function PokemonDetailModal({
 
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
-    ? getTypeColors(primaryType)
+    ? getTypeColors(primaryType, isDarkMode)
+    : isDarkMode
+    ? {
+        badge: 'bg-gray-500',
+        cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
+        cardBorder: 'border-gray-600',
+        shadow: 'shadow-gray-600/50',
+      }
     : {
         badge: 'bg-gray-400',
         cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
@@ -234,6 +258,7 @@ export function PokemonDetailModal({
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
+  const statColors = getStatBarColors(isDarkMode);
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -276,7 +301,12 @@ export function PokemonDetailModal({
         <div className="flex flex-col gap-3 md:gap-4 items-center">
           {/* Pokemon Card */}
           <aside
-            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+            style={{
+              backgroundColor: isDarkMode 
+                ? 'rgba(0, 0, 0, 0.8)' 
+                : 'rgba(255, 255, 255, 0.95)'
+            }}
           >
             {/* Owned Corner Tape Badge */}
             {pokemon.isOwned && (
@@ -307,11 +337,13 @@ export function PokemonDetailModal({
             {pokemon.isOwned && (
               <div className="flex gap-2 mb-2 md:mb-3">
                 {pokemon.types.map((type) => {
-                  const colors = getTypeColors(type);
+                  const colors = getTypeColors(type, isDarkMode);
+                  const textColor = getContrastColor(colors.badge);
                   return (
                     <span
                       key={type}
-                      className={`${colors.badge} text-white text-[10px] md:text-xs font-bold px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase`}
+                      className={`${colors.badge} ${textColor} text-[10px] md:text-xs font-bold px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase`}
+                      style={{textShadow: 'none'}}
                     >
                       {type}
                     </span>
@@ -360,43 +392,43 @@ export function PokemonDetailModal({
                       baseValue={pokemon.stats?.hp ?? 0}
                       yourValue={pokemon.stats?.hp ?? 0}
                       max={255}
-                      color="bg-red-300"
-                      upgradeColor="bg-red-600"
+                      color={statColors.hp.color}
+                      upgradeColor={statColors.hp.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.attack ?? 0}
                       yourValue={pokemon.stats?.attack ?? 0}
                       max={255}
-                      color="bg-orange-300"
-                      upgradeColor="bg-orange-600"
+                      color={statColors.attack.color}
+                      upgradeColor={statColors.attack.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.defense ?? 0}
                       yourValue={pokemon.stats?.defense ?? 0}
                       max={255}
-                      color="bg-blue-300"
-                      upgradeColor="bg-blue-600"
+                      color={statColors.defense.color}
+                      upgradeColor={statColors.defense.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spAttack ?? 0}
                       yourValue={pokemon.stats?.spAttack ?? 0}
                       max={255}
-                      color="bg-purple-300"
-                      upgradeColor="bg-purple-600"
+                      color={statColors.spAttack.color}
+                      upgradeColor={statColors.spAttack.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spDefense ?? 0}
                       yourValue={pokemon.stats?.spDefense ?? 0}
                       max={255}
-                      color="bg-yellow-300"
-                      upgradeColor="bg-yellow-600"
+                      color={statColors.spDefense.color}
+                      upgradeColor={statColors.spDefense.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.speed ?? 0}
                       yourValue={pokemon.stats?.speed ?? 0}
                       max={255}
-                      color="bg-pink-300"
-                      upgradeColor="bg-pink-600"
+                      color={statColors.speed.color}
+                      upgradeColor={statColors.speed.upgradeColor}
                     />
                   </div>
                 </div>
@@ -411,12 +443,20 @@ export function PokemonDetailModal({
                 error={error}
                 pokemonName={pokemon.name}
                 size="small"
+                isDarkMode={isDarkMode}
               />
             )}
           </aside>
 
           {/* Evolution Section */}
-          <div className="evolutionWrapper p-3 bg-[#a0c8ff] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] text-xs md:text-sm w-full max-w-[400px] font-press-start">
+          <div 
+            className="evolutionWrapper p-3 border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] text-xs md:text-sm w-full max-w-[400px] font-press-start"
+            style={{
+              backgroundColor: isDarkMode 
+                ? '#1e3a5f'  // Dark blue for dark mode
+                : '#a0c8ff'  // Original light blue for light mode
+            }}
+          >
             <h3 className="font-bold mb-2">Evolution</h3>
             <div className="evolutionChain flex items-center justify-center gap-2 md:gap-3">
               {[pokemon.id, ...(pokemon.evolution ?? [])]

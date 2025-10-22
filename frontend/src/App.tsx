@@ -19,7 +19,15 @@ function App() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first, then system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    // Check system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   const [currentPage, setCurrentPage] = useState<
     'clicker' | 'pokedex' | 'login'
   >('login');
@@ -38,6 +46,15 @@ function App() {
   const [tempTypes, setTempTypes] = useState(selectedTypes);
   const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
+
+  // Apply initial theme on mount
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const {loading, error, data, refetch} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
@@ -92,7 +109,18 @@ function App() {
   };
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    
+    // Save to localStorage
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    
+    // Apply CSS class to document
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
   const handleLoadMore = () => {
@@ -116,7 +144,7 @@ function App() {
         <>
           <main
             className="min-h-screen px-4 sm:px-6 md:px-8 pb-8 pt-0"
-            style={{backgroundColor: 'var(--retro-secondary)'}}
+            style={{backgroundColor: 'var(--background)'}}
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
@@ -132,6 +160,7 @@ function App() {
                   isMobile={isMobile}
                   showMobileFilters={showMobileFilters}
                   setShowMobileFilters={setShowMobileFilters}
+                  isDarkMode={isDarkMode}
                 />
 
                 {/* Filters and Count */}
@@ -155,6 +184,7 @@ function App() {
                   setSortOrder={setSortOrder}
                   setShowMobileFilters={setShowMobileFilters}
                   setTempRegion={setTempRegion}
+                  isDarkMode={isDarkMode}
                   setTempTypes={setTempTypes}
                   setTempSortBy={setTempSortBy}
                   setTempSortOrder={setTempSortOrder}
@@ -168,14 +198,14 @@ function App() {
                       <p className="pixel-font text-xl text-red-600">
                         Error loading Pokémon
                       </p>
-                      <p className="pixel-font text-sm text-[var(--retro-border)] mt-2">
+                      <p className="pixel-font text-sm style={{color: 'var(--muted-foreground)'}} mt-2">
                         {error.message}
                       </p>
                     </div>
                   ) : filteredPokemon.length === 0 && !loading ? (
                     <div className="text-center py-16">
                       <p className="pixel-font text-xl ">No Pokemon found</p>
-                      <p className="pixel-font text-sm text-[var(--retro-border)] mt-2">
+                      <p className="pixel-font text-sm style={{color: 'var(--muted-foreground)'}} mt-2">
                         Try a different search term
                       </p>
                     </div>
@@ -200,6 +230,7 @@ function App() {
                             <PokemonCard
                               pokemon={pokemon}
                               onClick={handlePokemonClick}
+                              isDarkMode={isDarkMode}
                             />
                           </li>
                         ))}
@@ -240,6 +271,7 @@ function App() {
               }
               refetch();
             }}
+            isDarkMode={isDarkMode}
           />
         </>
       )}
