@@ -52,6 +52,7 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **Responsiv design med GameBoy-estetikk**
 - **Sikkerhet og infrastruktur** (JWT secret validation, environment variables, rate limiting)
 - **Bærekraftig utvikling** (dark mode, performance optimization)
+- **Code splitting og lazy loading** (98% reduksjon i initial bundle size)
 
 **Del3 fokusområder:**
 
@@ -82,6 +83,34 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **Environment files**: Alle `.env` filer er gitignored for å forhindre utilsiktet commit av sensitive data
 - **Rate limiting**: Game-optimized limits som tillater høyfrekvent klikking
 - **JWT security**: Ingen hardkodede secrets, proper validation
+
+## Bærekraftig utvikling (Del3 - Fullført)
+
+### Issue #69: Code Splitting og Lazy Loading
+- **Implementert**: React.lazy() for route-based code splitting
+- **Resultat**: 98% reduksjon i initial bundle size (623.65 kB → 12.33 kB)
+- **Lazy loaded komponenter**:
+  - PokeClicker (kun når bruker navigerer til clicker)
+  - LoginScreen (kun når autentisering trengs)
+  - PokemonDetailModal (kun når Pokemon-detaljer åpnes)
+  - Pokedex komponenter (SearchBar, FiltersAndCount, PokemonCard)
+- **Suspense boundaries**: Loading states med GameBoy-estetikk
+- **Performance**: Dramatisk forbedret initial load time, spesielt på trege forbindelser
+
+### Bundle Size Analyse
+```
+Før: 623.65 kB (188.02 kB gzipped) - enkelt stort bundle
+Etter:
+  - Initial: 12.33 kB (3.80 kB gzipped) - 98% reduksjon
+  - Secondary: 41.23 kB (12.89 kB gzipped) - lazy loaded
+  - Heavy: 574.77 kB (176.27 kB gzipped) - lastes kun på behov
+```
+
+### Bærekraftige forbedringer
+- **Dramatisk raskere initial load**: Brukere kan starte å bruke appen umiddelbart
+- **Bedre caching**: Komponenter kan caches uavhengig
+- **Redusert dataforbruk**: Kun nødvendige komponenter lastes
+- **Forbedret brukeropplevelse**: Loading states med kontekstuelle meldinger
 
 ## Datamodell (planlagt)
 
