@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* Font loading optimized in HTML head with preload */
 
 :root {
   --box-shadow-width: 4px;
@@ -25,11 +25,12 @@
 .pixel-font {
   font-family:
     'Press Start 2P',
-    system-ui,
-    -apple-system,
-    sans-serif;
+    'Courier New',
+    'Courier',
+    monospace;
   line-height: 1.5;
   letter-spacing: 0.5px;
+  font-display: swap;
 }
 
 .box-shadow-margin {
