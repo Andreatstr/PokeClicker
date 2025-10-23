@@ -90,7 +90,7 @@ export function FiltersAndCount({
   setSortOrder,
   setShowMobileFilters,
   setTempRegion,
-  isDarkMode = false,
+  isDarkMode: _isDarkMode = false,
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
