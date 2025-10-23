@@ -28,3 +28,5 @@ dist-ssr
 .claude/
 CLAUDE.md
 .issues-del2.md
+
+coverage/
