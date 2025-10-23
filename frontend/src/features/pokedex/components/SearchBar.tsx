@@ -7,6 +7,7 @@ interface SearchBarProps {
   isMobile: boolean;
   showMobileFilters: boolean;
   setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
+  isDarkMode?: boolean;
 }
 
 export function SearchBar({
@@ -16,15 +17,18 @@ export function SearchBar({
   isMobile,
   showMobileFilters,
   setShowMobileFilters,
+  isDarkMode = false,
 }: SearchBarProps) {
   return (
     <section className="mb-6 mt-6 sm:mt-4 max-w-4xl mx-auto">
       <form
         className="p-4"
         style={{
-          backgroundColor: 'var(--retro-primary)',
-          border: '4px solid var(--retro-border)',
-          boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+          backgroundColor: 'var(--primary)',
+          border: '4px solid var(--border)',
+          boxShadow: isDarkMode 
+            ? '8px 8px 0px 0px rgba(51,51,51,1)' 
+            : '8px 8px 0px 0px rgba(0,0,0,1)',
         }}
         role="search"
         onSubmit={(e) => e.preventDefault()}
@@ -34,12 +38,21 @@ export function SearchBar({
         </Label>
         <div className="flex flex-col gap-3">
           <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <Input
+            <SearchIcon 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" 
+              style={{color: isDarkMode ? 'var(--muted-foreground)' : '#6b7280'}}
+            />
+            <input
               id="pokemon-search"
               type="search"
               placeholder="search"
-              className="w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+              className={`w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none pixel-font max-w-full outline-none p-2 shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin ${
+                isDarkMode ? 'placeholder-white' : 'placeholder-black'
+              }`}
+              style={{
+                backgroundColor: isDarkMode ? 'var(--card)' : 'var(--input)',
+                color: isDarkMode ? 'white' : 'black',
+              }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -52,7 +65,18 @@ export function SearchBar({
                 aria-label="Clear search"
                 onKeyDown={(e) => e.key === 'Enter' && handleClearSearch()}
               >
-                <CloseIcon className="w-5 h-5 text-gray-600 hover:text-black" />
+                <CloseIcon 
+                  className="w-5 h-5" 
+                  style={{
+                    color: isDarkMode ? 'var(--muted-foreground)' : '#4b5563',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = isDarkMode ? 'var(--foreground)' : '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = isDarkMode ? 'var(--muted-foreground)' : '#4b5563';
+                  }}
+                />
               </div>
             )}
           </div>

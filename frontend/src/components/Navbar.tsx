@@ -25,19 +25,21 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
   return (
     <header
       className="px-4 py-2 sm:px-6 sm:py-4 md:px-8 md:py-8"
-      style={{backgroundColor: 'var(--retro-secondary)'}}
+      style={{backgroundColor: 'var(--background)'}}
     >
       <div
         className="w-full h-16 sm:h-16 md:h-20 px-2 sm:px-4 py-3 sm:py-3 md:py-4"
         style={{
-          backgroundColor: 'var(--retro-surface)',
-          border: '4px solid var(--retro-border)',
-          boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+          backgroundColor: 'var(--card)',
+          border: '4px solid var(--border)',
+          boxShadow: isDarkMode
+            ? '8px 8px 0px 0px rgba(55,65,81,1)'
+            : '8px 8px 0px 0px rgba(187,183,178,1)',
         }}
       >
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center">
-            <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold text-black pixel-font whitespace-nowrap flex-shrink-[2] min-w-0">
+            <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0" style={{color: 'var(--foreground)'}}>
               PokeClicker
             </h1>
           </div>
@@ -94,9 +96,11 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
         <div
           className="lg:hidden mt-4 p-4"
           style={{
-            backgroundColor: 'var(--retro-surface)',
-            border: '4px solid var(--retro-border)',
-            boxShadow: '8px 8px 0px 0px rgba(0,0,0,1)',
+            backgroundColor: 'var(--card)',
+            border: '4px solid var(--border)',
+            boxShadow: isDarkMode
+              ? '8px 8px 0px 0px rgba(55,65,81,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
         >
           <div className="flex flex-col gap-3">

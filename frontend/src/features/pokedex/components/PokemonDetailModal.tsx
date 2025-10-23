@@ -6,6 +6,7 @@ import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState} from 'react';
 import '@ui/pixelact/styles/animations.css';
+import {getTypeColors, getContrastColor, getStatBarColors, getUnknownPokemonColors} from '../utils/typeColors';
 
 const ME_QUERY = gql`
   query Me {
@@ -22,6 +23,7 @@ interface Props {
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchase?: (id: number) => void;
+  isDarkMode?: boolean;
 }
 
 // Helper to calculate Pokemon purchase cost (matches backend)
@@ -29,128 +31,12 @@ function getPokemonCost(pokemonId: number): number {
   return Math.floor(100 + pokemonId / 10);
 }
 
-function getTypeColors(type: string) {
-  const typeColorMap: Record<
-    string,
-    {badge: string; cardBg: string; cardBorder: string; shadow: string}
-  > = {
-    normal: {
-      badge: 'bg-gray-400',
-      cardBg: 'bg-gradient-to-br from-gray-100 to-gray-200',
-      cardBorder: 'border-gray-400',
-      shadow: 'shadow-gray-400/50',
-    },
-    fire: {
-      badge: 'bg-red-500',
-      cardBg: 'bg-gradient-to-br from-red-50 to-red-100',
-      cardBorder: 'border-red-400',
-      shadow: 'shadow-red-400/50',
-    },
-    water: {
-      badge: 'bg-blue-500',
-      cardBg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-      cardBorder: 'border-blue-400',
-      shadow: 'shadow-blue-400/50',
-    },
-    electric: {
-      badge: 'bg-yellow-400',
-      cardBg: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
-      cardBorder: 'border-yellow-400',
-      shadow: 'shadow-yellow-400/50',
-    },
-    grass: {
-      badge: 'bg-green-500',
-      cardBg: 'bg-gradient-to-br from-green-50 to-green-100',
-      cardBorder: 'border-green-400',
-      shadow: 'shadow-green-400/50',
-    },
-    ice: {
-      badge: 'bg-blue-200',
-      cardBg: 'bg-gradient-to-br from-cyan-50 to-cyan-100',
-      cardBorder: 'border-cyan-300',
-      shadow: 'shadow-cyan-300/50',
-    },
-    fighting: {
-      badge: 'bg-red-700',
-      cardBg: 'bg-gradient-to-br from-red-100 to-red-200',
-      cardBorder: 'border-red-600',
-      shadow: 'shadow-red-600/50',
-    },
-    poison: {
-      badge: 'bg-purple-500',
-      cardBg: 'bg-gradient-to-br from-purple-50 to-purple-100',
-      cardBorder: 'border-purple-400',
-      shadow: 'shadow-purple-400/50',
-    },
-    ground: {
-      badge: 'bg-yellow-600',
-      cardBg: 'bg-gradient-to-br from-amber-50 to-amber-100',
-      cardBorder: 'border-amber-400',
-      shadow: 'shadow-amber-400/50',
-    },
-    flying: {
-      badge: 'bg-indigo-400',
-      cardBg: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
-      cardBorder: 'border-indigo-300',
-      shadow: 'shadow-indigo-300/50',
-    },
-    psychic: {
-      badge: 'bg-pink-500',
-      cardBg: 'bg-gradient-to-br from-pink-50 to-pink-100',
-      cardBorder: 'border-pink-400',
-      shadow: 'shadow-pink-400/50',
-    },
-    bug: {
-      badge: 'bg-green-400',
-      cardBg: 'bg-gradient-to-br from-lime-50 to-lime-100',
-      cardBorder: 'border-lime-400',
-      shadow: 'shadow-lime-400/50',
-    },
-    rock: {
-      badge: 'bg-yellow-800',
-      cardBg: 'bg-gradient-to-br from-stone-50 to-stone-100',
-      cardBorder: 'border-stone-400',
-      shadow: 'shadow-stone-400/50',
-    },
-    ghost: {
-      badge: 'bg-purple-700',
-      cardBg: 'bg-gradient-to-br from-violet-50 to-violet-100',
-      cardBorder: 'border-violet-400',
-      shadow: 'shadow-violet-400/50',
-    },
-    dragon: {
-      badge: 'bg-indigo-700',
-      cardBg: 'bg-gradient-to-br from-indigo-100 to-indigo-200',
-      cardBorder: 'border-indigo-600',
-      shadow: 'shadow-indigo-600/50',
-    },
-    dark: {
-      badge: 'bg-gray-800',
-      cardBg: 'bg-gradient-to-br from-slate-100 to-slate-200',
-      cardBorder: 'border-slate-600',
-      shadow: 'shadow-slate-600/50',
-    },
-    steel: {
-      badge: 'bg-gray-500',
-      cardBg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-      cardBorder: 'border-gray-500',
-      shadow: 'shadow-gray-500/50',
-    },
-    fairy: {
-      badge: 'bg-pink-300',
-      cardBg: 'bg-gradient-to-br from-pink-25 to-pink-50',
-      cardBorder: 'border-pink-300',
-      shadow: 'shadow-pink-300/50',
-    },
-  };
-
-  return typeColorMap[type] || typeColorMap.normal;
-}
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
+
 
 function EvolutionPokemon({
   id,
@@ -211,6 +97,7 @@ export function PokemonDetailModal({
   onClose,
   onSelectPokemon,
   onPurchase,
+  isDarkMode = false,
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
@@ -222,18 +109,14 @@ export function PokemonDetailModal({
 
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
-    ? getTypeColors(primaryType)
-    : {
-        badge: 'bg-gray-400',
-        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
-        cardBorder: 'border-gray-400',
-        shadow: 'shadow-gray-400/50',
-      };
+    ? getTypeColors(primaryType, isDarkMode)
+    : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
+  const statColors = getStatBarColors(isDarkMode);
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -276,7 +159,16 @@ export function PokemonDetailModal({
         <div className="flex flex-col gap-3 md:gap-4 items-center">
           {/* Pokemon Card */}
           <aside
-            className={`leftBox border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+            className={`leftBox border-4 p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+            style={{
+              borderColor: isDarkMode ? '#333333' : 'black',
+              boxShadow: isDarkMode 
+                ? '4px 4px 0px rgba(51,51,51,1)' 
+                : '4px 4px 0px rgba(0,0,0,1)',
+              backgroundColor: isDarkMode
+                ? 'rgba(20, 20, 20, 0.9)'
+                : 'rgba(245, 241, 232, 0.95)'
+            }}
           >
             {/* Owned Corner Tape Badge */}
             {pokemon.isOwned && (
@@ -307,11 +199,13 @@ export function PokemonDetailModal({
             {pokemon.isOwned && (
               <div className="flex gap-2 mb-2 md:mb-3">
                 {pokemon.types.map((type) => {
-                  const colors = getTypeColors(type);
+                  const colors = getTypeColors(type, isDarkMode);
+                  const textColor = getContrastColor(colors.badge);
                   return (
                     <span
                       key={type}
-                      className={`${colors.badge} text-white text-[10px] md:text-xs font-bold px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase`}
+                      className={`${colors.badge} ${textColor} text-[10px] md:text-xs font-bold px-2 py-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] uppercase`}
+                      style={{textShadow: 'none'}}
                     >
                       {type}
                     </span>
@@ -321,8 +215,9 @@ export function PokemonDetailModal({
             )}
 
             <figure
-              className="spriteFrame border-2 border-black p-2 mb-2 md:mb-3 flex items-center justify-center w-full h-[140px] md:h-[180px] relative"
+              className="spriteFrame border-2 p-2 mb-2 md:mb-3 flex items-center justify-center w-full h-[140px] md:h-[180px] relative"
               style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
                 backgroundImage: `url(${backgroundImageUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -360,43 +255,43 @@ export function PokemonDetailModal({
                       baseValue={pokemon.stats?.hp ?? 0}
                       yourValue={pokemon.stats?.hp ?? 0}
                       max={255}
-                      color="bg-red-300"
-                      upgradeColor="bg-red-600"
+                      color={statColors.hp.color}
+                      upgradeColor={statColors.hp.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.attack ?? 0}
                       yourValue={pokemon.stats?.attack ?? 0}
                       max={255}
-                      color="bg-orange-300"
-                      upgradeColor="bg-orange-600"
+                      color={statColors.attack.color}
+                      upgradeColor={statColors.attack.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.defense ?? 0}
                       yourValue={pokemon.stats?.defense ?? 0}
                       max={255}
-                      color="bg-blue-300"
-                      upgradeColor="bg-blue-600"
+                      color={statColors.defense.color}
+                      upgradeColor={statColors.defense.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spAttack ?? 0}
                       yourValue={pokemon.stats?.spAttack ?? 0}
                       max={255}
-                      color="bg-purple-300"
-                      upgradeColor="bg-purple-600"
+                      color={statColors.spAttack.color}
+                      upgradeColor={statColors.spAttack.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.spDefense ?? 0}
                       yourValue={pokemon.stats?.spDefense ?? 0}
                       max={255}
-                      color="bg-yellow-300"
-                      upgradeColor="bg-yellow-600"
+                      color={statColors.spDefense.color}
+                      upgradeColor={statColors.spDefense.upgradeColor}
                     />
                     <StackedProgress
                       baseValue={pokemon.stats?.speed ?? 0}
                       yourValue={pokemon.stats?.speed ?? 0}
                       max={255}
-                      color="bg-pink-300"
-                      upgradeColor="bg-pink-600"
+                      color={statColors.speed.color}
+                      upgradeColor={statColors.speed.upgradeColor}
                     />
                   </div>
                 </div>
@@ -411,12 +306,24 @@ export function PokemonDetailModal({
                 error={error}
                 pokemonName={pokemon.name}
                 size="small"
+                isDarkMode={isDarkMode}
               />
             )}
           </aside>
 
           {/* Evolution Section */}
-          <div className="evolutionWrapper p-3 bg-[#a0c8ff] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] text-xs md:text-sm w-full max-w-[400px] font-press-start">
+          <div 
+            className="evolutionWrapper p-3 border-4 text-xs md:text-sm w-full max-w-[400px] font-press-start"
+            style={{
+              borderColor: isDarkMode ? '#333333' : 'black',
+              boxShadow: isDarkMode 
+                ? '4px 4px 0px rgba(51,51,51,1)' 
+                : '4px 4px 0px rgba(0,0,0,1)',
+              backgroundColor: isDarkMode 
+                ? '#1e3a5f'  // Dark blue for dark mode
+                : '#a0c8ff'  // Original light blue for light mode
+            }}
+          >
             <h3 className="font-bold mb-2">Evolution</h3>
             <div className="evolutionChain flex items-center justify-center gap-2 md:gap-3">
               {[pokemon.id, ...(pokemon.evolution ?? [])]

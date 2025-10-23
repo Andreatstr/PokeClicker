@@ -16,10 +16,10 @@
 
 .dark {
   --pixel-box-shadow:
-    calc(-1 * (var(--box-shadow-width))) 0 0 0 var(--ring),
-    var(--box-shadow-width) 0 0 0 var(--ring),
-    0 var(--box-shadow-width) 0 0 var(--ring),
-    0 calc(-1 * (var(--box-shadow-width))) 0 0 var(--ring);
+    calc(-1 * (var(--box-shadow-width))) 0 0 0 oklch(0.8 0 0),
+    var(--box-shadow-width) 0 0 0 oklch(0.8 0 0),
+    0 var(--box-shadow-width) 0 0 oklch(0.8 0 0),
+    0 calc(-1 * (var(--box-shadow-width))) 0 0 oklch(0.8 0 0);
 }
 
 .pixel-font {

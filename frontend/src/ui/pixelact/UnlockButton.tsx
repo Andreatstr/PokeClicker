@@ -4,6 +4,7 @@ interface UnlockButtonProps {
   error: string | null;
   pokemonName: string;
   size?: 'small' | 'large';
+  isDarkMode?: boolean;
 }
 
 export function UnlockButton({
@@ -12,6 +13,7 @@ export function UnlockButton({
   error,
   pokemonName,
   size = 'small',
+  isDarkMode = false,
 }: UnlockButtonProps) {
   const sizeClasses =
     size === 'large' ? 'px-6 py-4 text-base' : 'px-4 py-3 text-sm';
@@ -36,10 +38,16 @@ export function UnlockButton({
         <span className="relative z-10">{error}</span>
       ) : (
         <span className="relative z-10 flex items-center justify-center gap-2">
-          <span className="text-xs uppercase tracking-wider drop-shadow-[1px_1px_0px_rgba(255,255,255,0.5)]">
+          <span className="text-xs uppercase tracking-wider drop-shadow-[1px_1px_0px_rgba(51,51,51,0.5)]">
             Unlock
           </span>
-          <span className="flex items-center gap-1 bg-black/20 px-2 py-1 rounded border border-black/30">
+          <span 
+            className="flex items-center gap-1 px-2 py-1 rounded"
+            style={{
+              backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+              border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.3)' : '1px solid rgba(0, 0, 0, 0.3)',
+            }}
+          >
             <span className={`${priceTextSize} font-bold`}>{cost}</span>
             <img
               src={`${import.meta.env.BASE_URL}candy.png`}

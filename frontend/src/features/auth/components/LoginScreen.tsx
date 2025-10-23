@@ -169,10 +169,11 @@ export function LoginScreen({onNavigate}: Props) {
               role="dialog"
             >
               <div
-                className="bg-[var(--retro-surface)] border-[4px] border-[var(--retro-border)] shadow-[8px_8px_0px_rgba(0,0,0,1)] p-6 w-full max-w-sm rounded-md text-left"
+                className="border-[4px] shadow-[8px_8px_0px_rgba(0,0,0,1)] p-6 w-full max-w-sm rounded-md text-left"
+                style={{backgroundColor: 'var(--card)', borderColor: 'var(--border)'}}
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="pixel-font text-xl text-black mb-4">
+                <h2 className="pixel-font text-xl mb-4" style={{color: 'var(--foreground)'}}>
                   {modalType === 'login' ? 'Log in' : 'Sign up'}
                 </h2>
 
@@ -180,7 +181,7 @@ export function LoginScreen({onNavigate}: Props) {
                   className="flex flex-col gap-4"
                   onSubmit={handleSubmit(submitAuth)}
                 >
-                  <label className="text-sm font-bold text-black">
+                  <label className="text-sm font-bold" style={{color: 'var(--foreground)'}}>
                     Username:
                     <input
                       {...register('username', {
@@ -194,16 +195,17 @@ export function LoginScreen({onNavigate}: Props) {
                       })}
                       disabled={loading}
                       type="text"
-                      className="mt-1 w-full px-3 py-2 border border-black bg-white text-black text-sm"
+                      className="mt-1 w-full px-3 py-2 border border-black text-sm"
+                      style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
                     />
                     {errors.username && (
-                      <p className="text-xs text-red-700 mt-1">
+                      <p className="text-xs mt-1" style={{color: 'var(--destructive)'}}>
                         {errors.username.message}
                       </p>
                     )}
                   </label>
 
-                  <label className="text-sm font-bold text-black">
+                  <label className="text-sm font-bold" style={{color: 'var(--foreground)'}}>
                     Password:
                     <input
                       {...register('password', {
@@ -212,10 +214,11 @@ export function LoginScreen({onNavigate}: Props) {
                       })}
                       disabled={loading}
                       type="password"
-                      className="mt-1 w-full px-3 py-2 border border-black bg-white text-black text-sm"
+                      className="mt-1 w-full px-3 py-2 border border-black text-sm"
+                      style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
                     />
                     {errors.password && (
-                      <p className="text-xs text-red-700 mt-1">
+                      <p className="text-xs mt-1" style={{color: 'var(--destructive)'}}>
                         {errors.password.message}
                       </p>
                     )}

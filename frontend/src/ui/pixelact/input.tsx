@@ -18,8 +18,8 @@ const Input = React.forwardRef<HTMLInputElement, PixelInputProps>(
           className
         )}
         style={{
-          backgroundColor: 'var(--retro-surface)',
-          color: 'black',
+          backgroundColor: 'var(--input)',
+          color: 'var(--foreground)',
           ...props.style,
         }}
         disabled={disabled}
