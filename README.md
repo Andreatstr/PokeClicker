@@ -483,78 +483,78 @@ VITE_GRAPHQL_URL=http://localhost:3001/
 
 ## Testing
 
-### Test Suite Overview
+### Test Suite Oversikt
 
-The project includes a comprehensive test suite with **97 passing tests** covering:
+Prosjektet inkluderer en omfattende testsuite med **97 bestående tester** som dekker:
 
-- ✅ **Utility functions** (lib/utils.ts, typeColors.ts) - 100% coverage
-- ✅ **Custom hooks** (useAuth, useGameMutations, usePokedexQuery, etc.) - 100% coverage  
-- ✅ **Component tests** (LoginScreen, PokeClicker) - Core functionality tested
-- ✅ **Integration tests** - Apollo Client mocking and GraphQL operations
+- ✅ **Utility-funksjoner** (lib/utils.ts, typeColors.ts) - 100% dekning
+- ✅ **Custom hooks** (useAuth, useGameMutations, usePokedexQuery, etc.) - 100% dekning  
+- ✅ **Komponenttester** (LoginScreen, PokeClicker) - Kjernefunksjonalitet testet
+- ✅ **Integrasjonstester** - Apollo Client mocking og GraphQL operasjoner
 
-### Running Tests
+### Kjøre Tester
 
 ```bash
-# Navigate to frontend directory
+# Naviger til frontend directory
 cd frontend
 
-# Run all tests
+# Kjør alle tester
 pnpm test
 
-# Run tests with coverage report
+# Kjør tester med coverage rapport
 pnpm test:coverage
 
-# Run tests in watch mode (for development)
+# Kjør tester i watch mode (for utvikling)
 pnpm test:watch
 
-# Run specific test categories
-pnpm test:unit        # Utility functions and hooks
-pnpm test:components  # Component tests
-pnpm test:integration # Integration tests
+# Kjør spesifikke test kategorier
+pnpm test:unit        # Utility funksjoner og hooks
+pnpm test:components  # Komponenttester
+pnpm test:integration # Integrasjonstester
 ```
 
-### Test Configuration
+### Test Konfigurasjon
 
-- **Framework**: Vitest with React Testing Library
-- **Environment**: jsdom for DOM simulation
-- **Coverage**: v8 provider with 80% threshold
+- **Framework**: Vitest med React Testing Library
+- **Environment**: jsdom for DOM simulering
+- **Coverage**: v8 provider med 80% terskel
 - **Mocking**: Apollo Client, localStorage, Audio, IntersectionObserver
 
-### Coverage Report
+### Coverage Rapport
 
-Current coverage:
-- **52.17% Statements** - Good coverage for core functionality
-- **65.09% Branches** - Good conditional logic coverage
-- **30.95% Functions** - Some functions not tested (UI components)
-- **52.88% Lines** - Good line coverage
+Nåværende dekning:
+- **52.17% Statements** - God dekning for kjernefunksjonalitet
+- **65.09% Branches** - God betinget logikk dekning
+- **30.95% Functions** - Noen funksjoner ikke testet (UI komponenter)
+- **52.88% Lines** - God linje dekning
 
-**Well-tested areas (100% coverage):**
-- Authentication hooks and utilities
-- Game mutations and state management
-- Pokedex functionality
-- Type color utilities
+**Godt testede områder (100% dekning):**
+- Autentisering hooks og utilities
+- Spill mutasjoner og state management
+- Pokedex funksjonalitet
+- Type farge utilities
 
-### Test Structure
+### Test Struktur
 
 ```
 frontend/src/
-├── __tests__/           # Integration tests
-├── test/               # Test utilities and setup
-│   ├── setup.ts        # Global test configuration
-│   ├── utils.tsx       # Custom render with providers
+├── __tests__/           # Integrasjonstester
+├── test/               # Test utilities og setup
+│   ├── setup.ts        # Global test konfigurasjon
+│   ├── utils.tsx       # Custom render med providers
 │   └── factories.ts    # Mock data factories
-└── features/*/__tests__/ # Feature-specific tests
-    ├── components/     # Component tests
-    ├── hooks/         # Hook tests
-    └── utils/         # Utility tests
+└── features/*/__tests__/ # Feature-spesifikke tester
+    ├── components/     # Komponenttester
+    ├── hooks/         # Hook tester
+    └── utils/         # Utility tester
 ```
 
-### Writing Tests
+### Skrive Tester
 
-Tests follow these patterns:
+Tester følger disse mønstrene:
 
 ```typescript
-// Component test example
+// Komponent test eksempel
 import { render, screen, userEvent } from '@testing-library/react'
 import { vi } from 'vitest'
 
@@ -565,7 +565,7 @@ describe('ComponentName', () => {
   })
 })
 
-// Hook test example  
+// Hook test eksempel  
 import { renderHook } from '@testing-library/react'
 import { useCustomHook } from '../useCustomHook'
 
