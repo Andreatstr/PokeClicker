@@ -1,4 +1,4 @@
-import {Button, Input, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
+import {Button, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
 
 interface SearchBarProps {
   searchTerm: string;

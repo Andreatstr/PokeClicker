@@ -28,7 +28,6 @@ interface FiltersAndCountProps {
   setSelectedTypes: (value: string[]) => void;
   setSortBy: (value: 'id' | 'name' | 'type') => void;
   setSortOrder: (value: 'asc' | 'desc') => void;
-  isDarkMode?: boolean;
   setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
   setTempRegion: (value: string | null) => void;
   setTempTypes: (value: string[]) => void;
@@ -90,7 +89,6 @@ export function FiltersAndCount({
   setSortOrder,
   setShowMobileFilters,
   setTempRegion,
-  isDarkMode = false,
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
