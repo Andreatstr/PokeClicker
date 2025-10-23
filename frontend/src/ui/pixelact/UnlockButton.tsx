@@ -41,11 +41,15 @@ export function UnlockButton({
           <span className="text-xs uppercase tracking-wider drop-shadow-[1px_1px_0px_rgba(51,51,51,0.5)]">
             Unlock
           </span>
-          <span 
+          <span
             className="flex items-center gap-1 px-2 py-1 rounded"
             style={{
-              backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-              border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.3)' : '1px solid rgba(0, 0, 0, 0.3)',
+              backgroundColor: isDarkMode
+                ? 'rgba(51, 51, 51, 0.2)'
+                : 'rgba(0, 0, 0, 0.2)',
+              border: isDarkMode
+                ? '1px solid rgba(51, 51, 51, 0.3)'
+                : '1px solid rgba(0, 0, 0, 0.3)',
             }}
           >
             <span className={`${priceTextSize} font-bold`}>{cost}</span>

@@ -132,11 +132,13 @@ function SelectItem({
         className,
         'rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring select-none'
       )}
-      style={{
-        '--hover-bg': 'var(--retro-secondary)',
-        color: 'var(--popover-foreground)',
-        ...props.style,
-      } as React.CSSProperties & Record<string, string>}
+      style={
+        {
+          '--hover-bg': 'var(--retro-secondary)',
+          color: 'var(--popover-foreground)',
+          ...props.style,
+        } as React.CSSProperties & Record<string, string>
+      }
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = 'var(--retro-secondary)';
       }}

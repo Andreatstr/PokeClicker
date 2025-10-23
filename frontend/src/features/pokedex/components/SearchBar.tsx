@@ -26,8 +26,8 @@ export function SearchBar({
         style={{
           backgroundColor: 'var(--primary)',
           border: '4px solid var(--border)',
-          boxShadow: isDarkMode 
-            ? '8px 8px 0px 0px rgba(51,51,51,1)' 
+          boxShadow: isDarkMode
+            ? '8px 8px 0px 0px rgba(51,51,51,1)'
             : '8px 8px 0px 0px rgba(0,0,0,1)',
         }}
         role="search"
@@ -38,9 +38,11 @@ export function SearchBar({
         </Label>
         <div className="flex flex-col gap-3">
           <div className="relative">
-            <SearchIcon 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" 
-              style={{color: isDarkMode ? 'var(--muted-foreground)' : '#6b7280'}}
+            <SearchIcon
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              style={{
+                color: isDarkMode ? 'var(--muted-foreground)' : '#6b7280',
+              }}
             />
             <input
               id="pokemon-search"
@@ -65,16 +67,20 @@ export function SearchBar({
                 aria-label="Clear search"
                 onKeyDown={(e) => e.key === 'Enter' && handleClearSearch()}
               >
-                <CloseIcon 
-                  className="w-5 h-5" 
+                <CloseIcon
+                  className="w-5 h-5"
                   style={{
                     color: isDarkMode ? 'var(--muted-foreground)' : '#4b5563',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = isDarkMode ? 'var(--foreground)' : '#000000';
+                    e.currentTarget.style.color = isDarkMode
+                      ? 'var(--foreground)'
+                      : '#000000';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = isDarkMode ? 'var(--muted-foreground)' : '#4b5563';
+                    e.currentTarget.style.color = isDarkMode
+                      ? 'var(--muted-foreground)'
+                      : '#4b5563';
                   }}
                 />
               </div>

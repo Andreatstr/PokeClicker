@@ -71,7 +71,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           borderColor: 'var(--border)',
           boxShadow: isDarkMode
             ? '8px 8px 0px 0px rgba(55,65,81,1)'
-            : '8px 8px 0px 0px rgba(0,0,0,1)'
+            : '8px 8px 0px 0px rgba(0,0,0,1)',
         }}
       >
         <audio ref={audioRef} loop>
@@ -110,7 +110,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         borderColor: 'var(--border)',
         boxShadow: isDarkMode
           ? '8px 8px 0px 0px rgba(55,65,81,1)'
-          : '8px 8px 0px 0px rgba(0,0,0,1)'
+          : '8px 8px 0px 0px rgba(0,0,0,1)',
       }}
     >
       <audio ref={audioRef} loop>

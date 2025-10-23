@@ -54,7 +54,10 @@ export function MultiSelect({
         )}
         style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
       >
-        <span className="pixel-font text-sm" style={{color: 'var(--foreground)'}}>
+        <span
+          className="pixel-font text-sm"
+          style={{color: 'var(--foreground)'}}
+        >
           {selected.length === 0 ? placeholder : `${selected.length} selected`}
         </span>
         <ChevronDownIcon className="size-4 opacity-50" />
@@ -63,7 +66,10 @@ export function MultiSelect({
       {open && (
         <div
           className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] max-h-[160px] overflow-y-auto"
-          style={{backgroundColor: 'var(--popover)', color: 'var(--popover-foreground)'}}
+          style={{
+            backgroundColor: 'var(--popover)',
+            color: 'var(--popover-foreground)',
+          }}
           role="listbox"
         >
           {options.map((type) => (
@@ -88,7 +94,12 @@ export function MultiSelect({
                     backgroundColor: 'var(--input)',
                   }}
                 />
-                <span className="capitalize pixel-font" style={{color: 'var(--foreground)'}}>{type}</span>
+                <span
+                  className="capitalize pixel-font"
+                  style={{color: 'var(--foreground)'}}
+                >
+                  {type}
+                </span>
               </div>
               {selected.includes(type) && (
                 <CheckIcon className="size-4 opacity-70" />

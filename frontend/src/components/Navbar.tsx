@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
@@ -9,9 +9,19 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
-export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
+export function Navbar({
+  currentPage,
+  onPageChange,
+  isDarkMode,
+  onToggleTheme,
+}: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {isAuthenticated, logout, user} = useAuth();
+
+  // Close mobile menu when page changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [currentPage]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -39,7 +49,10 @@ export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
       >
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center">
-            <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0" style={{color: 'var(--foreground)'}}>
+            <h1
+              className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0"
+              style={{color: 'var(--foreground)'}}
+            >
               PokeClicker
             </h1>
           </div>
