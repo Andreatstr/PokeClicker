@@ -1,3 +1,4 @@
+import { global } from '@apollo/client/utilities/globals'
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
