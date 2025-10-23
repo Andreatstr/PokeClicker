@@ -84,7 +84,9 @@ export function LoginScreen({onNavigate}: Props) {
     handleSubmit,
     formState: {errors},
     reset,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    mode: 'onSubmit',
+  });
 
   useEffect(() => {
     reset({username: '', password: ''});
