@@ -242,6 +242,7 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
           src={pokemon.sprite}
           alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
           className="w-full h-full object-contain origin-center"
+          loading="lazy"
           style={{
             imageRendering: 'pixelated',
             filter: pokemon.isOwned ? 'none' : 'brightness(0)',
