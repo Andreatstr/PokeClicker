@@ -35,3 +35,7 @@ dist-ssr
 .claude/
 CLAUDE.md
 .issues-del2.md
+
+# Test coverage files
+coverage/
+*.lcov
