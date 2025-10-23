@@ -1,12 +1,14 @@
 import {type PokedexPokemon, usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import '@ui/pixelact/styles/patterns.css';
-import {useState} from 'react';
+import {useState, memo} from 'react';
 import {UnlockButton} from '@ui/pixelact';
+import {getTypeColors} from '../utils/typeColors';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
   onClick?: (pokemon: PokedexPokemon) => void;
+  isDarkMode?: boolean;
 }
 
 // Helper to calculate Pokemon purchase cost (matches backend)
@@ -18,23 +20,67 @@ function getContrastColor(bgColor: string): string {
   // Map Tailwind color classes to their hex values
   const colorMap: Record<string, string> = {
     'bg-gray-400': '#9ca3af',
-    'bg-red-500': '#ef4444',
-    'bg-blue-500': '#3b82f6',
-    'bg-yellow-400': '#facc15',
-    'bg-green-500': '#22c55e',
-    'bg-blue-200': '#bfdbfe',
-    'bg-red-700': '#b91c1c',
-    'bg-purple-500': '#a855f7',
-    'bg-yellow-600': '#ca8a04',
-    'bg-indigo-400': '#818cf8',
-    'bg-pink-500': '#ec4899',
-    'bg-green-400': '#4ade80',
-    'bg-yellow-800': '#854d0e',
-    'bg-purple-700': '#7e22ce',
-    'bg-indigo-700': '#4338ca',
-    'bg-gray-800': '#1f2937',
     'bg-gray-500': '#6b7280',
+    'bg-gray-600': '#4b5563',
+    'bg-gray-700': '#374151',
+    'bg-gray-800': '#1f2937',
+    'bg-red-500': '#ef4444',
+    'bg-red-600': '#dc2626',
+    'bg-red-700': '#b91c1c',
+    'bg-red-800': '#991b1b',
+    'bg-red-900': '#7f1d1d',
+    'bg-blue-200': '#bfdbfe',
+    'bg-blue-500': '#3b82f6',
+    'bg-blue-600': '#2563eb',
+    'bg-blue-700': '#1d4ed8',
+    'bg-blue-800': '#1e40af',
+    'bg-yellow-400': '#facc15',
+    'bg-yellow-600': '#ca8a04',
+    'bg-yellow-700': '#a16207',
+    'bg-yellow-800': '#854d0e',
+    'bg-green-400': '#4ade80',
+    'bg-green-500': '#22c55e',
+    'bg-green-600': '#16a34a',
+    'bg-green-700': '#15803d',
+    'bg-green-800': '#166534',
+    'bg-purple-500': '#a855f7',
+    'bg-purple-600': '#9333ea',
+    'bg-purple-700': '#7e22ce',
+    'bg-purple-800': '#6b21a8',
+    'bg-indigo-400': '#818cf8',
+    'bg-indigo-600': '#4f46e5',
+    'bg-indigo-700': '#4338ca',
+    'bg-indigo-800': '#3730a3',
+    'bg-indigo-900': '#312e81',
     'bg-pink-300': '#f9a8d4',
+    'bg-pink-400': '#f472b6',
+    'bg-pink-500': '#ec4899',
+    'bg-pink-600': '#db2777',
+    'bg-pink-700': '#be185d',
+    'bg-pink-800': '#9d174d',
+    'bg-cyan-400': '#22d3ee',
+    'bg-cyan-500': '#06b6d4',
+    'bg-cyan-600': '#0891b2',
+    'bg-cyan-700': '#0e7490',
+    'bg-amber-600': '#d97706',
+    'bg-amber-700': '#a16207',
+    'bg-amber-800': '#92400e',
+    'bg-lime-500': '#84cc16',
+    'bg-lime-600': '#65a30d',
+    'bg-lime-700': '#4d7c0f',
+    'bg-lime-800': '#365314',
+    'bg-stone-500': '#78716c',
+    'bg-stone-600': '#57534e',
+    'bg-stone-700': '#44403c',
+    'bg-stone-800': '#292524',
+    'bg-violet-500': '#8b5cf6',
+    'bg-violet-600': '#7c3aed',
+    'bg-violet-700': '#6d28d9',
+    'bg-violet-800': '#5b21b6',
+    'bg-slate-600': '#475569',
+    'bg-slate-700': '#334155',
+    'bg-slate-800': '#1e293b',
+    'bg-slate-900': '#0f172a',
   };
 
   const hex = colorMap[bgColor] || '#000000';
@@ -53,126 +99,8 @@ function getContrastColor(bgColor: string): string {
   const luminance =
     0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 
-  // Return black for light backgrounds (luminance > 0.179 gives ~4.5:1 contrast), white for dark
-  return luminance > 0.179 ? 'text-black' : 'text-white';
-}
-
-function getTypeColors(type: string) {
-  const typeColorMap: Record<
-    string,
-    {badge: string; cardBg: string; cardBorder: string; shadow: string}
-  > = {
-    normal: {
-      badge: 'bg-gray-400',
-      cardBg: 'bg-gradient-to-br from-gray-100 to-gray-200',
-      cardBorder: 'border-gray-400',
-      shadow: 'shadow-gray-400/50',
-    },
-    fire: {
-      badge: 'bg-red-500',
-      cardBg: 'bg-red-300',
-      cardBorder: 'border-red-400',
-      shadow: 'shadow-red-400/50',
-    },
-    water: {
-      badge: 'bg-blue-500',
-      cardBg: 'bg-gradient-to-br from-blue-50 to-blue-100',
-      cardBorder: 'border-blue-400',
-      shadow: 'shadow-blue-400/50',
-    },
-    electric: {
-      badge: 'bg-yellow-400',
-      cardBg: 'bg-gradient-to-br from-yellow-50 to-yellow-100',
-      cardBorder: 'border-yellow-400',
-      shadow: 'shadow-yellow-400/50',
-    },
-    grass: {
-      badge: 'bg-green-500',
-      cardBg: 'bg-green-200',
-      cardBorder: 'border-green-400',
-      shadow: 'shadow-green-400/50',
-    },
-    ice: {
-      badge: 'bg-blue-200',
-      cardBg: 'bg-gradient-to-br from-cyan-50 to-cyan-100',
-      cardBorder: 'border-cyan-300',
-      shadow: 'shadow-cyan-300/50',
-    },
-    fighting: {
-      badge: 'bg-red-700',
-      cardBg: 'bg-gradient-to-br from-red-100 to-red-200',
-      cardBorder: 'border-red-600',
-      shadow: 'shadow-red-600/50',
-    },
-    poison: {
-      badge: 'bg-purple-500',
-      cardBg: 'bg-gradient-to-br from-purple-50 to-purple-100',
-      cardBorder: 'border-purple-400',
-      shadow: 'shadow-purple-400/50',
-    },
-    ground: {
-      badge: 'bg-yellow-600',
-      cardBg: 'bg-gradient-to-br from-amber-50 to-amber-100',
-      cardBorder: 'border-amber-400',
-      shadow: 'shadow-amber-400/50',
-    },
-    flying: {
-      badge: 'bg-indigo-400',
-      cardBg: 'bg-gradient-to-br from-indigo-50 to-indigo-100',
-      cardBorder: 'border-indigo-300',
-      shadow: 'shadow-indigo-300/50',
-    },
-    psychic: {
-      badge: 'bg-pink-500',
-      cardBg: 'bg-gradient-to-br from-pink-50 to-pink-100',
-      cardBorder: 'border-pink-400',
-      shadow: 'shadow-pink-400/50',
-    },
-    bug: {
-      badge: 'bg-green-400',
-      cardBg: 'bg-gradient-to-br from-lime-50 to-lime-100',
-      cardBorder: 'border-lime-400',
-      shadow: 'shadow-lime-400/50',
-    },
-    rock: {
-      badge: 'bg-yellow-800',
-      cardBg: 'bg-gradient-to-br from-stone-50 to-stone-100',
-      cardBorder: 'border-stone-400',
-      shadow: 'shadow-stone-400/50',
-    },
-    ghost: {
-      badge: 'bg-purple-700',
-      cardBg: 'bg-gradient-to-br from-violet-50 to-violet-100',
-      cardBorder: 'border-violet-400',
-      shadow: 'shadow-violet-400/50',
-    },
-    dragon: {
-      badge: 'bg-indigo-700',
-      cardBg: 'bg-gradient-to-br from-indigo-100 to-indigo-200',
-      cardBorder: 'border-indigo-600',
-      shadow: 'shadow-indigo-600/50',
-    },
-    dark: {
-      badge: 'bg-gray-800',
-      cardBg: 'bg-gradient-to-br from-slate-100 to-slate-200',
-      cardBorder: 'border-slate-600',
-      shadow: 'shadow-slate-600/50',
-    },
-    steel: {
-      badge: 'bg-gray-500',
-      cardBg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-      cardBorder: 'border-gray-500',
-      shadow: 'shadow-gray-500/50',
-    },
-    fairy: {
-      badge: 'bg-pink-300',
-      cardBg: 'bg-gradient-to-br from-pink-25 to-pink-50',
-      cardBorder: 'border-pink-300',
-      shadow: 'shadow-pink-300/50',
-    },
-  };
-
-  return typeColorMap[type] || typeColorMap.normal;
+  // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
+  return luminance > 0.5 ? 'text-black' : 'text-white';
 }
 
 function getBackgroundImageUrl(types: string[]): string {
@@ -180,16 +108,27 @@ function getBackgroundImageUrl(types: string[]): string {
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
 
-export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
+export const PokemonCard = memo(function PokemonCard({
+  pokemon,
+  onClick,
+  isDarkMode = false,
+}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
-    ? getTypeColors(primaryType)
-    : {
-        badge: 'bg-gray-400',
-        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
-        cardBorder: 'border-gray-400',
-        shadow: 'shadow-gray-400/50',
-      };
+    ? getTypeColors(primaryType, isDarkMode)
+    : isDarkMode
+      ? {
+          badge: 'bg-gray-500',
+          cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
+          cardBorder: 'border-gray-600',
+          shadow: 'shadow-gray-600/50',
+        }
+      : {
+          badge: 'bg-gray-400',
+          cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+          cardBorder: 'border-gray-400',
+          shadow: 'shadow-gray-400/50',
+        };
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
@@ -242,9 +181,29 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
 
   return (
     <aside
-      className={`relative cursor-pointer border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 w-full max-w-[280px] h-[440px] pixel-font flex flex-col items-center ${typeColors.cardBg}
+      className={`relative cursor-pointer border-4 p-4 w-full max-w-[280px] h-[440px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
-        hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] ${isAnimating ? 'animate-dopamine-release' : ''}`}
+        hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}`}
+      style={{
+        borderColor: isDarkMode ? '#333333' : 'black',
+        boxShadow: isDarkMode
+          ? '4px 4px 0px rgba(51,51,51,1)'
+          : '4px 4px 0px rgba(0,0,0,1)',
+      }}
+      onMouseEnter={(e) => {
+        if (!isAnimating) {
+          e.currentTarget.style.boxShadow = isDarkMode
+            ? '6px 6px 0px rgba(51,51,51,1)'
+            : '6px 6px 0px rgba(0,0,0,1)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isAnimating) {
+          e.currentTarget.style.boxShadow = isDarkMode
+            ? '4px 4px 0px rgba(51,51,51,1)'
+            : '4px 4px 0px rgba(0,0,0,1)';
+        }
+      }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -252,8 +211,9 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       aria-label={`View details for ${pokemon.name}`}
     >
       <figure
-        className="spriteFrame border-2 border-black p-2 mb-3 flex items-center justify-center w-full h-[210px] relative flex-shrink-0"
+        className="spriteFrame border-2 p-2 mb-3 flex items-center justify-center w-full h-[210px] relative flex-shrink-0"
         style={{
+          borderColor: isDarkMode ? '#333333' : 'black',
           backgroundImage: `url(${backgroundImageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -263,6 +223,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
           src={pokemon.sprite}
           alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
           className="w-full h-full object-contain origin-center"
+          loading="lazy"
           style={{
             imageRendering: 'pixelated',
             filter: pokemon.isOwned ? 'none' : 'brightness(0)',
@@ -272,7 +233,7 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
 
       <div
         className="bg-black/20 p-2 rounded-md w-full flex-1 flex flex-col overflow-hidden"
-        style={{textShadow: '1px 1px 0 #FFF'}}
+        style={{textShadow: '1px 1px 0 var(--background)'}}
       >
         <div className="infoGrid flex flex-col gap-1.5 text-[10px] flex-1">
           {/* Pokemon Name */}
@@ -281,7 +242,21 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
               {pokemon.isOwned ? pokemon.name : '???'}
             </strong>
             {pokemon.isOwned && (
-              <span className="font-normal text-[9px] bg-black/10 border border-black/30 px-2 py-0.5 rounded whitespace-nowrap ml-2">
+              <span
+                className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
+                style={{
+                  backgroundColor: isDarkMode
+                    ? 'rgba(51, 51, 51, 0.1)'
+                    : 'rgba(0, 0, 0, 0.1)',
+                  border: isDarkMode
+                    ? '1px solid rgba(51, 51, 51, 0.3)'
+                    : '1px solid rgba(0, 0, 0, 0.3)',
+                  color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
+                  textShadow: isDarkMode
+                    ? '1px 1px 0 rgba(0, 0, 0, 0.8)'
+                    : '1px 1px 0 rgba(255, 255, 255, 0.8)',
+                }}
+              >
                 #{pokemon.pokedexNumber}
               </span>
             )}
@@ -295,21 +270,48 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
               error={error}
               pokemonName={pokemon.name}
               size="small"
+              isDarkMode={isDarkMode}
             />
           ) : (
             <>
               {/* Info Grid */}
               <div className="flex gap-2 text-[9px]">
-                <div className="flex-1 bg-white/30 border border-black/20 rounded px-2 py-1">
-                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">
+                <div
+                  className="flex-1 rounded px-2 py-1"
+                  style={{
+                    backgroundColor: isDarkMode
+                      ? 'rgba(51, 51, 51, 0.1)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode
+                      ? '1px solid rgba(51, 51, 51, 0.2)'
+                      : '1px solid rgba(0, 0, 0, 0.2)',
+                  }}
+                >
+                  <div
+                    className="font-bold text-[8px] uppercase tracking-wide"
+                    style={{color: 'var(--muted-foreground)'}}
+                  >
                     Height
                   </div>
                   <div className="font-bold text-[11px] tabular-nums">
                     {pokemon.height ?? '—'}
                   </div>
                 </div>
-                <div className="flex-1 bg-white/30 border border-black/20 rounded px-2 py-1">
-                  <div className="font-bold text-[8px] text-black/60 uppercase tracking-wide">
+                <div
+                  className="flex-1 rounded px-2 py-1"
+                  style={{
+                    backgroundColor: isDarkMode
+                      ? 'rgba(51, 51, 51, 0.1)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode
+                      ? '1px solid rgba(51, 51, 51, 0.2)'
+                      : '1px solid rgba(0, 0, 0, 0.2)',
+                  }}
+                >
+                  <div
+                    className="font-bold text-[8px] uppercase tracking-wide"
+                    style={{color: 'var(--muted-foreground)'}}
+                  >
                     Weight
                   </div>
                   <div className="font-bold text-[11px] tabular-nums">
@@ -326,7 +328,15 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
                     {pokemon.abilities.map((ability) => (
                       <span
                         key={ability}
-                        className="px-1.5 py-0.5 bg-white/50 border border-black/20 rounded text-[7.5px] whitespace-nowrap leading-tight"
+                        className="px-1.5 py-0.5 rounded text-[7.5px] whitespace-nowrap leading-tight"
+                        style={{
+                          backgroundColor: isDarkMode
+                            ? 'rgba(51, 51, 51, 0.2)'
+                            : 'rgba(255, 255, 255, 0.5)',
+                          border: isDarkMode
+                            ? '1px solid rgba(51, 51, 51, 0.2)'
+                            : '1px solid rgba(0, 0, 0, 0.2)',
+                        }}
                       >
                         {ability}
                       </span>
@@ -341,13 +351,19 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
           {pokemon.isOwned && (
             <div className="flex flex-wrap gap-1 mt-auto pt-2 min-h-[24px]">
               {pokemon.types.map((type) => {
-                const typeColors = getTypeColors(type);
+                const typeColors = getTypeColors(type, isDarkMode);
                 const textColor = getContrastColor(typeColors.badge);
                 return (
                   <span
                     key={type}
-                    className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${typeColors.badge} ${textColor}`}
-                    style={{textShadow: 'none'}}
+                    className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 ${typeColors.badge} ${textColor}`}
+                    style={{
+                      textShadow: 'none',
+                      borderColor: isDarkMode ? '#333333' : 'black',
+                      boxShadow: isDarkMode
+                        ? '2px 2px 0px 0px rgba(51,51,51,1)'
+                        : '2px 2px 0px 0px rgba(0,0,0,1)',
+                    }}
                   >
                     {type}
                   </span>
@@ -359,4 +375,4 @@ export function PokemonCard({pokemon, onClick}: PokemonCardProps) {
       </div>
     </aside>
   );
-}
+});

@@ -24,9 +24,19 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # Claude Code files
 .claude/
 CLAUDE.md
 .issues-del2.md
 
+# Test coverage files
 coverage/
+*.lcov
+

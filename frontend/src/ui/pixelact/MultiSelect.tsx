@@ -50,11 +50,14 @@ export function MultiSelect({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)]',
-          'bg-[var(--retro-surface)] text-black dark:text-black'
+          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)]'
         )}
+        style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
       >
-        <span className="pixel-font text-black dark:text-black text-sm">
+        <span
+          className="pixel-font text-sm"
+          style={{color: 'var(--foreground)'}}
+        >
           {selected.length === 0 ? placeholder : `${selected.length} selected`}
         </span>
         <ChevronDownIcon className="size-4 opacity-50" />
@@ -62,7 +65,11 @@ export function MultiSelect({
 
       {open && (
         <div
-          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] bg-[var(--retro-surface)] text-black dark:text-black max-h-[160px] overflow-y-auto"
+          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] max-h-[160px] overflow-y-auto"
+          style={{
+            backgroundColor: 'var(--popover)',
+            color: 'var(--popover-foreground)',
+          }}
           role="listbox"
         >
           {options.map((type) => (
@@ -70,8 +77,7 @@ export function MultiSelect({
               key={type}
               className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none"
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  'var(--retro-secondary)';
+                e.currentTarget.style.backgroundColor = 'var(--accent)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = '';
@@ -82,9 +88,18 @@ export function MultiSelect({
                   type="checkbox"
                   checked={selected.includes(type)}
                   onChange={() => toggleOption(type)}
-                  className="appearance-none w-4 h-4 border border-black rounded-sm checked:bg-black checked:border-black"
+                  className="appearance-none w-4 h-4 border rounded-sm"
+                  style={{
+                    borderColor: 'var(--border)',
+                    backgroundColor: 'var(--input)',
+                  }}
                 />
-                <span className="capitalize text-black pixel-font">{type}</span>
+                <span
+                  className="capitalize pixel-font"
+                  style={{color: 'var(--foreground)'}}
+                >
+                  {type}
+                </span>
               </div>
               {selected.includes(type) && (
                 <CheckIcon className="size-4 opacity-70" />

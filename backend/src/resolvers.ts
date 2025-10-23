@@ -9,7 +9,10 @@ import {type AuthContext, requireAuth} from './auth.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
-const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET must be set in environment variables');
+}
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
 function sanitizeUserForClient(userDoc: UserDocument) {

@@ -68,11 +68,12 @@ function SelectTrigger({
       <ShadcnSelectTrigger
         {...props}
         className={cn(
-          'rounded-none ring-0 w-full border-0 !text-black dark:!text-black [&>span]:!text-black [&_svg]:!text-black select-none',
+          'rounded-none ring-0 w-full border-0 select-none',
           className
         )}
         style={{
-          backgroundColor: 'var(--retro-surface)',
+          backgroundColor: 'var(--input)',
+          color: 'var(--foreground)',
           ...props.style,
         }}
       >
@@ -97,12 +98,13 @@ function SelectContent({
   return (
     <ShadcnSelectContent
       className={cn(
-        'relative rounded-none border-none shadow-(--pixel-box-shadow) mt-2 !text-black dark:!text-black select-none',
+        'relative rounded-none border-none shadow-(--pixel-box-shadow) mt-2 select-none',
         inputVariants({font}),
         className
       )}
       style={{
-        backgroundColor: 'var(--retro-surface)',
+        backgroundColor: 'var(--popover)',
+        color: 'var(--popover-foreground)',
         ...props.style,
       }}
       {...props}
@@ -128,11 +130,13 @@ function SelectItem({
     <ShadcnSelectItem
       className={cn(
         className,
-        'rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring !text-black dark:!text-black select-none'
+        'rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring select-none'
       )}
       style={
         {
           '--hover-bg': 'var(--retro-secondary)',
+          color: 'var(--popover-foreground)',
+          ...props.style,
         } as React.CSSProperties & Record<string, string>
       }
       onMouseEnter={(e) => {

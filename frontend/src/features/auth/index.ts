@@ -2,8 +2,9 @@
 export {LoginScreen} from './components/LoginScreen';
 
 // Contexts
-export {AuthContext, AuthProvider} from './contexts/AuthContext';
-export type {User} from './contexts/AuthContext';
+export {AuthContext} from './contexts/AuthContextDefinition';
+export {AuthProvider} from './contexts/AuthContext';
+export type {User} from './contexts/AuthContextDefinition';
 
 // Hooks
 export {useAuth} from './hooks/useAuth';
