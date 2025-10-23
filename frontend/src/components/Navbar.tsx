@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
@@ -9,9 +9,14 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
-export function Navbar({onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
+export function Navbar({currentPage, onPageChange, isDarkMode, onToggleTheme}: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {isAuthenticated, logout, user} = useAuth();
+
+  // Close mobile menu when page changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [currentPage]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

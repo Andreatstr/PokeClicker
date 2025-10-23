@@ -32,7 +32,14 @@ function App() {
   });
   const [currentPage, setCurrentPage] = useState<
     'clicker' | 'pokedex' | 'login'
-  >('login');
+  >(() => {
+    const hasAuth = localStorage.getItem('authToken');
+    if (!hasAuth) return 'login';
+
+    // If authenticated, restore last page or default to pokedex
+    const savedPage = localStorage.getItem('currentPage') as 'clicker' | 'pokedex' | null;
+    return savedPage || 'pokedex';
+  });
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
@@ -57,6 +64,13 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Save current page to localStorage
+  useEffect(() => {
+    if (currentPage !== 'login') {
+      localStorage.setItem('currentPage', currentPage);
+    }
+  }, [currentPage]);
 
   const {loading, error, data, refetch} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
