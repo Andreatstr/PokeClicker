@@ -1,7 +1,7 @@
 import {type PokedexPokemon, usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import '@ui/pixelact/styles/patterns.css';
-import {useState} from 'react';
+import {useState, memo} from 'react';
 import {UnlockButton} from '@ui/pixelact';
 import {getTypeColors} from '../utils/typeColors';
 
@@ -131,7 +131,7 @@ function getBackgroundImageUrl(types: string[]): string {
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
 
-export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardProps) {
+export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
     ? getTypeColors(primaryType, isDarkMode)
@@ -370,4 +370,4 @@ export function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardP
       </div>
     </aside>
   );
-}
+});

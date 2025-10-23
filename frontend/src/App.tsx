@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, lazy, Suspense} from 'react';
 import {
   PokemonCard,
   PokemonDetailModal,
@@ -8,9 +8,11 @@ import {
   type PokedexPokemon,
 } from '@features/pokedex';
 import {Button} from '@ui/pixelact';
-import {PokeClicker} from '@features/clicker';
-import {LoginScreen} from '@features/auth';
 import {Navbar, BackgroundMusic} from '@/components';
+
+// Lazy load heavy components
+const PokeClicker = lazy(() => import('@features/clicker').then(module => ({default: module.PokeClicker})));
+const LoginScreen = lazy(() => import('@features/auth').then(module => ({default: module.LoginScreen})));
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -139,7 +141,9 @@ function App() {
         onToggleTheme={toggleTheme}
       />
       {currentPage === 'login' ? (
-        <LoginScreen onNavigate={setCurrentPage} />
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen pixel-font">Loading...</div>}>
+          <LoginScreen onNavigate={setCurrentPage} />
+        </Suspense>
       ) : (
         <>
           <main
@@ -148,7 +152,9 @@ function App() {
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
-                <PokeClicker isDarkMode={isDarkMode} />
+                <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh] pixel-font">Loading...</div>}>
+                  <PokeClicker isDarkMode={isDarkMode} />
+                </Suspense>
               </section>
             ) : (
               <>
