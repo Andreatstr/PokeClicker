@@ -76,6 +76,7 @@ function EvolutionPokemon({
             src={evo.sprite}
             alt={evo.name}
             className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
+            loading="lazy"
             style={{imageRendering: 'pixelated'}}
           />
         ) : (
@@ -227,6 +228,7 @@ export function PokemonDetailModal({
                 src={pokemon.sprite}
                 alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
                 className="w-full h-full object-contain origin-center"
+                loading="lazy"
                 style={{
                   imageRendering: 'pixelated',
                   filter: pokemon.isOwned ? 'none' : 'brightness(0)',
