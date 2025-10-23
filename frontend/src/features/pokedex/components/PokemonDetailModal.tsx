@@ -6,7 +6,12 @@ import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState} from 'react';
 import '@ui/pixelact/styles/animations.css';
-import {getTypeColors, getContrastColor, getStatBarColors, getUnknownPokemonColors} from '../utils/typeColors';
+import {
+  getTypeColors,
+  getContrastColor,
+  getStatBarColors,
+  getUnknownPokemonColors,
+} from '../utils/typeColors';
 
 const ME_QUERY = gql`
   query Me {
@@ -31,12 +36,10 @@ function getPokemonCost(pokemonId: number): number {
   return Math.floor(100 + pokemonId / 10);
 }
 
-
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
-
 
 function EvolutionPokemon({
   id,
@@ -163,12 +166,12 @@ export function PokemonDetailModal({
             className={`leftBox border-4 p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
-              boxShadow: isDarkMode 
-                ? '4px 4px 0px rgba(51,51,51,1)' 
+              boxShadow: isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)',
               backgroundColor: isDarkMode
                 ? 'rgba(20, 20, 20, 0.9)'
-                : 'rgba(245, 241, 232, 0.95)'
+                : 'rgba(245, 241, 232, 0.95)',
             }}
           >
             {/* Owned Corner Tape Badge */}
@@ -314,16 +317,16 @@ export function PokemonDetailModal({
           </aside>
 
           {/* Evolution Section */}
-          <div 
+          <div
             className="evolutionWrapper p-3 border-4 text-xs md:text-sm w-full max-w-[400px] font-press-start"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
-              boxShadow: isDarkMode 
-                ? '4px 4px 0px rgba(51,51,51,1)' 
+              boxShadow: isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)',
-              backgroundColor: isDarkMode 
-                ? '#1e3a5f'  // Dark blue for dark mode
-                : '#a0c8ff'  // Original light blue for light mode
+              backgroundColor: isDarkMode
+                ? '#1e3a5f' // Dark blue for dark mode
+                : '#a0c8ff', // Original light blue for light mode
             }}
           >
             <h3 className="font-bold mb-2">Evolution</h3>

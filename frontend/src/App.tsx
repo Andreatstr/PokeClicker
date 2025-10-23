@@ -11,8 +11,12 @@ import {Button} from '@ui/pixelact';
 import {Navbar, BackgroundMusic} from '@/components';
 
 // Lazy load heavy components
-const PokeClicker = lazy(() => import('@features/clicker').then(module => ({default: module.PokeClicker})));
-const LoginScreen = lazy(() => import('@features/auth').then(module => ({default: module.LoginScreen})));
+const PokeClicker = lazy(() =>
+  import('@features/clicker').then((module) => ({default: module.PokeClicker}))
+);
+const LoginScreen = lazy(() =>
+  import('@features/auth').then((module) => ({default: module.LoginScreen}))
+);
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -37,7 +41,10 @@ function App() {
     if (!hasAuth) return 'login';
 
     // If authenticated, restore last page or default to pokedex
-    const savedPage = localStorage.getItem('currentPage') as 'clicker' | 'pokedex' | null;
+    const savedPage = localStorage.getItem('currentPage') as
+      | 'clicker'
+      | 'pokedex'
+      | null;
     return savedPage || 'pokedex';
   });
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
@@ -127,10 +134,10 @@ function App() {
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
-    
+
     // Save to localStorage
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    
+
     // Apply CSS class to document
     if (newTheme) {
       document.documentElement.classList.add('dark');
@@ -155,7 +162,13 @@ function App() {
         onToggleTheme={toggleTheme}
       />
       {currentPage === 'login' ? (
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen pixel-font">Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-screen pixel-font">
+              Loading...
+            </div>
+          }
+        >
           <LoginScreen onNavigate={setCurrentPage} />
         </Suspense>
       ) : (
@@ -166,7 +179,13 @@ function App() {
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
-                <Suspense fallback={<div className="flex items-center justify-center min-h-[60vh] pixel-font">Loading...</div>}>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center min-h-[60vh] pixel-font">
+                      Loading...
+                    </div>
+                  }
+                >
                   <PokeClicker isDarkMode={isDarkMode} />
                 </Suspense>
               </section>

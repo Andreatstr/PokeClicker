@@ -103,29 +103,32 @@ function getContrastColor(bgColor: string): string {
   return luminance > 0.5 ? 'text-black' : 'text-white';
 }
 
-
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
   return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
 }
 
-export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMode = false}: PokemonCardProps) {
+export const PokemonCard = memo(function PokemonCard({
+  pokemon,
+  onClick,
+  isDarkMode = false,
+}: PokemonCardProps) {
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
     ? getTypeColors(primaryType, isDarkMode)
     : isDarkMode
-    ? {
-        badge: 'bg-gray-500',
-        cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
-        cardBorder: 'border-gray-600',
-        shadow: 'shadow-gray-600/50',
-      }
-    : {
-        badge: 'bg-gray-400',
-        cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
-        cardBorder: 'border-gray-400',
-        shadow: 'shadow-gray-400/50',
-      };
+      ? {
+          badge: 'bg-gray-500',
+          cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
+          cardBorder: 'border-gray-600',
+          shadow: 'shadow-gray-600/50',
+        }
+      : {
+          badge: 'bg-gray-400',
+          cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
+          cardBorder: 'border-gray-400',
+          shadow: 'shadow-gray-400/50',
+        };
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
@@ -183,21 +186,21 @@ export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMo
         hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}`}
       style={{
         borderColor: isDarkMode ? '#333333' : 'black',
-        boxShadow: isDarkMode 
-          ? '4px 4px 0px rgba(51,51,51,1)' 
+        boxShadow: isDarkMode
+          ? '4px 4px 0px rgba(51,51,51,1)'
           : '4px 4px 0px rgba(0,0,0,1)',
       }}
       onMouseEnter={(e) => {
         if (!isAnimating) {
-          e.currentTarget.style.boxShadow = isDarkMode 
-            ? '6px 6px 0px rgba(51,51,51,1)' 
+          e.currentTarget.style.boxShadow = isDarkMode
+            ? '6px 6px 0px rgba(51,51,51,1)'
             : '6px 6px 0px rgba(0,0,0,1)';
         }
       }}
       onMouseLeave={(e) => {
         if (!isAnimating) {
-          e.currentTarget.style.boxShadow = isDarkMode 
-            ? '4px 4px 0px rgba(51,51,51,1)' 
+          e.currentTarget.style.boxShadow = isDarkMode
+            ? '4px 4px 0px rgba(51,51,51,1)'
             : '4px 4px 0px rgba(0,0,0,1)';
         }
       }}
@@ -239,13 +242,19 @@ export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMo
               {pokemon.isOwned ? pokemon.name : '???'}
             </strong>
             {pokemon.isOwned && (
-              <span 
+              <span
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
                 style={{
-                  backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                  border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.3)' : '1px solid rgba(0, 0, 0, 0.3)',
+                  backgroundColor: isDarkMode
+                    ? 'rgba(51, 51, 51, 0.1)'
+                    : 'rgba(0, 0, 0, 0.1)',
+                  border: isDarkMode
+                    ? '1px solid rgba(51, 51, 51, 0.3)'
+                    : '1px solid rgba(0, 0, 0, 0.3)',
                   color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
-                  textShadow: isDarkMode ? '1px 1px 0 rgba(0, 0, 0, 0.8)' : '1px 1px 0 rgba(255, 255, 255, 0.8)'
+                  textShadow: isDarkMode
+                    ? '1px 1px 0 rgba(0, 0, 0, 0.8)'
+                    : '1px 1px 0 rgba(255, 255, 255, 0.8)',
                 }}
               >
                 #{pokemon.pokedexNumber}
@@ -267,28 +276,42 @@ export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMo
             <>
               {/* Info Grid */}
               <div className="flex gap-2 text-[9px]">
-                <div 
+                <div
                   className="flex-1 rounded px-2 py-1"
                   style={{
-                    backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-                    border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                    backgroundColor: isDarkMode
+                      ? 'rgba(51, 51, 51, 0.1)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode
+                      ? '1px solid rgba(51, 51, 51, 0.2)'
+                      : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <div className="font-bold text-[8px] uppercase tracking-wide" style={{color: 'var(--muted-foreground)'}}>
+                  <div
+                    className="font-bold text-[8px] uppercase tracking-wide"
+                    style={{color: 'var(--muted-foreground)'}}
+                  >
                     Height
                   </div>
                   <div className="font-bold text-[11px] tabular-nums">
                     {pokemon.height ?? '—'}
                   </div>
                 </div>
-                <div 
+                <div
                   className="flex-1 rounded px-2 py-1"
                   style={{
-                    backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-                    border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                    backgroundColor: isDarkMode
+                      ? 'rgba(51, 51, 51, 0.1)'
+                      : 'rgba(255, 255, 255, 0.3)',
+                    border: isDarkMode
+                      ? '1px solid rgba(51, 51, 51, 0.2)'
+                      : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <div className="font-bold text-[8px] uppercase tracking-wide" style={{color: 'var(--muted-foreground)'}}>
+                  <div
+                    className="font-bold text-[8px] uppercase tracking-wide"
+                    style={{color: 'var(--muted-foreground)'}}
+                  >
                     Weight
                   </div>
                   <div className="font-bold text-[11px] tabular-nums">
@@ -307,8 +330,12 @@ export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMo
                         key={ability}
                         className="px-1.5 py-0.5 rounded text-[7.5px] whitespace-nowrap leading-tight"
                         style={{
-                          backgroundColor: isDarkMode ? 'rgba(51, 51, 51, 0.2)' : 'rgba(255, 255, 255, 0.5)',
-                          border: isDarkMode ? '1px solid rgba(51, 51, 51, 0.2)' : '1px solid rgba(0, 0, 0, 0.2)',
+                          backgroundColor: isDarkMode
+                            ? 'rgba(51, 51, 51, 0.2)'
+                            : 'rgba(255, 255, 255, 0.5)',
+                          border: isDarkMode
+                            ? '1px solid rgba(51, 51, 51, 0.2)'
+                            : '1px solid rgba(0, 0, 0, 0.2)',
                         }}
                       >
                         {ability}
@@ -333,8 +360,8 @@ export const PokemonCard = memo(function PokemonCard({pokemon, onClick, isDarkMo
                     style={{
                       textShadow: 'none',
                       borderColor: isDarkMode ? '#333333' : 'black',
-                      boxShadow: isDarkMode 
-                        ? '2px 2px 0px 0px rgba(51,51,51,1)' 
+                      boxShadow: isDarkMode
+                        ? '2px 2px 0px 0px rgba(51,51,51,1)'
                         : '2px 2px 0px 0px rgba(0,0,0,1)',
                     }}
                   >

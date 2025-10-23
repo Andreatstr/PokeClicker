@@ -127,7 +127,7 @@ body {
   --warning: #fb7185;
   --warning-foreground: #000000;
   --link: #3b82f6;
-  
+
   /* Button border colors */
   --button-border-color: #000000;
   --button-border-color-secondary: #000000;
@@ -168,7 +168,7 @@ body {
   --sidebar-accent-foreground: #e5e7eb;
   --sidebar-border: #374151;
   --sidebar-ring: #6b7280;
-  
+
   /* Button border colors for dark mode */
   --button-border-color: #000000;
   --button-border-color-secondary: #000000;

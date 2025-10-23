@@ -226,18 +226,20 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
       {/* Display errors */}
       {displayError && (
-        <div 
+        <div
           className="fixed top-4 right-4 px-4 py-2 rounded shadow-lg z-50"
           style={{
             backgroundColor: isDarkMode ? 'var(--destructive)' : '#ef4444',
-            color: isDarkMode ? 'var(--destructive-foreground)' : 'white'
+            color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
           }}
         >
           {displayError}
           <button
             onClick={() => setDisplayError(null)}
             className="ml-4 font-bold hover:opacity-70"
-            style={{color: isDarkMode ? 'var(--destructive-foreground)' : 'white'}}
+            style={{
+              color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
+            }}
           >
             ✕
           </button>
@@ -246,59 +248,67 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
 
       {/* Show unauthenticated message */}
       {!isAuthenticated && (
-        <div 
+        <div
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8 rounded-lg shadow-xl z-50 text-center"
           style={{
             backgroundColor: 'var(--card)',
             color: 'var(--foreground)',
-            border: '4px solid var(--border)'
+            border: '4px solid var(--border)',
           }}
         >
-          <h2 className="pixel-font text-2xl mb-4" style={{color: 'var(--foreground)'}}>Please Log In</h2>
-          <p className="pixel-font text-sm mb-4" style={{color: 'var(--foreground)'}}>
+          <h2
+            className="pixel-font text-2xl mb-4"
+            style={{color: 'var(--foreground)'}}
+          >
+            Please Log In
+          </h2>
+          <p
+            className="pixel-font text-sm mb-4"
+            style={{color: 'var(--foreground)'}}
+          >
             You need to log in to play the clicker game and save your progress.
           </p>
         </div>
       )}
 
       {/* GameBoy Console */}
-      <Card 
+      <Card
         className="border-4 p-8 w-full max-w-md lg:max-w-lg"
         style={{
           backgroundColor: isDarkMode ? '#6a6a6a' : '#9FA0A0',
           borderColor: isDarkMode ? '#333333' : 'black',
-          boxShadow: isDarkMode 
-            ? '8px 8px 0px 0px rgba(51,51,51,1)' 
-            : '8px 8px 0px 0px rgba(0,0,0,1)'
+          boxShadow: isDarkMode
+            ? '8px 8px 0px 0px rgba(51,51,51,1)'
+            : '8px 8px 0px 0px rgba(0,0,0,1)',
         }}
       >
         <div className="flex flex-col items-center">
           {/* Screen Area */}
-          <div 
+          <div
             className="rounded-md p-3 mb-3 w-full shadow-inner border-2"
             style={{
               backgroundColor: isDarkMode ? '#1a1a2e' : '#3E3E52',
-              borderColor: isDarkMode ? '#0f0f1a' : '#2a2a3e'
+              borderColor: isDarkMode ? '#0f0f1a' : '#2a2a3e',
             }}
           >
             {/* Screen Label */}
             <div className="flex items-center justify-between mb-2 px-1">
               <div className="flex items-center gap-1">
-                <div 
+                <div
                   className="w-2 h-2 rounded-full border"
                   style={{
                     backgroundColor: isDarkMode ? '#dc2626' : '#dc2626',
-                    borderColor: isDarkMode ? '#333333' : 'black'
+                    borderColor: isDarkMode ? '#333333' : 'black',
                   }}
                 ></div>
-                <span 
+                <span
                   className="text-[6px] pixel-font tracking-wider"
                   style={{color: isDarkMode ? '#d1d5db' : '#d1d5db'}}
                 >
                   BATTERY
                 </span>
               </div>
-              <span 
+              <span
                 className="text-[7px] pixel-font tracking-wider"
                 style={{color: isDarkMode ? '#d1d5db' : '#d1d5db'}}
               >
@@ -307,11 +317,11 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
             </div>
 
             {/* Screen */}
-            <div 
+            <div
               className="p-2 shadow-inner border-2"
               style={{
                 backgroundColor: isDarkMode ? '#4a4a2a' : '#8a8a4a',
-                borderColor: isDarkMode ? '#0f0f1a' : '#1a1a2e'
+                borderColor: isDarkMode ? '#0f0f1a' : '#1a1a2e',
               }}
             >
               <button
@@ -368,13 +378,13 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
 
           {/* Nintendo GAME BOY text */}
           <div className="mb-6 text-center">
-            <p 
+            <p
               className="pixel-font text-[10px] tracking-wider mb-0.5"
               style={{color: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
             >
               Nintendo
             </p>
-            <p 
+            <p
               className="pixel-font text-[8px] font-bold tracking-widest italic"
               style={{color: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
             >
@@ -387,19 +397,19 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
             {/* D-Pad */}
             <div className="relative w-16 h-16">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div 
+                <div
                   className="w-16 h-5 rounded-sm shadow-md"
                   style={{backgroundColor: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
                 ></div>
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div 
+                <div
                   className="w-5 h-16 rounded-sm shadow-md"
                   style={{backgroundColor: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
                 ></div>
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div 
+                <div
                   className="w-5 h-5 rounded-sm"
                   style={{backgroundColor: isDarkMode ? '#000000' : '#1a1a2e'}}
                 ></div>
@@ -415,10 +425,12 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   disabled={!isAuthenticated}
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
-                  style={{
-                    borderColor: '#2a2a3e',
-                    '--custom-inner-border-color': '#2a2a3e',
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      borderColor: '#2a2a3e',
+                      '--custom-inner-border-color': '#2a2a3e',
+                    } as React.CSSProperties
+                  }
                 >
                   B
                 </Button>
@@ -430,10 +442,12 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   disabled={!isAuthenticated}
                   bgColor="#8B3A62"
                   className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
-                  style={{
-                    borderColor: '#2a2a3e',
-                    '--custom-inner-border-color': '#2a2a3e',
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      borderColor: '#2a2a3e',
+                      '--custom-inner-border-color': '#2a2a3e',
+                    } as React.CSSProperties
+                  }
                 >
                   A
                 </Button>
@@ -448,7 +462,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               className="w-10 h-3 rounded-full shadow-md p-0"
               style={{
                 backgroundColor: '#4a4a5e',
-                borderColor: '#2a2a3e'
+                borderColor: '#2a2a3e',
               }}
             />
             <Button
@@ -456,7 +470,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               className="w-10 h-3 rounded-full shadow-md p-0"
               style={{
                 backgroundColor: '#4a4a5e',
-                borderColor: '#2a2a3e'
+                borderColor: '#2a2a3e',
               }}
             />
           </div>
@@ -469,7 +483,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   <div
                     key={j}
                     className="w-1 h-1 rounded-full"
-                    style={{backgroundColor: isDarkMode ? '#4a4a4a' : '#6a6a6a'}}
+                    style={{
+                      backgroundColor: isDarkMode ? '#4a4a4a' : '#6a6a6a',
+                    }}
                   ></div>
                 ))}
               </div>
@@ -481,7 +497,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       {/* Stats and Upgrades */}
       <div className="flex flex-col gap-6 w-full max-w-md lg:max-w-lg">
         {/* Rare Candy Counter */}
-        <Card 
+        <Card
           className="border-4 p-6 relative overflow-hidden"
           style={{
             background: isDarkMode
@@ -490,20 +506,20 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
             borderColor: isDarkMode ? '#374151' : '#bbb7b2',
             boxShadow: isDarkMode
               ? '8px 8px 0px 0px rgba(55,65,81,1)'
-              : '8px 8px 0px 0px rgba(187,183,178,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
         >
-          <div 
+          <div
             className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
             style={{backgroundColor: isDarkMode ? '#fbbf24' : '#fde047'}}
           ></div>
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="border-2 p-2 rounded-md shadow-md"
                 style={{
                   backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
-                  borderColor: isDarkMode ? '#374151' : '#bbb7b2'
+                  borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                 }}
               >
                 <img
@@ -515,7 +531,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               </div>
               <span
                 className="pixel-font text-base font-bold"
-                style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
+                style={{
+                  color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
+                }}
               >
                 Rare Candy
               </span>
@@ -524,12 +542,14 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               className="border-2 px-4 py-2 shadow-md"
               style={{
                 backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
-                borderColor: isDarkMode ? '#374151' : '#bbb7b2'
+                borderColor: isDarkMode ? '#374151' : '#bbb7b2',
               }}
             >
               <span
                 className="pixel-font text-2xl font-bold"
-                style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
+                style={{
+                  color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
+                }}
               >
                 {Math.floor(getCurrentCandy())}
               </span>
@@ -538,7 +558,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         </Card>
 
         {/* Upgrades */}
-        <Card 
+        <Card
           className="border-4 p-6"
           style={{
             background: isDarkMode
@@ -547,19 +567,19 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
             borderColor: isDarkMode ? '#374151' : '#bbb7b2',
             boxShadow: isDarkMode
               ? '8px 8px 0px 0px rgba(55,65,81,1)'
-              : '8px 8px 0px 0px rgba(187,183,178,1)'
+              : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
         >
-          <div 
+          <div
             className="border-2 p-3 mb-4 shadow-inner"
             style={{
               background: isDarkMode
                 ? 'linear-gradient(to right, #dc2626, #ea580c, #ca8a04)'
                 : 'linear-gradient(to right, #ef4444, #fb923c, #fde047)',
-              borderColor: isDarkMode ? '#374151' : '#bbb7b2'
+              borderColor: isDarkMode ? '#374151' : '#bbb7b2',
             }}
           >
-            <h2 
+            <h2
               className="pixel-font text-base font-bold text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]"
               style={{color: 'white'}}
             >
@@ -582,7 +602,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                       background: isDarkMode
                         ? 'linear-gradient(to bottom right, #1f2937, #111827)'
                         : 'linear-gradient(to bottom right, var(--card), #e0deda)',
-                      borderColor: isDarkMode ? '#374151' : '#bbb7b2'
+                      borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                     }}
                   >
                     <div className="flex items-center justify-between gap-4 mb-1">
@@ -590,24 +610,41 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                         <div
                           className="w-2 h-8 border"
                           style={{
-                            backgroundColor: key === 'hp'
-                              ? (isDarkMode ? '#16a34a' : '#22c55e')
-                              : key === 'attack'
-                                ? (isDarkMode ? '#ea580c' : '#f97316')
-                                : key === 'defense'
-                                  ? (isDarkMode ? '#d97706' : '#fb923c')
-                                  : key === 'spAttack'
-                                    ? (isDarkMode ? '#2563eb' : '#3b82f6')
-                                    : key === 'spDefense'
-                                      ? (isDarkMode ? '#1d4ed8' : '#60a5fa')
-                                      : (isDarkMode ? '#7c3aed' : '#a855f7'),
-                            borderColor: isDarkMode ? '#374151' : '#bbb7b2'
+                            backgroundColor:
+                              key === 'hp'
+                                ? isDarkMode
+                                  ? '#16a34a'
+                                  : '#22c55e'
+                                : key === 'attack'
+                                  ? isDarkMode
+                                    ? '#ea580c'
+                                    : '#f97316'
+                                  : key === 'defense'
+                                    ? isDarkMode
+                                      ? '#d97706'
+                                      : '#fb923c'
+                                    : key === 'spAttack'
+                                      ? isDarkMode
+                                        ? '#2563eb'
+                                        : '#3b82f6'
+                                      : key === 'spDefense'
+                                        ? isDarkMode
+                                          ? '#1d4ed8'
+                                          : '#60a5fa'
+                                        : isDarkMode
+                                          ? '#7c3aed'
+                                          : '#a855f7',
+                            borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                           }}
                         ></div>
                         <div className="flex flex-col">
                           <span
                             className="pixel-font text-xs"
-                            style={{color: isDarkMode ? 'var(--muted-foreground)' : 'var(--muted-foreground)'}}
+                            style={{
+                              color: isDarkMode
+                                ? 'var(--muted-foreground)'
+                                : 'var(--muted-foreground)',
+                            }}
                           >
                             {key === 'hp'
                               ? 'HP'
@@ -619,7 +656,11 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                           </span>
                           <span
                             className="pixel-font text-lg font-bold"
-                            style={{color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)'}}
+                            style={{
+                              color: isDarkMode
+                                ? 'var(--foreground)'
+                                : 'var(--foreground)',
+                            }}
                           >
                             LV {String(value)}
                           </span>
@@ -637,16 +678,28 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                         }
                         bgColor={
                           key === 'hp'
-                            ? (isDarkMode ? '#16a34a' : '#4ade80')
+                            ? isDarkMode
+                              ? '#16a34a'
+                              : '#4ade80'
                             : key === 'attack'
-                              ? (isDarkMode ? '#ea580c' : '#fb923c')
+                              ? isDarkMode
+                                ? '#ea580c'
+                                : '#fb923c'
                               : key === 'defense'
-                                ? (isDarkMode ? '#d97706' : '#fbbf24')
+                                ? isDarkMode
+                                  ? '#d97706'
+                                  : '#fbbf24'
                                 : key === 'spAttack'
-                                  ? (isDarkMode ? '#2563eb' : '#60a5fa')
+                                  ? isDarkMode
+                                    ? '#2563eb'
+                                    : '#60a5fa'
                                   : key === 'spDefense'
-                                    ? (isDarkMode ? '#1d4ed8' : '#93c5fd')
-                                    : (isDarkMode ? '#7c3aed' : '#a855f7')
+                                    ? isDarkMode
+                                      ? '#1d4ed8'
+                                      : '#93c5fd'
+                                    : isDarkMode
+                                      ? '#7c3aed'
+                                      : '#a855f7'
                         }
                         className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                       >

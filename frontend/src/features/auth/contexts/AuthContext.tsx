@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {createContext, useState, useEffect, type ReactNode} from 'react';
 import {apolloClient} from '@/lib/apolloClient';
 
@@ -17,7 +18,7 @@ export interface User {
   owned_pokemon_ids: number[];
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (token: string, user: User) => Promise<void>;
