@@ -174,7 +174,7 @@ function App() {
             ) : currentPage === 'profile' ? (
               <section className="py-8">
                 <Suspense fallback={<LoadingSpinner message="Loading profile..." isDarkMode={isDarkMode} />}>
-                  <ProfileDashboard isDarkMode={isDarkMode} />
+                  <ProfileDashboard isDarkMode={isDarkMode} onNavigate={setCurrentPage} />
                 </Suspense>
               </section>
             ) : (

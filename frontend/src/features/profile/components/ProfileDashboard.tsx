@@ -2,9 +2,10 @@ import {useAuth} from '@features/auth';
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
+  onNavigate?: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void;
 }
 
-export function ProfileDashboard({isDarkMode = false}: ProfileDashboardProps) {
+export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashboardProps) {
   const {user, logout} = useAuth();
 
   if (!user) {
@@ -13,6 +14,7 @@ export function ProfileDashboard({isDarkMode = false}: ProfileDashboardProps) {
 
   const handleLogout = async () => {
     await logout();
+    onNavigate?.('login');
   };
 
   return (
