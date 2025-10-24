@@ -31,7 +31,7 @@ jobs:
       - name: Run smoke tests
         run: npx playwright test smoke.spec.ts --project=chromium
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: smoke-test-results

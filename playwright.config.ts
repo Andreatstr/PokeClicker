@@ -43,7 +43,7 @@ export default defineConfig({
     {
       command: 'cd backend && pnpm run dev',
       url: 'http://localhost:3001',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
         RATE_LIMIT_MAX_REQUESTS: '99999',
@@ -52,7 +52,7 @@ export default defineConfig({
     {
       command: 'cd frontend && pnpm run dev',
       url: 'http://localhost:5173',
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120 * 1000,
     },
   ],
