@@ -19,8 +19,8 @@ export class ClickerPage extends BasePage {
       .locator("..")
       .locator("..")
       .getByText(/^\d+$/);
-    // Click button is the Charizard image
-    this.clickButton = page.locator('img[alt="Charizard"]');
+    // Click button is the Charizard button
+    this.clickButton = page.getByRole('button', { name: /click charizard/i });
     // Stats are found by their label text (HP, Attack, etc.) and going up to parent container
     this.hpStat = page.getByText("HP", { exact: true }).locator("../..");
     this.attackStat = page
