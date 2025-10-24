@@ -3,8 +3,8 @@ import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
 interface NavbarProps {
-  currentPage: 'clicker' | 'pokedex' | 'login';
-  onPageChange: (page: 'clicker' | 'pokedex' | 'login') => void;
+  currentPage: 'clicker' | 'pokedex' | 'login' | 'map';
+  onPageChange: (page: 'clicker' | 'pokedex' | 'login' | 'map') => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -71,6 +71,12 @@ export function Navbar({
             >
               Pokedex
             </Button>
+            <Button
+              className="text-xs md:text-sm"
+              onClick={() => onPageChange('map')}
+            >
+              Map
+            </Button>
 
             <Button onClick={onToggleTheme} className="p-2">
               {isDarkMode ? (
@@ -86,7 +92,7 @@ export function Navbar({
                 onClick={handleLogout}
                 title={`Logged in as ${user?.username}`}
               >
-                Logout
+                Logout ({user?.username})
               </Button>
             ) : (
               <Button className="p-2" onClick={() => onPageChange('login')}>
@@ -117,35 +123,59 @@ export function Navbar({
           }}
         >
           <div className="flex flex-col gap-3">
-            <Button
-              className="w-full text-sm"
-              onClick={() => onPageChange('clicker')}
-            >
-              PokeClicker
-            </Button>
-            <Button
-              className="w-full text-sm"
-              onClick={() => onPageChange('pokedex')}
-            >
-              Pokedex
-            </Button>
+            {/* Navigation Links */}
+            <div className="flex flex-col gap-2">
+              <Button
+                className="w-full text-sm"
+                onClick={() => onPageChange('clicker')}
+              >
+                PokeClicker
+              </Button>
+              <Button
+                className="w-full text-sm"
+                onClick={() => onPageChange('pokedex')}
+              >
+                Pokedex
+              </Button>
+              <Button
+                className="w-full text-sm"
+                onClick={() => onPageChange('map')}
+              >
+                Map
+              </Button>
+            </div>
 
-            <div className="flex items-center justify-center gap-4 mt-2">
-              <Button onClick={onToggleTheme} className="p-2">
+            {/* Controls Row - Dark/Light Mode, Music, Profile */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+              <Button
+                className="w-full text-sm flex items-center justify-center gap-2"
+                onClick={onToggleTheme}
+              >
                 {isDarkMode ? (
-                  <SunIcon className="w-4 h-4" />
+                  <>
+                    <SunIcon className="w-4 h-4" />
+                    Light Mode
+                  </>
                 ) : (
-                  <MoonIcon className="w-4 h-4" />
+                  <>
+                    <MoonIcon className="w-4 h-4" />
+                    Dark Mode
+                  </>
                 )}
               </Button>
+
 
               {isAuthenticated ? (
                 <Button className="w-full text-sm" onClick={handleLogout}>
                   Logout ({user?.username})
                 </Button>
               ) : (
-                <Button className="p-2" onClick={() => onPageChange('login')}>
+                <Button 
+                  className="w-full text-sm flex items-center justify-center gap-2" 
+                  onClick={() => onPageChange('login')}
+                >
                   <UserIcon className="w-4 h-4" />
+                  Login
                 </Button>
               )}
             </div>

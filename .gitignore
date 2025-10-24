@@ -39,3 +39,4 @@ CLAUDE.md
 # Test coverage files
 coverage/
 *.lcov
+

@@ -6,6 +6,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/project2/',
   plugins: [react()],
+  server: {
+    host: true,
+    allowedHosts: [
+      'iknjy-129-241-236-235.a.free.pinggy.link',
+      'localhost',
+      '127.0.0.1'
+    ]
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

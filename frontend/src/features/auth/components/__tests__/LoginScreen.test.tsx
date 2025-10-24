@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LoginScreen } from '../LoginScreen'
-import { renderWithProviders } from '../../../../test/utils'
 
 // Mock Apollo Client
 const mockLoginMutation = vi.fn()
