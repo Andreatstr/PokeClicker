@@ -257,7 +257,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   const isLoading = loading;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+    <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
       {/* Display errors */}
       {displayError && (
         <div
@@ -392,8 +392,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                 ))}
 
                 <img
-                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
-                  alt="Charizard"
+                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${user?.selected_pokemon_id || 1}.png`}
+                  alt="Pokemon"
                   className={`w-3/5 h-3/5 object-contain transition-all duration-150 ${
                     isAnimating ? 'scale-110 brightness-110' : 'scale-100'
                   }`}

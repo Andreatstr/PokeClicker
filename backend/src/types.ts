@@ -28,6 +28,8 @@ export interface UserStats {
     speed: number;
   };
   owned_pokemon_ids: number[];
+  favorite_pokemon_id?: number;
+  selected_pokemon_id?: number;
 }
 
 export interface UserDocument extends UserStats {
@@ -39,7 +41,7 @@ export interface UserDocument extends UserStats {
 
 export interface AuthResponse {
   token: string;
-  user: Omit<UserDocument, 'password_hash'>;
+  user: Omit<UserDocument, 'password_hash' | 'created_at'> & { created_at: string };
 }
 
 export interface PokemonQueryArgs {
