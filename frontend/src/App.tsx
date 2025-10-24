@@ -215,6 +215,7 @@ function App() {
                 <Suspense fallback={<LoadingSpinner message="Loading profile..." isDarkMode={isDarkMode} />}>
                   <ProfileDashboard isDarkMode={isDarkMode} onNavigate={setCurrentPage} />
                 </Suspense>
+              </section>
             ) : currentPage === 'map' ? (
               <section className="py-8">
                 <PokemonMap isDarkMode={isDarkMode} />

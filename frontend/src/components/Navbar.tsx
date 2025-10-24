@@ -89,8 +89,6 @@ export function Navbar({
               >
                 <UserIcon className="w-4 h-4 mr-2" />
                 Profile
-                Logout ({user?.username})
-
               </Button>
             ) : (
               <Button className="p-2" onClick={() => onPageChange('login')}>
