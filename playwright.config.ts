@@ -12,7 +12,7 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
-    baseURL: process.env.CI ? 'http://localhost:5126' : 'http://localhost:5173',
+    baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -39,7 +39,7 @@ export default defineConfig({
       use: { ...devices['iPhone 12'] },
     },
   ],
-  webServer: [
+  webServer: process.env.CI ? [
     {
       command: 'cd backend && PORT=3026 npm run dev',
       url: 'http://localhost:3026',
@@ -48,14 +48,30 @@ export default defineConfig({
       env: {
         PORT: '3026',
         RATE_LIMIT_MAX_REQUESTS: '99999',
-        JWT_SECRET: process.env.JWT_SECRET || 'test-secret-for-e2e-only',
-        MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017',
-        MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'pokeclicker_db',
+        JWT_SECRET: 'test-secret-for-e2e-only',
+        MONGODB_URI: 'mongodb://localhost:27017',
+        MONGODB_DB_NAME: 'pokeclicker_db',
       },
     },
     {
       command: 'cd frontend && npm run dev -- --port 5126',
       url: 'http://localhost:5126',
+      reuseExistingServer: true,
+      timeout: 120 * 1000,
+    },
+  ] : [
+    {
+      command: 'cd backend && npm run dev',
+      url: 'http://localhost:3001',
+      reuseExistingServer: true,
+      timeout: 120 * 1000,
+      env: {
+        RATE_LIMIT_MAX_REQUESTS: '99999',
+      },
+    },
+    {
+      command: 'cd frontend && npm run dev',
+      url: 'http://localhost:5173',
       reuseExistingServer: true,
       timeout: 120 * 1000,
     },

@@ -40,3 +40,6 @@ CLAUDE.md
 coverage/
 *.lcov
 
+# Playwright test results
+test-results/
+playwright-report/
