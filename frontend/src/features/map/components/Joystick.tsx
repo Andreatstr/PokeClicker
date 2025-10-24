@@ -21,7 +21,7 @@ export function Joystick({onDirectionChange, onDirectionStart, onDirectionStop, 
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
     // Only register direction if moved far enough from center
-    if (distance < 15) return null;
+    if (distance < 10) return null;
     
     const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
     

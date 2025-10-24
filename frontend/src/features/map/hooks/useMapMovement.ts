@@ -5,7 +5,7 @@ const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
 const SPRITE_WIDTH = 68; // Width of one character sprite frame (272 / 4)
 const SPRITE_HEIGHT = 72; // Height of one character sprite frame (288 / 4)
 const ANIMATION_SPEED = 120; // ms between animation frames (slower for smoother look)
-const MOVE_SPEED = 120; // ms for movement transition (faster updates)
+const MOVE_SPEED = 150; // ms for movement transition
 const ANIMATION_FRAMES = 4; // Number of frames per direction
 
 // Map dimensions
@@ -61,26 +61,41 @@ export function useMapMovement(
   const keysPressed = useRef<Set<string>>(new Set());
   const animationIntervalRef = useRef<number | null>(null);
   const movementIntervalRef = useRef<number | null>(null);
+  const animationResetTimeoutRef = useRef<number | null>(null);
 
   // Handle sprite animation when moving
   useEffect(() => {
+    // Clear any existing timeout
+    if (animationResetTimeoutRef.current) {
+      clearTimeout(animationResetTimeoutRef.current);
+      animationResetTimeoutRef.current = null;
+    }
+
     if (isMoving) {
       // Cycle through frames 0, 1, 2, 3 for walking animation
       animationIntervalRef.current = window.setInterval(() => {
         setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
       }, ANIMATION_SPEED);
     } else {
-      // Stop animation and reset to idle frame
+      // Stop animation but don't reset to idle frame immediately
       if (animationIntervalRef.current) {
         clearInterval(animationIntervalRef.current);
         animationIntervalRef.current = null;
       }
-      setAnimationFrame(0);
+      // Keep current frame for better tap animation, reset to 0 after a delay
+      animationResetTimeoutRef.current = window.setTimeout(() => {
+        if (keysPressed.current.size === 0) {
+          setAnimationFrame(0);
+        }
+      }, 300);
     }
 
     return () => {
       if (animationIntervalRef.current) {
         clearInterval(animationIntervalRef.current);
+      }
+      if (animationResetTimeoutRef.current) {
+        clearTimeout(animationResetTimeoutRef.current);
       }
     };
   }, [isMoving]);
@@ -121,7 +136,7 @@ export function useMapMovement(
     [collisionChecker]
   );
 
-  // Movement interval management
+  // Movement interval management - back to original working logic
   useEffect(() => {
     // ALWAYS clear any existing interval first
     if (movementIntervalRef.current) {
@@ -132,7 +147,7 @@ export function useMapMovement(
     if (isMoving) {
       movementIntervalRef.current = window.setInterval(() => {
         const keys = Array.from(keysPressed.current);
-        if (keys.length === 0) return;
+        if (keys.length === 0) return; // Just return, don't call setIsMoving(false)
 
         const lastKey = keys[keys.length - 1];
         let dir: Direction | null = null;
@@ -143,7 +158,31 @@ export function useMapMovement(
 
         if (dir) {
           setDirection(dir);
-          setWorldPosition((prev) => calculateNewPosition(prev, dir));
+          setWorldPosition((prev) => {
+            let newPos = {...prev};
+
+            switch (dir) {
+              case 'up':
+                newPos.y = Math.max(prev.y - TILE_SIZE, SPRITE_HEIGHT / 2);
+                break;
+              case 'down':
+                newPos.y = Math.min(prev.y + TILE_SIZE, MAP_HEIGHT - SPRITE_HEIGHT / 2);
+                break;
+              case 'left':
+                newPos.x = Math.max(prev.x - TILE_SIZE, SPRITE_WIDTH / 2);
+                break;
+              case 'right':
+                newPos.x = Math.min(prev.x + TILE_SIZE, MAP_WIDTH - SPRITE_WIDTH / 2);
+                break;
+            }
+
+            // Check collision directly without dependency
+            if (!collisionChecker.isPositionWalkable(newPos.x, newPos.y)) {
+              return prev;
+            }
+
+            return newPos;
+          });
         }
       }, MOVE_SPEED);
     }
@@ -162,11 +201,24 @@ export function useMapMovement(
       e.preventDefault();
       const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(e.key);
+
+      // Immediate movement for tap responsiveness
       if (wasEmpty) {
+        let dir: Direction | null = null;
+        if (e.key === 'ArrowUp') dir = 'up';
+        else if (e.key === 'ArrowDown') dir = 'down';
+        else if (e.key === 'ArrowLeft') dir = 'left';
+        else if (e.key === 'ArrowRight') dir = 'right';
+
+        if (dir) {
+          setDirection(dir);
+          setWorldPosition((prev) => calculateNewPosition(prev, dir));
+          setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
+        }
         setIsMoving(true);
       }
     }
-  }, []);
+  }, [calculateNewPosition]);
 
   // Handle key up
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
@@ -202,10 +254,16 @@ export function useMapMovement(
     const key = keyMap[direction];
     const wasEmpty = keysPressed.current.size === 0;
     keysPressed.current.add(key);
+
+    // Immediate movement for joystick responsiveness
     if (wasEmpty) {
+      const dir = direction as Direction;
+      setDirection(dir);
+      setWorldPosition((prev) => calculateNewPosition(prev, dir));
+      setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
       setIsMoving(true);
     }
-  }, []);
+  }, [calculateNewPosition]);
 
   const handleJoystickDirectionChange = useCallback((direction: 'up' | 'down' | 'left' | 'right' | null) => {
     // Clear all current keys
