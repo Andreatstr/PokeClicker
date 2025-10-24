@@ -84,8 +84,8 @@ class PreloadService {
       if (options.pokemonRange) {
         tasks.push(async () => {
           await pokemonSpriteCache.preloadPokemonRange(
-            options.pokemonRange.start,
-            options.pokemonRange.end
+            options.pokemonRange!.start,
+            options.pokemonRange!.end
           );
         });
         totalTasks++;
@@ -94,7 +94,7 @@ class PreloadService {
       // Preload specific types
       if (options.specificTypes && options.specificTypes.length > 0) {
         tasks.push(async () => {
-          await typeBackgroundCache.preloadTypeBackgrounds(options.specificTypes);
+          await typeBackgroundCache.preloadTypeBackgrounds(options.specificTypes!);
         });
         totalTasks++;
       }

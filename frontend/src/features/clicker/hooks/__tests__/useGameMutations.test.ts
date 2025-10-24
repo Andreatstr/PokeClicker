@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
-import { MockedProvider } from '@apollo/client/testing'
+import { renderHook } from '@testing-library/react'
 import { useGameMutations } from '../useGameMutations'
 import { createMockUser } from '../../../../test/factories'
 

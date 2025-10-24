@@ -30,7 +30,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       speed: 1,
     }
   );
-  const [cachedAssets, setCachedAssets] = useState<{
+  const [, setCachedAssets] = useState<{
     charizard?: HTMLImageElement;
     candy?: HTMLImageElement;
     rareCandy?: HTMLImageElement;

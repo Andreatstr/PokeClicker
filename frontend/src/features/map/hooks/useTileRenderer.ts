@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import {useState, useEffect, useRef} from 'react';
 
 // Tile configuration
 const TILE_SIZE = 512; // Size of each tile in pixels (larger tiles = fewer requests)
@@ -56,114 +56,11 @@ export function useTileRenderer(
 ): TileRendererState {
   const [visibleTiles, setVisibleTiles] = useState<VisibleTile[]>([]);
   const [visiblePokemon, setVisiblePokemon] = useState<VisiblePokemon[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const loadingQueueRef = useRef<Set<string>>(new Set());
+  const [isLoading] = useState(false);
   const cacheRef = useRef<TileCache>({});
   const loadingTilesRef = useRef<Set<string>>(new Set());
 
-  // Generate tile key for caching
-  const getTileKey = useCallback((tileX: number, tileY: number) => {
-    return `${tileX}_${tileY}`;
-  }, []);
 
-  // Get tile source URL
-  const getTileSrc = useCallback((tileX: number, tileY: number) => {
-    return `${import.meta.env.BASE_URL}map/tiles/map_${tileX}_${tileY}.webp`;
-  }, []);
-
-  // Clean up old cache entries
-  const cleanupCache = useCallback(() => {
-    const now = Date.now();
-    const entries = Object.entries(cacheRef.current);
-
-    if (entries.length <= CACHE_SIZE) return;
-
-    // Sort by last used time and remove oldest entries
-    entries.sort((a, b) => a[1].lastUsed - b[1].lastUsed);
-    const toRemove = entries.slice(0, entries.length - CACHE_SIZE);
-
-    toRemove.forEach(([key]) => {
-      delete cacheRef.current[key];
-    });
-  }, []);
-
-  // Load a tile image
-  const loadTile = useCallback(async (tileX: number, tileY: number): Promise<HTMLImageElement | null> => {
-    const key = getTileKey(tileX, tileY);
-
-    // Check cache first
-    if (cacheRef.current[key]) {
-      cacheRef.current[key].lastUsed = Date.now();
-      return cacheRef.current[key].image;
-    }
-
-    // Prevent duplicate loading
-    if (loadingTilesRef.current.has(key)) {
-      return null;
-    }
-
-    loadingTilesRef.current.add(key);
-
-    try {
-      const img = new Image();
-      const src = getTileSrc(tileX, tileY);
-
-      return new Promise((resolve, reject) => {
-        img.onload = () => {
-          // Cache the loaded image
-          cacheRef.current[key] = {
-            image: img,
-            lastUsed: Date.now()
-          };
-          loadingTilesRef.current.delete(key);
-          cleanupCache();
-          resolve(img);
-        };
-
-        img.onerror = () => {
-          loadingTilesRef.current.delete(key);
-          reject(new Error(`Failed to load tile ${key}`));
-        };
-
-        img.src = src;
-      });
-    } catch (error) {
-      loadingTilesRef.current.delete(key);
-      return null;
-    }
-  }, [getTileKey, getTileSrc, cleanupCache]);
-
-  // Calculate which tiles are visible
-  const calculateVisibleTiles = useCallback(() => {
-    // Add larger buffer around viewport to prevent pop-in and unloading
-    const buffer = TILE_SIZE * 2; // Use 2 tile sizes as buffer
-    const startX = Math.max(0, Math.floor((camera.x - buffer) / TILE_SIZE));
-    const endX = Math.min(TILES_X - 1, Math.floor((camera.x + viewportSize.width + buffer) / TILE_SIZE));
-    const startY = Math.max(0, Math.floor((camera.y - buffer) / TILE_SIZE));
-    const endY = Math.min(TILES_Y - 1, Math.floor((camera.y + viewportSize.height + buffer) / TILE_SIZE));
-
-    const tiles: VisibleTile[] = [];
-
-    for (let tileY = startY; tileY <= endY; tileY++) {
-      for (let tileX = startX; tileX <= endX; tileX++) {
-        const worldX = tileX * TILE_SIZE;
-        const worldY = tileY * TILE_SIZE;
-        const screenX = worldX - camera.x;
-        const screenY = worldY - camera.y;
-
-        tiles.push({
-          x: tileX,
-          y: tileY,
-          src: getTileSrc(tileX, tileY),
-          loaded: !!cacheRef.current[getTileKey(tileX, tileY)],
-          screenX,
-          screenY
-        });
-      }
-    }
-
-    return tiles;
-  }, [camera.x, camera.y, viewportSize.width, viewportSize.height, getTileSrc, getTileKey]);
 
   // Update visible tiles when camera moves (with debouncing)
   useEffect(() => {

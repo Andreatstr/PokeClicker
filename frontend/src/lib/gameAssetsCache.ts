@@ -12,7 +12,7 @@ interface GameAssetUrls {
 
 class GameAssetsCache {
   private baseUrl = import.meta.env.BASE_URL;
-  private gameAssets: GameAssetUrls = {};
+  private gameAssets: Partial<GameAssetUrls> = {};
   private preloadedAssets = new Set<string>();
 
   private getGameAssetUrls(): GameAssetUrls {
@@ -27,7 +27,7 @@ class GameAssetsCache {
         collisionMap: `${this.baseUrl}map-collision.webp`,
       };
     }
-    return this.gameAssets;
+    return this.gameAssets as GameAssetUrls;
   }
 
   async getCharizardSprite(): Promise<HTMLImageElement> {

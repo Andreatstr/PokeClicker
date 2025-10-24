@@ -138,8 +138,8 @@ export const PokemonCard = memo(function PokemonCard({
   const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [cachedSprite, setCachedSprite] = useState<HTMLImageElement | null>(null);
-  const [cachedBackground, setCachedBackground] = useState<HTMLImageElement | null>(null);
+  const [, setCachedSprite] = useState<HTMLImageElement | null>(null);
+  const [, setCachedBackground] = useState<HTMLImageElement | null>(null);
 
   // Preload Pokemon sprite and type background
   useEffect(() => {

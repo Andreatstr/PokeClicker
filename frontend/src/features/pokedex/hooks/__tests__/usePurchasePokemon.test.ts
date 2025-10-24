@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { ApolloError } from '@apollo/client'
 import { usePurchasePokemon } from '../usePurchasePokemon'
+
 
 // Mock Apollo Client useMutation
 vi.mock('@apollo/client', () => ({
@@ -11,11 +13,27 @@ vi.mock('@apollo/client', () => ({
   ApolloClient: vi.fn(),
   InMemoryCache: vi.fn(),
   from: vi.fn(),
+  ApolloError: class MockApolloError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'ApolloError'
+      this.graphQLErrors = []
+      this.protocolErrors = []
+      this.clientErrors = []
+      this.networkError = null
+      this.extraInfo = undefined
+    }
+    graphQLErrors: any[] = []
+    protocolErrors: any[] = []
+    clientErrors: any[] = []
+    networkError: any = null
+    extraInfo: any = undefined
+  },
 }))
 
 // Get the mocked useMutation function
 const { useMutation } = await import('@apollo/client')
-const mockUseMutation = vi.mocked(useMutation)
+const mockUseMutation = useMutation as any
 
 describe('usePurchasePokemon hook', () => {
   beforeEach(() => {
@@ -24,7 +42,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should return mutation function and loading state', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     const { result } = renderHook(() => usePurchasePokemon())
 
@@ -36,7 +64,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should call useMutation with correct mutation and options', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     renderHook(() => usePurchasePokemon())
 
@@ -51,7 +89,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should provide optimistic response function', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     renderHook(() => usePurchasePokemon())
 
@@ -82,7 +130,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should handle different Pokemon IDs in optimistic response', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     renderHook(() => usePurchasePokemon())
 
@@ -101,7 +159,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should include refetchQueries option', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     renderHook(() => usePurchasePokemon())
 
@@ -113,7 +181,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should return loading state', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: true, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: true,
+        error: undefined,
+        data: undefined,
+        called: true,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     const { result } = renderHook(() => usePurchasePokemon())
 
@@ -121,9 +199,26 @@ describe('usePurchasePokemon hook', () => {
   })
 
   it('should return error state', () => {
-    const mockError = new Error('Purchase failed')
+    const mockError = new ApolloError({
+      errorMessage: 'Purchase failed',
+      graphQLErrors: [],
+      protocolErrors: [],
+      clientErrors: [],
+      networkError: new Error('Purchase failed'),
+      extraInfo: undefined,
+    })
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: mockError }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: mockError,
+        data: undefined,
+        called: true,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     const { result } = renderHook(() => usePurchasePokemon())
 
@@ -132,7 +227,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should return mutation function that can be called', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     const { result } = renderHook(() => usePurchasePokemon())
 
@@ -142,7 +247,17 @@ describe('usePurchasePokemon hook', () => {
 
   it('should handle optimistic response with current date', () => {
     const mockMutation = vi.fn()
-    mockUseMutation.mockReturnValue([mockMutation, { loading: false, error: null }])
+    mockUseMutation.mockReturnValue([
+      mockMutation,
+      {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        called: false,
+        client: {} as any,
+        reset: vi.fn(),
+      },
+    ])
 
     renderHook(() => usePurchasePokemon())
 

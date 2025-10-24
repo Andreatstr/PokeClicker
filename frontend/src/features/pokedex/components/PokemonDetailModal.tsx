@@ -13,7 +13,6 @@ import {
   getUnknownPokemonColors,
 } from '../utils/typeColors';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
-import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
 
 const ME_QUERY = gql`
   query Me {
