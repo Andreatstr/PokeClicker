@@ -1,4 +1,13 @@
+import {useState} from 'react';
 import {useAuth} from '@features/auth';
+import {useMutation, gql} from '@apollo/client';
+import {ConfirmDialog} from './ConfirmDialog';
+
+const DELETE_USER = gql`
+  mutation DeleteUser {
+    deleteUser
+  }
+`;
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
@@ -7,6 +16,8 @@ interface ProfileDashboardProps {
 
 export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashboardProps) {
   const {user, logout} = useAuth();
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteUser, {loading: deleting}] = useMutation(DELETE_USER);
 
   if (!user) {
     return null;
@@ -15,6 +26,18 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
   const handleLogout = async () => {
     await logout();
     onNavigate?.('login');
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteUser();
+      await logout();
+      setDeleteDialogOpen(false);
+      onNavigate?.('login');
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      alert('Failed to delete account. Please try again.');
+    }
   };
 
   return (
@@ -47,34 +70,78 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
           </div>
         </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="px-6 py-3 font-bold border-4 transition-all"
-          style={{
-            borderColor: isDarkMode ? '#333333' : 'black',
-            backgroundColor: '#ef4444',
-            color: 'white',
-            boxShadow: isDarkMode
-              ? '4px 4px 0px rgba(51,51,51,1)'
-              : '4px 4px 0px rgba(0,0,0,1)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translate(-2px, -2px)';
-            e.currentTarget.style.boxShadow = isDarkMode
-              ? '6px 6px 0px rgba(51,51,51,1)'
-              : '6px 6px 0px rgba(0,0,0,1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translate(0, 0)';
-            e.currentTarget.style.boxShadow = isDarkMode
-              ? '4px 4px 0px rgba(51,51,51,1)'
-              : '4px 4px 0px rgba(0,0,0,1)';
-          }}
-        >
-          LOGOUT
-        </button>
+        {/* Action Buttons */}
+        <div className="flex gap-4 flex-wrap">
+          <button
+            onClick={handleLogout}
+            className="flex-1 min-w-[120px] px-6 py-3 font-bold border-4 transition-all"
+            style={{
+              borderColor: isDarkMode ? '#333333' : 'black',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              boxShadow: isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '6px 6px 0px rgba(51,51,51,1)'
+                : '6px 6px 0px rgba(0,0,0,1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+            }}
+          >
+            LOGOUT
+          </button>
+
+          <button
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={deleting}
+            className="flex-1 min-w-[120px] px-6 py-3 font-bold border-4 transition-all"
+            style={{
+              borderColor: isDarkMode ? '#333333' : 'black',
+              backgroundColor: deleting ? '#9ca3af' : '#ef4444',
+              color: 'white',
+              boxShadow: isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)',
+              cursor: deleting ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              if (!deleting) {
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '6px 6px 0px rgba(51,51,51,1)'
+                  : '6px 6px 0px rgba(0,0,0,1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+            }}
+          >
+            {deleting ? 'DELETING...' : 'DELETE ACCOUNT'}
+          </button>
+        </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteAccount}
+        title="DELETE ACCOUNT"
+        message="Are you sure you want to delete your account? This action cannot be undone. All your Pokemon and progress will be lost forever."
+        confirmText="DELETE"
+        cancelText="CANCEL"
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 }
