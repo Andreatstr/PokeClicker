@@ -19,7 +19,8 @@
     "test:watch": "vitest --watch",
     "test:unit": "vitest run --reporter=verbose src/lib src/features/*/utils",
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
-    "test:integration": "vitest run --reporter=verbose src/__tests__"
+    "test:integration": "vitest run --reporter=verbose src/__tests__",
+    "split-tiles": "npx tsx scripts/split-tiles.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",

@@ -151,13 +151,13 @@ export function Joystick({onDirectionChange, onDirectionStart, onDirectionStop, 
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="relative w-16 h-16">
+    <div className="relative w-32 h-32">
       {/* Circular Joystick Base */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-16 h-16 bg-[#2a2a3e] rounded-full shadow-md border-2 border-[#1a1a2e]"></div>
       </div>
-      
-      {/* Interactive Joystick Area */}
+
+      {/* Interactive Joystick Area - Much bigger hitbox */}
       <div
         ref={joystickRef}
         className="absolute inset-0 cursor-pointer rounded-full"

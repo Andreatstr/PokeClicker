@@ -1,8 +1,8 @@
 import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
 
 // Tile configuration
-const TILE_SIZE = 256; // Size of each tile in pixels
-const CACHE_SIZE = 100; // Maximum number of tiles to keep in cache (increased for better performance)
+const TILE_SIZE = 512; // Size of each tile in pixels (larger tiles = fewer requests)
+const CACHE_SIZE = 50; // Reduced cache size since we have fewer total tiles
 
 // Map dimensions
 const MAP_WIDTH = 10560;
@@ -154,7 +154,7 @@ export function useTileRenderer(
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       // Inline tile calculation to avoid dependency issues
-      const buffer = TILE_SIZE * 2.5; // Increased buffer for mobile
+      const buffer = TILE_SIZE * 1.5; // Smaller buffer since tiles are larger
       const startX = Math.max(0, Math.floor((camera.x - buffer) / TILE_SIZE));
       const endX = Math.min(TILES_X - 1, Math.floor((camera.x + viewportSize.width + buffer) / TILE_SIZE));
       const startY = Math.max(0, Math.floor((camera.y - buffer) / TILE_SIZE));

@@ -83,22 +83,29 @@ export function GameBoy({
           </div>
 
           {/* Interactive Controls */}
-          <div className="flex items-center justify-around w-full px-1 mb-2">
-            {/* Joystick */}
-            <Joystick
-              onDirectionChange={onDirectionChange}
-              onDirectionStart={onDirectionStart}
-              onDirectionStop={onDirectionStop}
-              isMobile={isMobile}
-            />
+          <div className="flex items-center w-full px-1 mb-2">
+            {/* Joystick - more to the left */}
+            <div className="flex-[0.8] flex justify-center">
+              <Joystick
+                onDirectionChange={onDirectionChange}
+                onDirectionStart={onDirectionStart}
+                onDirectionStop={onDirectionStop}
+                isMobile={isMobile}
+              />
+            </div>
 
-            {/* A, B Buttons */}
-            <GameBoyButtons
-              onAButtonClick={onAButtonClick}
-              onBButtonClick={onBButtonClick}
-              isAuthenticated={isAuthenticated}
-              nearbyPokemon={nearbyPokemon}
-            />
+            {/* Center spacer */}
+            <div className="flex-[0.4]"></div>
+
+            {/* A, B Buttons - right side */}
+            <div className="flex-[0.8] flex justify-center">
+              <GameBoyButtons
+                onAButtonClick={onAButtonClick}
+                onBButtonClick={onBButtonClick}
+                isAuthenticated={isAuthenticated}
+                nearbyPokemon={nearbyPokemon}
+              />
+            </div>
           </div>
 
           {/* Start/Select Buttons */}
