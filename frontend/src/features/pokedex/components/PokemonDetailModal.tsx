@@ -4,7 +4,7 @@ import type {PokedexPokemon} from '@features/pokedex';
 import {usePokemonById, usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import '@ui/pixelact/styles/animations.css';
 import {
   getTypeColors,
@@ -12,6 +12,7 @@ import {
   getStatBarColors,
   getUnknownPokemonColors,
 } from '../utils/typeColors';
+import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 
 const ME_QUERY = gql`
   query Me {
@@ -38,7 +39,7 @@ function getPokemonCost(pokemonId: number): number {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
-  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.webp`;
 }
 
 function EvolutionPokemon({
@@ -53,6 +54,23 @@ function EvolutionPokemon({
   isOwned: boolean;
 }) {
   const {data, loading} = usePokemonById(id);
+  const [cachedSprite, setCachedSprite] = useState<HTMLImageElement | null>(null);
+
+  // Preload evolution sprite
+  useEffect(() => {
+    const preloadSprite = async () => {
+      if (isOwned && data?.pokemonById) {
+        try {
+          const sprite = await pokemonSpriteCache.getPokemonSprite(id);
+          setCachedSprite(sprite);
+        } catch (error) {
+          console.warn('Failed to preload evolution sprite:', error);
+        }
+      }
+    };
+
+    preloadSprite();
+  }, [id, isOwned, data?.pokemonById]);
 
   if (loading || !data?.pokemonById) {
     return (
@@ -76,7 +94,7 @@ function EvolutionPokemon({
       >
         {isOwned ? (
           <img
-            src={evo.sprite}
+            src={cachedSprite?.src || evo.sprite}
             alt={evo.name}
             className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
             loading="lazy"
@@ -117,7 +135,7 @@ export function PokemonDetailModal({
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
-    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
   const statColors = getStatBarColors(isDarkMode);

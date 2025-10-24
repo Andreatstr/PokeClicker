@@ -1,17 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { ApolloError } from '@apollo/client'
 import { usePokedexQuery } from '../usePokedexQuery'
 import { createMockPokemon } from '../../../../test/factories'
+
 
 // Mock Apollo Client useQuery
 vi.mock('@apollo/client', () => ({
   useQuery: vi.fn(),
   gql: vi.fn().mockReturnValue({}),
+  ApolloError: class MockApolloError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'ApolloError'
+      this.graphQLErrors = []
+      this.protocolErrors = []
+      this.clientErrors = []
+      this.networkError = null
+      this.extraInfo = undefined
+    }
+    graphQLErrors: any[] = []
+    protocolErrors: any[] = []
+    clientErrors: any[] = []
+    networkError: any = null
+    extraInfo: any = undefined
+  },
 }))
 
 // Get the mocked useQuery function
 const { useQuery } = await import('@apollo/client')
-const mockUseQuery = vi.mocked(useQuery)
+const mockUseQuery = useQuery as any
 
 describe('usePokedexQuery hook', () => {
   beforeEach(() => {
@@ -32,6 +50,17 @@ describe('usePokedexQuery hook', () => {
       loading: false,
       error: undefined,
       refetch: mockRefetch,
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokedexQuery({}))
@@ -55,6 +84,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokedexQuery(variables))
@@ -74,6 +114,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokedexQuery({}))
@@ -84,12 +135,30 @@ describe('usePokedexQuery hook', () => {
   })
 
   it('should handle error state', () => {
-    const mockError = new Error('Network error')
+    const mockError = new ApolloError({
+      errorMessage: 'Network error',
+      graphQLErrors: [],
+      protocolErrors: [],
+      clientErrors: [],
+      networkError: new Error('Network error'),
+      extraInfo: undefined,
+    })
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: false,
       error: mockError,
       refetch: vi.fn(),
+      networkStatus: 8,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokedexQuery({}))
@@ -113,6 +182,17 @@ describe('usePokedexQuery hook', () => {
       loading: false,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokedexQuery({}))
@@ -134,6 +214,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokedexQuery(variables))
@@ -160,6 +251,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokedexQuery(variables))
@@ -184,6 +286,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokedexQuery(variables))
@@ -209,6 +322,17 @@ describe('usePokedexQuery hook', () => {
       loading: true,
       error: undefined,
       refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokedexQuery(variables))
@@ -229,6 +353,17 @@ describe('usePokedexQuery hook', () => {
       loading: false,
       error: undefined,
       refetch: mockRefetch,
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: {},
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokedexQuery({}))

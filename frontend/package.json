@@ -19,7 +19,8 @@
     "test:watch": "vitest --watch",
     "test:unit": "vitest run --reporter=verbose src/lib src/features/*/utils",
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
-    "test:integration": "vitest run --reporter=verbose src/__tests__"
+    "test:integration": "vitest run --reporter=verbose src/__tests__",
+    "split-tiles": "npx tsx scripts/split-tiles.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",
@@ -30,14 +31,17 @@
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fs": "0.0.1-security",
     "graphql": "^16.11.0",
     "lucide-react": "^0.544.0",
+    "path": "^0.12.7",
     "pixel-retroui": "^2.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.65.0",
     "react-router-dom": "^7.9.3",
     "react-window": "^2.2.1",
+    "sharp": "^0.34.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"
   },

@@ -1,16 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { ApolloError } from '@apollo/client'
 import { usePokemonById } from '../usePokemonById'
+
 
 // Mock Apollo Client useQuery
 vi.mock('@apollo/client', () => ({
   useQuery: vi.fn(),
   gql: vi.fn().mockReturnValue({}),
+  ApolloError: class MockApolloError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'ApolloError'
+      this.graphQLErrors = []
+      this.protocolErrors = []
+      this.clientErrors = []
+      this.networkError = null
+      this.extraInfo = undefined
+    }
+    graphQLErrors: any[] = []
+    protocolErrors: any[] = []
+    clientErrors: any[] = []
+    networkError: any = null
+    extraInfo: any = undefined
+  },
 }))
 
 // Get the mocked useQuery function
 const { useQuery } = await import('@apollo/client')
-const mockUseQuery = vi.mocked(useQuery)
+const mockUseQuery = useQuery as any
 
 describe('usePokemonById hook', () => {
   beforeEach(() => {
@@ -43,6 +61,18 @@ describe('usePokemonById hook', () => {
       data: mockData,
       loading: false,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokemonById(1))
@@ -61,6 +91,18 @@ describe('usePokemonById hook', () => {
       data: undefined,
       loading: false,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: null },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     renderHook(() => usePokemonById(null))
@@ -79,6 +121,18 @@ describe('usePokemonById hook', () => {
       data: undefined,
       loading: true,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 1,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(1))
@@ -89,11 +143,30 @@ describe('usePokemonById hook', () => {
   })
 
   it('should handle error state', () => {
-    const mockError = new Error('Network error')
+    const mockError = new ApolloError({
+      errorMessage: 'Network error',
+      graphQLErrors: [],
+      protocolErrors: [],
+      clientErrors: [],
+      networkError: new Error('Network error'),
+      extraInfo: undefined,
+    })
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: false,
       error: mockError,
+      refetch: vi.fn(),
+      networkStatus: 8,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(1))
@@ -129,6 +202,18 @@ describe('usePokemonById hook', () => {
       data: mockData,
       loading: false,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(1))
@@ -145,6 +230,18 @@ describe('usePokemonById hook', () => {
       data: mockData,
       loading: false,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(999))
@@ -179,6 +276,18 @@ describe('usePokemonById hook', () => {
       data: mockData,
       loading: false,
       error: undefined,
+      refetch: vi.fn(),
+      networkStatus: 7,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(25))
@@ -198,6 +307,16 @@ describe('usePokemonById hook', () => {
       error: undefined,
       refetch: mockRefetch,
       networkStatus: mockNetworkStatus,
+      called: true,
+      client: {} as any,
+      observable: {} as any,
+      previousData: undefined,
+      variables: { id: 1 },
+      fetchMore: vi.fn(),
+      startPolling: vi.fn(),
+      stopPolling: vi.fn(),
+      subscribeToMore: vi.fn(),
+      updateQuery: vi.fn(),
     })
 
     const { result } = renderHook(() => usePokemonById(1))

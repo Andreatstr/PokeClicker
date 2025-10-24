@@ -3,13 +3,17 @@ import {
   usePokedexQuery,
   type PokedexPokemon,
 } from '@features/pokedex';
-import {Navbar, BackgroundMusic, LoadingSpinner, LazyPokedex} from '@/components';
+import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
+import {preloadService} from '@/lib/preloadService';
 
 // Lazy load heavy components
 const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
 const LoginScreen = lazy(() => import('@features/auth').then(module => ({ default: module.LoginScreen })));
 const PokemonDetailModal = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonDetailModal })));
 const ProfileDashboard = lazy(() => import('@features/profile').then(module => ({ default: module.ProfileDashboard })));
+import {PokemonMap} from '@features/map';
+import {BackgroundMusic} from '@components/BackgroundMusic';
+
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -28,7 +32,9 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [currentPage, setCurrentPage] = useState<
-    'clicker' | 'pokedex' | 'login' | 'profile'
+
+    'clicker' | 'pokedex' | 'map' | 'login' | 'profile'
+
   >(() => {
     const hasAuth = localStorage.getItem('authToken');
     if (!hasAuth) return 'login';
@@ -45,6 +51,39 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Initialize preloading service
+  useEffect(() => {
+    const initializePreloading = async () => {
+      try {
+        // Preload based on current page
+        switch (currentPage) {
+          case 'pokedex':
+            await preloadService.preloadForPokedex();
+            break;
+          case 'clicker':
+            await preloadService.preloadForClicker();
+            break;
+          case 'map':
+            await preloadService.preloadForMap();
+            break;
+          default:
+            // Preload common assets for login screen
+            await preloadService.preloadAll({
+              preloadCommonPokemon: true,
+              preloadCommonTypes: true,
+              preloadGameAssets: true,
+              preloadMapAssets: false,
+            });
+        }
+      } catch (error) {
+        console.warn('Failed to initialize preloading:', error);
+      }
+    };
+
+    initializePreloading();
+  }, [currentPage]);
+
   const [displayedCount, setDisplayedCount] = useState(20);
 
   const ITEMS_PER_PAGE = 20;
@@ -176,6 +215,9 @@ function App() {
                 <Suspense fallback={<LoadingSpinner message="Loading profile..." isDarkMode={isDarkMode} />}>
                   <ProfileDashboard isDarkMode={isDarkMode} onNavigate={setCurrentPage} />
                 </Suspense>
+            ) : currentPage === 'map' ? (
+              <section className="py-8">
+                <PokemonMap isDarkMode={isDarkMode} />
               </section>
             ) : (
               <>
@@ -255,7 +297,9 @@ function App() {
           )}
         </>
       )}
-      <BackgroundMusic isDarkMode={isDarkMode} />
+      <div className="relative">
+        <BackgroundMusic isDarkMode={isDarkMode} />
+      </div>
     </>
   );
 }
