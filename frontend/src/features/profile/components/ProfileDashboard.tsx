@@ -41,9 +41,9 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-4 px-4 sm:py-8 sm:px-6">
       <div
-        className="border-4 p-6 pixel-font"
+        className="border-4 p-4 sm:p-6 pixel-font"
         style={{
           borderColor: isDarkMode ? '#333333' : 'black',
           backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
@@ -52,13 +52,13 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
             : '8px 8px 0px rgba(0,0,0,1)',
         }}
       >
-        <h1 className="text-2xl font-bold mb-6">TRAINER PROFILE</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">TRAINER PROFILE</h1>
 
         {/* User Info Section */}
-        <div className="mb-6 p-4 border-2" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
-          <h2 className="text-xl mb-4">TRAINER INFO</h2>
-          <div className="space-y-2">
-            <p>
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+          <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER INFO</h2>
+          <div className="space-y-2 text-sm sm:text-base">
+            <p className="break-words">
               <strong>NAME:</strong> {user.username}
             </p>
             <p>
@@ -71,10 +71,10 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button
             onClick={handleLogout}
-            className="flex-1 min-w-[120px] px-6 py-3 font-bold border-4 transition-all"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: '#3b82f6',
@@ -102,7 +102,7 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
           <button
             onClick={() => setDeleteDialogOpen(true)}
             disabled={deleting}
-            className="flex-1 min-w-[120px] px-6 py-3 font-bold border-4 transition-all"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: deleting ? '#9ca3af' : '#ef4444',
