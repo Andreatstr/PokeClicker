@@ -9,29 +9,26 @@ on:
 jobs:
   smoke-test:
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Install Playwright Browsers
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium
 
       - name: Run smoke tests
+        env:
+          VITE_GRAPHQL_URL: http://localhost:3026/
         run: npx playwright test smoke.spec.ts --project=chromium
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: smoke-test-results
