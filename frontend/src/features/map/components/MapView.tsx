@@ -136,7 +136,7 @@ export function MapView({
         <div>World: {Math.floor(worldPosition.x)}, {Math.floor(worldPosition.y)}</div>
         <div>Camera: {Math.floor(camera.x)}, {Math.floor(camera.y)}</div>
         <div>
-          Collision: {collisionMapLoaded ? '✓ Loaded' : '⏳ Loading...'}
+          Collision: {collisionMapLoaded ? 'Loaded' : 'Loading...'}
         </div>
         <div>Wild Pokemon: {wildPokemon.length}</div>
       </div>

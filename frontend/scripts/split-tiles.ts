@@ -34,7 +34,7 @@ async function ensureDirectoryExists(dirPath: string): Promise<void> {
 async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
   const { inputPath, outputDir, prefix } = config;
 
-  console.log(`🖼️  Processing ${inputPath}...`);
+  console.log(`Processing ${inputPath}...`);
 
   try {
     // Check if input file exists
@@ -44,14 +44,14 @@ async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
     const metadata = await sharp(inputPath).metadata();
     const { width = 0, height = 0 } = metadata;
 
-    console.log(`📏 Image size: ${width}x${height}`);
+    console.log(`Image size: ${width}x${height}`);
 
     // Calculate number of tiles
     const tilesX = Math.ceil(width / TILE_SIZE);
     const tilesY = Math.ceil(height / TILE_SIZE);
     const totalTiles = tilesX * tilesY;
 
-    console.log(`🧩 Creating ${tilesX}x${tilesY} = ${totalTiles} tiles...`);
+    console.log(`Creating ${tilesX}x${tilesY} = ${totalTiles} tiles...`);
 
     // Ensure output directory exists
     await ensureDirectoryExists(outputDir);
@@ -89,33 +89,33 @@ async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
 
         // Progress update every 50 tiles for better performance
         if (tilesCreated % 50 === 0) {
-          console.log(`📦 Created ${tilesCreated}/${totalTiles} tiles...`);
+          console.log(`Created ${tilesCreated}/${totalTiles} tiles...`);
         }
       }
     }
 
-    console.log(`✅ Completed ${prefix}: ${tilesCreated} tiles`);
+    console.log(`Completed ${prefix}: ${tilesCreated} tiles`);
     return true;
 
   } catch (error) {
-    console.error(`❌ Error processing ${inputPath}:`, error);
+    console.error(`Error processing ${inputPath}:`, error);
     return false;
   }
 }
 
 async function main(): Promise<boolean> {
-  console.log('🗺️  Map Tile Splitter');
+  console.log('Map Tile Splitter');
   console.log('='.repeat(50));
-  console.log(`📏 Map size: ${MAP_WIDTH}x${MAP_HEIGHT}`);
-  console.log(`🧩 Tile size: ${TILE_SIZE}x${TILE_SIZE}`);
+  console.log(`Map size: ${MAP_WIDTH}x${MAP_HEIGHT}`);
+  console.log(`Tile size: ${TILE_SIZE}x${TILE_SIZE}`);
 
   // Calculate expected tiles
   const expectedTilesX = Math.ceil(MAP_WIDTH / TILE_SIZE);
   const expectedTilesY = Math.ceil(MAP_HEIGHT / TILE_SIZE);
   const expectedTotal = expectedTilesX * expectedTilesY;
 
-  console.log(`📊 Expected tiles: ${expectedTilesX}x${expectedTilesY} = ${expectedTotal} tiles per image`);
-  console.log('📁 Output: public/map/tiles/');
+  console.log(`Expected tiles: ${expectedTilesX}x${expectedTilesY} = ${expectedTotal} tiles per image`);
+  console.log('Output: public/map/tiles/');
   console.log();
 
   // Define paths
@@ -141,12 +141,12 @@ async function main(): Promise<boolean> {
     try {
       await fs.access(config.inputPath);
     } catch {
-      console.error(`❌ Image not found: ${config.inputPath}`);
+      console.error(`Image not found: ${config.inputPath}`);
       return false;
     }
   }
 
-  console.log('🚀 Starting tile conversion...');
+  console.log('Starting tile conversion...');
   console.log();
 
   // Process each image
@@ -158,14 +158,14 @@ async function main(): Promise<boolean> {
     console.log();
   }
 
-  console.log('🎉 All tiles created successfully!');
-  console.log(`📁 Location: ${tilesDir}`);
-  console.log('📊 Files created:');
+  console.log('All tiles created successfully!');
+  console.log(`Location: ${tilesDir}`);
+  console.log('Files created:');
   console.log(`   - map_0_0.webp to map_${expectedTilesX-1}_${expectedTilesY-1}.webp (${expectedTotal} files)`);
   console.log(`   - collision_0_0.webp to collision_${expectedTilesX-1}_${expectedTilesY-1}.webp (${expectedTotal} files)`);
   console.log(`   - Total: ${expectedTotal * 2} tile files`);
   console.log();
-  console.log('✨ Optimized for mobile performance with 75% fewer HTTP requests!');
+  console.log('Optimized for mobile performance with 75% fewer HTTP requests!');
 
   return true;
 }
@@ -177,7 +177,7 @@ if (require.main === module) {
       process.exit(success ? 0 : 1);
     })
     .catch((error) => {
-      console.error('❌ Unexpected error:', error);
+      console.error('Unexpected error:', error);
       process.exit(1);
     });
 }

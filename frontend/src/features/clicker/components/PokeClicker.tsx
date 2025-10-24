@@ -275,7 +275,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
             }}
           >
-            ✕
+            X
           </button>
         </div>
       )}

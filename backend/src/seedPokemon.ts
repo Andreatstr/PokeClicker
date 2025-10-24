@@ -121,7 +121,7 @@ async function seedPokemon() {
   await collection.createIndex({id: 1}, {unique: true});
 
   console.log(
-    `✓ Successfully seeded ${pokemonMetadata.length} Pokemon with indexes!`
+    `Successfully seeded ${pokemonMetadata.length} Pokemon with indexes!`
   );
   process.exit(0);
 }
