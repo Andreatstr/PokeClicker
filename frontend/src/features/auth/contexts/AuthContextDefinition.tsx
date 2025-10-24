@@ -14,6 +14,7 @@ export interface User {
     speed: number;
   };
   owned_pokemon_ids: number[];
+  favorite_pokemon_id?: number | null;
 }
 
 interface AuthContextType {

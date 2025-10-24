@@ -1,11 +1,32 @@
 import {useState} from 'react';
 import {useAuth} from '@features/auth';
-import {useMutation, gql} from '@apollo/client';
+import {useMutation, useQuery, gql} from '@apollo/client';
 import {ConfirmDialog} from './ConfirmDialog';
+import {FavoritePokemonSelector} from './FavoritePokemonSelector';
 
 const DELETE_USER = gql`
   mutation DeleteUser {
     deleteUser
+  }
+`;
+
+const SET_FAVORITE_POKEMON = gql`
+  mutation SetFavoritePokemon($pokemonId: Int) {
+    setFavoritePokemon(pokemonId: $pokemonId) {
+      _id
+      favorite_pokemon_id
+    }
+  }
+`;
+
+const GET_POKEMON_BY_ID = gql`
+  query GetPokemonById($id: Int!) {
+    pokemonById(id: $id) {
+      id
+      name
+      sprite
+      types
+    }
   }
 `;
 
@@ -15,9 +36,16 @@ interface ProfileDashboardProps {
 }
 
 export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashboardProps) {
-  const {user, logout} = useAuth();
+  const {user, logout, updateUser} = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [deleteUser, {loading: deleting}] = useMutation(DELETE_USER);
+  const [setFavoritePokemon] = useMutation(SET_FAVORITE_POKEMON);
+
+  const {data: favoritePokemonData} = useQuery(GET_POKEMON_BY_ID, {
+    variables: {id: user?.favorite_pokemon_id},
+    skip: !user?.favorite_pokemon_id,
+  });
 
   if (!user) {
     return null;
@@ -37,6 +65,22 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
     } catch (error) {
       console.error('Failed to delete account:', error);
       alert('Failed to delete account. Please try again.');
+    }
+  };
+
+  const handleSetFavorite = async (pokemonId: number | null) => {
+    try {
+      const result = await setFavoritePokemon({variables: {pokemonId}});
+      if (result.data?.setFavoritePokemon) {
+        updateUser({
+          ...user,
+          favorite_pokemon_id: result.data.setFavoritePokemon.favorite_pokemon_id,
+        });
+      }
+      setShowFavoriteSelector(false);
+    } catch (error) {
+      console.error('Failed to set favorite Pokemon:', error);
+      alert('Failed to set favorite Pokemon. Please try again.');
     }
   };
 
@@ -68,6 +112,53 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
               <strong>POKEMON OWNED:</strong> {user.owned_pokemon_ids.length}
             </p>
           </div>
+        </div>
+
+        {/* Favorite Pokemon Section */}
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+          <h2 className="text-lg sm:text-xl font-bold">FAVORITE</h2>
+
+          {favoritePokemonData?.pokemonById ? (
+            <button
+              onClick={() => setShowFavoriteSelector(true)}
+              className="px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
+              }}
+              title="Click to change favorite (long press to remove)"
+            >
+              <img
+                src={favoritePokemonData.pokemonById.sprite}
+                alt={favoritePokemonData.pokemonById.name}
+                className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
+                style={{imageRendering: 'pixelated'}}
+              />
+              <p className="text-sm sm:text-base capitalize font-bold text-left flex-1">
+                {favoritePokemonData.pokemonById.name}
+              </p>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowFavoriteSelector(true)}
+              disabled={user.owned_pokemon_ids.length === 0}
+              className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: user.owned_pokemon_ids.length === 0 ? '#555' : (isDarkMode ? '#2a2a2a' : '#f5f1e8'),
+                cursor: user.owned_pokemon_ids.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
+              }}
+              title={user.owned_pokemon_ids.length === 0 ? 'Catch a Pokemon first!' : 'Click to select favorite'}
+            >
+              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0" style={{color: isDarkMode ? '#666' : '#999'}}>
+                ?
+              </div>
+              <p className="text-sm sm:text-base font-bold text-left flex-1" style={{color: isDarkMode ? '#666' : '#999'}}>
+                None
+              </p>
+            </button>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -140,6 +231,14 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         message="Are you sure you want to delete your account? This action cannot be undone. All your Pokemon and progress will be lost forever."
         confirmText="DELETE"
         cancelText="CANCEL"
+        isDarkMode={isDarkMode}
+      />
+
+      <FavoritePokemonSelector
+        isOpen={showFavoriteSelector}
+        onClose={() => setShowFavoriteSelector(false)}
+        onSelect={handleSetFavorite}
+        ownedPokemonIds={user.owned_pokemon_ids}
         isDarkMode={isDarkMode}
       />
     </div>

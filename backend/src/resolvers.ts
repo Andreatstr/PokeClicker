@@ -23,6 +23,7 @@ function sanitizeUserForClient(userDoc: UserDocument) {
     created_at: userDoc.created_at,
     stats: userDoc.stats,
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
+    favorite_pokemon_id: userDoc.favorite_pokemon_id,
   };
 }
 
@@ -417,6 +418,60 @@ export const resolvers = {
       }
 
       return true;
+    },
+
+    // Set favorite Pokemon
+    setFavoritePokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId?: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // If pokemonId is provided, verify user owns it
+      if (pokemonId !== null && pokemonId !== undefined) {
+        if (
+          !userDoc.owned_pokemon_ids ||
+          !userDoc.owned_pokemon_ids.includes(pokemonId)
+        ) {
+          throw new Error('You must own this Pokémon to set it as favorite');
+        }
+
+        // Set favorite Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$set: {favorite_pokemon_id: pokemonId}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to set favorite Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      } else {
+        // Unset favorite Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$unset: {favorite_pokemon_id: ''}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to unset favorite Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      }
     },
   },
 };

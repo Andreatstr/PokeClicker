@@ -28,6 +28,7 @@ export interface UserStats {
     speed: number;
   };
   owned_pokemon_ids: number[];
+  favorite_pokemon_id?: number;
 }
 
 export interface UserDocument extends UserStats {
