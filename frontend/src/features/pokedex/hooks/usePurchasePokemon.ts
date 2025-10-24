@@ -9,6 +9,8 @@ const PURCHASE_POKEMON_MUTATION = gql`
       rare_candy
       created_at
       owned_pokemon_ids
+      favorite_pokemon_id
+      selected_pokemon_id
       stats {
         hp
         attack
@@ -44,6 +46,8 @@ export function usePurchasePokemon() {
           rare_candy: 0,
           created_at: new Date().toISOString(),
           owned_pokemon_ids: [variables.pokemonId],
+          favorite_pokemon_id: null,
+          selected_pokemon_id: null,
           stats: {
             __typename: 'UserStats',
             hp: 1,

@@ -7,6 +7,7 @@ const UPDATE_RARE_CANDY = gql`
       _id
       username
       rare_candy
+      created_at
       stats {
         hp
         attack
@@ -16,6 +17,8 @@ const UPDATE_RARE_CANDY = gql`
         speed
       }
       owned_pokemon_ids
+      favorite_pokemon_id
+      selected_pokemon_id
     }
   }
 `;
@@ -26,6 +29,7 @@ const UPGRADE_STAT = gql`
       _id
       username
       rare_candy
+      created_at
       stats {
         hp
         attack
@@ -35,6 +39,8 @@ const UPGRADE_STAT = gql`
         speed
       }
       owned_pokemon_ids
+      favorite_pokemon_id
+      selected_pokemon_id
     }
   }
 `;

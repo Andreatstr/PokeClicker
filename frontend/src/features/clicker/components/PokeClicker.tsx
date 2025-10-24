@@ -2,6 +2,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {Button, Card} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 import {useGameMutations} from '@features/clicker';
+import {gameAssetsCache} from '@/lib/gameAssetsCache';
 
 interface Candy {
   id: number;
@@ -29,6 +30,39 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       speed: 1,
     }
   );
+  const [, setCachedAssets] = useState<{
+    charizard?: HTMLImageElement;
+    candy?: HTMLImageElement;
+    rareCandy?: HTMLImageElement;
+    pokemonBg?: HTMLImageElement;
+  }>({});
+
+  // Preload game assets
+  useEffect(() => {
+    const preloadAssets = async () => {
+      try {
+        await gameAssetsCache.preloadClickerAssets();
+        
+        const [charizard, candy, rareCandy, pokemonBg] = await Promise.all([
+          gameAssetsCache.getCharizardSprite(),
+          gameAssetsCache.getCandyImage(),
+          gameAssetsCache.getRareCandyIcon(),
+          gameAssetsCache.getPokemonBackground(),
+        ]);
+
+        setCachedAssets({
+          charizard,
+          candy,
+          rareCandy,
+          pokemonBg,
+        });
+      } catch (error) {
+        console.warn('Failed to preload game assets:', error);
+      }
+    };
+
+    preloadAssets();
+  }, []);
 
   // Batching state
   const [pendingCandyAmount, setPendingCandyAmount] = useState(0);
@@ -223,7 +257,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   const isLoading = loading;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+    <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
       {/* Display errors */}
       {displayError && (
         <div
@@ -241,7 +275,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
               color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
             }}
           >
-            ✕
+            X
           </button>
         </div>
       )}
@@ -330,7 +364,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                 aria-label="Click Charizard to earn rare candy"
                 disabled={!isAuthenticated}
                 style={{
-                  backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.png')`,
+                  backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.webp')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   imageRendering: 'pixelated',
@@ -349,7 +383,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                     }}
                   >
                     <img
-                      src={`${import.meta.env.BASE_URL}candy.png`}
+                      src={`${import.meta.env.BASE_URL}candy.webp`}
                       alt="candy"
                       className="w-8 h-8"
                       style={{imageRendering: 'pixelated'}}
@@ -358,8 +392,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                 ))}
 
                 <img
-                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
-                  alt="Charizard"
+                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${user?.selected_pokemon_id || 1}.png`}
+                  alt="Pokemon"
                   className={`w-3/5 h-3/5 object-contain transition-all duration-150 ${
                     isAnimating ? 'scale-110 brightness-110' : 'scale-100'
                   }`}

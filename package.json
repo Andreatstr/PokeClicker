@@ -27,6 +27,7 @@
   ],
   "devDependencies": {
     "@playwright/test": "^1.56.1",
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "vitest": "^4.0.2"
   }
 }

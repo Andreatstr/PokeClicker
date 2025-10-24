@@ -15,14 +15,16 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
-function sanitizeUserForClient(userDoc: UserDocument) {
+function sanitizeUserForClient(userDoc: UserDocument): Omit<UserDocument, 'password_hash' | 'created_at'> & { created_at: string } {
   return {
     _id: userDoc._id,
     username: userDoc.username,
     rare_candy: userDoc.rare_candy ?? 0,
-    created_at: userDoc.created_at,
+    created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: userDoc.stats,
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
+    favorite_pokemon_id: userDoc.favorite_pokemon_id,
+    selected_pokemon_id: userDoc.selected_pokemon_id,
   };
 }
 
@@ -396,6 +398,135 @@ export const resolvers = {
       }
 
       return sanitizeUserForClient(result);
+    },
+
+    // Delete user account
+    deleteUser: async (
+      _: unknown,
+      __: unknown,
+      context: AuthContext
+    ): Promise<boolean> => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Delete the user
+      const result = await users.deleteOne({_id: new ObjectId(user.id)});
+
+      if (result.deletedCount === 0) {
+        throw new Error('User not found or already deleted');
+      }
+
+      return true;
+    },
+
+    // Set favorite Pokemon
+    setFavoritePokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId?: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // If pokemonId is provided, verify user owns it
+      if (pokemonId !== null && pokemonId !== undefined) {
+        if (
+          !userDoc.owned_pokemon_ids ||
+          !userDoc.owned_pokemon_ids.includes(pokemonId)
+        ) {
+          throw new Error('You must own this Pokémon to set it as favorite');
+        }
+
+        // Set favorite Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$set: {favorite_pokemon_id: pokemonId}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to set favorite Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      } else {
+        // Unset favorite Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$unset: {favorite_pokemon_id: ''}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to unset favorite Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      }
+    },
+
+    // Set selected Pokemon for clicker
+    setSelectedPokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId?: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // If pokemonId is provided, verify user owns it
+      if (pokemonId !== null && pokemonId !== undefined) {
+        if (
+          !userDoc.owned_pokemon_ids ||
+          !userDoc.owned_pokemon_ids.includes(pokemonId)
+        ) {
+          throw new Error('You must own this Pokémon to select it for clicker');
+        }
+
+        // Set selected Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$set: {selected_pokemon_id: pokemonId}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to set selected Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      } else {
+        // Unset selected Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$unset: {selected_pokemon_id: ''}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to unset selected Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      }
     },
   },
 };

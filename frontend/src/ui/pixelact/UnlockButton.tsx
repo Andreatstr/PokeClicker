@@ -54,7 +54,7 @@ export function UnlockButton({
           >
             <span className={`${priceTextSize} font-bold`}>{cost}</span>
             <img
-              src={`${import.meta.env.BASE_URL}candy.png`}
+              src={`${import.meta.env.BASE_URL}candy.webp`}
               alt="candy"
               className={`${candySize} inline-block group-hover:scale-110 transition-transform`}
               style={{imageRendering: 'pixelated'}}

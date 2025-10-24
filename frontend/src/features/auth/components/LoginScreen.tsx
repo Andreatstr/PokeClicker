@@ -31,6 +31,8 @@ const LOGIN_MUTATION = gql`
           speed
         }
         owned_pokemon_ids
+        favorite_pokemon_id
+        selected_pokemon_id
       }
     }
   }
@@ -54,6 +56,8 @@ const SIGNUP_MUTATION = gql`
           speed
         }
         owned_pokemon_ids
+        favorite_pokemon_id
+        selected_pokemon_id
       }
     }
   }
@@ -122,7 +126,7 @@ export function LoginScreen({onNavigate}: Props) {
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-0"
-        poster="/project2/loginBackground.png"
+        poster="/project2/loginBackground.webp"
       >
         <source src="/project2/loginBackgroundVideo.mp4" type="video/mp4" />
         Your browser does not support the video tag.

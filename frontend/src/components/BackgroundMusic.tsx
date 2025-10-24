@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 
 interface BackgroundMusicProps {
   isDarkMode?: boolean;
+  isButton?: boolean;
 }
 
 export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
@@ -66,12 +67,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
   if (isMinimized) {
     return (
       <div
-        className="fixed bottom-4 left-4 bg-background border-4 p-3"
+        className="fixed bottom-4 left-4 w-12 h-12 lg:w-auto lg:h-auto flex items-center justify-center p-2 lg:p-3 border-4 border-gray-300 dark:border-gray-600 rounded lg:rounded z-50"
         style={{
-          borderColor: 'var(--border)',
+          backgroundColor: 'var(--card)',
+          color: 'var(--foreground)',
           boxShadow: isDarkMode
             ? '8px 8px 0px 0px rgba(55,65,81,1)'
-            : '8px 8px 0px 0px rgba(0,0,0,1)',
+            : '8px 8px 0px 0px rgba(187,183,178,1)',
         }}
       >
         <audio ref={audioRef} loop>
@@ -84,7 +86,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
         <button
           onClick={toggleMinimize}
-          className="w-8 h-8 hover:opacity-70 transition-opacity"
+          className="w-8 h-8 hover:opacity-70 transition-opacity border-0 outline-none focus:outline-none"
           aria-label="Expand music controls"
         >
           <svg
@@ -105,12 +107,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
   return (
     <div
-      className="fixed bottom-4 left-4 flex items-center gap-2 bg-background border-4 p-3"
+      className="fixed bottom-4 left-4 lg:bottom-4 lg:left-4 flex items-center gap-2 p-3 border-4 border-gray-300 dark:border-gray-600 rounded z-50"
       style={{
-        borderColor: 'var(--border)',
+        backgroundColor: 'var(--card)',
+        color: 'var(--foreground)',
         boxShadow: isDarkMode
           ? '8px 8px 0px 0px rgba(55,65,81,1)'
-          : '8px 8px 0px 0px rgba(0,0,0,1)',
+          : '8px 8px 0px 0px rgba(187,183,178,1)',
       }}
     >
       <audio ref={audioRef} loop>
@@ -123,7 +126,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
       <button
         onClick={togglePlay}
-        className="w-8 h-8 hover:opacity-70 transition-opacity"
+        className="w-8 h-8 hover:opacity-70 transition-opacity border-0 outline-none focus:outline-none"
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
         <svg
@@ -146,7 +149,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       <button
         onClick={decreaseVolume}
         disabled={volume === 0}
-        className="w-8 h-8 hover:opacity-70 disabled:opacity-30 transition-opacity"
+        className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 outline-none focus:outline-none"
         aria-label="Decrease volume"
       >
         <svg
@@ -165,7 +168,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       <button
         onClick={increaseVolume}
         disabled={volume === 1}
-        className="w-8 h-8 hover:opacity-70 disabled:opacity-30 transition-opacity"
+        className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 outline-none focus:outline-none"
         aria-label="Increase volume"
       >
         <svg
@@ -181,7 +184,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         </svg>
       </button>
 
-      <div className="ml-2 w-12 h-1 bg-foreground/20 relative">
+      <div className="w-12 h-2 bg-foreground/20 relative rounded">
         <div
           className="absolute top-0 left-0 h-full bg-foreground transition-all"
           style={{width: `${volume * 100}%`}}
@@ -190,7 +193,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
       <button
         onClick={toggleMinimize}
-        className="w-8 h-8 hover:opacity-70 transition-opacity ml-2"
+        className="w-7 h-7 hover:opacity-70 transition-opacity border-0 outline-none focus:outline-none"
         aria-label="Minimize music controls"
       >
         <svg

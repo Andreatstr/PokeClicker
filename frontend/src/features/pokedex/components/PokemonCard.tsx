@@ -1,9 +1,11 @@
 import {type PokedexPokemon, usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import '@ui/pixelact/styles/patterns.css';
-import {useState, memo} from 'react';
+import {useState, memo, useEffect} from 'react';
 import {UnlockButton} from '@ui/pixelact';
 import {getTypeColors} from '../utils/typeColors';
+import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
+import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
@@ -105,7 +107,7 @@ function getContrastColor(bgColor: string): string {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
-  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.webp`;
 }
 
 export const PokemonCard = memo(function PokemonCard({
@@ -131,11 +133,34 @@ export const PokemonCard = memo(function PokemonCard({
         };
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
-    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [, setCachedSprite] = useState<HTMLImageElement | null>(null);
+  const [, setCachedBackground] = useState<HTMLImageElement | null>(null);
+
+  // Preload Pokemon sprite and type background
+  useEffect(() => {
+    const preloadAssets = async () => {
+      try {
+        if (pokemon.isOwned) {
+          // Preload Pokemon sprite
+          const sprite = await pokemonSpriteCache.getPokemonSprite(pokemon.id);
+          setCachedSprite(sprite);
+          
+          // Preload type background
+          const background = await typeBackgroundCache.getTypeBackground(primaryType);
+          setCachedBackground(background);
+        }
+      } catch (error) {
+        console.warn('Failed to preload Pokemon assets:', error);
+      }
+    };
+
+    preloadAssets();
+  }, [pokemon.id, pokemon.isOwned, primaryType]);
 
   const cost = getPokemonCost(pokemon.id);
 
