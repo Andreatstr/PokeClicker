@@ -1,5 +1,5 @@
-import type { User } from '@features/auth'
-import type { PokedexPokemon } from '@features/pokedex'
+import type {User} from '@features/auth';
+import type {PokedexPokemon} from '@features/pokedex';
 
 export const createMockUser = (overrides = {}): User => ({
   _id: '1',
@@ -16,7 +16,7 @@ export const createMockUser = (overrides = {}): User => ({
   },
   owned_pokemon_ids: [1, 2, 3],
   ...overrides,
-})
+});
 
 export const createMockPokemon = (overrides = {}): PokedexPokemon => ({
   id: 1,
@@ -38,10 +38,10 @@ export const createMockPokemon = (overrides = {}): PokedexPokemon => ({
   evolution: [2, 3],
   isOwned: false,
   ...overrides,
-})
+});
 
-export const createMockApolloResponse = (data: any) => ({
+export const createMockApolloResponse = <T>(data: T) => ({
   data,
   loading: false,
   error: undefined,
-})
+});

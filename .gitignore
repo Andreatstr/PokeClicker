@@ -39,3 +39,8 @@ CLAUDE.md
 # Test coverage files
 coverage/
 *.lcov
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/

@@ -1,11 +1,19 @@
-import { Suspense, lazy } from 'react';
-import { LoadingSpinner } from './LoadingSpinner';
-import { type PokedexPokemon } from '@features/pokedex';
+import {Suspense, lazy} from 'react';
+import {LoadingSpinner} from './LoadingSpinner';
+import {type PokedexPokemon} from '@features/pokedex';
 
 // Lazy load the heavy Pokedex components
-const SearchBar = lazy(() => import('@features/pokedex').then(module => ({ default: module.SearchBar })));
-const FiltersAndCount = lazy(() => import('@features/pokedex').then(module => ({ default: module.FiltersAndCount })));
-const PokemonCard = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonCard })));
+const SearchBar = lazy(() =>
+  import('@features/pokedex').then((module) => ({default: module.SearchBar}))
+);
+const FiltersAndCount = lazy(() =>
+  import('@features/pokedex').then((module) => ({
+    default: module.FiltersAndCount,
+  }))
+);
+const PokemonCard = lazy(() =>
+  import('@features/pokedex').then((module) => ({default: module.PokemonCard}))
+);
 
 interface LazyPokedexProps {
   // SearchBar props
@@ -51,7 +59,14 @@ export function LazyPokedex(props: LazyPokedexProps) {
   return (
     <>
       {/* Search Bar */}
-      <Suspense fallback={<LoadingSpinner message="Loading search..." isDarkMode={props.isDarkMode} />}>
+      <Suspense
+        fallback={
+          <LoadingSpinner
+            message="Loading search..."
+            isDarkMode={props.isDarkMode}
+          />
+        }
+      >
         <SearchBar
           searchTerm={props.searchTerm}
           setSearchTerm={props.setSearchTerm}
@@ -64,7 +79,14 @@ export function LazyPokedex(props: LazyPokedexProps) {
       </Suspense>
 
       {/* Filters and Count */}
-      <Suspense fallback={<LoadingSpinner message="Loading filters..." isDarkMode={props.isDarkMode} />}>
+      <Suspense
+        fallback={
+          <LoadingSpinner
+            message="Loading filters..."
+            isDarkMode={props.isDarkMode}
+          />
+        }
+      >
         <FiltersAndCount
           loading={props.loading}
           displayedPokemon={props.displayedPokemon}
@@ -94,7 +116,14 @@ export function LazyPokedex(props: LazyPokedexProps) {
 
       {/* Pokemon Grid */}
       <section className="max-w-[2000px] mx-auto">
-        <Suspense fallback={<LoadingSpinner message="Loading Pokemon..." isDarkMode={props.isDarkMode} />}>
+        <Suspense
+          fallback={
+            <LoadingSpinner
+              message="Loading Pokemon..."
+              isDarkMode={props.isDarkMode}
+            />
+          }
+        >
           <PokemonGrid
             displayedPokemon={props.displayedPokemon}
             handlePokemonClick={props.handlePokemonClick}
@@ -120,13 +149,24 @@ interface PokemonGridProps {
   loading: boolean;
 }
 
-function PokemonGrid({ displayedPokemon, handlePokemonClick, isDarkMode, ITEMS_PER_PAGE, hasMore, handleLoadMore, loading }: PokemonGridProps) {
+function PokemonGrid({
+  displayedPokemon,
+  handlePokemonClick,
+  isDarkMode,
+  ITEMS_PER_PAGE,
+  hasMore,
+  handleLoadMore,
+  loading,
+}: PokemonGridProps) {
   return (
     <>
       {displayedPokemon.length === 0 && !loading ? (
         <div className="text-center py-16">
           <p className="pixel-font text-xl">No Pokemon found</p>
-          <p className="pixel-font text-sm" style={{color: 'var(--muted-foreground)'}}>
+          <p
+            className="pixel-font text-sm"
+            style={{color: 'var(--muted-foreground)'}}
+          >
             Try a different search term
           </p>
         </div>

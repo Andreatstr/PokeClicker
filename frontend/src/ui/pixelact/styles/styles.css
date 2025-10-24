@@ -23,11 +23,7 @@
 }
 
 .pixel-font {
-  font-family:
-    'Press Start 2P',
-    'Courier New',
-    'Courier',
-    monospace;
+  font-family: 'Press Start 2P', 'Courier New', 'Courier', monospace;
   line-height: 1.5;
   letter-spacing: 0.5px;
   font-display: swap;

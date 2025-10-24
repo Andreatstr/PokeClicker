@@ -1,21 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook } from '@testing-library/react'
-import { usePokemonById } from '../usePokemonById'
+import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {renderHook} from '@testing-library/react';
+import {usePokemonById} from '../usePokemonById';
 
 // Mock Apollo Client useQuery
 vi.mock('@apollo/client', () => ({
   useQuery: vi.fn(),
   gql: vi.fn().mockReturnValue({}),
-}))
+}));
 
 // Get the mocked useQuery function
-const { useQuery } = await import('@apollo/client')
-const mockUseQuery = vi.mocked(useQuery)
+const {useQuery} = await import('@apollo/client');
+const mockUseQuery = vi.mocked(useQuery);
 
 describe('usePokemonById hook', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('should call useQuery with correct variables when id is provided', () => {
     const mockData = {
@@ -37,71 +37,71 @@ describe('usePokemonById hook', () => {
         abilities: ['overgrow', 'chlorophyll'],
         evolution: [2, 3],
       },
-    }
+    };
 
     mockUseQuery.mockReturnValue({
       data: mockData,
       loading: false,
       error: undefined,
-    })
+    });
 
-    renderHook(() => usePokemonById(1))
+    renderHook(() => usePokemonById(1));
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.any(Object), // POKEMON_BY_ID_QUERY
       {
-        variables: { id: 1 },
+        variables: {id: 1},
         skip: false,
       }
-    )
-  })
+    );
+  });
 
   it('should skip query when id is null', () => {
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: false,
       error: undefined,
-    })
+    });
 
-    renderHook(() => usePokemonById(null))
+    renderHook(() => usePokemonById(null));
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.any(Object), // POKEMON_BY_ID_QUERY
       {
-        variables: { id: null },
+        variables: {id: null},
         skip: true,
       }
-    )
-  })
+    );
+  });
 
   it('should handle loading state', () => {
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: true,
       error: undefined,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.loading).toBe(true)
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.error).toBeUndefined()
-  })
+    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.error).toBeUndefined();
+  });
 
   it('should handle error state', () => {
-    const mockError = new Error('Network error')
+    const mockError = new Error('Network error');
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: false,
       error: mockError,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.loading).toBe(false)
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.error).toBe(mockError)
-  })
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.error).toBe(mockError);
+  });
 
   it('should handle successful data fetch', () => {
     const mockPokemon = {
@@ -121,37 +121,37 @@ describe('usePokemonById hook', () => {
       weight: 6.9,
       abilities: ['overgrow', 'chlorophyll'],
       evolution: [2, 3],
-    }
+    };
 
-    const mockData = { pokemonById: mockPokemon }
+    const mockData = {pokemonById: mockPokemon};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
       loading: false,
       error: undefined,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.loading).toBe(false)
-    expect(result.current.error).toBeUndefined()
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeUndefined();
+  });
 
   it('should handle null Pokemon data', () => {
-    const mockData = { pokemonById: null }
+    const mockData = {pokemonById: null};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
       loading: false,
       error: undefined,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(999))
+    const {result} = renderHook(() => usePokemonById(999));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.data?.pokemonById).toBeNull()
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data?.pokemonById).toBeNull();
+  });
 
   it('should handle different Pokemon IDs', () => {
     const mockPokemon = {
@@ -171,26 +171,26 @@ describe('usePokemonById hook', () => {
       weight: 6.0,
       abilities: ['static', 'lightning-rod'],
       evolution: [26],
-    }
+    };
 
-    const mockData = { pokemonById: mockPokemon }
+    const mockData = {pokemonById: mockPokemon};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
       loading: false,
       error: undefined,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(25))
+    const {result} = renderHook(() => usePokemonById(25));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.data?.pokemonById?.id).toBe(25)
-    expect(result.current.data?.pokemonById?.name).toBe('pikachu')
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data?.pokemonById?.id).toBe(25);
+    expect(result.current.data?.pokemonById?.name).toBe('pikachu');
+  });
 
   it('should pass through all useQuery return values', () => {
-    const mockRefetch = vi.fn()
-    const mockNetworkStatus = 7
+    const mockRefetch = vi.fn();
+    const mockNetworkStatus = 7;
 
     mockUseQuery.mockReturnValue({
       data: undefined,
@@ -198,14 +198,14 @@ describe('usePokemonById hook', () => {
       error: undefined,
       refetch: mockRefetch,
       networkStatus: mockNetworkStatus,
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.loading).toBe(true)
-    expect(result.current.error).toBeUndefined()
-    expect(result.current.refetch).toBe(mockRefetch)
-    expect(result.current.networkStatus).toBe(mockNetworkStatus)
-  })
-})
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.refetch).toBe(mockRefetch);
+    expect(result.current.networkStatus).toBe(mockNetworkStatus);
+  });
+});

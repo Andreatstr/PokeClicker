@@ -1,14 +1,24 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
+import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {
-  usePokedexQuery,
-  type PokedexPokemon,
-} from '@features/pokedex';
-import {Navbar, BackgroundMusic, LoadingSpinner, LazyPokedex} from '@/components';
+  Navbar,
+  BackgroundMusic,
+  LoadingSpinner,
+  LazyPokedex,
+} from '@/components';
 
 // Lazy load heavy components
-const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
-const LoginScreen = lazy(() => import('@features/auth').then(module => ({ default: module.LoginScreen })));
-const PokemonDetailModal = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonDetailModal })));
+const PokeClicker = lazy(() =>
+  import('@features/clicker').then((module) => ({default: module.PokeClicker}))
+);
+const LoginScreen = lazy(() =>
+  import('@features/auth').then((module) => ({default: module.LoginScreen}))
+);
+const PokemonDetailModal = lazy(() =>
+  import('@features/pokedex').then((module) => ({
+    default: module.PokemonDetailModal,
+  }))
+);
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -154,7 +164,14 @@ function App() {
         onToggleTheme={toggleTheme}
       />
       {currentPage === 'login' ? (
-        <Suspense fallback={<LoadingSpinner message="Loading login..." isDarkMode={isDarkMode} />}>
+        <Suspense
+          fallback={
+            <LoadingSpinner
+              message="Loading login..."
+              isDarkMode={isDarkMode}
+            />
+          }
+        >
           <LoginScreen onNavigate={setCurrentPage} />
         </Suspense>
       ) : (
@@ -165,7 +182,14 @@ function App() {
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
-                <Suspense fallback={<LoadingSpinner message="Loading clicker game..." isDarkMode={isDarkMode} />}>
+                <Suspense
+                  fallback={
+                    <LoadingSpinner
+                      message="Loading clicker game..."
+                      isDarkMode={isDarkMode}
+                    />
+                  }
+                >
                   <PokeClicker isDarkMode={isDarkMode} />
                 </Suspense>
               </section>
@@ -176,7 +200,10 @@ function App() {
                     <p className="pixel-font text-xl text-red-600">
                       Error loading Pokémon
                     </p>
-                    <p className="pixel-font text-sm" style={{color: 'var(--muted-foreground)'}}>
+                    <p
+                      className="pixel-font text-sm"
+                      style={{color: 'var(--muted-foreground)'}}
+                    >
                       {error.message}
                     </p>
                   </div>
@@ -190,7 +217,6 @@ function App() {
                     showMobileFilters={showMobileFilters}
                     setShowMobileFilters={setShowMobileFilters}
                     isDarkMode={isDarkMode}
-                    
                     // FiltersAndCount props
                     loading={loading}
                     displayedPokemon={displayedPokemon}
@@ -212,7 +238,6 @@ function App() {
                     setTempSortBy={setTempSortBy}
                     setTempSortOrder={setTempSortOrder}
                     handleClearFilters={handleClearFilters}
-                    
                     // PokemonCard props
                     handlePokemonClick={handlePokemonClick}
                     displayedCount={displayedCount}
@@ -226,7 +251,14 @@ function App() {
           </main>
 
           {isModalOpen && (
-            <Suspense fallback={<LoadingSpinner message="Loading Pokemon details..." isDarkMode={isDarkMode} />}>
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading Pokemon details..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
                 isOpen={isModalOpen}
