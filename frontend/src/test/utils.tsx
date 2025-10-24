@@ -1,22 +1,21 @@
-import { render } from '@testing-library/react'
-import { ApolloProvider } from '@apollo/client'
-import { AuthProvider } from '@features/auth'
-import { apolloClient } from '@lib/apolloClient'
+import {render as rtlRender, type RenderOptions} from '@testing-library/react';
+import {ApolloProvider} from '@apollo/client';
+import {AuthProvider} from '@features/auth';
+import {apolloClient} from '@lib/apolloClient';
 
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+function AllTheProviders({children}: {children: React.ReactNode}) {
   return (
     <AuthProvider>
-      <ApolloProvider client={apolloClient}>
-        {children}
-      </ApolloProvider>
+      <ApolloProvider client={apolloClient}>{children}</ApolloProvider>
     </AuthProvider>
-  )
+  );
 }
 
-const customRender = (
+export function render(
   ui: React.ReactElement,
-  options?: any
-) => render(ui, { wrapper: AllTheProviders, ...options })
+  options?: Omit<RenderOptions, 'wrapper'>
+) {
+  return rtlRender(ui, {wrapper: AllTheProviders, ...options});
+}
 
-export * from '@testing-library/react'
-export { customRender as render }
+export * from '@testing-library/react';

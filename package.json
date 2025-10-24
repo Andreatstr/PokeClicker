@@ -14,13 +14,19 @@
     "preview:frontend": "cd frontend && npm run preview",
     "lint": "npm run lint:frontend && npm run lint:backend",
     "lint:frontend": "cd frontend && npm run lint",
-    "lint:backend": "cd backend && npm run lint"
+    "lint:backend": "cd backend && npm run lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "workspaces": [
     "frontend",
     "backend"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "concurrently": "^8.2.2",
     "vitest": "^4.0.2"
   }
