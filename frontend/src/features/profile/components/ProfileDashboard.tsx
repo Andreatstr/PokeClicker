@@ -19,6 +19,15 @@ const SET_FAVORITE_POKEMON = gql`
   }
 `;
 
+const SET_SELECTED_POKEMON = gql`
+  mutation SetSelectedPokemon($pokemonId: Int) {
+    setSelectedPokemon(pokemonId: $pokemonId) {
+      _id
+      selected_pokemon_id
+    }
+  }
+`;
+
 const GET_POKEMON_BY_ID = gql`
   query GetPokemonById($id: Int!) {
     pokemonById(id: $id) {
@@ -39,12 +48,19 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
   const {user, logout, updateUser} = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
+  const [showSelectedSelector, setShowSelectedSelector] = useState(false);
   const [deleteUser, {loading: deleting}] = useMutation(DELETE_USER);
   const [setFavoritePokemon] = useMutation(SET_FAVORITE_POKEMON);
+  const [setSelectedPokemon] = useMutation(SET_SELECTED_POKEMON);
 
   const {data: favoritePokemonData} = useQuery(GET_POKEMON_BY_ID, {
     variables: {id: user?.favorite_pokemon_id},
     skip: !user?.favorite_pokemon_id,
+  });
+
+  const {data: selectedPokemonData} = useQuery(GET_POKEMON_BY_ID, {
+    variables: {id: user?.selected_pokemon_id},
+    skip: !user?.selected_pokemon_id,
   });
 
   if (!user) {
@@ -70,17 +86,41 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
 
   const handleSetFavorite = async (pokemonId: number | null) => {
     try {
+      console.log('Setting favorite Pokemon:', pokemonId);
       const result = await setFavoritePokemon({variables: {pokemonId}});
+      console.log('Favorite mutation result:', result);
       if (result.data?.setFavoritePokemon) {
-        updateUser({
+        const updatedUser = {
           ...user,
           favorite_pokemon_id: result.data.setFavoritePokemon.favorite_pokemon_id,
-        });
+        };
+        console.log('Updating user with:', updatedUser);
+        updateUser(updatedUser);
       }
       setShowFavoriteSelector(false);
     } catch (error) {
       console.error('Failed to set favorite Pokemon:', error);
       alert('Failed to set favorite Pokemon. Please try again.');
+    }
+  };
+
+  const handleSetSelected = async (pokemonId: number | null) => {
+    try {
+      console.log('Setting selected Pokemon:', pokemonId);
+      const result = await setSelectedPokemon({variables: {pokemonId}});
+      console.log('Selected mutation result:', result);
+      if (result.data?.setSelectedPokemon) {
+        const updatedUser = {
+          ...user,
+          selected_pokemon_id: result.data.setSelectedPokemon.selected_pokemon_id,
+        };
+        console.log('Updating user with:', updatedUser);
+        updateUser(updatedUser);
+      }
+      setShowSelectedSelector(false);
+    } catch (error) {
+      console.error('Failed to set selected Pokemon:', error);
+      alert('Failed to set selected Pokemon. Please try again.');
     }
   };
 
@@ -150,6 +190,53 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
                 opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
               }}
               title={user.owned_pokemon_ids.length === 0 ? 'Catch a Pokemon first!' : 'Click to select favorite'}
+            >
+              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0" style={{color: isDarkMode ? '#666' : '#999'}}>
+                ?
+              </div>
+              <p className="text-sm sm:text-base font-bold text-left flex-1" style={{color: isDarkMode ? '#666' : '#999'}}>
+                None
+              </p>
+            </button>
+          )}
+        </div>
+
+        {/* Clicker Pokemon Section */}
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+          <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
+
+          {selectedPokemonData?.pokemonById ? (
+            <button
+              onClick={() => setShowSelectedSelector(true)}
+              className="px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
+              }}
+              title="Click to change clicker Pokemon"
+            >
+              <img
+                src={selectedPokemonData.pokemonById.sprite}
+                alt={selectedPokemonData.pokemonById.name}
+                className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
+                style={{imageRendering: 'pixelated'}}
+              />
+              <p className="text-sm sm:text-base capitalize font-bold text-left flex-1">
+                {selectedPokemonData.pokemonById.name}
+              </p>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowSelectedSelector(true)}
+              disabled={user.owned_pokemon_ids.length === 0}
+              className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: user.owned_pokemon_ids.length === 0 ? '#555' : (isDarkMode ? '#2a2a2a' : '#f5f1e8'),
+                cursor: user.owned_pokemon_ids.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
+              }}
+              title={user.owned_pokemon_ids.length === 0 ? 'Catch a Pokemon first!' : 'Click to select clicker Pokemon'}
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0" style={{color: isDarkMode ? '#666' : '#999'}}>
                 ?
@@ -238,6 +325,14 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         isOpen={showFavoriteSelector}
         onClose={() => setShowFavoriteSelector(false)}
         onSelect={handleSetFavorite}
+        ownedPokemonIds={user.owned_pokemon_ids}
+        isDarkMode={isDarkMode}
+      />
+
+      <FavoritePokemonSelector
+        isOpen={showSelectedSelector}
+        onClose={() => setShowSelectedSelector(false)}
+        onSelect={handleSetSelected}
         ownedPokemonIds={user.owned_pokemon_ids}
         isDarkMode={isDarkMode}
       />

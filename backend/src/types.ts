@@ -29,6 +29,7 @@ export interface UserStats {
   };
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number;
+  selected_pokemon_id?: number;
 }
 
 export interface UserDocument extends UserStats {

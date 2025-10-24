@@ -24,6 +24,7 @@ function sanitizeUserForClient(userDoc: UserDocument) {
     stats: userDoc.stats,
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
+    selected_pokemon_id: userDoc.selected_pokemon_id,
   };
 }
 
@@ -468,6 +469,60 @@ export const resolvers = {
 
         if (!result) {
           throw new Error('Failed to unset favorite Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      }
+    },
+
+    // Set selected Pokemon for clicker
+    setSelectedPokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId?: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // If pokemonId is provided, verify user owns it
+      if (pokemonId !== null && pokemonId !== undefined) {
+        if (
+          !userDoc.owned_pokemon_ids ||
+          !userDoc.owned_pokemon_ids.includes(pokemonId)
+        ) {
+          throw new Error('You must own this Pokémon to select it for clicker');
+        }
+
+        // Set selected Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$set: {selected_pokemon_id: pokemonId}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to set selected Pokémon');
+        }
+
+        return sanitizeUserForClient(result);
+      } else {
+        // Unset selected Pokemon
+        const result = await users.findOneAndUpdate(
+          {_id: new ObjectId(user.id)},
+          {$unset: {selected_pokemon_id: ''}},
+          {returnDocument: 'after'}
+        );
+
+        if (!result) {
+          throw new Error('Failed to unset selected Pokémon');
         }
 
         return sanitizeUserForClient(result);

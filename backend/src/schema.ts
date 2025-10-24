@@ -35,6 +35,7 @@ export const typeDefs = `#graphql
     stats: UserStats!
     owned_pokemon_ids: [Int!]!
     favorite_pokemon_id: Int
+    selected_pokemon_id: Int
   }
 
 	type UserStats {
@@ -59,6 +60,7 @@ export const typeDefs = `#graphql
     purchasePokemon(pokemonId: Int!): User!
     deleteUser: Boolean!
     setFavoritePokemon(pokemonId: Int): User!
+    setSelectedPokemon(pokemonId: Int): User!
   }
 
   type Pokemon {
