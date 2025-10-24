@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Tile Splitter</title>
+</head>
+<body>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="status">Loading...</div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        
+        const TILE_SIZE = 256;
+        const MAP_WIDTH = 10560;
+        const MAP_HEIGHT = 6080;
+        const TILES_X = Math.ceil(MAP_WIDTH / TILE_SIZE);
+        const TILES_Y = Math.ceil(MAP_HEIGHT / TILE_SIZE);
+        
+        console.log(`Will create ${TILES_X}x${TILES_Y} tiles (${TILES_X * TILES_Y} total)`);
+        
+        // Load the map image
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            canvas.width = TILE_SIZE;
+            canvas.height = TILE_SIZE;
+            
+            let tilesCreated = 0;
+            const totalTiles = TILES_X * TILES_Y;
+            
+            for (let y = 0; y < TILES_Y; y++) {
+                for (let x = 0; x < TILES_X; x++) {
+                    const sourceX = x * TILE_SIZE;
+                    const sourceY = y * TILE_SIZE;
+                    const sourceWidth = Math.min(TILE_SIZE, MAP_WIDTH - sourceX);
+                    const sourceHeight = Math.min(TILE_SIZE, MAP_HEIGHT - sourceY);
+                    
+                    // Clear canvas
+                    ctx.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
+                    
+                    // Draw the tile portion
+                    ctx.drawImage(
+                        img,
+                        sourceX, sourceY, sourceWidth, sourceHeight,
+                        0, 0, sourceWidth, sourceHeight
+                    );
+                    
+                    // Convert to blob and download
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `tile_${x}_${y}.webp`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        
+                        tilesCreated++;
+                        status.textContent = `Created ${tilesCreated}/${totalTiles} tiles`;
+                        
+                        if (tilesCreated === totalTiles) {
+                            status.textContent = `Done! Created ${totalTiles} tiles.`;
+                        }
+                    }, 'image/webp', 0.85);
+                }
+            }
+        };
+        
+        img.src = './map.webp';
+    </script>
+</body>
+</html>

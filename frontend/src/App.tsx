@@ -3,13 +3,14 @@ import {
   usePokedexQuery,
   type PokedexPokemon,
 } from '@features/pokedex';
-import {Navbar, BackgroundMusic, LoadingSpinner, LazyPokedex} from '@/components';
+import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
 
 // Lazy load heavy components
 const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
 const LoginScreen = lazy(() => import('@features/auth').then(module => ({ default: module.LoginScreen })));
 const PokemonDetailModal = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonDetailModal })));
 import {PokemonMap} from '@features/map';
+import {BackgroundMusic} from '@components/BackgroundMusic';
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -252,7 +253,9 @@ function App() {
           )}
         </>
       )}
-      <BackgroundMusic isDarkMode={isDarkMode} />
+      <div className="relative">
+        <BackgroundMusic isDarkMode={isDarkMode} />
+      </div>
     </>
   );
 }

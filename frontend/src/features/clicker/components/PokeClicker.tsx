@@ -330,7 +330,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                 aria-label="Click Charizard to earn rare candy"
                 disabled={!isAuthenticated}
                 style={{
-                  backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.png')`,
+                  backgroundImage: `url('${import.meta.env.BASE_URL}pokemon-bg.webp')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   imageRendering: 'pixelated',
@@ -349,7 +349,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                     }}
                   >
                     <img
-                      src={`${import.meta.env.BASE_URL}candy.png`}
+                      src={`${import.meta.env.BASE_URL}candy.webp`}
                       alt="candy"
                       className="w-8 h-8"
                       style={{imageRendering: 'pixelated'}}

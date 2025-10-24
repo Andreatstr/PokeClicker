@@ -38,7 +38,7 @@ function getPokemonCost(pokemonId: number): number {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
-  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.webp`;
 }
 
 function EvolutionPokemon({
@@ -117,7 +117,7 @@ export function PokemonDetailModal({
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
-    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
   const statColors = getStatBarColors(isDarkMode);

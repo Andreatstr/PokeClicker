@@ -105,7 +105,7 @@ function getContrastColor(bgColor: string): string {
 
 function getBackgroundImageUrl(types: string[]): string {
   const primaryType = types[0];
-  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.png`;
+  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.webp`;
 }
 
 export const PokemonCard = memo(function PokemonCard({
@@ -131,7 +131,7 @@ export const PokemonCard = memo(function PokemonCard({
         };
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
-    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.png`;
+    : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
