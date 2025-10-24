@@ -223,7 +223,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   const isLoading = loading;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+    <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
       {/* Display errors */}
       {displayError && (
         <div

@@ -86,15 +86,12 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
 
   const handleSetFavorite = async (pokemonId: number | null) => {
     try {
-      console.log('Setting favorite Pokemon:', pokemonId);
       const result = await setFavoritePokemon({variables: {pokemonId}});
-      console.log('Favorite mutation result:', result);
       if (result.data?.setFavoritePokemon) {
         const updatedUser = {
           ...user,
           favorite_pokemon_id: result.data.setFavoritePokemon.favorite_pokemon_id,
         };
-        console.log('Updating user with:', updatedUser);
         updateUser(updatedUser);
       }
       setShowFavoriteSelector(false);
@@ -106,15 +103,12 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
 
   const handleSetSelected = async (pokemonId: number | null) => {
     try {
-      console.log('Setting selected Pokemon:', pokemonId);
       const result = await setSelectedPokemon({variables: {pokemonId}});
-      console.log('Selected mutation result:', result);
       if (result.data?.setSelectedPokemon) {
         const updatedUser = {
           ...user,
           selected_pokemon_id: result.data.setSelectedPokemon.selected_pokemon_id,
         };
-        console.log('Updating user with:', updatedUser);
         updateUser(updatedUser);
       }
       setShowSelectedSelector(false);
