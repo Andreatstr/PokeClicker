@@ -12,7 +12,7 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.CI ? 'http://localhost:5126' : 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -41,17 +41,18 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'cd backend && pnpm run dev',
-      url: 'http://localhost:3001',
+      command: 'cd backend && PORT=3026 pnpm run dev',
+      url: 'http://localhost:3026',
       reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
         RATE_LIMIT_MAX_REQUESTS: '99999',
+        PORT: '3026',
       },
     },
     {
-      command: 'cd frontend && pnpm run dev',
-      url: 'http://localhost:5173',
+      command: 'cd frontend && pnpm run dev --port 5126',
+      url: 'http://localhost:5126',
       reuseExistingServer: true,
       timeout: 120 * 1000,
     },
