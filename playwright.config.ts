@@ -46,8 +46,11 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
-        RATE_LIMIT_MAX_REQUESTS: '99999',
         PORT: '3026',
+        RATE_LIMIT_MAX_REQUESTS: '99999',
+        JWT_SECRET: process.env.JWT_SECRET || 'test-secret-for-e2e-only',
+        MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017',
+        MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || 'pokeclicker_db',
       },
     },
     {
