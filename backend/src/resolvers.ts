@@ -397,5 +397,26 @@ export const resolvers = {
 
       return sanitizeUserForClient(result);
     },
+
+    // Delete user account
+    deleteUser: async (
+      _: unknown,
+      __: unknown,
+      context: AuthContext
+    ): Promise<boolean> => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Delete the user
+      const result = await users.deleteOne({_id: new ObjectId(user.id)});
+
+      if (result.deletedCount === 0) {
+        throw new Error('User not found or already deleted');
+      }
+
+      return true;
+    },
   },
 };

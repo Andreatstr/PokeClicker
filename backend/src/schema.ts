@@ -56,6 +56,7 @@ export const typeDefs = `#graphql
     updateRareCandy(amount: Int!): User!
     upgradeStat(stat: String!): User!
     purchasePokemon(pokemonId: Int!): User!
+    deleteUser: Boolean!
   }
 
   type Pokemon {
