@@ -14,7 +14,20 @@ const SET_FAVORITE_POKEMON = gql`
   mutation SetFavoritePokemon($pokemonId: Int) {
     setFavoritePokemon(pokemonId: $pokemonId) {
       _id
+      username
+      rare_candy
+      created_at
+      stats {
+        hp
+        attack
+        defense
+        spAttack
+        spDefense
+        speed
+      }
+      owned_pokemon_ids
       favorite_pokemon_id
+      selected_pokemon_id
     }
   }
 `;
@@ -23,6 +36,19 @@ const SET_SELECTED_POKEMON = gql`
   mutation SetSelectedPokemon($pokemonId: Int) {
     setSelectedPokemon(pokemonId: $pokemonId) {
       _id
+      username
+      rare_candy
+      created_at
+      stats {
+        hp
+        attack
+        defense
+        spAttack
+        spDefense
+        speed
+      }
+      owned_pokemon_ids
+      favorite_pokemon_id
       selected_pokemon_id
     }
   }
@@ -88,11 +114,7 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
     try {
       const result = await setFavoritePokemon({variables: {pokemonId}});
       if (result.data?.setFavoritePokemon) {
-        const updatedUser = {
-          ...user,
-          favorite_pokemon_id: result.data.setFavoritePokemon.favorite_pokemon_id,
-        };
-        updateUser(updatedUser);
+        updateUser(result.data.setFavoritePokemon);
       }
       setShowFavoriteSelector(false);
     } catch (error) {
@@ -105,11 +127,7 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
     try {
       const result = await setSelectedPokemon({variables: {pokemonId}});
       if (result.data?.setSelectedPokemon) {
-        const updatedUser = {
-          ...user,
-          selected_pokemon_id: result.data.setSelectedPokemon.selected_pokemon_id,
-        };
-        updateUser(updatedUser);
+        updateUser(result.data.setSelectedPokemon);
       }
       setShowSelectedSelector(false);
     } catch (error) {
@@ -133,7 +151,7 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">TRAINER PROFILE</h1>
 
         {/* User Info Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
           <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER INFO</h2>
           <div className="space-y-2 text-sm sm:text-base">
             <p className="break-words">
@@ -145,11 +163,54 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
             <p>
               <strong>POKEMON OWNED:</strong> {user.owned_pokemon_ids.length}
             </p>
+            <p>
+              <strong>TRAINER SINCE:</strong>{' '}
+              {(() => {
+                try {
+                  const date = new Date(user.created_at);
+                  if (isNaN(date.getTime())) return 'Unknown';
+                  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                } catch {
+                  return 'Unknown';
+                }
+              })()}
+            </p>
+          </div>
+        </div>
+
+        {/* Game Statistics Section */}
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+          <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER STATS</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">HP</span>
+              <span className="font-bold">{user.stats.hp}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">ATTACK</span>
+              <span className="font-bold">{user.stats.attack}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">DEFENSE</span>
+              <span className="font-bold">{user.stats.defense}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">SP. ATK</span>
+              <span className="font-bold">{user.stats.spAttack}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">SP. DEF</span>
+              <span className="font-bold">{user.stats.spDefense}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs opacity-70">SPEED</span>
+              <span className="font-bold">{user.stats.speed}</span>
+            </div>
           </div>
         </div>
 
         {/* Favorite Pokemon Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
           <h2 className="text-lg sm:text-xl font-bold">FAVORITE</h2>
 
           {favoritePokemonData?.pokemonById ? (
@@ -196,7 +257,7 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         </div>
 
         {/* Clicker Pokemon Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
           <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
 
           {selectedPokemonData?.pokemonById ? (

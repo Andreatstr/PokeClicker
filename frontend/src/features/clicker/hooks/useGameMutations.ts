@@ -7,6 +7,7 @@ const UPDATE_RARE_CANDY = gql`
       _id
       username
       rare_candy
+      created_at
       stats {
         hp
         attack
@@ -28,6 +29,7 @@ const UPGRADE_STAT = gql`
       _id
       username
       rare_candy
+      created_at
       stats {
         hp
         attack

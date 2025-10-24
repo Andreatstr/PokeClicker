@@ -15,12 +15,12 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
-function sanitizeUserForClient(userDoc: UserDocument) {
+function sanitizeUserForClient(userDoc: UserDocument): Omit<UserDocument, 'password_hash' | 'created_at'> & { created_at: string } {
   return {
     _id: userDoc._id,
     username: userDoc.username,
     rare_candy: userDoc.rare_candy ?? 0,
-    created_at: userDoc.created_at,
+    created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: userDoc.stats,
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
