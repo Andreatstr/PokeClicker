@@ -2,6 +2,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {Button, Card} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 import {useGameMutations} from '@features/clicker';
+import {gameAssetsCache} from '@/lib/gameAssetsCache';
 
 interface Candy {
   id: number;
@@ -29,6 +30,39 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       speed: 1,
     }
   );
+  const [cachedAssets, setCachedAssets] = useState<{
+    charizard?: HTMLImageElement;
+    candy?: HTMLImageElement;
+    rareCandy?: HTMLImageElement;
+    pokemonBg?: HTMLImageElement;
+  }>({});
+
+  // Preload game assets
+  useEffect(() => {
+    const preloadAssets = async () => {
+      try {
+        await gameAssetsCache.preloadClickerAssets();
+        
+        const [charizard, candy, rareCandy, pokemonBg] = await Promise.all([
+          gameAssetsCache.getCharizardSprite(),
+          gameAssetsCache.getCandyImage(),
+          gameAssetsCache.getRareCandyIcon(),
+          gameAssetsCache.getPokemonBackground(),
+        ]);
+
+        setCachedAssets({
+          charizard,
+          candy,
+          rareCandy,
+          pokemonBg,
+        });
+      } catch (error) {
+        console.warn('Failed to preload game assets:', error);
+      }
+    };
+
+    preloadAssets();
+  }, []);
 
   // Batching state
   const [pendingCandyAmount, setPendingCandyAmount] = useState(0);

@@ -9,7 +9,11 @@ import {usePokemonSpawning} from '../hooks/usePokemonSpawning';
 // Default viewport dimensions (overridden responsively below). Use 16:9 to be wider/less tall.
 const DEFAULT_VIEWPORT = {width: 720, height: 405};
 
-export function PokemonMap() {
+interface PokemonMapProps {
+  isDarkMode?: boolean;
+}
+
+export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   const {user, isAuthenticated} = useAuth();
 
   // Responsive viewport for fitting GameBoy on mobile and web
@@ -132,6 +136,7 @@ export function PokemonMap() {
           user={user}
           collisionMapLoaded={collisionMap.collisionMapLoaded}
           viewportSize={renderSize}
+          isDarkMode={isDarkMode}
         />
       </div>
     </GameBoy>

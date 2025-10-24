@@ -4,6 +4,7 @@ import {
   type PokedexPokemon,
 } from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
+import {preloadService} from '@/lib/preloadService';
 
 // Lazy load heavy components
 const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
@@ -45,6 +46,39 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Initialize preloading service
+  useEffect(() => {
+    const initializePreloading = async () => {
+      try {
+        // Preload based on current page
+        switch (currentPage) {
+          case 'pokedex':
+            await preloadService.preloadForPokedex();
+            break;
+          case 'clicker':
+            await preloadService.preloadForClicker();
+            break;
+          case 'map':
+            await preloadService.preloadForMap();
+            break;
+          default:
+            // Preload common assets for login screen
+            await preloadService.preloadAll({
+              preloadCommonPokemon: true,
+              preloadCommonTypes: true,
+              preloadGameAssets: true,
+              preloadMapAssets: false,
+            });
+        }
+      } catch (error) {
+        console.warn('Failed to initialize preloading:', error);
+      }
+    };
+
+    initializePreloading();
+  }, [currentPage]);
+
   const [displayedCount, setDisplayedCount] = useState(20);
 
   const ITEMS_PER_PAGE = 20;
@@ -173,7 +207,7 @@ function App() {
               </section>
             ) : currentPage === 'map' ? (
               <section className="py-8">
-                <PokemonMap />
+                <PokemonMap isDarkMode={isDarkMode} />
               </section>
             ) : (
               <>

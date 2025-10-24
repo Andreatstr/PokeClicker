@@ -23,6 +23,7 @@ interface MapViewProps {
   worldPosition: {x: number; y: number};
   user: any;
   collisionMapLoaded: boolean;
+  isDarkMode?: boolean;
 }
 
 export function MapView({
@@ -34,6 +35,7 @@ export function MapView({
   worldPosition,
   user,
   collisionMapLoaded,
+  isDarkMode = false,
 }: MapViewProps) {
   return (
     <>
@@ -96,7 +98,13 @@ export function MapView({
           role="dialog"
           aria-live="polite"
         >
-          <div className="bg-white/95 border-4 border-black shadow-[6px_6px_0_rgba(0,0,0,1)] px-2 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3 rounded-sm">
+          <div 
+            className={`border-4 shadow-[6px_6px_0_rgba(0,0,0,1)] px-2 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3 rounded-sm ${
+              isDarkMode 
+                ? 'bg-gray-800/95 border-gray-600 text-white' 
+                : 'bg-white/95 border-black text-black'
+            }`}
+          >
             <img
               src={nearbyPokemon.pokemon.sprite}
               alt={nearbyPokemon.pokemon.name}
@@ -107,7 +115,11 @@ export function MapView({
               {nearbyPokemon.pokemon.name} nearby!
             </span>
             <button
-              className="ml-auto bg-red-600 hover:bg-red-700 text-white px-2 py-1 md:px-3 md:py-1.5 pixel-font text-xs md:text-sm border-2 border-black rounded"
+              className={`ml-auto text-white px-2 py-1 md:px-3 md:py-1.5 pixel-font text-xs md:text-sm border-2 rounded ${
+                isDarkMode
+                  ? 'bg-red-700 hover:bg-red-800 border-gray-600'
+                  : 'bg-red-600 hover:bg-red-700 border-black'
+              }`}
               onClick={() => {
                 // Placeholder action for now
                 console.log('Battle start with', nearbyPokemon.pokemon.name);
