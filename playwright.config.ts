@@ -41,7 +41,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'cd backend && PORT=3026 pnpm run dev',
+      command: 'cd backend && PORT=3026 npm run dev',
       url: 'http://localhost:3026',
       reuseExistingServer: true,
       timeout: 120 * 1000,
@@ -51,7 +51,7 @@ export default defineConfig({
       },
     },
     {
-      command: 'cd frontend && pnpm run dev --port 5126',
+      command: 'cd frontend && npm run dev -- --port 5126',
       url: 'http://localhost:5126',
       reuseExistingServer: true,
       timeout: 120 * 1000,
