@@ -31,16 +31,31 @@ interface TileCache {
   };
 }
 
+interface PokemonSpawn {
+  pokemon: any;
+  x: number;
+  y: number;
+}
+
+interface VisiblePokemon {
+  pokemon: any;
+  screenX: number;
+  screenY: number;
+}
+
 interface TileRendererState {
   visibleTiles: VisibleTile[];
+  visiblePokemon: VisiblePokemon[];
   isLoading: boolean;
 }
 
 export function useTileRenderer(
   camera: {x: number; y: number},
-  viewportSize: {width: number; height: number}
+  viewportSize: {width: number; height: number},
+  wildPokemon: PokemonSpawn[] = []
 ): TileRendererState {
   const [visibleTiles, setVisibleTiles] = useState<VisibleTile[]>([]);
+  const [visiblePokemon, setVisiblePokemon] = useState<VisiblePokemon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const loadingQueueRef = useRef<Set<string>>(new Set());
   const cacheRef = useRef<TileCache>({});
@@ -183,6 +198,14 @@ export function useTileRenderer(
 
       setVisibleTiles(newTiles);
 
+      // Calculate visible Pokemon positions (same render cycle as tiles)
+      const newPokemon: VisiblePokemon[] = wildPokemon.map(pokemon => ({
+        pokemon: pokemon.pokemon,
+        screenX: pokemon.x - camera.x,
+        screenY: pokemon.y - camera.y
+      }));
+      setVisiblePokemon(newPokemon);
+
       // Load tiles that aren't cached (non-blocking)
       const tilesToLoad = newTiles.filter(tile => !tile.loaded);
 
@@ -272,6 +295,7 @@ export function useTileRenderer(
 
   return {
     visibleTiles,
+    visiblePokemon,
     isLoading
   };
 }

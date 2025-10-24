@@ -1,8 +1,5 @@
-import React, {useState, useEffect} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
-import {gameAssetsCache} from '@/lib/gameAssetsCache';
-import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 
 // Constants
 const SPRITE_WIDTH = 68;
@@ -41,7 +38,7 @@ export function TiledMapView({
   viewportSize,
   isDarkMode = false,
 }: TiledMapViewProps) {
-  const {visibleTiles, isLoading} = useTileRenderer(camera, viewportSize);
+  const {visibleTiles, visiblePokemon, isLoading} = useTileRenderer(camera, viewportSize, wildPokemon);
 
   return (
     <>
@@ -69,6 +66,26 @@ export function TiledMapView({
             />
           );
         })}
+        
+        {/* Wild Pokemon - positioned absolutely on the map */}
+        {visiblePokemon.map((visiblePoke, index) => (
+          <img
+            key={`${visiblePoke.pokemon.id}-${index}`}
+            src={visiblePoke.pokemon.sprite}
+            alt={visiblePoke.pokemon.name}
+            className="absolute transition-none"
+            style={{
+              left: `${visiblePoke.screenX - 24}px`, // Pre-calculated screen coordinates
+              top: `${visiblePoke.screenY - 24}px`,
+              width: '48px',
+              height: '48px',
+              imageRendering: 'pixelated',
+              pointerEvents: 'none',
+              zIndex: 5, // Above tiles but below character
+            }}
+            title={visiblePoke.pokemon.name}
+          />
+        ))}
       </div>
 
       {/* Optional subtle loading indicator (non-blocking) */}
@@ -78,26 +95,6 @@ export function TiledMapView({
         </div>
       )}
 
-      {/* Wild Pokemon - positioned in world coordinates */}
-      <div className="absolute inset-0 pointer-events-none">
-        {wildPokemon.map((wildPoke, index) => (
-          <img
-            key={`${wildPoke.pokemon.id}-${index}`}
-            src={wildPoke.pokemon.sprite}
-            alt={wildPoke.pokemon.name}
-            className="absolute"
-            style={{
-              left: `${wildPoke.x - camera.x - 24}px`,
-              top: `${wildPoke.y - camera.y - 24}px`,
-              width: '48px',
-              height: '48px',
-              imageRendering: 'pixelated',
-              pointerEvents: 'none',
-            }}
-            title={wildPoke.pokemon.name}
-          />
-        ))}
-      </div>
 
       {/* Character Sprite - stays centered in viewport */}
       <div
