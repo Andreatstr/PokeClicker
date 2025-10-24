@@ -3,8 +3,8 @@ import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
 interface NavbarProps {
-  currentPage: 'clicker' | 'pokedex' | 'login';
-  onPageChange: (page: 'clicker' | 'pokedex' | 'login') => void;
+  currentPage: 'clicker' | 'pokedex' | 'login' | 'profile';
+  onPageChange: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -16,7 +16,7 @@ export function Navbar({
   onToggleTheme,
 }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const {isAuthenticated, logout, user} = useAuth();
+  const {isAuthenticated, user} = useAuth();
 
   // Close mobile menu when page changes
   useEffect(() => {
@@ -25,11 +25,6 @@ export function Navbar({
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    onPageChange('login');
   };
 
   return (
@@ -83,10 +78,11 @@ export function Navbar({
             {isAuthenticated ? (
               <Button
                 className="text-xs md:text-sm"
-                onClick={handleLogout}
+                onClick={() => onPageChange('profile')}
                 title={`Logged in as ${user?.username}`}
               >
-                Logout
+                <UserIcon className="w-4 h-4 mr-2" />
+                Profile
               </Button>
             ) : (
               <Button className="p-2" onClick={() => onPageChange('login')}>
@@ -140,8 +136,8 @@ export function Navbar({
               </Button>
 
               {isAuthenticated ? (
-                <Button className="w-full text-sm" onClick={handleLogout}>
-                  Logout ({user?.username})
+                <Button className="w-full text-sm" onClick={() => onPageChange('profile')}>
+                  Profile ({user?.username})
                 </Button>
               ) : (
                 <Button className="p-2" onClick={() => onPageChange('login')}>

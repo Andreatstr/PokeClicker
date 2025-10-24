@@ -9,6 +9,7 @@ import {Navbar, BackgroundMusic, LoadingSpinner, LazyPokedex} from '@/components
 const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
 const LoginScreen = lazy(() => import('@features/auth').then(module => ({ default: module.LoginScreen })));
 const PokemonDetailModal = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonDetailModal })));
+const ProfileDashboard = lazy(() => import('@features/profile').then(module => ({ default: module.ProfileDashboard })));
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -27,7 +28,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [currentPage, setCurrentPage] = useState<
-    'clicker' | 'pokedex' | 'login'
+    'clicker' | 'pokedex' | 'login' | 'profile'
   >(() => {
     const hasAuth = localStorage.getItem('authToken');
     if (!hasAuth) return 'login';
@@ -36,6 +37,7 @@ function App() {
     const savedPage = localStorage.getItem('currentPage') as
       | 'clicker'
       | 'pokedex'
+      | 'profile'
       | null;
     return savedPage || 'pokedex';
   });
@@ -167,6 +169,12 @@ function App() {
               <section className="py-8">
                 <Suspense fallback={<LoadingSpinner message="Loading clicker game..." isDarkMode={isDarkMode} />}>
                   <PokeClicker isDarkMode={isDarkMode} />
+                </Suspense>
+              </section>
+            ) : currentPage === 'profile' ? (
+              <section className="py-8">
+                <Suspense fallback={<LoadingSpinner message="Loading profile..." isDarkMode={isDarkMode} />}>
+                  <ProfileDashboard isDarkMode={isDarkMode} />
                 </Suspense>
               </section>
             ) : (

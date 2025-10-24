@@ -21,6 +21,7 @@
     "backend"
   ],
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "vitest": "^4.0.2"
   }
 }
