@@ -1,15 +1,12 @@
 import {useQuery, gql} from '@apollo/client';
 import {Dialog, DialogBody} from '@ui/pixelact';
 
-const GET_POKEDEX = gql`
-  query GetPokedex($limit: Int, $offset: Int) {
-    pokedex(limit: $limit, offset: $offset) {
-      pokemon {
-        id
-        name
-        sprite
-        isOwned
-      }
+const GET_POKEMON_BY_ID = gql`
+  query GetPokemonById($id: Int!) {
+    pokemonById(id: $id) {
+      id
+      name
+      sprite
     }
   }
 `;
@@ -29,14 +26,18 @@ export function FavoritePokemonSelector({
   ownedPokemonIds,
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
-  const {data, loading} = useQuery(GET_POKEDEX, {
-    variables: {limit: 1000, offset: 0},
-    skip: !isOpen,
-  });
-
-  const ownedPokemon = data?.pokedex.pokemon.filter((p: any) =>
-    ownedPokemonIds.includes(p.id)
+  // Fetch each owned Pokemon individually (will be batched/cached by Apollo)
+  const pokemonQueries = ownedPokemonIds.map((id) =>
+    useQuery(GET_POKEMON_BY_ID, {
+      variables: {id},
+      skip: !isOpen,
+    })
   );
+
+  const loading = pokemonQueries.some((q) => q.loading);
+  const ownedPokemon = pokemonQueries
+    .map((q) => q.data?.pokemonById)
+    .filter(Boolean);
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
