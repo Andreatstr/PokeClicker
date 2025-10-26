@@ -49,7 +49,7 @@ export function HealthBar({
           textShadow: '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white'
         }}
       >
-        {Math.floor(current)} / {max} HP
+        {Math.floor(current)} HP
       </div>
     </div>
   );

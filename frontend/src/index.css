@@ -287,3 +287,87 @@ body {
 .placeholder-black::placeholder {
   color: rgba(0, 0, 0, 0.6) !important;
 }
+
+/* Pokemon Battle Background */
+div.battle-background {
+  background: linear-gradient(90deg, 
+    #1e3a8a 0%,     /* Dark blue */
+    #3b82f6 20%,    /* Blue */
+    #60a5fa 40%,    /* Light blue */
+    #93c5fd 60%,    /* Very light blue */
+    #60a5fa 80%,    /* Light blue */
+    #1e3a8a 100%    /* Dark blue */
+  ) !important;
+  background-color: transparent !important;
+  position: relative;
+  overflow: hidden;
+  /* DEBUG: Add border to see the container */
+  border: 3px solid yellow;
+}
+
+.battle-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    /* Circle 1 - top right - MUCH LARGER */
+    radial-gradient(circle 200px at 85% 25%, 
+      red 0%, 
+      red 100%
+    ),
+    /* Circle 2 - bottom left - MUCH LARGER */
+    radial-gradient(circle 200px at 15% 75%, 
+      blue 0%, 
+      blue 100%
+    );
+  pointer-events: none;
+}
+
+/* Responsive platform sizing */
+@media (min-width: 768px) {
+  .battle-background::before {
+    background: 
+      /* Circle 1 - top right */
+      radial-gradient(circle 75px at 85% 25%, 
+        red 0%, 
+        red 100%
+      ),
+      /* Circle 2 - bottom left */
+      radial-gradient(circle 75px at 15% 75%, 
+        blue 0%, 
+        blue 100%
+      );
+  }
+}
+
+@media (min-width: 1024px) {
+  .battle-background::before {
+    background: 
+      /* Circle 1 - top right */
+      radial-gradient(circle 100px at 85% 25%, 
+        red 0%, 
+        red 100%
+      ),
+      /* Circle 2 - bottom left */
+      radial-gradient(circle 100px at 15% 75%, 
+        blue 0%, 
+        blue 100%
+      );
+  }
+}
+
+/* Dark mode battle background */
+.dark .battle-background {
+  background: linear-gradient(135deg, 
+    #1a1a2e 0%,     /* Dark navy */
+    #16213e 25%,    /* Darker navy */
+    #0f3460 50%,    /* Deep blue */
+    #1a1a2e 75%,    /* Dark navy */
+    #0e1b2e 100%    /* Very dark blue */
+  );
+}
+
+/* Dark mode uses same circles */

@@ -117,6 +117,8 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     };
   }, []);
 
+  const [battleAttackFunction, setBattleAttackFunction] = useState<(() => void) | null>(null);
+
   // Start battle handler
   const startBattle = useCallback(
     (opponent: PokedexPokemon, spawnId: string) => {
@@ -219,8 +221,13 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   }, [pokemon.nearbyPokemon, startBattle]);
 
   const handleBButtonClick = useCallback(() => {
-    // Cancel action or show menu
-  }, []);
+    if (inBattle && battleAttackFunction) {
+      // In battle mode, trigger attack
+      battleAttackFunction();
+    } else {
+      // Normal mode, cancel action or show menu
+    }
+  }, [inBattle, battleAttackFunction]);
 
   return (
     <GameBoy
@@ -244,6 +251,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
             opponentPokemon={battleOpponent}
             onBattleComplete={handleBattleComplete}
             isDarkMode={isDarkMode}
+            onAttackFunctionReady={setBattleAttackFunction}
           />
         ) : (
           <TiledMapView
