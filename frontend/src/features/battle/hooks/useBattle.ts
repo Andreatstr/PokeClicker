@@ -24,10 +24,10 @@ export function useBattle({
   onBattleEnd,
 }: UseBattleProps) {
   const [battleState, setBattleState] = useState<BattleState>(() => {
-    // Scale HP to make battles last longer (~15-20 seconds)
-    // Opponent gets more HP to last longer
-    const scaledPlayerHP = (playerPokemon.stats?.hp || 100) * 30;
-    const scaledOpponentHP = (opponentPokemon.stats?.hp || 100) * 40;
+    // Scale HP to make battles last 30-45 seconds with active clicking
+    // 3x longer than before, with opponent having 1.8x more HP for difficulty (1.5x * 1.2x)
+    const scaledPlayerHP = (playerPokemon.stats?.hp || 100) * 75;
+    const scaledOpponentHP = (opponentPokemon.stats?.hp || 100) * 162;
 
     return {
       playerHP: scaledPlayerHP,
@@ -74,8 +74,9 @@ export function useBattle({
     const opponentAttack = opponentPokemon.stats?.attack || 10;
     const playerDefense = playerPokemon.stats?.defense || 10;
 
+    // Moderate passive damage - player should survive if actively clicking
     const baseDamage = Math.max(1, opponentAttack - playerDefense * 0.3);
-    return baseDamage * 1.5;
+    return baseDamage * 1.2;
   }, [opponentPokemon, playerPokemon]);
 
   const calculateClickDamage = useCallback(() => {
@@ -83,9 +84,11 @@ export function useBattle({
     const playerSpeed = playerPokemon.stats?.speed || 1;
     const opponentDefense = opponentPokemon.stats?.defense || 10;
 
-    const baseDamage = Math.max(1, playerAttack - opponentDefense * 0.6);
-    const speedMultiplier = 1 + playerSpeed * 0.02;
-    return baseDamage * speedMultiplier * 0.6;
+    // Balanced click damage - player should be able to win with active clicking
+    const baseDamage = Math.max(2, playerAttack - opponentDefense * 0.4);
+    // Speed provides slight boost: 1 + (speed × 0.05)
+    const speedMultiplier = 1 + playerSpeed * 0.05;
+    return baseDamage * speedMultiplier;
   }, [playerPokemon, opponentPokemon]);
 
   const handleAttackClick = useCallback(() => {

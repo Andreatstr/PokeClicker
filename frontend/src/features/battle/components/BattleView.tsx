@@ -46,7 +46,7 @@ export function BattleView({
 
   // Calculate rare candy reward
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
-  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 10);
+  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 5);
 
   if (showResult && battleResult) {
     return (
