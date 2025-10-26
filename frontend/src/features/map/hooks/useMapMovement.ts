@@ -22,6 +22,8 @@ const SPRITE_POSITIONS: Record<Direction, number> = {
   up: 3,
 };
 
+const PLAYER_POSITION_KEY = 'playerPosition';
+
 interface CollisionChecker {
   isPositionWalkable: (x: number, y: number) => boolean;
 }
@@ -34,9 +36,14 @@ interface MovementState {
 }
 
 interface MovementActions {
-  handleJoystickDirectionStart: (direction: 'up' | 'down' | 'left' | 'right') => void;
-  handleJoystickDirectionChange: (direction: 'up' | 'down' | 'left' | 'right' | null) => void;
+  handleJoystickDirectionStart: (
+    direction: 'up' | 'down' | 'left' | 'right'
+  ) => void;
+  handleJoystickDirectionChange: (
+    direction: 'up' | 'down' | 'left' | 'right' | null
+  ) => void;
   handleJoystickDirectionStop: () => void;
+  resetToHome: () => void;
 }
 
 interface CameraInfo {
@@ -49,10 +56,17 @@ export function useMapMovement(
   collisionChecker: CollisionChecker,
   renderSize: {width: number; height: number}
 ): MovementState & MovementActions & CameraInfo {
-  // Character position in world coordinates
-  const [worldPosition, setWorldPosition] = useState({
-    x: MAP_WIDTH / 2,
-    y: MAP_HEIGHT / 2,
+  // Character position in world coordinates - restore from localStorage if available
+  const [worldPosition, setWorldPosition] = useState(() => {
+    const saved = localStorage.getItem(PLAYER_POSITION_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to restore player position:', e);
+      }
+    }
+    return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
   });
   const [direction, setDirection] = useState<Direction>('down');
   const [isMoving, setIsMoving] = useState(false);
@@ -62,6 +76,11 @@ export function useMapMovement(
   const animationIntervalRef = useRef<number | null>(null);
   const movementIntervalRef = useRef<number | null>(null);
   const animationResetTimeoutRef = useRef<number | null>(null);
+
+  // Save player position to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(PLAYER_POSITION_KEY, JSON.stringify(worldPosition));
+  }, [worldPosition]);
 
   // Handle sprite animation when moving
   useEffect(() => {
@@ -103,7 +122,7 @@ export function useMapMovement(
   // Calculate new position based on direction with collision detection
   const calculateNewPosition = useCallback(
     (currentPos: {x: number; y: number}, dir: Direction) => {
-      let newPos = {...currentPos};
+      const newPos = {...currentPos};
 
       switch (dir) {
         case 'up':
@@ -151,28 +170,38 @@ export function useMapMovement(
 
         const lastKey = keys[keys.length - 1];
         let dir: Direction | null = null;
-        if (lastKey === 'ArrowUp') dir = 'up';
-        else if (lastKey === 'ArrowDown') dir = 'down';
-        else if (lastKey === 'ArrowLeft') dir = 'left';
-        else if (lastKey === 'ArrowRight') dir = 'right';
+        if (lastKey === 'ArrowUp' || lastKey === 'w' || lastKey === 'W')
+          dir = 'up';
+        else if (lastKey === 'ArrowDown' || lastKey === 's' || lastKey === 'S')
+          dir = 'down';
+        else if (lastKey === 'ArrowLeft' || lastKey === 'a' || lastKey === 'A')
+          dir = 'left';
+        else if (lastKey === 'ArrowRight' || lastKey === 'd' || lastKey === 'D')
+          dir = 'right';
 
         if (dir) {
           setDirection(dir);
           setWorldPosition((prev) => {
-            let newPos = {...prev};
+            const newPos = {...prev};
 
             switch (dir) {
               case 'up':
                 newPos.y = Math.max(prev.y - TILE_SIZE, SPRITE_HEIGHT / 2);
                 break;
               case 'down':
-                newPos.y = Math.min(prev.y + TILE_SIZE, MAP_HEIGHT - SPRITE_HEIGHT / 2);
+                newPos.y = Math.min(
+                  prev.y + TILE_SIZE,
+                  MAP_HEIGHT - SPRITE_HEIGHT / 2
+                );
                 break;
               case 'left':
                 newPos.x = Math.max(prev.x - TILE_SIZE, SPRITE_WIDTH / 2);
                 break;
               case 'right':
-                newPos.x = Math.min(prev.x + TILE_SIZE, MAP_WIDTH - SPRITE_WIDTH / 2);
+                newPos.x = Math.min(
+                  prev.x + TILE_SIZE,
+                  MAP_WIDTH - SPRITE_WIDTH / 2
+                );
                 break;
             }
 
@@ -196,33 +225,69 @@ export function useMapMovement(
   }, [isMoving]);
 
   // Handle key down
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-      e.preventDefault();
-      const wasEmpty = keysPressed.current.size === 0;
-      keysPressed.current.add(e.key);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const validKeys = [
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'w',
+        'a',
+        's',
+        'd',
+        'W',
+        'A',
+        'S',
+        'D',
+      ];
+      if (validKeys.includes(e.key)) {
+        e.preventDefault();
 
-      // Immediate movement for tap responsiveness
-      if (wasEmpty) {
-        let dir: Direction | null = null;
-        if (e.key === 'ArrowUp') dir = 'up';
-        else if (e.key === 'ArrowDown') dir = 'down';
-        else if (e.key === 'ArrowLeft') dir = 'left';
-        else if (e.key === 'ArrowRight') dir = 'right';
+        // Check if this is a new key press (not a repeat)
+        const isNewKey = !keysPressed.current.has(e.key);
+        keysPressed.current.add(e.key);
 
-        if (dir) {
-          setDirection(dir);
-          setWorldPosition((prev) => calculateNewPosition(prev, dir));
-          setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
+        // Immediate movement for any new key press (tap responsiveness)
+        if (isNewKey) {
+          let dir: Direction | null = null;
+          if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dir = 'up';
+          else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S')
+            dir = 'down';
+          else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A')
+            dir = 'left';
+          else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D')
+            dir = 'right';
+
+          if (dir) {
+            setDirection(dir);
+            setWorldPosition((prev) => calculateNewPosition(prev, dir));
+            setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
+          }
+          setIsMoving(true);
         }
-        setIsMoving(true);
       }
-    }
-  }, [calculateNewPosition]);
+    },
+    [calculateNewPosition]
+  );
 
   // Handle key up
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    const validKeys = [
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'w',
+      'a',
+      's',
+      'd',
+      'W',
+      'A',
+      'S',
+      'D',
+    ];
+    if (validKeys.includes(e.key)) {
       e.preventDefault();
       keysPressed.current.delete(e.key);
       if (keysPressed.current.size === 0) {
@@ -243,33 +308,8 @@ export function useMapMovement(
   }, [handleKeyDown, handleKeyUp]);
 
   // Joystick direction handling
-  const handleJoystickDirectionStart = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
-    const keyMap = {
-      up: 'ArrowUp',
-      down: 'ArrowDown',
-      left: 'ArrowLeft',
-      right: 'ArrowRight',
-    };
-
-    const key = keyMap[direction];
-    const wasEmpty = keysPressed.current.size === 0;
-    keysPressed.current.add(key);
-
-    // Immediate movement for joystick responsiveness
-    if (wasEmpty) {
-      const dir = direction as Direction;
-      setDirection(dir);
-      setWorldPosition((prev) => calculateNewPosition(prev, dir));
-      setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
-      setIsMoving(true);
-    }
-  }, [calculateNewPosition]);
-
-  const handleJoystickDirectionChange = useCallback((direction: 'up' | 'down' | 'left' | 'right' | null) => {
-    // Clear all current keys
-    keysPressed.current.clear();
-
-    if (direction) {
+  const handleJoystickDirectionStart = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right') => {
       const keyMap = {
         up: 'ArrowUp',
         down: 'ArrowDown',
@@ -278,12 +318,43 @@ export function useMapMovement(
       };
 
       const key = keyMap[direction];
+      const wasEmpty = keysPressed.current.size === 0;
       keysPressed.current.add(key);
-      setIsMoving(true);
-    } else {
-      setIsMoving(false);
-    }
-  }, []);
+
+      // Immediate movement for joystick responsiveness
+      if (wasEmpty) {
+        const dir = direction as Direction;
+        setDirection(dir);
+        setWorldPosition((prev) => calculateNewPosition(prev, dir));
+        setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
+        setIsMoving(true);
+      }
+    },
+    [calculateNewPosition]
+  );
+
+  const handleJoystickDirectionChange = useCallback(
+    (direction: 'up' | 'down' | 'left' | 'right' | null) => {
+      // Clear all current keys
+      keysPressed.current.clear();
+
+      if (direction) {
+        const keyMap = {
+          up: 'ArrowUp',
+          down: 'ArrowDown',
+          left: 'ArrowLeft',
+          right: 'ArrowRight',
+        };
+
+        const key = keyMap[direction];
+        keysPressed.current.add(key);
+        setIsMoving(true);
+      } else {
+        setIsMoving(false);
+      }
+    },
+    []
+  );
 
   const handleJoystickDirectionStop = useCallback(() => {
     keysPressed.current.clear();
@@ -326,6 +397,14 @@ export function useMapMovement(
   const screenPos = getCharacterScreenPosition();
   const spritePos = getSpritePosition();
 
+  // Reset to home position
+  const resetToHome = useCallback(() => {
+    const homePosition = {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
+    setWorldPosition(homePosition);
+    setIsMoving(false);
+    keysPressed.current.clear();
+  }, []);
+
   return {
     // State
     worldPosition,
@@ -337,6 +416,7 @@ export function useMapMovement(
     handleJoystickDirectionStart,
     handleJoystickDirectionChange,
     handleJoystickDirectionStop,
+    resetToHome,
 
     // Camera info
     camera,

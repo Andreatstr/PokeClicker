@@ -8,6 +8,7 @@ const MOVE_SPEED = 120;
 const TILE_SIZE = 512;
 
 interface PokemonSpawn {
+  spawnId: string;
   pokemon: PokedexPokemon;
   x: number;
   y: number;
@@ -20,10 +21,12 @@ interface TiledMapViewProps {
   wildPokemon: PokemonSpawn[];
   nearbyPokemon: PokemonSpawn | null;
   worldPosition: {x: number; y: number};
-  user: any;
+  user: {rare_candy?: number} | null;
   collisionMapLoaded: boolean;
   viewportSize: {width: number; height: number};
   isDarkMode?: boolean;
+  onStartBattle: (pokemon: PokedexPokemon, spawnId: string) => void;
+  onResetToHome: () => void;
 }
 
 export function TiledMapView({
@@ -32,13 +35,17 @@ export function TiledMapView({
   spritePos,
   wildPokemon,
   nearbyPokemon,
-  worldPosition,
   user,
-  collisionMapLoaded,
   viewportSize,
   isDarkMode = false,
+  onStartBattle,
+  onResetToHome,
 }: TiledMapViewProps) {
-  const {visibleTiles, visiblePokemon, isLoading} = useTileRenderer(camera, viewportSize, wildPokemon);
+  const {visibleTiles, visiblePokemon, isLoading} = useTileRenderer(
+    camera,
+    viewportSize,
+    wildPokemon
+  );
 
   return (
     <>
@@ -66,7 +73,7 @@ export function TiledMapView({
             />
           );
         })}
-        
+
         {/* Wild Pokemon - positioned absolutely on the map */}
         {visiblePokemon.map((visiblePoke, index) => (
           <img
@@ -95,7 +102,6 @@ export function TiledMapView({
         </div>
       )}
 
-
       {/* Character Sprite - stays centered in viewport */}
       <div
         className="absolute"
@@ -120,10 +126,10 @@ export function TiledMapView({
           role="dialog"
           aria-live="polite"
         >
-          <div 
+          <div
             className={`border-4 shadow-[6px_6px_0_rgba(0,0,0,1)] px-2 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3 rounded-sm ${
-              isDarkMode 
-                ? 'bg-gray-800/95 border-gray-600 text-white' 
+              isDarkMode
+                ? 'bg-gray-800/95 border-gray-600 text-white'
                 : 'bg-white/95 border-black text-black'
             }`}
           >
@@ -142,9 +148,9 @@ export function TiledMapView({
                   ? 'bg-red-700 hover:bg-red-800 border-gray-600'
                   : 'bg-red-600 hover:bg-red-700 border-black'
               }`}
-              onClick={() => {
-                console.log('Battle start with', nearbyPokemon.pokemon.name);
-              }}
+              onClick={() =>
+                onStartBattle(nearbyPokemon.pokemon, nearbyPokemon.spawnId)
+              }
             >
               Battle!
             </button>
@@ -152,16 +158,17 @@ export function TiledMapView({
         </div>
       )}
 
-      {/* Position Debug Info */}
-      <div className="hidden lg:block absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 pixel-font text-[10px] border border-white z-20">
-        <div>World: {Math.floor(worldPosition.x)}, {Math.floor(worldPosition.y)}</div>
-        <div>Camera: {Math.floor(camera.x)}, {Math.floor(camera.y)}</div>
-        <div>
-          Collision: {collisionMapLoaded ? 'Loaded' : 'Loading...'}
-        </div>
-        <div>Wild Pokemon: {wildPokemon.length}</div>
-        <div>Visible Tiles: {visibleTiles.length}</div>
-        <div>Loading: {isLoading ? 'Yes' : 'No'}</div>
+      {/* Home Button (Top Left) */}
+      <div className="absolute top-2 left-2 z-20">
+        <button
+          onClick={onResetToHome}
+          className="flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors"
+          title="Return to home position"
+        >
+          <span className="pixel-font text-xs font-bold text-white">
+            🏠 Home
+          </span>
+        </button>
       </div>
 
       {/* Rare Candy Counter (Top Right) */}

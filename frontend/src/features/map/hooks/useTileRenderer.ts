@@ -32,13 +32,13 @@ interface TileCache {
 }
 
 interface PokemonSpawn {
-  pokemon: any;
+  pokemon: {id: number; name: string; sprite: string};
   x: number;
   y: number;
 }
 
 interface VisiblePokemon {
-  pokemon: any;
+  pokemon: {id: number; name: string; sprite: string};
   screenX: number;
   screenY: number;
 }
@@ -60,17 +60,21 @@ export function useTileRenderer(
   const cacheRef = useRef<TileCache>({});
   const loadingTilesRef = useRef<Set<string>>(new Set());
 
-
-
   // Update visible tiles when camera moves (with debouncing)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       // Inline tile calculation to avoid dependency issues
       const buffer = TILE_SIZE * 1.5; // Smaller buffer since tiles are larger
       const startX = Math.max(0, Math.floor((camera.x - buffer) / TILE_SIZE));
-      const endX = Math.min(TILES_X - 1, Math.floor((camera.x + viewportSize.width + buffer) / TILE_SIZE));
+      const endX = Math.min(
+        TILES_X - 1,
+        Math.floor((camera.x + viewportSize.width + buffer) / TILE_SIZE)
+      );
       const startY = Math.max(0, Math.floor((camera.y - buffer) / TILE_SIZE));
-      const endY = Math.min(TILES_Y - 1, Math.floor((camera.y + viewportSize.height + buffer) / TILE_SIZE));
+      const endY = Math.min(
+        TILES_Y - 1,
+        Math.floor((camera.y + viewportSize.height + buffer) / TILE_SIZE)
+      );
 
       const newTiles: VisibleTile[] = [];
 
@@ -88,7 +92,7 @@ export function useTileRenderer(
             src: `${import.meta.env.BASE_URL}map/tiles/map_${tileX}_${tileY}.webp`,
             loaded: !!cacheRef.current[key],
             screenX,
-            screenY
+            screenY,
           });
         }
       }
@@ -96,15 +100,15 @@ export function useTileRenderer(
       setVisibleTiles(newTiles);
 
       // Calculate visible Pokemon positions (same render cycle as tiles)
-      const newPokemon: VisiblePokemon[] = wildPokemon.map(pokemon => ({
+      const newPokemon: VisiblePokemon[] = wildPokemon.map((pokemon) => ({
         pokemon: pokemon.pokemon,
         screenX: pokemon.x - camera.x,
-        screenY: pokemon.y - camera.y
+        screenY: pokemon.y - camera.y,
       }));
       setVisiblePokemon(newPokemon);
 
       // Load tiles that aren't cached (non-blocking)
-      const tilesToLoad = newTiles.filter(tile => !tile.loaded);
+      const tilesToLoad = newTiles.filter((tile) => !tile.loaded);
 
       if (tilesToLoad.length > 0) {
         // Sort tiles by distance from center for priority loading
@@ -128,7 +132,7 @@ export function useTileRenderer(
           for (let i = 0; i < tiles.length; i += batchSize) {
             const batch = tiles.slice(i, i + batchSize);
             await Promise.allSettled(
-              batch.map(async tile => {
+              batch.map(async (tile) => {
                 const key = `${tile.x}_${tile.y}`;
 
                 if (cacheRef.current[key] || loadingTilesRef.current.has(key)) {
@@ -143,15 +147,15 @@ export function useTileRenderer(
                     img.onload = () => {
                       cacheRef.current[key] = {
                         image: img,
-                        lastUsed: Date.now()
+                        lastUsed: Date.now(),
                       };
                       loadingTilesRef.current.delete(key);
 
                       // Update tiles immediately when loaded
-                      setVisibleTiles(currentTiles =>
-                        currentTiles.map(t =>
+                      setVisibleTiles((currentTiles) =>
+                        currentTiles.map((t) =>
                           t.x === tile.x && t.y === tile.y
-                            ? { ...t, loaded: true }
+                            ? {...t, loaded: true}
                             : t
                         )
                       );
@@ -160,7 +164,10 @@ export function useTileRenderer(
                       const entries = Object.entries(cacheRef.current);
                       if (entries.length > CACHE_SIZE) {
                         entries.sort((a, b) => a[1].lastUsed - b[1].lastUsed);
-                        const toRemove = entries.slice(0, entries.length - CACHE_SIZE);
+                        const toRemove = entries.slice(
+                          0,
+                          entries.length - CACHE_SIZE
+                        );
                         toRemove.forEach(([k]) => {
                           delete cacheRef.current[k];
                         });
@@ -174,7 +181,7 @@ export function useTileRenderer(
                     };
                     img.src = tile.src;
                   });
-                } catch (error) {
+                } catch {
                   loadingTilesRef.current.delete(key);
                 }
               })
@@ -193,6 +200,6 @@ export function useTileRenderer(
   return {
     visibleTiles,
     visiblePokemon,
-    isLoading
+    isLoading,
   };
 }

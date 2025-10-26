@@ -20,7 +20,7 @@ interface MapViewProps {
   wildPokemon: PokemonSpawn[];
   nearbyPokemon: PokemonSpawn | null;
   worldPosition: {x: number; y: number};
-  user: any;
+  user: {rare_candy?: number} | null;
   collisionMapLoaded: boolean;
   isDarkMode?: boolean;
 }
@@ -97,10 +97,10 @@ export function MapView({
           role="dialog"
           aria-live="polite"
         >
-          <div 
+          <div
             className={`border-4 shadow-[6px_6px_0_rgba(0,0,0,1)] px-2 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3 rounded-sm ${
-              isDarkMode 
-                ? 'bg-gray-800/95 border-gray-600 text-white' 
+              isDarkMode
+                ? 'bg-gray-800/95 border-gray-600 text-white'
                 : 'bg-white/95 border-black text-black'
             }`}
           >
@@ -132,11 +132,13 @@ export function MapView({
 
       {/* Position Debug Info */}
       <div className="hidden lg:block absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 pixel-font text-[10px] border border-white z-20">
-        <div>World: {Math.floor(worldPosition.x)}, {Math.floor(worldPosition.y)}</div>
-        <div>Camera: {Math.floor(camera.x)}, {Math.floor(camera.y)}</div>
         <div>
-          Collision: {collisionMapLoaded ? 'Loaded' : 'Loading...'}
+          World: {Math.floor(worldPosition.x)}, {Math.floor(worldPosition.y)}
         </div>
+        <div>
+          Camera: {Math.floor(camera.x)}, {Math.floor(camera.y)}
+        </div>
+        <div>Collision: {collisionMapLoaded ? 'Loaded' : 'Loading...'}</div>
         <div>Wild Pokemon: {wildPokemon.length}</div>
       </div>
 
