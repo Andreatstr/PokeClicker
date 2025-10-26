@@ -20,6 +20,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run Vitest unit tests
+        run: npm test
+        working-directory: ./frontend
+
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
