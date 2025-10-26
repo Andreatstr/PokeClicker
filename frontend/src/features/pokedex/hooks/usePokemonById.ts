@@ -19,6 +19,8 @@ const POKEMON_BY_ID_QUERY = gql`
       weight
       abilities
       evolution
+      isOwned
+      pokedexNumber
     }
   }
 `;
@@ -42,6 +44,8 @@ export interface PokemonById {
   weight: number;
   abilities: string[];
   evolution: number[];
+  isOwned: boolean;
+  pokedexNumber: number;
 }
 
 export function usePokemonById(id: number | null) {

@@ -75,6 +75,8 @@ export const typeDefs = `#graphql
     weight: Int!
     abilities: [String!]!
     evolution: [Int!]!
+    isOwned: Boolean!
+    pokedexNumber: Int!
   }
 
   type PokemonStats {

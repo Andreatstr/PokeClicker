@@ -129,6 +129,10 @@ export function PokemonDetailModal({
   const [isAnimating, setIsAnimating] = useState(false);
   const {data: userData} = useQuery(ME_QUERY);
 
+  // Fetch data for all Pokemon in evolution chain to get their pokedexNumbers
+  const evolutionIds = pokemon ? [pokemon.id, ...(pokemon.evolution ?? [])] : [];
+  const evolutionDataQueries = evolutionIds.map(id => usePokemonById(id));
+
   if (!pokemon) return null;
 
   const primaryType = pokemon.types[0];
@@ -141,6 +145,15 @@ export function PokemonDetailModal({
   const cost = getPokemonCost(pokemon.id);
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
   const statColors = getStatBarColors(isDarkMode);
+
+  // Sort evolution chain by pokedexNumber instead of ID
+  const sortedEvolutionIds = evolutionIds
+    .map((id, index) => ({
+      id,
+      pokedexNumber: evolutionDataQueries[index]?.data?.pokemonById?.pokedexNumber ?? id,
+    }))
+    .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
+    .map(item => item.id);
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -351,17 +364,15 @@ export function PokemonDetailModal({
           >
             <h3 className="font-bold mb-2">Evolution</h3>
             <div className="evolutionChain flex items-center justify-center gap-2 md:gap-3">
-              {[pokemon.id, ...(pokemon.evolution ?? [])]
-                .sort((a, b) => a - b)
-                .map((id, i, arr) => (
-                  <EvolutionPokemon
-                    key={id}
-                    id={id}
-                    onSelectPokemon={onSelectPokemon}
-                    showArrow={i < arr.length - 1}
-                    isOwned={ownedPokemonIds.includes(id)}
-                  />
-                ))}
+              {sortedEvolutionIds.map((id, i, arr) => (
+                <EvolutionPokemon
+                  key={id}
+                  id={id}
+                  onSelectPokemon={onSelectPokemon}
+                  showArrow={i < arr.length - 1}
+                  isOwned={ownedPokemonIds.includes(id)}
+                />
+              ))}
             </div>
           </div>
         </div>
