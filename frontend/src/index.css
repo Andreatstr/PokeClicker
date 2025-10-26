@@ -27,6 +27,9 @@ body {
   min-height: 100vh;
   font-family: 'Press Start 2P', 'Courier New', 'Courier', monospace;
   font-display: swap;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 #root {
