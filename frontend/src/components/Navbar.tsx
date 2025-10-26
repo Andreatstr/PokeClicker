@@ -4,7 +4,9 @@ import {useAuth} from '@features/auth';
 
 interface NavbarProps {
   currentPage: 'clicker' | 'pokedex' | 'login' | 'map' | 'profile';
-  onPageChange: (page: 'clicker' | 'pokedex' | 'login' | 'map' | 'profile') => void;
+  onPageChange: (
+    page: 'clicker' | 'pokedex' | 'login' | 'map' | 'profile'
+  ) => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -160,14 +162,16 @@ export function Navbar({
                 )}
               </Button>
 
-
               {isAuthenticated ? (
-                <Button className="w-full text-sm" onClick={() => onPageChange('profile')}>
+                <Button
+                  className="w-full text-sm"
+                  onClick={() => onPageChange('profile')}
+                >
                   Profile ({user?.username})
                 </Button>
               ) : (
-                <Button 
-                  className="w-full text-sm flex items-center justify-center gap-2" 
+                <Button
+                  className="w-full text-sm flex items-center justify-center gap-2"
                   onClick={() => onPageChange('login')}
                 >
                   <UserIcon className="w-4 h-4" />

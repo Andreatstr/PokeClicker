@@ -3,10 +3,13 @@ import {Button, Card} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 import {useGameMutations} from '@features/clicker';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
+import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
+import {formatNumber} from '@/lib/formatNumber';
 
 interface Candy {
   id: number;
   x: number;
+  amount: number;
 }
 
 interface PokeClickerProps {
@@ -42,7 +45,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     const preloadAssets = async () => {
       try {
         await gameAssetsCache.preloadClickerAssets();
-        
+
         const [charizard, candy, rareCandy, pokemonBg] = await Promise.all([
           gameAssetsCache.getCharizardSprite(),
           gameAssetsCache.getCandyImage(),
@@ -64,31 +67,40 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     preloadAssets();
   }, []);
 
-  // Batching state
-  const [pendingCandyAmount, setPendingCandyAmount] = useState(0);
+  // Local candy state - THIS is the source of truth for display!
+  const [localRareCandy, setLocalRareCandy] = useState(user?.rare_candy || 0);
+  const [unsyncedAmount, setUnsyncedAmount] = useState(0);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncRef = useRef<number>(Date.now());
 
   // Error state
   const [displayError, setDisplayError] = useState<string | null>(null);
 
-  // Sync local state with user data when it changes
+  // Initialize local candy from server when component mounts
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    if (user && !hasMountedRef.current) {
+      setLocalRareCandy(user.rare_candy);
+      setUnsyncedAmount(0);
+      hasMountedRef.current = true;
+    }
+  }, [user]); // Run when user is available
+
+  // Sync stats with user data when it changes (but NOT candy)
   useEffect(() => {
     if (user) {
       setStats(user.stats);
-      // Reset pending candy when we get fresh data from server
-      setPendingCandyAmount(0);
     }
   }, [user]);
 
-  // Get the reliable candy count (server value + pending)
-  const getCurrentCandy = () => (user?.rare_candy || 0) + pendingCandyAmount;
+  // Get the current candy count (local state only - never use server value during gameplay)
+  const getCurrentCandy = () => localRareCandy;
 
   const flushPendingCandy = useCallback(async () => {
-    if (pendingCandyAmount === 0 || !isAuthenticated) return;
+    if (unsyncedAmount === 0 || !isAuthenticated) return;
 
-    const amountToSync = pendingCandyAmount;
-    setPendingCandyAmount(0);
+    const amountToSync = unsyncedAmount;
+    setUnsyncedAmount(0); // Clear unsynced amount (we're syncing it now)
     lastSyncRef.current = Date.now();
 
     if (batchTimerRef.current) {
@@ -97,33 +109,32 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     }
 
     try {
-      const updatedUser = await updateRareCandy(amountToSync, updateUser);
-      if (updatedUser) {
-        // Server is the source of truth - this will trigger the useEffect to update
-      }
+      // Send to server and update Apollo cache (for other pages)
+      await updateRareCandy(amountToSync, updateUser);
+      // Success - server and cache are now in sync with our local state
     } catch (err) {
       console.error('Failed to sync candy:', err);
-      setDisplayError('Failed to save progress. Retrying...');
-      // Re-add the pending amount to try again
-      setPendingCandyAmount(amountToSync);
+      setDisplayError('Failed to save progress. Will retry...');
+      // Put the amount back in unsynced so it will be tried again
+      setUnsyncedAmount((prev) => prev + amountToSync);
       setTimeout(() => setDisplayError(null), 3000);
     }
-  }, [pendingCandyAmount, isAuthenticated, updateRareCandy, updateUser]);
+  }, [unsyncedAmount, isAuthenticated, updateRareCandy]);
 
-  // Batch update clicks every 2 seconds or after 10 clicks
+  // Batch update clicks every 10 seconds or after 50 clicks
   useEffect(() => {
-    if (pendingCandyAmount === 0 || !isAuthenticated) return;
+    if (unsyncedAmount === 0 || !isAuthenticated) return;
 
     const shouldFlush =
-      pendingCandyAmount >= 10 || Date.now() - lastSyncRef.current >= 2000;
+      unsyncedAmount >= 50 || Date.now() - lastSyncRef.current >= 10000;
 
     if (shouldFlush) {
       flushPendingCandy();
     } else if (!batchTimerRef.current) {
-      // Set a timer to flush after 2 seconds
+      // Set a timer to flush after 10 seconds
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
-      }, 2000);
+      }, 10000);
     }
 
     return () => {
@@ -132,17 +143,38 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         batchTimerRef.current = null;
       }
     };
-  }, [pendingCandyAmount, isAuthenticated, flushPendingCandy]);
+  }, [unsyncedAmount, isAuthenticated, flushPendingCandy]);
 
-  // Calculate candies per click based on attack and sp. attack
+  // Flush when component unmounts (navigating away from clicker)
+  useEffect(() => {
+    return () => {
+      if (unsyncedAmount > 0) {
+        flushPendingCandy();
+      }
+    };
+  }, []);
+
+  // Calculate candies per click (using shared utility)
   const getCandiesPerClick = () => {
-    return stats.attack + Math.floor(stats.spAttack * 0.5);
+    return calculateCandyPerClick(stats);
   };
 
-  // Calculate upgrade cost (exponential growth)
+  // Calculate upgrade cost (differentiated by stat type)
   const getUpgradeCost = (stat: keyof typeof stats) => {
     const level = stats[stat];
-    return Math.floor(10 * Math.pow(1.5, level - 1));
+    // Different multipliers for different stat types:
+    // Attack/SpAttack: 2.8x (most expensive, highest reward)
+    // HP/Defense/SpDefense: 2.5x (moderate cost)
+    // Speed: 2.2x (cheapest, utility stat)
+    let multiplier = 2.5; // default
+
+    if (stat === 'attack' || stat === 'spAttack') {
+      multiplier = 2.8;
+    } else if (stat === 'speed') {
+      multiplier = 2.2;
+    }
+
+    return Math.floor(10 * Math.pow(multiplier, level - 1));
   };
 
   // Effect for passive income
@@ -154,7 +186,10 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
 
     if (passiveIncome > 0) {
       const interval = setInterval(() => {
-        setPendingCandyAmount((prev) => prev + passiveIncome);
+        // Update local candy (optimistic UI)
+        setLocalRareCandy((prev) => prev + passiveIncome);
+        // Track unsynced amount
+        setUnsyncedAmount((prev) => prev + passiveIncome);
       }, 1000); // Every second
 
       return () => clearInterval(interval);
@@ -169,14 +204,17 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
 
     const candiesEarned = getCandiesPerClick();
 
-    // Add to pending candy
-    setPendingCandyAmount((prev) => prev + candiesEarned);
+    // Update local candy immediately (optimistic UI)
+    setLocalRareCandy((prev) => prev + candiesEarned);
+    // Track unsynced amount
+    setUnsyncedAmount((prev) => prev + candiesEarned);
     setIsAnimating(true);
 
     // Add floating candy animation
     const newCandy: Candy = {
       id: Date.now() + Math.random(),
       x: Math.random() * 60 + 20, // Random position between 20% and 80%
+      amount: candiesEarned,
     };
     setCandies((prev) => [...prev, newCandy]);
 
@@ -201,20 +239,23 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       return; // Not enough candy
     }
 
-    // Flush pending candy updates before upgrading to ensure server has latest amount
-    if (pendingCandyAmount > 0) {
+    // Flush unsynced candy before upgrading to ensure server has latest amount
+    if (unsyncedAmount > 0) {
       await flushPendingCandy();
     }
 
-    // Optimistic update for stats only
+    // Optimistic updates (both candy and stats)
     const oldStat = stats[stat];
+    const oldCandy = localRareCandy;
+    setLocalRareCandy((prev) => prev - cost); // Deduct cost immediately
     setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
 
     try {
       const updatedUser = await upgradeStat(stat, updateUser);
       if (updatedUser) {
-        // Server is the source of truth - useEffect will sync
+        // Server confirmed - update stats from server
         setStats(updatedUser.stats);
+        // Note: We don't update localRareCandy from server because we already deducted it optimistically
       }
     } catch (err) {
       console.error('Failed to upgrade stat:', err);
@@ -223,7 +264,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
           ? err.message
           : 'Failed to upgrade stat. Please try again.';
       setDisplayError(errorMessage);
-      // Revert optimistic update
+      // Revert optimistic updates
+      setLocalRareCandy(oldCandy);
       setStats((prev: typeof stats) => ({...prev, [stat]: oldStat}));
       setTimeout(() => setDisplayError(null), 3000);
     }
@@ -375,13 +417,21 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                 {candies.map((candy) => (
                   <div
                     key={candy.id}
-                    className="absolute pointer-events-none"
+                    className="absolute pointer-events-none flex items-center gap-1"
                     style={{
                       left: `${candy.x}%`,
                       bottom: '40%',
                       animation: 'float-up 1s ease-out forwards',
                     }}
                   >
+                    <span
+                      className="pixel-font text-yellow-400 font-bold text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                      style={{
+                        textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
+                      }}
+                    >
+                      +{formatNumber(candy.amount)}
+                    </span>
                     <img
                       src={`${import.meta.env.BASE_URL}candy.webp`}
                       alt="candy"
@@ -585,7 +635,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                   color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
                 }}
               >
-                {Math.floor(getCurrentCandy())}
+                {formatNumber(Math.floor(getCurrentCandy()))}
               </span>
             </div>
           </div>
@@ -738,7 +788,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
                         className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                          ↑ {cost}
+                          ↑ {formatNumber(cost)}
                         </span>
                       </Button>
                     </div>

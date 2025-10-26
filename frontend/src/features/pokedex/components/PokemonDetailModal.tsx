@@ -54,7 +54,9 @@ function EvolutionPokemon({
   isOwned: boolean;
 }) {
   const {data, loading} = usePokemonById(id);
-  const [cachedSprite, setCachedSprite] = useState<HTMLImageElement | null>(null);
+  const [cachedSprite, setCachedSprite] = useState<HTMLImageElement | null>(
+    null
+  );
 
   // Preload evolution sprite
   useEffect(() => {

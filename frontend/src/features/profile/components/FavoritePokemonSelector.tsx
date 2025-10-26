@@ -1,9 +1,9 @@
 import {useQuery, gql} from '@apollo/client';
 import {Dialog, DialogBody} from '@ui/pixelact';
 
-const GET_POKEMON_BY_ID = gql`
-  query GetPokemonById($id: Int!) {
-    pokemonById(id: $id) {
+const GET_POKEMON_BY_IDS = gql`
+  query GetPokemonByIds($ids: [Int!]!) {
+    pokemonByIds(ids: $ids) {
       id
       name
       sprite
@@ -26,18 +26,13 @@ export function FavoritePokemonSelector({
   ownedPokemonIds,
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
-  // Fetch each owned Pokemon individually (will be batched/cached by Apollo)
-  const pokemonQueries = ownedPokemonIds.map((id) =>
-    useQuery(GET_POKEMON_BY_ID, {
-      variables: {id},
-      skip: !isOpen,
-    })
-  );
+  // Fetch all owned Pokemon in a single query
+  const {data, loading} = useQuery(GET_POKEMON_BY_IDS, {
+    variables: {ids: ownedPokemonIds},
+    skip: !isOpen || ownedPokemonIds.length === 0,
+  });
 
-  const loading = pokemonQueries.some((q) => q.loading);
-  const ownedPokemon = pokemonQueries
-    .map((q) => q.data?.pokemonById)
-    .filter(Boolean);
+  const ownedPokemon = data?.pokemonByIds || [];
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -52,39 +47,43 @@ export function FavoritePokemonSelector({
               : '8px 8px 0px rgba(0,0,0,1)',
           }}
         >
-          <h2 className="text-lg sm:text-xl font-bold mb-4">SELECT FAVORITE POKEMON</h2>
+          <h2 className="text-lg sm:text-xl font-bold mb-4">
+            SELECT FAVORITE POKEMON
+          </h2>
 
           {loading ? (
             <p className="text-center py-8">Loading Pokemon...</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {ownedPokemon?.map((pokemon: any) => (
-                <button
-                  key={pokemon.id}
-                  onClick={() => onSelect(pokemon.id)}
-                  className="p-3 border-2 transition-all hover:scale-105"
-                  style={{
-                    borderColor: isDarkMode ? '#333333' : 'black',
-                    backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
-                  }}
-                >
-                  <img
-                    src={pokemon.sprite}
-                    alt={pokemon.name}
-                    className="w-full h-16 sm:h-20 object-contain mx-auto"
-                    style={{imageRendering: 'pixelated'}}
-                  />
-                  <p className="text-xs sm:text-sm mt-2 capitalize text-center truncate">
-                    {pokemon.name}
-                  </p>
-                  <p
-                    className="text-xs text-center"
-                    style={{color: isDarkMode ? '#a0a0a0' : '#666'}}
+              {ownedPokemon?.map(
+                (pokemon: {id: number; name: string; sprite: string}) => (
+                  <button
+                    key={pokemon.id}
+                    onClick={() => onSelect(pokemon.id)}
+                    className="p-3 border-2 transition-all hover:scale-105"
+                    style={{
+                      borderColor: isDarkMode ? '#333333' : 'black',
+                      backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
+                    }}
                   >
-                    #{pokemon.id}
-                  </p>
-                </button>
-              ))}
+                    <img
+                      src={pokemon.sprite}
+                      alt={pokemon.name}
+                      className="w-full h-16 sm:h-20 object-contain mx-auto"
+                      style={{imageRendering: 'pixelated'}}
+                    />
+                    <p className="text-xs sm:text-sm mt-2 capitalize text-center truncate">
+                      {pokemon.name}
+                    </p>
+                    <p
+                      className="text-xs text-center"
+                      style={{color: isDarkMode ? '#a0a0a0' : '#666'}}
+                    >
+                      #{pokemon.id}
+                    </p>
+                  </button>
+                )
+              )}
             </div>
           )}
 
