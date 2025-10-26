@@ -123,9 +123,11 @@ export function BattleView({
       {result === 'ongoing' && (
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-center pointer-events-none -translate-y-8">
           <div
-            className={`pixel-font text-xs ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            } bg-black/50 px-3 py-1 rounded`}
+            className={`pixel-font text-xs px-3 py-1 rounded ${
+              isDarkMode
+                ? 'text-gray-300 bg-black/50'
+                : 'text-white bg-black/70'
+            }`}
           >
             Click anywhere to attack!
           </div>
