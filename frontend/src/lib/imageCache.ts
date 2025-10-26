@@ -13,8 +13,13 @@ interface CacheStats {
   hitCount: number;
 }
 
+interface CachedHTMLImageElement extends HTMLImageElement {
+  timestamp?: number;
+  size?: number;
+}
+
 class ImageCacheService {
-  private memoryCache = new Map<string, HTMLImageElement>();
+  private memoryCache = new Map<string, CachedHTMLImageElement>();
   private localStorageCache = new Map<string, CachedImage>();
   private maxMemorySize = 50 * 1024 * 1024; // 50MB
   private maxLocalStorageSize = 100 * 1024 * 1024; // 100MB
@@ -38,8 +43,9 @@ class ImageCacheService {
       if (cached) {
         const data = JSON.parse(cached);
         this.localStorageCache = new Map(data);
-        this.currentLocalStorageSize = Array.from(this.localStorageCache.values())
-          .reduce((total, item) => total + item.size, 0);
+        this.currentLocalStorageSize = Array.from(
+          this.localStorageCache.values()
+        ).reduce((total, item) => total + item.size, 0);
       }
     } catch (error) {
       console.warn('Failed to load image cache from localStorage:', error);
@@ -56,15 +62,14 @@ class ImageCacheService {
     }
   }
 
-
   private cleanupMemoryCache() {
     if (this.currentMemorySize <= this.maxMemorySize) return;
 
     // Remove oldest entries
     const entries = Array.from(this.memoryCache.entries());
     entries.sort((a, b) => {
-      const aTime = (a[1] as any).timestamp || 0;
-      const bTime = (b[1] as any).timestamp || 0;
+      const aTime = a[1].timestamp || 0;
+      const bTime = b[1].timestamp || 0;
       return aTime - bTime;
     });
 
@@ -75,7 +80,7 @@ class ImageCacheService {
 
     this.currentMemorySize = 0;
     this.memoryCache.forEach((img) => {
-      this.currentMemorySize += (img as any).size || 0;
+      this.currentMemorySize += img.size || 0;
     });
   }
 
@@ -88,7 +93,8 @@ class ImageCacheService {
 
     const toRemove = entries.slice(0, Math.floor(entries.length * 0.3));
     toRemove.forEach(([key]) => {
-      this.currentLocalStorageSize -= this.localStorageCache.get(key)?.size || 0;
+      this.currentLocalStorageSize -=
+        this.localStorageCache.get(key)?.size || 0;
       this.localStorageCache.delete(key);
     });
 
@@ -106,15 +112,15 @@ class ImageCacheService {
     // Check localStorage cache
     if (this.localStorageCache.has(url)) {
       const cached = this.localStorageCache.get(url)!;
-      const img = new Image();
+      const img = new Image() as CachedHTMLImageElement;
       img.src = URL.createObjectURL(cached.blob);
-      (img as any).timestamp = Date.now();
-      (img as any).size = cached.size;
-      
+      img.timestamp = Date.now();
+      img.size = cached.size;
+
       this.memoryCache.set(url, img);
       this.currentMemorySize += cached.size;
       this.cleanupMemoryCache();
-      
+
       this.stats.hitCount++;
       this.updateStats();
       return img;
@@ -123,16 +129,17 @@ class ImageCacheService {
     // Load from network
     this.stats.missCount++;
     this.updateStats();
-    
+
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to load image: ${response.status}`);
-      
+      if (!response.ok)
+        throw new Error(`Failed to load image: ${response.status}`);
+
       const blob = await response.blob();
-      const img = new Image();
+      const img = new Image() as CachedHTMLImageElement;
       img.src = URL.createObjectURL(blob);
-      (img as any).timestamp = Date.now();
-      (img as any).size = blob.size;
+      img.timestamp = Date.now();
+      img.size = blob.size;
 
       // Cache in memory
       this.memoryCache.set(url, img);
@@ -146,7 +153,7 @@ class ImageCacheService {
         timestamp: Date.now(),
         size: blob.size,
       };
-      
+
       this.localStorageCache.set(url, cachedImage);
       this.currentLocalStorageSize += blob.size;
       this.cleanupLocalStorageCache();
@@ -160,7 +167,7 @@ class ImageCacheService {
   }
 
   async preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-    const promises = urls.map(url => this.getImage(url));
+    const promises = urls.map((url) => this.getImage(url));
     return Promise.all(promises);
   }
 
@@ -186,21 +193,25 @@ class ImageCacheService {
   }
 
   private updateStats() {
-    this.stats.totalSize = this.currentMemorySize + this.currentLocalStorageSize;
+    this.stats.totalSize =
+      this.currentMemorySize + this.currentLocalStorageSize;
     this.stats.itemCount = this.memoryCache.size + this.localStorageCache.size;
     const totalRequests = this.stats.hitCount + this.stats.missCount;
-    this.stats.hitRate = totalRequests > 0 ? this.stats.hitCount / totalRequests : 0;
+    this.stats.hitRate =
+      totalRequests > 0 ? this.stats.hitCount / totalRequests : 0;
   }
 
   getStats(): CacheStats {
-    return { ...this.stats };
+    return {...this.stats};
   }
 
   // Utility method to get image dimensions without loading
-  async getImageDimensions(url: string): Promise<{ width: number; height: number }> {
+  async getImageDimensions(
+    url: string
+  ): Promise<{width: number; height: number}> {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onload = () => resolve({width: img.width, height: img.height});
       img.onerror = reject;
       img.src = url;
     });
@@ -211,4 +222,4 @@ class ImageCacheService {
 export const imageCache = new ImageCacheService();
 
 // Export types for use in components
-export type { CacheStats };
+export type {CacheStats};

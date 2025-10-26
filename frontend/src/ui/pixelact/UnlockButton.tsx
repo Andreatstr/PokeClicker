@@ -1,3 +1,5 @@
+import {formatNumber} from '@/lib/formatNumber';
+
 interface UnlockButtonProps {
   onClick: (e: React.MouseEvent) => void;
   cost: number;
@@ -52,7 +54,9 @@ export function UnlockButton({
                 : '1px solid rgba(0, 0, 0, 0.3)',
             }}
           >
-            <span className={`${priceTextSize} font-bold`}>{cost}</span>
+            <span className={`${priceTextSize} font-bold`}>
+              {formatNumber(cost)}
+            </span>
             <img
               src={`${import.meta.env.BASE_URL}candy.webp`}
               alt="candy"

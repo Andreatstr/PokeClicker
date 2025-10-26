@@ -10,6 +10,7 @@ export const typeDefs = `#graphql
       offset: Int
     ): PokemonResponse!
     pokemonById(id: Int!): Pokemon
+    pokemonByIds(ids: [Int!]!): [Pokemon!]!
     pokedex(
       search: String
       generation: String
@@ -58,6 +59,7 @@ export const typeDefs = `#graphql
     updateRareCandy(amount: Int!): User!
     upgradeStat(stat: String!): User!
     purchasePokemon(pokemonId: Int!): User!
+    catchPokemon(pokemonId: Int!): User!
     deleteUser: Boolean!
     setFavoritePokemon(pokemonId: Int): User!
     setSelectedPokemon(pokemonId: Int): User!

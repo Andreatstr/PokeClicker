@@ -1,4 +1,4 @@
-import { imageCache } from './imageCache';
+import {imageCache} from './imageCache';
 
 interface GameAssetUrls {
   charizardSprite: string;
@@ -18,9 +18,11 @@ class GameAssetsCache {
   private getGameAssetUrls(): GameAssetUrls {
     if (Object.keys(this.gameAssets).length === 0) {
       this.gameAssets = {
-        charizardSprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
+        charizardSprite:
+          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
         candyImage: `${this.baseUrl}candy.webp`,
-        rareCandyIcon: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
+        rareCandyIcon:
+          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
         pokemonBackground: `${this.baseUrl}pokemon-bg.webp`,
         ashSprite: `${this.baseUrl}AshKetchumSprite.webp`,
         mapBackground: `${this.baseUrl}map.webp`,
@@ -68,10 +70,10 @@ class GameAssetsCache {
   async preloadAllGameAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const assetUrls = Object.values(urls);
-    
+
     await imageCache.preloadImages(assetUrls);
-    
-    Object.keys(urls).forEach(asset => this.preloadedAssets.add(asset));
+
+    Object.keys(urls).forEach((asset) => this.preloadedAssets.add(asset));
   }
 
   async preloadClickerAssets(): Promise<void> {
@@ -80,27 +82,28 @@ class GameAssetsCache {
       urls.charizardSprite,
       urls.candyImage,
       urls.rareCandyIcon,
-      urls.pokemonBackground
+      urls.pokemonBackground,
     ];
-    
+
     await imageCache.preloadImages(clickerAssets);
-    
-    ['charizardSprite', 'candyImage', 'rareCandyIcon', 'pokemonBackground'].forEach(asset => {
+
+    [
+      'charizardSprite',
+      'candyImage',
+      'rareCandyIcon',
+      'pokemonBackground',
+    ].forEach((asset) => {
       this.preloadedAssets.add(asset);
     });
   }
 
   async preloadMapAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
-    const mapAssets = [
-      urls.ashSprite,
-      urls.mapBackground,
-      urls.collisionMap
-    ];
-    
+    const mapAssets = [urls.ashSprite, urls.mapBackground, urls.collisionMap];
+
     await imageCache.preloadImages(mapAssets);
-    
-    ['ashSprite', 'mapBackground', 'collisionMap'].forEach(asset => {
+
+    ['ashSprite', 'mapBackground', 'collisionMap'].forEach((asset) => {
       this.preloadedAssets.add(asset);
     });
   }
@@ -136,4 +139,4 @@ class GameAssetsCache {
 export const gameAssetsCache = new GameAssetsCache();
 
 // Export types
-export type { GameAssetUrls };
+export type {GameAssetUrls};

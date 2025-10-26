@@ -14,8 +14,10 @@ interface PokemonCardProps {
 }
 
 // Helper to calculate Pokemon purchase cost (matches backend)
+// Exponential pricing by tier: 100 × 2^(tier)
 function getPokemonCost(pokemonId: number): number {
-  return Math.floor(100 + pokemonId / 10);
+  const tier = Math.floor(pokemonId / 10);
+  return Math.floor(100 * Math.pow(2, tier));
 }
 
 function getContrastColor(bgColor: string): string {
@@ -149,9 +151,10 @@ export const PokemonCard = memo(function PokemonCard({
           // Preload Pokemon sprite
           const sprite = await pokemonSpriteCache.getPokemonSprite(pokemon.id);
           setCachedSprite(sprite);
-          
+
           // Preload type background
-          const background = await typeBackgroundCache.getTypeBackground(primaryType);
+          const background =
+            await typeBackgroundCache.getTypeBackground(primaryType);
           setCachedBackground(background);
         }
       } catch (error) {

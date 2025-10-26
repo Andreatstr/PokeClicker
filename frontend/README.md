@@ -5,6 +5,7 @@ A modern React-based Pokemon map exploration game with optimized mobile performa
 ## 🎮 Features
 
 ### **Map System**
+
 - **Tile-based rendering** with 512x512px tiles for optimal performance
 - **Smart caching** with LRU cache (50 tiles in memory)
 - **Priority loading** - closest tiles to player load first
@@ -12,18 +13,21 @@ A modern React-based Pokemon map exploration game with optimized mobile performa
 - **Mobile-optimized** with limited concurrent tile requests
 
 ### **Character Movement**
+
 - **Smooth sprite animation** with 4-frame walking cycles
 - **Collision detection** using pixel-perfect map data
 - **Joystick controls** for mobile devices
 - **Keyboard support** with arrow keys
 
 ### **Interactive Controls**
+
 - **Virtual GameBoy interface** with authentic styling
 - **A/B buttons** for interaction and battles
 - **Responsive design** adapts to different screen sizes
 - **Touch-friendly** controls for mobile gameplay
 
 ### **Pokemon System**
+
 - **Wild Pokemon spawning** at random walkable locations
 - **Proximity detection** for nearby Pokemon encounters
 - **Battle system** (coming soon)
@@ -32,17 +36,20 @@ A modern React-based Pokemon map exploration game with optimized mobile performa
 ## 🚀 Performance Optimizations
 
 ### **Image Optimization**
+
 - All images converted from PNG to WebP format
 - 85% quality compression for optimal size/quality balance
 - Tile-based loading reduces memory usage
 
 ### **Code Architecture**
+
 - **Modular component structure** with separated concerns
 - **Custom React hooks** for business logic
 - **TypeScript** for type safety and better development experience
 - **Efficient state management** with minimal re-renders
 
 ### **Mobile Performance**
+
 - **Non-blocking tile loading** - gameplay continues while tiles load
 - **Batched network requests** (4 concurrent max for mobile)
 - **Smart buffering** - tiles load before coming into view
@@ -51,11 +58,13 @@ A modern React-based Pokemon map exploration game with optimized mobile performa
 ## 🛠️ Development
 
 ### **Prerequisites**
+
 - Node.js 18+
 - npm or pnpm
 - For tile generation: Sharp (auto-installed)
 
 ### **Getting Started**
+
 ```bash
 # Install dependencies
 npm install
@@ -71,6 +80,7 @@ npm run build
 ```
 
 ### **Tile Management**
+
 ```bash
 # Generate new tiles from map images
 npm run split-tiles
@@ -118,18 +128,21 @@ public/
 ## 🎯 Technical Highlights
 
 ### **Tile System**
+
 - **Viewport culling**: Only renders visible tiles + buffer
 - **Distance-based loading**: Prioritizes tiles closest to player
 - **Memory management**: LRU cache prevents memory leaks
 - **Error handling**: Graceful fallbacks for failed tile loads
 
 ### **Movement System**
+
 - **Pixel-perfect collision**: Uses grayscale collision map
 - **Smooth transitions**: CSS transitions with easing
 - **State management**: Efficient key handling with refs
 - **Mobile support**: Touch joystick with haptic feedback
 
 ### **Performance Metrics**
+
 - **Load time**: ~75% faster on mobile vs full image loading
 - **Memory usage**: Capped at 50 tiles (~100MB vs 2GB+ for full map)
 - **Network efficiency**: 252 requests vs 1000+ with smaller tiles
@@ -138,18 +151,20 @@ public/
 ## 🔧 Configuration
 
 Key constants in `useTileRenderer.ts`:
+
 ```typescript
-const TILE_SIZE = 512;           // Tile dimensions in pixels
-const CACHE_SIZE = 50;           // Max tiles kept in memory
-const MAP_WIDTH = 10560;         // Total map width
-const MAP_HEIGHT = 6080;         // Total map height
+const TILE_SIZE = 512; // Tile dimensions in pixels
+const CACHE_SIZE = 50; // Max tiles kept in memory
+const MAP_WIDTH = 10560; // Total map width
+const MAP_HEIGHT = 6080; // Total map height
 ```
 
 Movement settings in `useMapMovement.ts`:
+
 ```typescript
-const TILE_SIZE = 24;            // Movement step size
-const ANIMATION_SPEED = 120;     // Animation frame duration (ms)
-const MOVE_SPEED = 120;          // Movement interval (ms)
+const TILE_SIZE = 24; // Movement step size
+const ANIMATION_SPEED = 120; // Animation frame duration (ms)
+const MOVE_SPEED = 120; // Movement interval (ms)
 ```
 
 ## 📱 Mobile Optimization

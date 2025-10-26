@@ -70,7 +70,10 @@ interface ProfileDashboardProps {
   onNavigate?: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void;
 }
 
-export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashboardProps) {
+export function ProfileDashboard({
+  isDarkMode = false,
+  onNavigate,
+}: ProfileDashboardProps) {
   const {user, logout, updateUser} = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
@@ -148,10 +151,15 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
             : '8px 8px 0px rgba(0,0,0,1)',
         }}
       >
-        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">TRAINER PROFILE</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+          TRAINER PROFILE
+        </h1>
 
         {/* User Info Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
+          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+        >
           <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER INFO</h2>
           <div className="space-y-2 text-sm sm:text-base">
             <p className="break-words">
@@ -169,7 +177,10 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
                 try {
                   const date = new Date(user.created_at);
                   if (isNaN(date.getTime())) return 'Unknown';
-                  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    year: 'numeric',
+                  });
                 } catch {
                   return 'Unknown';
                 }
@@ -179,7 +190,10 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         </div>
 
         {/* Game Statistics Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
+          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+        >
           <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER STATS</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
             <div className="flex flex-col">
@@ -210,7 +224,10 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         </div>
 
         {/* Favorite Pokemon Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+        >
           <h2 className="text-lg sm:text-xl font-bold">FAVORITE</h2>
 
           {favoritePokemonData?.pokemonById ? (
@@ -240,16 +257,34 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
               className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
               style={{
                 borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor: user.owned_pokemon_ids.length === 0 ? '#555' : (isDarkMode ? '#2a2a2a' : '#f5f1e8'),
-                cursor: user.owned_pokemon_ids.length === 0 ? 'not-allowed' : 'pointer',
+                backgroundColor:
+                  user.owned_pokemon_ids.length === 0
+                    ? '#555'
+                    : isDarkMode
+                      ? '#2a2a2a'
+                      : '#f5f1e8',
+                cursor:
+                  user.owned_pokemon_ids.length === 0
+                    ? 'not-allowed'
+                    : 'pointer',
                 opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
               }}
-              title={user.owned_pokemon_ids.length === 0 ? 'Catch a Pokemon first!' : 'Click to select favorite'}
+              title={
+                user.owned_pokemon_ids.length === 0
+                  ? 'Catch a Pokemon first!'
+                  : 'Click to select favorite'
+              }
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0" style={{color: isDarkMode ? '#666' : '#999'}}>
+              <div
+                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0"
+                style={{color: isDarkMode ? '#666' : '#999'}}
+              >
                 ?
               </div>
-              <p className="text-sm sm:text-base font-bold text-left flex-1" style={{color: isDarkMode ? '#666' : '#999'}}>
+              <p
+                className="text-sm sm:text-base font-bold text-left flex-1"
+                style={{color: isDarkMode ? '#666' : '#999'}}
+              >
                 None
               </p>
             </button>
@@ -257,7 +292,10 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
         </div>
 
         {/* Clicker Pokemon Section */}
-        <div className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4" style={{borderColor: isDarkMode ? '#333333' : 'black'}}>
+        <div
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+        >
           <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
 
           {selectedPokemonData?.pokemonById ? (
@@ -287,16 +325,34 @@ export function ProfileDashboard({isDarkMode = false, onNavigate}: ProfileDashbo
               className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
               style={{
                 borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor: user.owned_pokemon_ids.length === 0 ? '#555' : (isDarkMode ? '#2a2a2a' : '#f5f1e8'),
-                cursor: user.owned_pokemon_ids.length === 0 ? 'not-allowed' : 'pointer',
+                backgroundColor:
+                  user.owned_pokemon_ids.length === 0
+                    ? '#555'
+                    : isDarkMode
+                      ? '#2a2a2a'
+                      : '#f5f1e8',
+                cursor:
+                  user.owned_pokemon_ids.length === 0
+                    ? 'not-allowed'
+                    : 'pointer',
                 opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
               }}
-              title={user.owned_pokemon_ids.length === 0 ? 'Catch a Pokemon first!' : 'Click to select clicker Pokemon'}
+              title={
+                user.owned_pokemon_ids.length === 0
+                  ? 'Catch a Pokemon first!'
+                  : 'Click to select clicker Pokemon'
+              }
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0" style={{color: isDarkMode ? '#666' : '#999'}}>
+              <div
+                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0"
+                style={{color: isDarkMode ? '#666' : '#999'}}
+              >
                 ?
               </div>
-              <p className="text-sm sm:text-base font-bold text-left flex-1" style={{color: isDarkMode ? '#666' : '#999'}}>
+              <p
+                className="text-sm sm:text-base font-bold text-left flex-1"
+                style={{color: isDarkMode ? '#666' : '#999'}}
+              >
                 None
               </p>
             </button>

@@ -11,8 +11,8 @@ export default defineConfig({
     allowedHosts: [
       'iknjy-129-241-236-235.a.free.pinggy.link',
       'localhost',
-      '127.0.0.1'
-    ]
+      '127.0.0.1',
+    ],
   },
   resolve: {
     alias: {

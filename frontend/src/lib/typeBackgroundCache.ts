@@ -1,4 +1,4 @@
-import { imageCache } from './imageCache';
+import {imageCache} from './imageCache';
 
 interface TypeBackgroundUrls {
   [type: string]: string;
@@ -21,7 +21,7 @@ class TypeBackgroundCache {
 
   async getTypeBackground(type: string): Promise<HTMLImageElement> {
     const url = this.getTypeBackgroundUrl(type);
-    
+
     try {
       return await imageCache.getImage(url);
     } catch (error) {
@@ -34,27 +34,52 @@ class TypeBackgroundCache {
 
   async preloadAllTypeBackgrounds(): Promise<void> {
     const allTypes = [
-      'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
-      'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark',
-      'steel', 'fairy', 'unknown'
+      'normal',
+      'fire',
+      'water',
+      'electric',
+      'grass',
+      'ice',
+      'fighting',
+      'poison',
+      'ground',
+      'flying',
+      'psychic',
+      'bug',
+      'rock',
+      'ghost',
+      'dragon',
+      'dark',
+      'steel',
+      'fairy',
+      'unknown',
     ];
 
-    const urls = allTypes.map(type => this.getTypeBackgroundUrl(type));
+    const urls = allTypes.map((type) => this.getTypeBackgroundUrl(type));
     await imageCache.preloadImages(urls);
-    
-    allTypes.forEach(type => this.preloadedTypes.add(type));
+
+    allTypes.forEach((type) => this.preloadedTypes.add(type));
   }
 
   async preloadTypeBackgrounds(types: string[]): Promise<void> {
-    const urls = types.map(type => this.getTypeBackgroundUrl(type));
+    const urls = types.map((type) => this.getTypeBackgroundUrl(type));
     await imageCache.preloadImages(urls);
-    
-    types.forEach(type => this.preloadedTypes.add(type));
+
+    types.forEach((type) => this.preloadedTypes.add(type));
   }
 
   // Preload common Pokemon types
   async preloadCommonTypes(): Promise<void> {
-    const commonTypes = ['normal', 'fire', 'water', 'electric', 'grass', 'psychic', 'fighting', 'poison'];
+    const commonTypes = [
+      'normal',
+      'fire',
+      'water',
+      'electric',
+      'grass',
+      'psychic',
+      'fighting',
+      'poison',
+    ];
     await this.preloadTypeBackgrounds(commonTypes);
   }
 
@@ -89,4 +114,4 @@ class TypeBackgroundCache {
 export const typeBackgroundCache = new TypeBackgroundCache();
 
 // Export types
-export type { TypeBackgroundUrls };
+export type {TypeBackgroundUrls};

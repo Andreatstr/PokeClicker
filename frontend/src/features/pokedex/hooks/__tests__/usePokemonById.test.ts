@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook } from '@testing-library/react'
-import { ApolloError } from '@apollo/client'
-import { usePokemonById } from '../usePokemonById'
-
+import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {renderHook} from '@testing-library/react';
+import {ApolloError} from '@apollo/client';
+import {usePokemonById} from '../usePokemonById';
 
 // Mock Apollo Client useQuery
 vi.mock('@apollo/client', () => ({
@@ -10,30 +9,30 @@ vi.mock('@apollo/client', () => ({
   gql: vi.fn().mockReturnValue({}),
   ApolloError: class MockApolloError extends Error {
     constructor(message: string) {
-      super(message)
-      this.name = 'ApolloError'
-      this.graphQLErrors = []
-      this.protocolErrors = []
-      this.clientErrors = []
-      this.networkError = null
-      this.extraInfo = undefined
+      super(message);
+      this.name = 'ApolloError';
+      this.graphQLErrors = [];
+      this.protocolErrors = [];
+      this.clientErrors = [];
+      this.networkError = null;
+      this.extraInfo = undefined;
     }
-    graphQLErrors: any[] = []
-    protocolErrors: any[] = []
-    clientErrors: any[] = []
-    networkError: any = null
-    extraInfo: any = undefined
+    graphQLErrors: any[] = [];
+    protocolErrors: any[] = [];
+    clientErrors: any[] = [];
+    networkError: any = null;
+    extraInfo: any = undefined;
   },
-}))
+}));
 
 // Get the mocked useQuery function
-const { useQuery } = await import('@apollo/client')
-const mockUseQuery = useQuery as any
+const {useQuery} = await import('@apollo/client');
+const mockUseQuery = useQuery as any;
 
 describe('usePokemonById hook', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('should call useQuery with correct variables when id is provided', () => {
     const mockData = {
@@ -55,7 +54,7 @@ describe('usePokemonById hook', () => {
         abilities: ['overgrow', 'chlorophyll'],
         evolution: [2, 3],
       },
-    }
+    };
 
     mockUseQuery.mockReturnValue({
       data: mockData,
@@ -67,24 +66,24 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    renderHook(() => usePokemonById(1))
+    renderHook(() => usePokemonById(1));
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.any(Object), // POKEMON_BY_ID_QUERY
       {
-        variables: { id: 1 },
+        variables: {id: 1},
         skip: false,
       }
-    )
-  })
+    );
+  });
 
   it('should skip query when id is null', () => {
     mockUseQuery.mockReturnValue({
@@ -97,24 +96,24 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: null },
+      variables: {id: null},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    renderHook(() => usePokemonById(null))
+    renderHook(() => usePokemonById(null));
 
     expect(mockUseQuery).toHaveBeenCalledWith(
       expect.any(Object), // POKEMON_BY_ID_QUERY
       {
-        variables: { id: null },
+        variables: {id: null},
         skip: true,
       }
-    )
-  })
+    );
+  });
 
   it('should handle loading state', () => {
     mockUseQuery.mockReturnValue({
@@ -127,20 +126,20 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.loading).toBe(true)
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.error).toBeUndefined()
-  })
+    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.error).toBeUndefined();
+  });
 
   it('should handle error state', () => {
     const mockError = new ApolloError({
@@ -150,7 +149,7 @@ describe('usePokemonById hook', () => {
       clientErrors: [],
       networkError: new Error('Network error'),
       extraInfo: undefined,
-    })
+    });
     mockUseQuery.mockReturnValue({
       data: undefined,
       loading: false,
@@ -161,20 +160,20 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.loading).toBe(false)
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.error).toBe(mockError)
-  })
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.error).toBe(mockError);
+  });
 
   it('should handle successful data fetch', () => {
     const mockPokemon = {
@@ -194,9 +193,9 @@ describe('usePokemonById hook', () => {
       weight: 6.9,
       abilities: ['overgrow', 'chlorophyll'],
       evolution: [2, 3],
-    }
+    };
 
-    const mockData = { pokemonById: mockPokemon }
+    const mockData = {pokemonById: mockPokemon};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
@@ -208,23 +207,23 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.loading).toBe(false)
-    expect(result.current.error).toBeUndefined()
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeUndefined();
+  });
 
   it('should handle null Pokemon data', () => {
-    const mockData = { pokemonById: null }
+    const mockData = {pokemonById: null};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
@@ -236,19 +235,19 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(999))
+    const {result} = renderHook(() => usePokemonById(999));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.data?.pokemonById).toBeNull()
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data?.pokemonById).toBeNull();
+  });
 
   it('should handle different Pokemon IDs', () => {
     const mockPokemon = {
@@ -268,9 +267,9 @@ describe('usePokemonById hook', () => {
       weight: 6.0,
       abilities: ['static', 'lightning-rod'],
       evolution: [26],
-    }
+    };
 
-    const mockData = { pokemonById: mockPokemon }
+    const mockData = {pokemonById: mockPokemon};
 
     mockUseQuery.mockReturnValue({
       data: mockData,
@@ -282,24 +281,24 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(25))
+    const {result} = renderHook(() => usePokemonById(25));
 
-    expect(result.current.data).toEqual(mockData)
-    expect(result.current.data?.pokemonById?.id).toBe(25)
-    expect(result.current.data?.pokemonById?.name).toBe('pikachu')
-  })
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.data?.pokemonById?.id).toBe(25);
+    expect(result.current.data?.pokemonById?.name).toBe('pikachu');
+  });
 
   it('should pass through all useQuery return values', () => {
-    const mockRefetch = vi.fn()
-    const mockNetworkStatus = 7
+    const mockRefetch = vi.fn();
+    const mockNetworkStatus = 7;
 
     mockUseQuery.mockReturnValue({
       data: undefined,
@@ -311,20 +310,20 @@ describe('usePokemonById hook', () => {
       client: {} as any,
       observable: {} as any,
       previousData: undefined,
-      variables: { id: 1 },
+      variables: {id: 1},
       fetchMore: vi.fn(),
       startPolling: vi.fn(),
       stopPolling: vi.fn(),
       subscribeToMore: vi.fn(),
       updateQuery: vi.fn(),
-    })
+    });
 
-    const { result } = renderHook(() => usePokemonById(1))
+    const {result} = renderHook(() => usePokemonById(1));
 
-    expect(result.current.data).toBeUndefined()
-    expect(result.current.loading).toBe(true)
-    expect(result.current.error).toBeUndefined()
-    expect(result.current.refetch).toBe(mockRefetch)
-    expect(result.current.networkStatus).toBe(mockNetworkStatus)
-  })
-})
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.loading).toBe(true);
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.refetch).toBe(mockRefetch);
+    expect(result.current.networkStatus).toBe(mockNetworkStatus);
+  });
+});

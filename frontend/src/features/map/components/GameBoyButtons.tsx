@@ -7,7 +7,11 @@ interface GameBoyButtonsProps {
   nearbyPokemon: {pokemon: {name: string}} | null;
 }
 
-export function GameBoyButtons({onAButtonClick, onBButtonClick, isAuthenticated}: GameBoyButtonsProps) {
+export function GameBoyButtons({
+  onAButtonClick,
+  onBButtonClick,
+  isAuthenticated,
+}: GameBoyButtonsProps) {
   return (
     <div className="flex gap-2 items-center -rotate-[20deg] mb-2">
       <div className="flex flex-col items-center">

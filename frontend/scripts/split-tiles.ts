@@ -8,7 +8,7 @@
  * or: npx tsx scripts/split-tiles.ts
  */
 
-import { promises as fs } from 'fs';
+import {promises as fs} from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
 
@@ -27,12 +27,12 @@ async function ensureDirectoryExists(dirPath: string): Promise<void> {
   try {
     await fs.access(dirPath);
   } catch {
-    await fs.mkdir(dirPath, { recursive: true });
+    await fs.mkdir(dirPath, {recursive: true});
   }
 }
 
 async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
-  const { inputPath, outputDir, prefix } = config;
+  const {inputPath, outputDir, prefix} = config;
 
   console.log(`Processing ${inputPath}...`);
 
@@ -42,7 +42,7 @@ async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
 
     // Get image metadata
     const metadata = await sharp(inputPath).metadata();
-    const { width = 0, height = 0 } = metadata;
+    const {width = 0, height = 0} = metadata;
 
     console.log(`Image size: ${width}x${height}`);
 
@@ -77,7 +77,7 @@ async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
             left,
             top,
             width: tileWidth,
-            height: tileHeight
+            height: tileHeight,
           })
           .webp({
             quality: 85,
@@ -96,7 +96,6 @@ async function splitImageIntoTiles(config: TileConfig): Promise<boolean> {
 
     console.log(`Completed ${prefix}: ${tilesCreated} tiles`);
     return true;
-
   } catch (error) {
     console.error(`Error processing ${inputPath}:`, error);
     return false;
@@ -114,7 +113,9 @@ async function main(): Promise<boolean> {
   const expectedTilesY = Math.ceil(MAP_HEIGHT / TILE_SIZE);
   const expectedTotal = expectedTilesX * expectedTilesY;
 
-  console.log(`Expected tiles: ${expectedTilesX}x${expectedTilesY} = ${expectedTotal} tiles per image`);
+  console.log(
+    `Expected tiles: ${expectedTilesX}x${expectedTilesY} = ${expectedTotal} tiles per image`
+  );
   console.log('Output: public/map/tiles/');
   console.log();
 
@@ -127,13 +128,13 @@ async function main(): Promise<boolean> {
     {
       inputPath: path.join(mapDir, 'map.webp'),
       outputDir: tilesDir,
-      prefix: 'map'
+      prefix: 'map',
     },
     {
       inputPath: path.join(mapDir, 'map-collision.webp'),
       outputDir: tilesDir,
-      prefix: 'collision'
-    }
+      prefix: 'collision',
+    },
   ];
 
   // Check if source images exist
@@ -161,8 +162,12 @@ async function main(): Promise<boolean> {
   console.log('All tiles created successfully!');
   console.log(`Location: ${tilesDir}`);
   console.log('Files created:');
-  console.log(`   - map_0_0.webp to map_${expectedTilesX-1}_${expectedTilesY-1}.webp (${expectedTotal} files)`);
-  console.log(`   - collision_0_0.webp to collision_${expectedTilesX-1}_${expectedTilesY-1}.webp (${expectedTotal} files)`);
+  console.log(
+    `   - map_0_0.webp to map_${expectedTilesX - 1}_${expectedTilesY - 1}.webp (${expectedTotal} files)`
+  );
+  console.log(
+    `   - collision_0_0.webp to collision_${expectedTilesX - 1}_${expectedTilesY - 1}.webp (${expectedTotal} files)`
+  );
   console.log(`   - Total: ${expectedTotal * 2} tile files`);
   console.log();
   console.log('Optimized for mobile performance with 75% fewer HTTP requests!');
@@ -182,4 +187,4 @@ if (require.main === module) {
     });
 }
 
-export { main as splitTiles };
+export {main as splitTiles};

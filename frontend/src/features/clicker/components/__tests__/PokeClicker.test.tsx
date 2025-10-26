@@ -94,7 +94,8 @@ describe('PokeClicker component', () => {
 
     render(<PokeClicker />);
 
-    expect(screen.getByText('1500')).toBeInTheDocument();
+    // formatNumber converts 1500 to '1.5K'
+    expect(screen.getByText('1.5K')).toBeInTheDocument();
   });
 
   it('should handle candy clicking when authenticated', async () => {

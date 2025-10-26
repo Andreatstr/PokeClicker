@@ -28,7 +28,7 @@ class PreloadService {
 
   private updateProgress(progress: number) {
     this.preloadProgress = progress;
-    this.preloadCallbacks.forEach(callback => callback(progress));
+    this.preloadCallbacks.forEach((callback) => callback(progress));
   }
 
   async preloadAll(options: PreloadOptions = {}): Promise<void> {
@@ -42,7 +42,6 @@ class PreloadService {
 
     try {
       const tasks: Array<() => Promise<void>> = [];
-      let totalTasks = 0;
 
       // Preload common Pokemon (first 50)
       if (options.preloadCommonPokemon !== false) {
@@ -50,7 +49,6 @@ class PreloadService {
           await pokemonSpriteCache.preloadCommonPokemon();
           this.updateProgress(20);
         });
-        totalTasks++;
       }
 
       // Preload common types
@@ -59,7 +57,6 @@ class PreloadService {
           await typeBackgroundCache.preloadCommonTypes();
           this.updateProgress(40);
         });
-        totalTasks++;
       }
 
       // Preload game assets
@@ -68,7 +65,6 @@ class PreloadService {
           await gameAssetsCache.preloadClickerAssets();
           this.updateProgress(60);
         });
-        totalTasks++;
       }
 
       // Preload map assets
@@ -77,7 +73,6 @@ class PreloadService {
           await gameAssetsCache.preloadMapAssets();
           this.updateProgress(80);
         });
-        totalTasks++;
       }
 
       // Preload specific Pokemon range
@@ -88,19 +83,19 @@ class PreloadService {
             options.pokemonRange!.end
           );
         });
-        totalTasks++;
       }
 
       // Preload specific types
       if (options.specificTypes && options.specificTypes.length > 0) {
         tasks.push(async () => {
-          await typeBackgroundCache.preloadTypeBackgrounds(options.specificTypes!);
+          await typeBackgroundCache.preloadTypeBackgrounds(
+            options.specificTypes!
+          );
         });
-        totalTasks++;
       }
 
       // Execute all tasks
-      await Promise.all(tasks.map(task => task()));
+      await Promise.all(tasks.map((task) => task()));
 
       this.updateProgress(100);
       console.log('All assets preloaded successfully');
@@ -176,4 +171,4 @@ class PreloadService {
 export const preloadService = new PreloadService();
 
 // Export types
-export type { PreloadOptions };
+export type {PreloadOptions};

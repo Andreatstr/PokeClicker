@@ -30,7 +30,6 @@ export function useCollisionMap(): CollisionMapState {
       collisionCanvasRef.current = canvas;
       collisionCtxRef.current = ctx;
       setCollisionMapLoaded(true);
-      console.log('Collision map loaded successfully');
     };
     img.onerror = () => {
       console.error('Failed to load collision map');
@@ -38,37 +37,40 @@ export function useCollisionMap(): CollisionMapState {
   }, []);
 
   // Check if a position is walkable (white pixel on collision map)
-  const isPositionWalkable = useCallback((x: number, y: number): boolean => {
-    if (!collisionCtxRef.current || !collisionMapLoaded) {
-      return true; // Allow movement if collision map not loaded yet
-    }
+  const isPositionWalkable = useCallback(
+    (x: number, y: number): boolean => {
+      if (!collisionCtxRef.current || !collisionMapLoaded) {
+        return true; // Allow movement if collision map not loaded yet
+      }
 
-    // Clamp coordinates to map bounds
-    const checkX = Math.floor(Math.max(0, Math.min(x, MAP_WIDTH - 1)));
-    const checkY = Math.floor(Math.max(0, Math.min(y, MAP_HEIGHT - 1)));
+      // Clamp coordinates to map bounds
+      const checkX = Math.floor(Math.max(0, Math.min(x, MAP_WIDTH - 1)));
+      const checkY = Math.floor(Math.max(0, Math.min(y, MAP_HEIGHT - 1)));
 
-    try {
-      const pixelData = collisionCtxRef.current.getImageData(
-        checkX,
-        checkY,
-        1,
-        1
-      ).data;
+      try {
+        const pixelData = collisionCtxRef.current.getImageData(
+          checkX,
+          checkY,
+          1,
+          1
+        ).data;
 
-      // Check if pixel is white (walkable)
-      // White pixels have high RGB values (close to 255)
-      const r = pixelData[0];
-      const g = pixelData[1];
-      const b = pixelData[2];
+        // Check if pixel is white (walkable)
+        // White pixels have high RGB values (close to 255)
+        const r = pixelData[0];
+        const g = pixelData[1];
+        const b = pixelData[2];
 
-      // Consider it walkable if it's mostly white (brightness > 200)
-      const brightness = (r + g + b) / 3;
-      return brightness > 200;
-    } catch (error) {
-      console.error('Error checking collision:', error);
-      return true; // Allow movement on error
-    }
-  }, [collisionMapLoaded]);
+        // Consider it walkable if it's mostly white (brightness > 200)
+        const brightness = (r + g + b) / 3;
+        return brightness > 200;
+      } catch (error) {
+        console.error('Error checking collision:', error);
+        return true; // Allow movement on error
+      }
+    },
+    [collisionMapLoaded]
+  );
 
   return {
     collisionMapLoaded,

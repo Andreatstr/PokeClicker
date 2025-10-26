@@ -35,7 +35,10 @@ export function ConfirmDialog({
           }}
         >
           <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{title}</h2>
-          <p className="mb-4 sm:mb-6 text-sm sm:text-base" style={{color: isDarkMode ? '#e5e5e5' : '#000'}}>
+          <p
+            className="mb-4 sm:mb-6 text-sm sm:text-base"
+            style={{color: isDarkMode ? '#e5e5e5' : '#000'}}
+          >
             {message}
           </p>
 
