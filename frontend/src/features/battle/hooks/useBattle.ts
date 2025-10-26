@@ -24,10 +24,10 @@ export function useBattle({
   onBattleEnd,
 }: UseBattleProps) {
   const [battleState, setBattleState] = useState<BattleState>(() => {
-    // Scale HP to make battles last longer (~10 seconds)
-    // Both players get 20x HP
-    const scaledPlayerHP = (playerPokemon.stats?.hp || 100) * 20;
-    const scaledOpponentHP = (opponentPokemon.stats?.hp || 100) * 20;
+    // Scale HP to make battles last longer (~15-20 seconds)
+    // Opponent gets more HP to last longer
+    const scaledPlayerHP = (playerPokemon.stats?.hp || 100) * 30;
+    const scaledOpponentHP = (opponentPokemon.stats?.hp || 100) * 40;
 
     return {
       playerHP: scaledPlayerHP,
@@ -56,9 +56,7 @@ export function useBattle({
       (stats?.spDefense || 0) +
       (stats?.speed || 0);
 
-    // Map total stats (typical range ~200-600) to attack interval (500ms to 100ms)
-    // Lower interval = faster attacks
-    const minInterval = 100; // 10 attacks/second for strongest Pokemon
+    const minInterval = 100;
     const maxInterval = 500; // 2 attacks/second for weakest Pokemon
     const minStats = 200;
     const maxStats = 600;
@@ -72,29 +70,24 @@ export function useBattle({
     return Math.round(interval);
   }, [opponentPokemon]);
 
-  // Calculate damage from opponent to player (passive damage)
   const calculatePassiveDamage = useCallback(() => {
     const opponentAttack = opponentPokemon.stats?.attack || 10;
     const playerDefense = playerPokemon.stats?.defense || 10;
 
-    const baseDamage = Math.max(1, opponentAttack - playerDefense * 0.5);
-    return baseDamage * 0.5;
+    const baseDamage = Math.max(1, opponentAttack - playerDefense * 0.3);
+    return baseDamage * 1.5;
   }, [opponentPokemon, playerPokemon]);
 
-  // Calculate damage from player click
   const calculateClickDamage = useCallback(() => {
     const playerAttack = playerPokemon.stats?.attack || 10;
     const playerSpeed = playerPokemon.stats?.speed || 1;
     const opponentDefense = opponentPokemon.stats?.defense || 10;
 
-    // Base damage with defense reduction
-    const baseDamage = Math.max(1, playerAttack - opponentDefense * 0.3);
-    // Speed multiplier: 1 + (speed × 0.1)
-    const speedMultiplier = 1 + playerSpeed * 0.1;
-    return baseDamage * speedMultiplier;
+    const baseDamage = Math.max(1, playerAttack - opponentDefense * 0.6);
+    const speedMultiplier = 1 + playerSpeed * 0.02;
+    return baseDamage * speedMultiplier * 0.6;
   }, [playerPokemon, opponentPokemon]);
 
-  // Handle player click attack
   const handleAttackClick = useCallback(() => {
     if (battleState.result !== 'ongoing') return;
 
@@ -114,7 +107,6 @@ export function useBattle({
     });
   }, [battleState.result, calculateClickDamage]);
 
-  // Passive damage from opponent (frequency based on opponent stats)
   useEffect(() => {
     if (battleState.result !== 'ongoing') return;
 
@@ -143,7 +135,6 @@ export function useBattle({
     };
   }, [battleState.result, calculatePassiveDamage, getAttackInterval]);
 
-  // Handle battle end
   useEffect(() => {
     if (battleState.result !== 'ongoing') {
       if (passiveDamageTimerRef.current) {
