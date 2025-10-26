@@ -15,7 +15,9 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
-function sanitizeUserForClient(userDoc: UserDocument): Omit<UserDocument, 'password_hash' | 'created_at'> & { created_at: string } {
+function sanitizeUserForClient(
+  userDoc: UserDocument
+): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
   return {
     _id: userDoc._id,
     username: userDoc.username,
@@ -107,16 +109,30 @@ const authMutations = {
   },
 };
 
-// Helper to get upgrade cost
-function getUpgradeCost(currentLevel: number): number {
-  return Math.floor(10 * Math.pow(1.5, currentLevel - 1));
+// Helper to get upgrade cost (differentiated by stat type)
+function getUpgradeCost(currentLevel: number, stat: string): number {
+  // Different multipliers for different stat types:
+  // Attack/SpAttack: 2.8x (most expensive, highest reward)
+  // HP/Defense/SpDefense: 2.5x (moderate cost)
+  // Speed: 2.2x (cheapest, utility stat)
+  let multiplier = 2.5; // default
+
+  if (stat === 'attack' || stat === 'spAttack') {
+    multiplier = 2.8;
+  } else if (stat === 'speed') {
+    multiplier = 2.2;
+  }
+
+  return Math.floor(10 * Math.pow(multiplier, currentLevel - 1));
 }
 
 // Helper to get Pokemon purchase cost
 function getPokemonCost(pokemonId: number): number {
-  // Base cost of 100 rare candy
-  // Increases slightly with Pokemon ID (rarer Pokemon cost more)
-  return Math.floor(100 + pokemonId / 10);
+  // Exponential pricing by tier: 100 × 2^(tier)
+  // Pokemon are grouped into tiers of 10
+  // Tier 0 (ID 1-10): 100, Tier 1 (ID 11-20): 200, Tier 2 (ID 21-30): 400, etc.
+  const tier = Math.floor(pokemonId / 10);
+  return Math.floor(100 * Math.pow(2, tier));
 }
 
 export const resolvers = {
@@ -145,6 +161,13 @@ export const resolvers = {
     },
     pokemonById: async (_: unknown, {id}: {id: number}) => {
       return fetchPokemonById(id);
+    },
+    pokemonByIds: async (_: unknown, {ids}: {ids: number[]}) => {
+      // Fetch all Pokemon in parallel
+      const pokemonPromises = ids.map((id) => fetchPokemonById(id));
+      const pokemon = await Promise.all(pokemonPromises);
+      // Filter out any null results (in case some IDs don't exist)
+      return pokemon.filter(Boolean);
     },
     pokedex: async (
       _: unknown,
@@ -322,7 +345,7 @@ export const resolvers = {
 
       // Calculate cost
       const currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats];
-      const cost = getUpgradeCost(currentLevel);
+      const cost = getUpgradeCost(currentLevel, stat);
 
       // Check if user has enough rare candy
       if (userDoc.rare_candy < cost) {
@@ -395,6 +418,48 @@ export const resolvers = {
 
       if (!result) {
         throw new Error('Failed to purchase Pokémon');
+      }
+
+      return sanitizeUserForClient(result);
+    },
+
+    // Catch Pokemon (free - for battle rewards)
+    catchPokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+
+      // Get current user state
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // Check if user already owns this Pokemon
+      if (
+        userDoc.owned_pokemon_ids &&
+        userDoc.owned_pokemon_ids.includes(pokemonId)
+      ) {
+        // Already owned - just return the user without error
+        return sanitizeUserForClient(userDoc);
+      }
+
+      // Add Pokemon to collection (no candy cost)
+      const result = await users.findOneAndUpdate(
+        {_id: new ObjectId(user.id)},
+        {
+          $addToSet: {owned_pokemon_ids: pokemonId},
+        },
+        {returnDocument: 'after'}
+      );
+
+      if (!result) {
+        throw new Error('Failed to catch Pokémon');
       }
 
       return sanitizeUserForClient(result);
