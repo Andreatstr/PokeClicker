@@ -1,100 +1,128 @@
 import {useState, useRef, useCallback, useEffect} from 'react';
 
 interface JoystickProps {
-  onDirectionChange: (direction: 'up' | 'down' | 'left' | 'right' | null) => void;
+  onDirectionChange: (
+    direction: 'up' | 'down' | 'left' | 'right' | null
+  ) => void;
   onDirectionStart: (direction: 'up' | 'down' | 'left' | 'right') => void;
   onDirectionStop: () => void;
   isMobile?: boolean;
 }
 
-export function Joystick({onDirectionChange, onDirectionStart, onDirectionStop, isMobile = false}: JoystickProps) {
+export function Joystick({
+  onDirectionChange,
+  onDirectionStart,
+  onDirectionStop,
+  isMobile = false,
+}: JoystickProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [currentDirection, setCurrentDirection] = useState<'up' | 'down' | 'left' | 'right' | null>(null);
+  const [currentDirection, setCurrentDirection] = useState<
+    'up' | 'down' | 'left' | 'right' | null
+  >(null);
   const [knobPosition, setKnobPosition] = useState({x: 0, y: 0});
   const joystickRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const lastCallTime = useRef<number>(0);
 
-  const getDirection = useCallback((x: number, y: number, centerX: number, centerY: number) => {
-    const deltaX = x - centerX;
-    const deltaY = y - centerY;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    
-    // Only register direction if moved far enough from center
-    if (distance < 10) return null;
-    
-    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-    
-    // Convert angle to direction
-    if (angle >= -45 && angle < 45) return 'right';
-    if (angle >= 45 && angle < 135) return 'down';
-    if (angle >= 135 || angle < -135) return 'left';
-    if (angle >= -135 && angle < -45) return 'up';
-    
-    return null;
-  }, []);
+  const getDirection = useCallback(
+    (x: number, y: number, centerX: number, centerY: number) => {
+      const deltaX = x - centerX;
+      const deltaY = y - centerY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-  const getKnobPosition = useCallback((x: number, y: number, centerX: number, centerY: number) => {
-    const deltaX = x - centerX;
-    const deltaY = y - centerY;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    
-    // Limit knob movement to joystick radius (about 20px from center)
-    const maxDistance = 20;
-    const limitedDistance = Math.min(distance, maxDistance);
-    
-    if (distance === 0) return {x: 0, y: 0};
-    
-    const ratio = limitedDistance / distance;
-    return {
-      x: deltaX * ratio,
-      y: deltaY * ratio
-    };
-  }, []);
+      // Only register direction if moved far enough from center
+      if (distance < 10) return null;
 
-  const handleStart = useCallback((clientX: number, clientY: number) => {
-    if (!joystickRef.current) return;
-    
-    const rect = joystickRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const knobPos = getKnobPosition(clientX, clientY, centerX, centerY);
-    setKnobPosition(knobPos);
-    
-    const direction = getDirection(clientX, clientY, centerX, centerY);
-    
-    setIsDragging(true);
-    if (direction) {
-      setCurrentDirection(direction);
-      onDirectionStart(direction);
-    }
-  }, [getDirection, getKnobPosition, onDirectionStart]);
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
-  const handleMove = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging || !joystickRef.current) return;
-    
-    const now = Date.now();
-    const throttleDelay = isMobile ? 50 : 16; // Throttle more on mobile
-    
-    if (now - lastCallTime.current < throttleDelay) return;
-    lastCallTime.current = now;
-    
-    const rect = joystickRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const knobPos = getKnobPosition(clientX, clientY, centerX, centerY);
-    setKnobPosition(knobPos);
-    
-    const direction = getDirection(clientX, clientY, centerX, centerY);
-    
-    // Only call onDirectionChange if direction actually changed
-    if (direction !== currentDirection) {
-      setCurrentDirection(direction);
-      onDirectionChange(direction);
-    }
-  }, [isDragging, currentDirection, getDirection, getKnobPosition, onDirectionChange, isMobile]);
+      // Convert angle to direction
+      if (angle >= -45 && angle < 45) return 'right';
+      if (angle >= 45 && angle < 135) return 'down';
+      if (angle >= 135 || angle < -135) return 'left';
+      if (angle >= -135 && angle < -45) return 'up';
+
+      return null;
+    },
+    []
+  );
+
+  const getKnobPosition = useCallback(
+    (x: number, y: number, centerX: number, centerY: number) => {
+      const deltaX = x - centerX;
+      const deltaY = y - centerY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      // Limit knob movement to joystick radius (about 20px from center)
+      const maxDistance = 20;
+      const limitedDistance = Math.min(distance, maxDistance);
+
+      if (distance === 0) return {x: 0, y: 0};
+
+      const ratio = limitedDistance / distance;
+      return {
+        x: deltaX * ratio,
+        y: deltaY * ratio,
+      };
+    },
+    []
+  );
+
+  const handleStart = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!joystickRef.current) return;
+
+      const rect = joystickRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const knobPos = getKnobPosition(clientX, clientY, centerX, centerY);
+      setKnobPosition(knobPos);
+
+      const direction = getDirection(clientX, clientY, centerX, centerY);
+
+      setIsDragging(true);
+      if (direction) {
+        setCurrentDirection(direction);
+        onDirectionStart(direction);
+      }
+    },
+    [getDirection, getKnobPosition, onDirectionStart]
+  );
+
+  const handleMove = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!isDragging || !joystickRef.current) return;
+
+      const now = Date.now();
+      const throttleDelay = isMobile ? 50 : 16; // Throttle more on mobile
+
+      if (now - lastCallTime.current < throttleDelay) return;
+      lastCallTime.current = now;
+
+      const rect = joystickRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const knobPos = getKnobPosition(clientX, clientY, centerX, centerY);
+      setKnobPosition(knobPos);
+
+      const direction = getDirection(clientX, clientY, centerX, centerY);
+
+      // Only call onDirectionChange if direction actually changed
+      if (direction !== currentDirection) {
+        setCurrentDirection(direction);
+        onDirectionChange(direction);
+      }
+    },
+    [
+      isDragging,
+      currentDirection,
+      getDirection,
+      getKnobPosition,
+      onDirectionChange,
+      isMobile,
+    ]
+  );
 
   const handleEnd = useCallback(() => {
     if (isDragging) {
@@ -106,32 +134,47 @@ export function Joystick({onDirectionChange, onDirectionStart, onDirectionStop, 
   }, [isDragging, onDirectionStop]);
 
   // Touch events
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleStart(touch.clientX, touch.clientY);
-  }, [handleStart]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleStart(touch.clientX, touch.clientY);
+    },
+    [handleStart]
+  );
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleMove(touch.clientX, touch.clientY);
-  }, [handleMove]);
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleMove(touch.clientX, touch.clientY);
+    },
+    [handleMove]
+  );
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    handleEnd();
-  }, [handleEnd]);
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      handleEnd();
+    },
+    [handleEnd]
+  );
 
   // Mouse events
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    handleStart(e.clientX, e.clientY);
-  }, [handleStart]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      handleStart(e.clientX, e.clientY);
+    },
+    [handleStart]
+  );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    handleMove(e.clientX, e.clientY);
-  }, [handleMove]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    },
+    [handleMove]
+  );
 
   const handleMouseUp = useCallback(() => {
     handleEnd();
@@ -142,7 +185,7 @@ export function Joystick({onDirectionChange, onDirectionStart, onDirectionStop, 
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);

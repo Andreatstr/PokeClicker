@@ -2,9 +2,15 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
 import {TiledMapView} from './TiledMapView';
+import {BattleView} from '@features/battle';
 import {useCollisionMap} from '../hooks/useCollisionMap';
 import {useMapMovement} from '../hooks/useMapMovement';
 import {usePokemonSpawning} from '../hooks/usePokemonSpawning';
+import {usePokemonById} from '@features/pokedex/hooks/usePokemonById';
+import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
+import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
+import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
+import type {PokedexPokemon} from '@features/pokedex';
 
 // Default viewport dimensions (overridden responsively below). Use 16:9 to be wider/less tall.
 const DEFAULT_VIEWPORT = {width: 720, height: 405};
@@ -14,7 +20,26 @@ interface PokemonMapProps {
 }
 
 export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
-  const {user, isAuthenticated} = useAuth();
+  const {user, isAuthenticated, updateUser} = useAuth();
+
+  // Fetch user's favorite Pokemon for battles
+  const {data: favoritePokemonData} = usePokemonById(
+    user?.favorite_pokemon_id || null
+  );
+
+  // Mutations for awarding battle rewards
+  const [catchPokemon] = useCatchPokemon();
+  const {updateRareCandy} = useGameMutations();
+
+  // Battle state
+  const [inBattle, setInBattle] = useState(false);
+  const [battleOpponent, setBattleOpponent] = useState<PokedexPokemon | null>(
+    null
+  );
+  const [playerPokemon, setPlayerPokemon] = useState<PokedexPokemon | null>(
+    null
+  );
+  const [battleSpawnId, setBattleSpawnId] = useState<string | null>(null);
 
   // Responsive viewport for fitting GameBoy on mobile and web
   const [viewport, setViewport] = useState<{width: number; height: number}>(
@@ -92,22 +117,109 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     };
   }, []);
 
+  // Start battle handler
+  const startBattle = useCallback(
+    (opponent: PokedexPokemon, spawnId: string) => {
+      // Store the spawn ID for removal after victory
+      setBattleSpawnId(spawnId);
+
+      // Use the user's favorite Pokemon
+      if (favoritePokemonData?.pokemonById) {
+        const playerPokemon: PokedexPokemon = {
+          id: favoritePokemonData.pokemonById.id,
+          name: favoritePokemonData.pokemonById.name,
+          types: favoritePokemonData.pokemonById.types,
+          sprite: favoritePokemonData.pokemonById.sprite,
+          pokedexNumber: favoritePokemonData.pokemonById.id,
+          stats: favoritePokemonData.pokemonById.stats,
+          isOwned: true,
+        };
+
+        setPlayerPokemon(playerPokemon);
+        setBattleOpponent(opponent);
+        setInBattle(true);
+      } else {
+        // Fallback to Bulbasaur if favorite Pokemon not set
+        const defaultPlayerPokemon: PokedexPokemon = {
+          id: 1,
+          name: 'Bulbasaur',
+          types: ['grass', 'poison'],
+          sprite:
+            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
+          pokedexNumber: 1,
+          stats: {
+            hp: 45,
+            attack: 49,
+            defense: 49,
+            spAttack: 65,
+            spDefense: 65,
+            speed: 45,
+          },
+          isOwned: true,
+        };
+
+        setPlayerPokemon(defaultPlayerPokemon);
+        setBattleOpponent(opponent);
+        setInBattle(true);
+      }
+    },
+    [favoritePokemonData]
+  );
+
+  // Battle complete handler
+  const handleBattleComplete = useCallback(
+    async (result: 'victory' | 'defeat', clickCount: number) => {
+      if (result === 'victory' && battleOpponent && battleSpawnId) {
+        try {
+          // Calculate rare candy reward based on clicker power
+          // Reward = clickCount × candyPerClick × 10
+          const candyPerClick = user?.stats
+            ? calculateCandyPerClick(user.stats)
+            : 1;
+          const rareCandyReward = Math.floor(clickCount * candyPerClick * 10);
+
+          // Award rare candy
+          await updateRareCandy(rareCandyReward, updateUser);
+
+          // Add Pokemon to collection if not already owned
+          if (!battleOpponent.isOwned) {
+            await catchPokemon({
+              variables: {pokemonId: battleOpponent.id},
+            });
+          }
+
+          // Remove the caught Pokemon from the map and spawn a new one
+          pokemon.removePokemon(battleSpawnId);
+        } catch (error) {
+          console.error('Failed to award battle rewards:', error);
+        }
+      }
+
+      setInBattle(false);
+      setBattleOpponent(null);
+      setPlayerPokemon(null);
+      setBattleSpawnId(null);
+    },
+    [
+      battleOpponent,
+      battleSpawnId,
+      updateRareCandy,
+      updateUser,
+      catchPokemon,
+      pokemon,
+      user?.stats,
+    ]
+  );
+
   // A/B Button handlers
   const handleAButtonClick = useCallback(() => {
     if (pokemon.nearbyPokemon) {
-      // Start battle with nearby Pokemon
-      console.log('Starting battle with', pokemon.nearbyPokemon.pokemon.name);
-      alert(`Battle! You encountered a wild ${pokemon.nearbyPokemon.pokemon.name}! (Battle feature coming soon)`);
-    } else {
-      // Interact with environment or show menu
-      console.log('A button pressed - no nearby Pokemon');
-      alert('A button pressed - no nearby Pokemon to battle');
+      startBattle(pokemon.nearbyPokemon.pokemon, pokemon.nearbyPokemon.spawnId);
     }
-  }, [pokemon.nearbyPokemon]);
+  }, [pokemon.nearbyPokemon, startBattle]);
 
   const handleBButtonClick = useCallback(() => {
     // Cancel action or show menu
-    console.log('B button pressed');
   }, []);
 
   return (
@@ -121,23 +233,34 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       nearbyPokemon={pokemon.nearbyPokemon}
       viewport={viewport}
     >
-      {/* Map Viewport Container - this is the game view */}
+      {/* Map/Battle Viewport Container - this is the game view */}
       <div
         ref={viewportRef}
         className="relative box-content border-4 border-black shadow-inner bg-black w-full h-full overflow-hidden"
       >
-        <TiledMapView
-          camera={movement.camera}
-          screenPos={movement.screenPos}
-          spritePos={movement.spritePos}
-          wildPokemon={pokemon.getVisiblePokemon(movement.camera, renderSize)}
-          nearbyPokemon={pokemon.nearbyPokemon}
-          worldPosition={movement.worldPosition}
-          user={user}
-          collisionMapLoaded={collisionMap.collisionMapLoaded}
-          viewportSize={renderSize}
-          isDarkMode={isDarkMode}
-        />
+        {inBattle && battleOpponent && playerPokemon ? (
+          <BattleView
+            playerPokemon={playerPokemon}
+            opponentPokemon={battleOpponent}
+            onBattleComplete={handleBattleComplete}
+            isDarkMode={isDarkMode}
+          />
+        ) : (
+          <TiledMapView
+            camera={movement.camera}
+            screenPos={movement.screenPos}
+            spritePos={movement.spritePos}
+            wildPokemon={pokemon.getVisiblePokemon(movement.camera, renderSize)}
+            nearbyPokemon={pokemon.nearbyPokemon}
+            worldPosition={movement.worldPosition}
+            user={user}
+            collisionMapLoaded={collisionMap.collisionMapLoaded}
+            viewportSize={renderSize}
+            isDarkMode={isDarkMode}
+            onStartBattle={startBattle}
+            onResetToHome={movement.resetToHome}
+          />
+        )}
       </div>
     </GameBoy>
   );

@@ -1,19 +1,27 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
-import {
-  usePokedexQuery,
-  type PokedexPokemon,
-} from '@features/pokedex';
+import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
 import {preloadService} from '@/lib/preloadService';
 
 // Lazy load heavy components
-const PokeClicker = lazy(() => import('@features/clicker').then(module => ({ default: module.PokeClicker })));
-const LoginScreen = lazy(() => import('@features/auth').then(module => ({ default: module.LoginScreen })));
-const PokemonDetailModal = lazy(() => import('@features/pokedex').then(module => ({ default: module.PokemonDetailModal })));
-const ProfileDashboard = lazy(() => import('@features/profile').then(module => ({ default: module.ProfileDashboard })));
+const PokeClicker = lazy(() =>
+  import('@features/clicker').then((module) => ({default: module.PokeClicker}))
+);
+const LoginScreen = lazy(() =>
+  import('@features/auth').then((module) => ({default: module.LoginScreen}))
+);
+const PokemonDetailModal = lazy(() =>
+  import('@features/pokedex').then((module) => ({
+    default: module.PokemonDetailModal,
+  }))
+);
+const ProfileDashboard = lazy(() =>
+  import('@features/profile').then((module) => ({
+    default: module.ProfileDashboard,
+  }))
+);
 import {PokemonMap} from '@features/map';
 import {BackgroundMusic} from '@components/BackgroundMusic';
-
 
 function App() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -32,9 +40,7 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   const [currentPage, setCurrentPage] = useState<
-
     'clicker' | 'pokedex' | 'map' | 'login' | 'profile'
-
   >(() => {
     const hasAuth = localStorage.getItem('authToken');
     if (!hasAuth) return 'login';
@@ -195,7 +201,14 @@ function App() {
         onToggleTheme={toggleTheme}
       />
       {currentPage === 'login' ? (
-        <Suspense fallback={<LoadingSpinner message="Loading login..." isDarkMode={isDarkMode} />}>
+        <Suspense
+          fallback={
+            <LoadingSpinner
+              message="Loading login..."
+              isDarkMode={isDarkMode}
+            />
+          }
+        >
           <LoginScreen onNavigate={setCurrentPage} />
         </Suspense>
       ) : (
@@ -206,14 +219,31 @@ function App() {
           >
             {currentPage === 'clicker' ? (
               <section className="py-8">
-                <Suspense fallback={<LoadingSpinner message="Loading clicker game..." isDarkMode={isDarkMode} />}>
+                <Suspense
+                  fallback={
+                    <LoadingSpinner
+                      message="Loading clicker game..."
+                      isDarkMode={isDarkMode}
+                    />
+                  }
+                >
                   <PokeClicker isDarkMode={isDarkMode} />
                 </Suspense>
               </section>
             ) : currentPage === 'profile' ? (
               <section className="py-8">
-                <Suspense fallback={<LoadingSpinner message="Loading profile..." isDarkMode={isDarkMode} />}>
-                  <ProfileDashboard isDarkMode={isDarkMode} onNavigate={setCurrentPage} />
+                <Suspense
+                  fallback={
+                    <LoadingSpinner
+                      message="Loading profile..."
+                      isDarkMode={isDarkMode}
+                    />
+                  }
+                >
+                  <ProfileDashboard
+                    isDarkMode={isDarkMode}
+                    onNavigate={setCurrentPage}
+                  />
                 </Suspense>
               </section>
             ) : currentPage === 'map' ? (
@@ -227,7 +257,10 @@ function App() {
                     <p className="pixel-font text-xl text-red-600">
                       Error loading Pokémon
                     </p>
-                    <p className="pixel-font text-sm" style={{color: 'var(--muted-foreground)'}}>
+                    <p
+                      className="pixel-font text-sm"
+                      style={{color: 'var(--muted-foreground)'}}
+                    >
                       {error.message}
                     </p>
                   </div>
@@ -241,7 +274,6 @@ function App() {
                     showMobileFilters={showMobileFilters}
                     setShowMobileFilters={setShowMobileFilters}
                     isDarkMode={isDarkMode}
-                    
                     // FiltersAndCount props
                     loading={loading}
                     displayedPokemon={displayedPokemon}
@@ -263,7 +295,6 @@ function App() {
                     setTempSortBy={setTempSortBy}
                     setTempSortOrder={setTempSortOrder}
                     handleClearFilters={handleClearFilters}
-                    
                     // PokemonCard props
                     handlePokemonClick={handlePokemonClick}
                     displayedCount={displayedCount}
@@ -277,7 +308,14 @@ function App() {
           </main>
 
           {isModalOpen && (
-            <Suspense fallback={<LoadingSpinner message="Loading Pokemon details..." isDarkMode={isDarkMode} />}>
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading Pokemon details..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
                 isOpen={isModalOpen}
