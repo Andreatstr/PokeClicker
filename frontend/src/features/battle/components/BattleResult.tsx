@@ -1,6 +1,7 @@
 import type {PokedexPokemon} from '@features/pokedex';
 import {Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
+import {useState, useEffect} from 'react';
 
 interface BattleResultProps {
   result: 'victory' | 'defeat';
@@ -20,6 +21,23 @@ export function BattleResult({
   isDarkMode = false,
 }: BattleResultProps) {
   const isVictory = result === 'victory';
+  const [showButton, setShowButton] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    const countdownInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          setShowButton(true);
+          clearInterval(countdownInterval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
+  }, []);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center p-3">
@@ -111,9 +129,15 @@ export function BattleResult({
         </div>
 
         {/* Continue Button */}
-        <Button onClick={onContinue} className="w-full text-sm py-2">
-          {isVictory ? 'Continue' : 'Return to Map'}
-        </Button>
+        {showButton ? (
+          <Button onClick={onContinue} className="w-full text-sm py-2">
+            {isVictory ? 'Continue' : 'Return to Map'}
+          </Button>
+        ) : (
+          <div className={`pixel-font text-2xl font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            {countdown}
+          </div>
+        )}
       </div>
     </div>
   );
