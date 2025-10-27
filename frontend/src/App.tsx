@@ -98,6 +98,11 @@ function App() {
 
   const ITEMS_PER_PAGE = 20;
 
+  // Reset displayedCount when filters change
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [selectedRegion, selectedTypes, debouncedSearchTerm, sortBy, sortOrder]);
+
   // Mobile
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -340,6 +345,7 @@ function App() {
             >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
+                allPokemon={filteredPokemon}
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
                 onSelectPokemon={(id) => {
