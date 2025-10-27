@@ -70,18 +70,16 @@ export function GameBoy({
             </div>
 
             {/* Screen - contains the game viewport */}
-            <div className="bg-[#8a8a4a] p-1.5 shadow-inner border-2 border-[#1a1a2e]">
-              <div
-                className="mx-auto"
-                style={{
-                  width: '100%',
-                  maxWidth: `${viewport.width}px`,
-                  aspectRatio: `${viewport.width} / ${viewport.height}`,
-                }}
-              >
-                {/* Game Viewport Container - this is where the game content goes */}
-                {children}
-              </div>
+            <div
+              className="mx-auto"
+              style={{
+                width: '100%',
+                maxWidth: `${viewport.width}px`,
+                aspectRatio: `${viewport.width} / ${viewport.height}`,
+              }}
+            >
+              {/* Game Viewport Container - this is where the game content goes */}
+              {children}
             </div>
           </div>
 
