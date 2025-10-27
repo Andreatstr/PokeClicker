@@ -36,8 +36,8 @@ export function SearchBar({
         <Label htmlFor="pokemon-search" className="sr-only">
           Search Pokemon
         </Label>
-        <div className="flex flex-col gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
             <SearchIcon
               className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               style={{
@@ -86,18 +86,16 @@ export function SearchBar({
               </div>
             )}
           </div>
-          {isMobile && (
-            <Button
-              className="w-full mt-2 text-sm"
-              aria-haspopup="dialog"
-              aria-expanded={showMobileFilters}
-              aria-controls="mobile-filter-dialog"
-              aria-label="Open filter options"
-              onClick={() => setShowMobileFilters((prev) => !prev)}
-            >
-              Filters
-            </Button>
-          )}
+          <Button
+            className="w-full sm:w-auto text-sm"
+            aria-haspopup="dialog"
+            aria-expanded={showMobileFilters}
+            aria-controls="mobile-filter-dialog"
+            aria-label="Open filter options"
+            onClick={() => setShowMobileFilters((prev) => !prev)}
+          >
+            Filters
+          </Button>
         </div>
       </form>
     </section>
