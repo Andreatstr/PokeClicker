@@ -224,7 +224,7 @@ export function FiltersAndCount({
                 {/* OWNED */}
                 <div>
                   <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
-                    Show
+                    Filter on
                   </Label>
 
                   <Select
@@ -243,7 +243,7 @@ export function FiltersAndCount({
                     <SelectContent>
                       <SelectItem value="all">All Pokémon</SelectItem>
                       <SelectItem value="owned" disabled={ownedCount === 0}>
-                        Owned only {ownedCount > 0 ? `(${ownedCount})` : ''}
+                        Owned only {ownedCount > 0 ? `(${ownedCount} total)` : ''}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -260,6 +260,7 @@ export function FiltersAndCount({
                     setTempTypes([]);
                     setTempSortBy('id');
                     setTempSortOrder('asc');
+                    setTempOwnedOnly(false);
 
                     setSelectedRegion(null);
                     setSelectedTypes([]);
