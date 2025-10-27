@@ -5,6 +5,7 @@ import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
+import {getPlatformImage} from '../utils/platformMapping';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -96,7 +97,7 @@ export function BattleView({
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {/* Opponent platform - positioned under opponent Pokemon (moved lower on mobile) */}
         <img
-          src="/project2/plattforms/grass.webp"
+          src={getPlatformImage(opponentPokemon.types)}
           alt="Opponent platform"
           className="absolute w-32 h-16 md:w-40 md:h-20 md:mr-4 md:mt-4 object-contain"
           style={{
@@ -107,12 +108,12 @@ export function BattleView({
         />
         {/* Player platform - positioned under player Pokemon (moved left and higher on mobile) */}
         <img
-          src="/project2/plattforms/grass.webp"
+          src={getPlatformImage(playerPokemon.types)}
           alt="Player platform"
-          className="absolute w-32 h-16 md:w-40 md:h-20 object-contain"
+          className="absolute w-48 h-24 md:w-60 md:h-30 object-contain"
           style={{
-            bottom: '8px',
-            left: '16px',
+            bottom: '-16px',
+            left: '0px',
             filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
           }}
         />
@@ -143,7 +144,7 @@ export function BattleView({
       <div className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6">
         <div className="flex justify-start items-end gap-4 md:gap-6">
           <div
-            className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 flex-shrink-0 relative group ml-8 mb-2 md:ml-4 md:mb-0"
+            className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 flex-shrink-0 relative group ml-8 -mb-4 md:ml-4 md:-mb-6"
             aria-label={`Click to attack with ${playerPokemon.name}`}
           >
             <img
