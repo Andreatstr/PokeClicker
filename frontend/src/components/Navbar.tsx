@@ -164,10 +164,12 @@ export function Navbar({
 
               {isAuthenticated ? (
                 <Button
-                  className="w-full text-sm"
+                  className="w-full text-sm flex items-center justify-center gap-2"
                   onClick={() => onPageChange('profile')}
+                  title={`Logged in as ${user?.username}`}
                 >
-                  Profile ({user?.username})
+                  <UserIcon className="w-4 h-4" />
+                  Profile
                 </Button>
               ) : (
                 <Button
