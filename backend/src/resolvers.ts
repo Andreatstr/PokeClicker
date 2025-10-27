@@ -159,15 +159,65 @@ export const resolvers = {
     pokemon: async (_: unknown, args: PokemonQueryArgs) => {
       return fetchPokemon(args);
     },
-    pokemonById: async (_: unknown, {id}: {id: number}) => {
-      return fetchPokemonById(id);
+    pokemonById: async (
+      _: unknown,
+      {id}: {id: number},
+      context: AuthContext
+    ) => {
+      const pokemon = await fetchPokemonById(id);
+      if (!pokemon) return null;
+
+      // Check if user owns this Pokemon
+      let isOwned = false;
+      if (context.user?.id) {
+        try {
+          const db = getDatabase();
+          const users = db.collection('users');
+          const user = await users.findOne({_id: new ObjectId(context.user.id)});
+          if (user && user.owned_pokemon_ids) {
+            isOwned = user.owned_pokemon_ids.includes(id);
+          }
+        } catch (error) {
+          console.error('Error checking Pokemon ownership:', error);
+        }
+      }
+
+      return {
+        ...pokemon,
+        isOwned,
+        pokedexNumber: pokemon.id,
+      };
     },
-    pokemonByIds: async (_: unknown, {ids}: {ids: number[]}) => {
+    pokemonByIds: async (
+      _: unknown,
+      {ids}: {ids: number[]},
+      context: AuthContext
+    ) => {
       // Fetch all Pokemon in parallel
       const pokemonPromises = ids.map((id) => fetchPokemonById(id));
       const pokemon = await Promise.all(pokemonPromises);
-      // Filter out any null results (in case some IDs don't exist)
-      return pokemon.filter(Boolean);
+
+      // Get owned Pokemon IDs if user is authenticated
+      let ownedPokemonIds: number[] = [];
+      if (context.user?.id) {
+        try {
+          const db = getDatabase();
+          const users = db.collection('users');
+          const user = await users.findOne({_id: new ObjectId(context.user.id)});
+          if (user && user.owned_pokemon_ids) {
+            ownedPokemonIds = user.owned_pokemon_ids;
+          }
+        } catch (error) {
+          console.error('Error fetching user owned Pokemon:', error);
+        }
+      }
+
+      // Filter out any null results and add ownership info
+      return pokemon.filter(Boolean).map((p) => ({
+        ...p,
+        isOwned: ownedPokemonIds.includes(p.id),
+        pokedexNumber: p.id,
+      }));
     },
     pokedex: async (
       _: unknown,

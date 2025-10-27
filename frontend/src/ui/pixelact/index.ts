@@ -45,3 +45,13 @@ export {
 // Icons
 export {Icon} from './Icon';
 export * from './icons';
+
+// Carousel components
+export {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  useCarousel,
+} from './carousel';

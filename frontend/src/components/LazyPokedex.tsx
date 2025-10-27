@@ -1,4 +1,4 @@
-import {Suspense, lazy} from 'react';
+import {Suspense, lazy, useState, useEffect} from 'react';
 import {LoadingSpinner} from './LoadingSpinner';
 import {type PokedexPokemon} from '@features/pokedex';
 
@@ -158,6 +158,33 @@ function PokemonGrid({
   handleLoadMore,
   loading,
 }: PokemonGridProps) {
+  const [selectedMobilePokemon, setSelectedMobilePokemon] = useState<PokedexPokemon | null>(null);
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Set first Pokemon as selected on mobile by default (only when no selection exists)
+  useEffect(() => {
+    if (isMobileView && displayedPokemon.length > 0 && !selectedMobilePokemon) {
+      setSelectedMobilePokemon(displayedPokemon[0]);
+    }
+    // If selected Pokemon is no longer in the list (e.g., after filtering), reset to first
+    if (isMobileView && selectedMobilePokemon && displayedPokemon.length > 0) {
+      const stillExists = displayedPokemon.some(p => p.id === selectedMobilePokemon.id);
+      if (!stillExists) {
+        setSelectedMobilePokemon(displayedPokemon[0]);
+      }
+    }
+  }, [isMobileView, displayedPokemon, selectedMobilePokemon]);
+
   return (
     <>
       {displayedPokemon.length === 0 && !loading ? (
@@ -172,41 +199,127 @@ function PokemonGrid({
         </div>
       ) : (
         <>
-          <ul
-            className="grid gap-4 md:gap-6 list-none p-0 m-0"
-            style={{
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
-              justifyContent: 'center',
-            }}
-          >
-            {displayedPokemon.map((pokemon, index) => (
-              <li
-                key={pokemon.id}
-                className="animate-fade-in"
+          {/* Mobile: Card on Top + List Below */}
+          {isMobileView ? (
+            <div className="flex flex-col gap-4">
+              {/* Top: Selected Pokemon Card */}
+              <div className="w-full flex justify-center">
+                {selectedMobilePokemon && (
+                  <Suspense
+                    fallback={
+                      <LoadingSpinner
+                        message="Loading Pokemon..."
+                        isDarkMode={isDarkMode}
+                      />
+                    }
+                  >
+                    <PokemonCard
+                      pokemon={selectedMobilePokemon}
+                      onClick={handlePokemonClick}
+                      isDarkMode={isDarkMode}
+                    />
+                  </Suspense>
+                )}
+              </div>
+
+              {/* Bottom: Horizontal Scrollable Pokemon List */}
+              <div className="w-full relative">
+                {/* Left Scroll Hint - shown when scrolled right */}
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <div className="animate-pulse text-4xl font-bold">←</div>
+                </div>
+                {/* Gradient fade on left edge */}
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-l-4 border-black"></div>
+
+                {/* Right Scroll Hint - shown when more content to the right */}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <div className="animate-pulse text-4xl font-bold">→</div>
+                </div>
+                {/* Gradient fade on right edge to indicate more content */}
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-r-4 border-black"></div>
+
+                <div className="overflow-x-auto border-4 border-black bg-white dark:bg-gray-900 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                  <ul className="flex list-none p-0 m-0">
+                    {displayedPokemon.map((pokemon) => (
+                      <li
+                        key={pokemon.id}
+                        onClick={() => setSelectedMobilePokemon(pokemon)}
+                        className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 border-r-2 border-black cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+                          selectedMobilePokemon?.id === pokemon.id
+                            ? 'bg-blue-100 dark:bg-blue-900'
+                            : ''
+                        }`}
+                        style={{minWidth: '100px'}}
+                      >
+                        <img
+                          src={pokemon.sprite}
+                          alt={pokemon.name}
+                          className="w-16 h-16 pixelated"
+                          style={{imageRendering: 'pixelated'}}
+                        />
+                        <p className="text-[10px] font-bold text-center">
+                          No. {pokemon.pokedexNumber}
+                        </p>
+                        <p className="text-xs font-bold capitalize text-center truncate w-full px-1">
+                          {pokemon.isOwned ? pokemon.name : '???'}
+                        </p>
+                      </li>
+                    ))}
+                    {hasMore && (
+                      <li className="flex-shrink-0 flex items-center justify-center p-4" style={{minWidth: '100px'}}>
+                        <button
+                          className="text-xs py-2 px-4 whitespace-nowrap"
+                          onClick={handleLoadMore}
+                          disabled={loading}
+                        >
+                          {loading ? '...' : 'More'}
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Desktop: Grid View */
+            <>
+              <ul
+                className="grid gap-4 md:gap-6 list-none p-0 m-0"
                 style={{
-                  animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms`,
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
+                  justifyContent: 'center',
                 }}
               >
-                <PokemonCard
-                  pokemon={pokemon}
-                  onClick={handlePokemonClick}
-                  isDarkMode={isDarkMode}
-                />
-              </li>
-            ))}
-          </ul>
+                {displayedPokemon.map((pokemon, index) => (
+                  <li
+                    key={pokemon.id}
+                    className="animate-fade-in"
+                    style={{
+                      animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms`,
+                    }}
+                  >
+                    <PokemonCard
+                      pokemon={pokemon}
+                      onClick={handlePokemonClick}
+                      isDarkMode={isDarkMode}
+                    />
+                  </li>
+                ))}
+              </ul>
 
-          {/* Load More Button */}
-          {hasMore && (
-            <footer className="flex flex-col items-center gap-4 mt-8">
-              <button
-                className="min-w-[200px]"
-                onClick={handleLoadMore}
-                disabled={loading}
-              >
-                {loading ? 'Loading...' : 'Load more'}
-              </button>
-            </footer>
+              {/* Load More Button */}
+              {hasMore && (
+                <footer className="flex flex-col items-center gap-4 mt-8">
+                  <button
+                    className="min-w-[200px]"
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                  >
+                    {loading ? 'Loading...' : 'Load more'}
+                  </button>
+                </footer>
+              )}
+            </>
           )}
         </>
       )}

@@ -1,5 +1,5 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
-import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
+import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
 import {preloadService} from '@/lib/preloadService';
 
@@ -58,6 +58,10 @@ function App() {
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  // State for cross-region Pokemon navigation
+  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<number | null>(null);
+  const {data: crossRegionData} = usePokemonById(crossRegionPokemonId);
+
   // Initialize preloading service
   useEffect(() => {
     const initializePreloading = async () => {
@@ -93,6 +97,11 @@ function App() {
   const [displayedCount, setDisplayedCount] = useState(20);
 
   const ITEMS_PER_PAGE = 20;
+
+  // Reset displayedCount when filters change
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE);
+  }, [selectedRegion, selectedTypes, debouncedSearchTerm, sortBy, sortOrder]);
 
   // Mobile
   const [isMobile, setIsMobile] = useState(false);
@@ -147,6 +156,24 @@ function App() {
     setSelectedPokemon(pokemon);
     setModalOpen(true);
   };
+
+  // Update selectedPokemon when cross-region data loads
+  useEffect(() => {
+    if (crossRegionData?.pokemonById) {
+      const crossRegionPokemon: PokedexPokemon = {
+        id: crossRegionData.pokemonById.id,
+        name: crossRegionData.pokemonById.name,
+        types: crossRegionData.pokemonById.types,
+        sprite: crossRegionData.pokemonById.sprite,
+        stats: crossRegionData.pokemonById.stats,
+        evolution: crossRegionData.pokemonById.evolution,
+        isOwned: crossRegionData.pokemonById.isOwned,
+        pokedexNumber: crossRegionData.pokemonById.pokedexNumber,
+      };
+      setSelectedPokemon(crossRegionPokemon);
+      setCrossRegionPokemonId(null); // Reset after loading
+    }
+  }, [crossRegionData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -318,11 +345,18 @@ function App() {
             >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
+                allPokemon={filteredPokemon}
                 isOpen={isModalOpen}
                 onClose={() => setModalOpen(false)}
                 onSelectPokemon={(id) => {
+                  // First, try to find Pokemon in filtered list
                   const next = filteredPokemon.find((p) => p.id === id);
-                  if (next) setSelectedPokemon(next);
+                  if (next) {
+                    setSelectedPokemon(next);
+                  } else {
+                    // If not found (cross-region), fetch using pokemonById query
+                    setCrossRegionPokemonId(id);
+                  }
                 }}
                 onPurchase={(id) => {
                   if (selectedPokemon && selectedPokemon.id === id) {

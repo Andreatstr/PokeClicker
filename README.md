@@ -112,6 +112,19 @@ Etter:
 - **Redusert dataforbruk**: Kun nødvendige komponenter lastes
 - **Forbedret brukeropplevelse**: Loading states med kontekstuelle meldinger
 
+### Issue #81: Virtual Rendering for Carousel Navigation
+- **Problem**: Åpning av Pokemon-modal med 50 filtrerte Pokemon resulterte i 500+ GraphQL queries (50 Pokemon × 10 evolution queries hver)
+- **Årsak**: Carousel rendret alle Pokemon samtidig, hver med egne evolution chain queries
+- **Løsning**: Implementert virtuell rendering med render window
+  - Kun rendrer Pokemon innen currentIndex ± 1 (3 Pokemon totalt)
+  - Reduserer API-kall fra ~500 til ~30 (90% reduksjon)
+  - Dynamisk lasting av evolution chains kun når Pokemon vises
+- **Resultat**:
+  - Eliminerer rate limiting problemer
+  - Raskere modal åpning (ingen unødvendige API-kall)
+  - Jevnere navigasjon (on-demand data loading)
+  - Betydelig redusert minnebruk og nettverkstrafikk
+
 ## Datamodell (planlagt)
 
 ### User (MongoDB document)
