@@ -85,8 +85,8 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       if (w < 640) return pick(420, '3:4');
       if (w < 768) return pick(520, '4:3');
       if (w < 1024) return pick(640, '16:10');
-      if (w < 1280) return pick(840, '4:3');
-      return pick(1000, '4:3');
+      if (w < 1280) return pick(840, '16:10');
+      return pick(890, '16:9');
     };
     const apply = () => setViewport(computeViewport());
     apply();

@@ -5,6 +5,7 @@ import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
+import {getPlatformImage} from '../utils/platformMapping';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -75,18 +76,19 @@ export function BattleView({
       className="relative w-full h-full flex flex-col cursor-pointer"
       style={{
         background: isDarkMode ? `
-          linear-gradient(0deg, #374151 0%, #4b5563 20%, #6b7280 40%, #4b5563 60%, #374151 80%, #1f2937 100%),
-          linear-gradient(0deg, #1f2937 0%, #374151 15%, #4b5563 30%, #6b7280 45%, #4b5563 60%, #374151 75%, #1f2937 90%, #111827 100%),
-          linear-gradient(0deg, #111827 0%, #1f2937 10%, #374151 25%, #4b5563 40%, #6b7280 55%, #4b5563 70%, #374151 85%, #1f2937 100%),
-          linear-gradient(0deg, #0f172a 0%, #111827 20%, #1f2937 40%, #374151 60%, #1f2937 80%, #111827 100%),
-          linear-gradient(0deg, #1e293b 0%, #334155 25%, #475569 50%, #334155 75%, #1e293b 100%)
+          linear-gradient(0deg, #064e3b 0%, #065f46 20%, #047857 40%, #065f46 60%, #064e3b 80%, #022c22 100%),
+          linear-gradient(0deg, #022c22 0%, #064e3b 15%, #065f46 30%, #059669 45%, #065f46 60%, #064e3b 75%, #022c22 90%, #012117 100%),
+          linear-gradient(0deg, #012117 0%, #022c22 10%, #064e3b 25%, #065f46 40%, #047857 55%, #065f46 70%, #064e3b 85%, #022c22 100%),
+          linear-gradient(0deg, #0f172a 0%, #064e3b 20%, #065f46 40%, #047857 60%, #065f46 80%, #064e3b 100%),
+          linear-gradient(0deg, #022c22 0%, #064e3b 25%, #059669 50%, #064e3b 75%, #022c22 100%),
+          linear-gradient(0deg, #065f46 0%, #047857 30%, #10b981 50%, #047857 70%, #065f46 100%)
         ` : `
-          linear-gradient(0deg, #e2e8f0 0%, #cbd5e1 20%, #94a3b8 40%, #cbd5e1 60%, #e2e8f0 80%, #94a3b8 100%),
-          linear-gradient(0deg, #cbd5e1 0%, #e2e8f0 15%, #cbd5e1 30%, #94a3b8 45%, #cbd5e1 60%, #e2e8f0 75%, #cbd5e1 90%, #94a3b8 100%),
-          linear-gradient(0deg, #94a3b8 0%, #cbd5e1 10%, #e2e8f0 25%, #cbd5e1 40%, #94a3b8 55%, #cbd5e1 70%, #e2e8f0 85%, #cbd5e1 100%),
-          linear-gradient(0deg, #64748b 0%, #94a3b8 20%, #cbd5e1 40%, #e2e8f0 60%, #cbd5e1 80%, #94a3b8 100%),
-          linear-gradient(0deg, #475569 0%, #64748b 30%, #94a3b8 50%, #64748b 70%, #475569 100%),
-          linear-gradient(0deg, #334155 0%, #475569 25%, #64748b 50%, #475569 75%, #334155 100%)
+          linear-gradient(0deg, #f0fdf4 0%, #dcfce7 15%, #bbf7d0 30%, #86efac 45%, #bbf7d0 60%, #dcfce7 75%, #f0fdf4 100%),
+          linear-gradient(0deg, #dcfce7 0%, #bbf7d0 20%, #86efac 40%, #4ade80 60%, #86efac 80%, #bbf7d0 100%),
+          linear-gradient(0deg, #bbf7d0 0%, #86efac 15%, #4ade80 30%, #22c55e 50%, #4ade80 70%, #86efac 85%, #bbf7d0 100%),
+          linear-gradient(0deg, #ecfdf5 0%, #d1fae5 20%, #a7f3d0 40%, #6ee7b7 60%, #a7f3d0 80%, #d1fae5 100%),
+          linear-gradient(0deg, #86efac 0%, #4ade80 25%, #22c55e 50%, #4ade80 75%, #86efac 100%),
+          linear-gradient(0deg, #d1fae5 0%, #a7f3d0 20%, #6ee7b7 40%, #34d399 60%, #6ee7b7 80%, #a7f3d0 100%)
         `
       }}
       onClick={handleAttackClick}
@@ -94,37 +96,29 @@ export function BattleView({
       {/* Oval platforms - positioned based on Pokemon locations */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {/* Opponent platform - positioned under opponent Pokemon (moved lower on mobile) */}
-        <div 
-          className="absolute w-32 h-16 md:w-40 md:h-20 md:mr-4 md:mt-4" 
+        <img
+          src={getPlatformImage(opponentPokemon.types)}
+          alt="Opponent platform"
+          className="absolute w-32 h-16 md:w-40 md:h-20 md:mr-4 md:mt-4 object-contain"
           style={{
-            top: '20%', 
-            right: '8px', 
-            borderRadius: '50%',
-            background: `
-              linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #dc2626 100%),
-              linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)
-            `,
-            boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)',
-            border: '2px solid #991b1b'
+            top: '20%',
+            right: '8px',
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
           }}
-        ></div>
+        />
         {/* Player platform - positioned under player Pokemon (moved left and higher on mobile) */}
-        <div 
-          className="absolute w-32 h-16 md:w-40 md:h-20" 
+        <img
+          src={getPlatformImage(playerPokemon.types)}
+          alt="Player platform"
+          className="absolute w-48 h-24 md:w-60 md:h-30 object-contain"
           style={{
-            bottom: '8px', 
-            left: '16px', 
-            borderRadius: '50%',
-            background: `
-              linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #2563eb 100%),
-              linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)
-            `,
-            boxShadow: '0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)',
-            border: '2px solid #1d4ed8'
+            bottom: '-16px',
+            left: '0px',
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
           }}
-        ></div>
+        />
       </div>
-      
+
       {/* Opponent Pokemon (top right) */}
       <div className="flex-1 flex flex-col justify-start p-2 pt-4 md:p-4 md:pt-4">
         <div className="flex justify-center items-center gap-2 md:gap-4 translate-y-8 md:translate-y-8 md:justify-end">
@@ -140,7 +134,7 @@ export function BattleView({
           <img
             src={opponentPokemon.sprite}
             alt={opponentPokemon.name}
-            className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated -mr-4 md:mr-8"
+            className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated -mr-8 md:mr-8"
             style={{imageRendering: 'pixelated'}}
           />
         </div>
@@ -148,9 +142,9 @@ export function BattleView({
 
       {/* Player Pokemon (bottom left) */}
       <div className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6">
-        <div className="flex justify-start items-end gap-4 md:gap-6">
+        <div className="flex justify-start items-end gap-2 md:gap-4">
           <div
-            className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 flex-shrink-0 relative group ml-8 mb-2 md:ml-4 md:mb-0"
+            className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 flex-shrink-0 relative group ml-8 -mb-4 md:ml-4 md:-mb-6"
             aria-label={`Click to attack with ${playerPokemon.name}`}
           >
             <img
@@ -160,7 +154,7 @@ export function BattleView({
               style={{imageRendering: 'pixelated'}}
             />
           </div>
-          <div className="flex-1 max-w-[140px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-4 md:ml-4">
+          <div className="flex-1 max-w-[120px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-0 md:ml-4">
             <HealthBar
               current={playerHP}
               max={playerMaxHP}

@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      'iknjy-129-241-236-235.a.free.pinggy.link',
+      'tcdux-129-241-236-87.a.free.pinggy.link',
       'localhost',
       '127.0.0.1',
     ],

@@ -52,8 +52,8 @@ export function Joystick({
       const deltaY = y - centerY;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      // Limit knob movement to joystick radius (about 20px from center)
-      const maxDistance = 20;
+      // Limit knob movement to joystick radius (16px for 100px container)
+      const maxDistance = 16;
       const limitedDistance = Math.min(distance, maxDistance);
 
       if (distance === 0) return {x: 0, y: 0};
@@ -194,10 +194,10 @@ export function Joystick({
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="relative w-32 h-32">
+    <div className="relative w-[100px] h-[100px]">
       {/* Circular Joystick Base */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-16 h-16 bg-[#2a2a3e] rounded-full shadow-md border-2 border-[#1a1a2e]"></div>
+        <div className="w-12 h-12 bg-[#2a2a3e] rounded-full shadow-md border-2 border-[#1a1a2e]"></div>
       </div>
 
       {/* Interactive Joystick Area - Much bigger hitbox */}
@@ -213,10 +213,10 @@ export function Joystick({
         {/* Draggable Knob - Bigger and Red for mobile */}
         <div
           ref={knobRef}
-          className="absolute w-8 h-8 bg-red-500 rounded-full border-2 border-red-700 shadow-lg transition-all duration-100"
+          className="absolute w-6 h-6 bg-red-500 rounded-full border-2 border-red-700 shadow-lg transition-all duration-100"
           style={{
-            left: `calc(50% + ${knobPosition.x}px - 16px)`,
-            top: `calc(50% + ${knobPosition.y}px - 16px)`,
+            left: `calc(50% + ${knobPosition.x}px - 12px)`,
+            top: `calc(50% + ${knobPosition.y}px - 12px)`,
             transform: isDragging ? 'scale(1.1)' : 'scale(1)',
           }}
         />
