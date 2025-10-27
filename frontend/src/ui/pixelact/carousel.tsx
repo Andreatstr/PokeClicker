@@ -26,10 +26,11 @@ export function useCarousel() {
 
 interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  initialIndex?: number;
 }
 
-export function Carousel({children, className, ...props}: CarouselProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+export function Carousel({children, className, initialIndex = 0, ...props}: CarouselProps) {
+  const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
   const [itemsCount, setItemsCount] = React.useState(0);
 
   const canScrollPrev = currentIndex > 0;

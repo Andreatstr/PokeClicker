@@ -579,7 +579,7 @@ function CarouselWrapper({
   const initialIndex = allPokemon.findIndex(p => p.id === currentPokemon.id);
 
   return (
-    <Carousel className="relative">
+    <Carousel className="relative" initialIndex={initialIndex}>
       {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
       <CarouselPrevious
         className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl"
@@ -589,7 +589,6 @@ function CarouselWrapper({
       />
 
       <CarouselContent>
-        <CarouselInitializer initialIndex={initialIndex} itemCount={allPokemon.length} />
         {allPokemon.map((poke, index) => (
           <CarouselItem key={poke.id}>
             <LazyPokemonCard
@@ -609,20 +608,6 @@ function CarouselWrapper({
       </CarouselContent>
     </Carousel>
   );
-}
-
-// Helper component to set initial carousel index and item count
-function CarouselInitializer({initialIndex, itemCount}: {initialIndex: number; itemCount: number}) {
-  const {setCurrentIndex, setItemsCount} = useCarousel();
-
-  useEffect(() => {
-    if (initialIndex >= 0) {
-      setCurrentIndex(initialIndex);
-    }
-    setItemsCount(itemCount);
-  }, [initialIndex, itemCount, setCurrentIndex, setItemsCount]);
-
-  return null;
 }
 
 // Lazy-loaded Pokemon card that only renders when near the current carousel index
