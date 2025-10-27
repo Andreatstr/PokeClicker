@@ -57,6 +57,7 @@ function App() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedOwnedOnly, setSelectedOwnedOnly] = useState(false);
 
   // State for cross-region Pokemon navigation
   const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<number | null>(null);
@@ -109,6 +110,7 @@ function App() {
   const [tempTypes, setTempTypes] = useState(selectedTypes);
   const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
+  const [tempOwnedOnly, setTempOwnedOnly] = useState(false);
 
   // Apply initial theme on mount
   useEffect(() => {
@@ -173,6 +175,7 @@ function App() {
     sortOrder,
     limit: ITEMS_PER_PAGE,
     offset: (paginationPage - 1) * ITEMS_PER_PAGE,
+    ownedOnly: selectedOwnedOnly,
   });
 
   useEffect(() => {
@@ -229,6 +232,8 @@ function App() {
     setSelectedTypes([]);
     setSortBy('id');
     setSortOrder('asc');
+    setSelectedOwnedOnly(false);
+    setTempOwnedOnly(false);
   };
 
   const handleClearSearch = () => {
@@ -353,6 +358,8 @@ function App() {
                     tempTypes={tempTypes}
                     tempSortBy={tempSortBy}
                     tempSortOrder={tempSortOrder}
+                    selectedOwnedOnly={selectedOwnedOnly}
+                    tempOwnedOnly={tempOwnedOnly}
                     setSelectedRegion={setSelectedRegion}
                     setSelectedTypes={setSelectedTypes}
                     setSortBy={setSortBy}
@@ -361,6 +368,8 @@ function App() {
                     setTempTypes={setTempTypes}
                     setTempSortBy={setTempSortBy}
                     setTempSortOrder={setTempSortOrder}
+                    setSelectedOwnedOnly={setSelectedOwnedOnly}
+                    setTempOwnedOnly={setTempOwnedOnly}
                     handleClearFilters={handleClearFilters}
                     // Pagination props
                     handlePokemonClick={handlePokemonClick}

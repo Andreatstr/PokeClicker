@@ -20,6 +20,7 @@ export const typeDefs = `#graphql
       limit: Int
       offset: Int
       userId: String
+      ownedOnly: Boolean
     ): PokedexResponse!
   }
 

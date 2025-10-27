@@ -24,6 +24,8 @@ interface FiltersAndCountProps {
   tempTypes: string[];
   tempSortBy: 'id' | 'name' | 'type';
   tempSortOrder: 'asc' | 'desc';
+  selectedOwnedOnly: boolean;
+  tempOwnedOnly: boolean;
   setSelectedRegion: (value: string | null) => void;
   setSelectedTypes: (value: string[]) => void;
   setSortBy: (value: 'id' | 'name' | 'type') => void;
@@ -33,6 +35,8 @@ interface FiltersAndCountProps {
   setTempTypes: (value: string[]) => void;
   setTempSortBy: (value: 'id' | 'name' | 'type') => void;
   setTempSortOrder: (value: 'asc' | 'desc') => void;
+  setSelectedOwnedOnly: (value: boolean) => void;
+  setTempOwnedOnly: (value: boolean) => void;
   handleClearFilters: () => void;
 }
 
@@ -83,6 +87,8 @@ export function FiltersAndCount({
   tempTypes,
   tempSortBy,
   tempSortOrder,
+  selectedOwnedOnly,
+  tempOwnedOnly,
   setSelectedRegion,
   setSelectedTypes,
   setSortBy,
@@ -92,6 +98,8 @@ export function FiltersAndCount({
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
+  setSelectedOwnedOnly,
+  setTempOwnedOnly,
   handleClearFilters,
 }: FiltersAndCountProps) {
   return (
@@ -209,6 +217,24 @@ export function FiltersAndCount({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* OWNED */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="owned-only-toggle"
+                    checked={tempOwnedOnly}
+                    onChange={(e) => setTempOwnedOnly(e.target.checked)}
+                    className="accent-pixelact"
+                  />
+                  <Label
+                    htmlFor="owned-only-toggle"
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
+                    Owned Pokemon
+                  </Label>
+                </div>
               </div>
 
               {/* Footer Buttons */}
@@ -226,6 +252,7 @@ export function FiltersAndCount({
                     setSelectedTypes([]);
                     setSortBy('id');
                     setSortOrder('asc');
+                    setSelectedOwnedOnly(false);
                     setShowMobileFilters(false);
                   }}
                 >
@@ -246,6 +273,7 @@ export function FiltersAndCount({
                     setSelectedTypes(tempTypes);
                     setSortBy(tempSortBy);
                     setSortOrder(tempSortOrder);
+                    setSelectedOwnedOnly(tempOwnedOnly);
                     setShowMobileFilters(false);
                   }}
                 >

@@ -52,7 +52,7 @@ const authMutations = {
       created_at: new Date(),
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
       stats: DEFAULT_USER_STATS.stats,
-      owned_pokemon_ids: DEFAULT_USER_STATS.owned_pokemon_ids ?? [],
+      owned_pokemon_ids: [1], // DEFAULT_USER_STATS.owned_pokemon_ids ?? [],
     };
 
     try {
@@ -230,6 +230,7 @@ export const resolvers = {
         limit?: number;
         offset?: number;
         userId?: string;
+        ownedOnly?: boolean;
       },
       context: AuthContext
     ) => {
@@ -242,6 +243,7 @@ export const resolvers = {
         limit = 20,
         offset = 0,
         userId,
+        ownedOnly,
       } = args;
 
       let ownedPokemonIds: number[] = [];
