@@ -309,7 +309,7 @@ function PokemonCardContent({
         }}
       >
         <h3 className="font-bold mb-2">Evolution</h3>
-        <div className="evolutionChain flex items-center justify-center gap-2 md:gap-3">
+        <div className="evolutionChain flex flex-wrap items-center justify-center gap-2 md:gap-3">
           {sortedEvolutionIds.map((id, i, arr) => (
             <EvolutionPokemon
               key={id}
