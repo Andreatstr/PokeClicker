@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {getDatabase} from './db.js';
 import {DEFAULT_USER_STATS} from './types.js';
-import {UserDocument, AuthResponse, PokemonQueryArgs} from './types';
+import {UserDocument, AuthResponse, PokemonQueryArgs, PokemonUpgradeDocument} from './types';
 import {Collection, ObjectId} from 'mongodb';
 import {type AuthContext, requireAuth} from './auth.js';
 import 'dotenv/config';
@@ -111,13 +111,18 @@ const authMutations = {
 
 // Helper to get upgrade cost (differentiated by stat type)
 function getUpgradeCost(currentLevel: number, stat: string): number {
-  // Different multipliers for different stat types:
-  // Attack/SpAttack: 2.8x (most expensive, highest reward)
-  // HP/Defense/SpDefense: 2.5x (moderate cost)
-  // Speed: 2.2x (cheapest, utility stat)
   let multiplier = 2.5; // default
 
-  if (stat === 'attack' || stat === 'spAttack') {
+  // New simplified system for PokeClicker upgrades:
+  if (stat === 'clickPower') {
+    // Click Power upgrade: More expensive (high reward)
+    multiplier = 2.8;
+  } else if (stat === 'passiveIncome') {
+    // Passive Income (CPS) upgrade: Moderate cost
+    multiplier = 2.5;
+  }
+  // Legacy support for old stat names (backwards compatibility):
+  else if (stat === 'attack' || stat === 'spAttack') {
     multiplier = 2.8;
   } else if (stat === 'speed') {
     multiplier = 2.2;
@@ -135,6 +140,13 @@ function getPokemonCost(pokemonId: number): number {
   return Math.floor(100 * Math.pow(2, tier));
 }
 
+// Helper to get Pokemon upgrade cost (3% all stats per level)
+function getPokemonUpgradeCost(currentLevel: number): number {
+  // Cost formula: 100 × 2.5^(level-1)
+  // Level 1->2: 100, Level 2->3: 250, Level 3->4: 625, etc.
+  return Math.floor(100 * Math.pow(2.5, currentLevel - 1));
+}
+
 export const resolvers = {
   Query: {
     health: () => ({
@@ -147,11 +159,36 @@ export const resolvers = {
       const user = requireAuth(context);
 
       const db = getDatabase();
-      const users = db.collection('users');
-      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      const users = db.collection('users') as Collection<UserDocument>;
+      let userDoc = await users.findOne({_id: new ObjectId(user.id)});
 
       if (!userDoc) {
         throw new Error('User not found');
+      }
+
+      // Automatic migration: Initialize new stats for existing users
+      let needsUpdate = false;
+      const updates: any = {};
+
+      if (!userDoc.stats.clickPower) {
+        updates['stats.clickPower'] = 1;
+        needsUpdate = true;
+      }
+      if (!userDoc.stats.passiveIncome) {
+        updates['stats.passiveIncome'] = 1;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        await users.updateOne(
+          {_id: new ObjectId(user.id)},
+          {$set: updates}
+        );
+        // Re-fetch to get updated document
+        userDoc = await users.findOne({_id: new ObjectId(user.id)});
+        if (!userDoc) {
+          throw new Error('User not found after migration');
+        }
       }
 
       return sanitizeUserForClient(userDoc as UserDocument);
@@ -332,6 +369,34 @@ export const resolvers = {
         total,
       };
     },
+
+    // Get Pokemon upgrade level for a specific Pokemon
+    pokemonUpgrade: async (
+      _: unknown,
+      {pokemonId}: {pokemonId: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const upgrades = db.collection('pokemon_upgrades') as Collection<PokemonUpgradeDocument>;
+
+      // Find existing upgrade for this user+Pokemon
+      const upgrade = await upgrades.findOne({
+        user_id: new ObjectId(user.id),
+        pokemon_id: pokemonId,
+      });
+
+      // If no upgrade exists, return level 1 (default)
+      const level = upgrade?.level || 1;
+      const cost = getPokemonUpgradeCost(level);
+
+      return {
+        pokemon_id: pokemonId,
+        level,
+        cost,
+      };
+    },
   },
   Mutation: {
     ...authMutations,
@@ -369,8 +434,12 @@ export const resolvers = {
     ) => {
       const user = requireAuth(context);
 
-      // Validate stat name
+      // Validate stat name (includes new simplified stats + legacy stats)
       const validStats = [
+        // New simplified PokeClicker upgrades:
+        'clickPower',
+        'passiveIncome',
+        // Legacy stats (for backwards compatibility & per-Pokemon upgrades later):
         'hp',
         'attack',
         'defense',
@@ -388,19 +457,52 @@ export const resolvers = {
       const users = db.collection('users') as Collection<UserDocument>;
 
       // Get current user state
-      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      let userDoc = await users.findOne({_id: new ObjectId(user.id)});
       if (!userDoc) {
         throw new Error('User not found');
       }
 
-      // Calculate cost
-      const currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats];
+      // Initialize new stats if they don't exist (migration for existing users)
+      let needsMigration = false;
+      if (stat === 'clickPower' && (userDoc.stats.clickPower === undefined || userDoc.stats.clickPower === null)) {
+        needsMigration = true;
+        await users.updateOne(
+          {_id: new ObjectId(user.id)},
+          {$set: {'stats.clickPower': 1}}
+        );
+      }
+      if (stat === 'passiveIncome' && (userDoc.stats.passiveIncome === undefined || userDoc.stats.passiveIncome === null)) {
+        needsMigration = true;
+        await users.updateOne(
+          {_id: new ObjectId(user.id)},
+          {$set: {'stats.passiveIncome': 1}}
+        );
+      }
+
+      // Re-fetch user if we did migration to get updated stats
+      if (needsMigration) {
+        userDoc = await users.findOne({_id: new ObjectId(user.id)});
+        if (!userDoc) {
+          throw new Error('User not found after migration');
+        }
+      }
+
+      // Calculate cost - for new stats, ensure we use the correct level
+      let currentLevel = 1;
+      if (stat === 'clickPower' || stat === 'passiveIncome') {
+        currentLevel = (userDoc.stats as any)[stat] || 1;
+        console.log(`[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`);
+      } else {
+        currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats] || 1;
+      }
       const cost = getUpgradeCost(currentLevel, stat);
+
+      console.log(`[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost}, userCandy=${userDoc.rare_candy}`);
 
       // Check if user has enough rare candy
       if (userDoc.rare_candy < cost) {
         throw new Error(
-          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`
+          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}. Current ${stat} level: ${currentLevel}`
         );
       }
 
@@ -642,6 +744,88 @@ export const resolvers = {
 
         return sanitizeUserForClient(result);
       }
+    },
+
+    // Upgrade a Pokemon (increases level by 1, all stats +3%)
+    upgradePokemon: async (
+      _: unknown,
+      {pokemonId}: {pokemonId: number},
+      context: AuthContext
+    ) => {
+      const user = requireAuth(context);
+
+      const db = getDatabase();
+      const users = db.collection('users') as Collection<UserDocument>;
+      const upgrades = db.collection('pokemon_upgrades') as Collection<PokemonUpgradeDocument>;
+
+      // Check if user owns this Pokemon
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      if (!userDoc.owned_pokemon_ids?.includes(pokemonId)) {
+        throw new Error('You do not own this Pokémon');
+      }
+
+      // Get current upgrade level
+      const existingUpgrade = await upgrades.findOne({
+        user_id: new ObjectId(user.id),
+        pokemon_id: pokemonId,
+      });
+
+      const currentLevel = existingUpgrade?.level || 1;
+      const cost = getPokemonUpgradeCost(currentLevel);
+
+      // Check if user has enough candy
+      if (userDoc.rare_candy < cost) {
+        throw new Error(
+          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`
+        );
+      }
+
+      // Deduct candy
+      await users.updateOne(
+        {_id: new ObjectId(user.id)},
+        {$inc: {rare_candy: -cost}}
+      );
+
+      // Update or create upgrade record
+      const newLevel = currentLevel + 1;
+      const now = new Date();
+
+      if (existingUpgrade) {
+        // Update existing
+        await upgrades.updateOne(
+          {
+            user_id: new ObjectId(user.id),
+            pokemon_id: pokemonId,
+          },
+          {
+            $set: {
+              level: newLevel,
+              updated_at: now,
+            },
+          }
+        );
+      } else {
+        // Create new
+        await upgrades.insertOne({
+          user_id: new ObjectId(user.id),
+          pokemon_id: pokemonId,
+          level: newLevel,
+          created_at: now,
+          updated_at: now,
+        });
+      }
+
+      const newCost = getPokemonUpgradeCost(newLevel);
+
+      return {
+        pokemon_id: pokemonId,
+        level: newLevel,
+        cost: newCost,
+      };
     },
   },
 };

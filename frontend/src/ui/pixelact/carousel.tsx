@@ -1,36 +1,6 @@
 import * as React from 'react';
 import {cn} from '@/lib/utils';
-
-const PixelArrowRight = ({className = ''}: {className?: string}) => (
-  <svg
-    width="20"
-    height="20"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
-
-const PixelArrowLeft = ({className = ''}: {className?: string}) => (
-  <svg
-    width="20"
-    height="20"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-    style={{transform: 'scaleX(-1)'}}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
+import {ArrowLeftIcon, ArrowRightIcon} from './icons';
 
 interface CarouselContextValue {
   currentIndex: number;
@@ -215,7 +185,7 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
       aria-label="Previous"
       {...props}
     >
-      <PixelArrowLeft />
+      <ArrowLeftIcon />
     </button>
   );
 }
@@ -243,7 +213,7 @@ export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<H
       aria-label="Next"
       {...props}
     >
-      <PixelArrowRight />
+      <ArrowRightIcon />
     </button>
   );
 }

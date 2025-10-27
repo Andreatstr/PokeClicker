@@ -1,10 +1,11 @@
-import {Dialog, DialogBody, UnlockButton, Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, useCarousel} from '@ui/pixelact';
+import {Dialog, DialogBody, UnlockButton, Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, useCarousel, Button, ArrowUpIcon, ArrowRightIcon} from '@ui/pixelact';
 import {StackedProgress} from '@features/clicker';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePokemonById, usePurchasePokemon} from '@features/pokedex';
+import {usePokemonById, usePurchasePokemon, usePokemonUpgrade, useUpgradePokemonMutation} from '@features/pokedex';
 import {useAuth, type User} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState, useEffect} from 'react';
+import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {
   getTypeColors,
@@ -13,21 +14,6 @@ import {
   getUnknownPokemonColors,
 } from '../utils/typeColors';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
-
-const PixelArrowRight = ({className = ''}: {className?: string}) => (
-  <svg
-    width="24"
-    height="24"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
 
 const ME_QUERY = gql`
   query Me {
@@ -87,6 +73,10 @@ function PokemonCardContent({
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Fetch Pokemon upgrade data
+  const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(pokemon.isOwned ? pokemon.id : null);
+  const [upgradePokemonMutation, {loading: upgrading}] = useUpgradePokemonMutation();
+
   // Handle purchase for THIS specific Pokemon
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,6 +102,30 @@ function PokemonCardContent({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
+      setError(errorMessage);
+      setTimeout(() => setError(null), 1200);
+    }
+  };
+
+  // Handle Pokemon upgrade
+  const handleUpgrade = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setError(null);
+
+    try {
+      await upgradePokemonMutation({
+        variables: {pokemonId: pokemon.id},
+      });
+
+      // Refetch upgrade data to get new level and cost
+      await refetchUpgrade();
+
+      // Trigger success animation
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 800);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to upgrade Pokémon';
       setError(errorMessage);
       setTimeout(() => setError(null), 1200);
     }
@@ -143,6 +157,18 @@ function PokemonCardContent({
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
   const statColors = getStatBarColors(isDarkMode);
+
+  // Calculate upgraded stats (3% per level)
+  const upgradeLevel = upgrade?.level || 1;
+  const statMultiplier = 1 + 0.03 * (upgradeLevel - 1);
+  const upgradedStats = {
+    hp: Math.floor((pokemon.stats?.hp || 0) * statMultiplier),
+    attack: Math.floor((pokemon.stats?.attack || 0) * statMultiplier),
+    defense: Math.floor((pokemon.stats?.defense || 0) * statMultiplier),
+    spAttack: Math.floor((pokemon.stats?.spAttack || 0) * statMultiplier),
+    spDefense: Math.floor((pokemon.stats?.spDefense || 0) * statMultiplier),
+    speed: Math.floor((pokemon.stats?.speed || 0) * statMultiplier),
+  };
 
   // Sort evolution chain by pokedexNumber instead of ID
   const sortedEvolutionIds = evolutionIds
@@ -252,42 +278,42 @@ function PokemonCardContent({
               <div className="statsBars col-start-2 row-start-1 flex flex-col gap-1">
                 <StackedProgress
                   baseValue={pokemon.stats?.hp ?? 0}
-                  yourValue={pokemon.stats?.hp ?? 0}
+                  yourValue={upgradedStats.hp}
                   max={255}
                   color={statColors.hp.color}
                   upgradeColor={statColors.hp.upgradeColor}
                 />
                 <StackedProgress
                   baseValue={pokemon.stats?.attack ?? 0}
-                  yourValue={pokemon.stats?.attack ?? 0}
+                  yourValue={upgradedStats.attack}
                   max={255}
                   color={statColors.attack.color}
                   upgradeColor={statColors.attack.upgradeColor}
                 />
                 <StackedProgress
                   baseValue={pokemon.stats?.defense ?? 0}
-                  yourValue={pokemon.stats?.defense ?? 0}
+                  yourValue={upgradedStats.defense}
                   max={255}
                   color={statColors.defense.color}
                   upgradeColor={statColors.defense.upgradeColor}
                 />
                 <StackedProgress
                   baseValue={pokemon.stats?.spAttack ?? 0}
-                  yourValue={pokemon.stats?.spAttack ?? 0}
+                  yourValue={upgradedStats.spAttack}
                   max={255}
                   color={statColors.spAttack.color}
                   upgradeColor={statColors.spAttack.upgradeColor}
                 />
                 <StackedProgress
                   baseValue={pokemon.stats?.spDefense ?? 0}
-                  yourValue={pokemon.stats?.spDefense ?? 0}
+                  yourValue={upgradedStats.spDefense}
                   max={255}
                   color={statColors.spDefense.color}
                   upgradeColor={statColors.spDefense.upgradeColor}
                 />
                 <StackedProgress
                   baseValue={pokemon.stats?.speed ?? 0}
-                  yourValue={pokemon.stats?.speed ?? 0}
+                  yourValue={upgradedStats.speed}
                   max={255}
                   color={statColors.speed.color}
                   upgradeColor={statColors.speed.upgradeColor}
@@ -296,6 +322,42 @@ function PokemonCardContent({
             </div>
           </div>
         </section>
+
+        {/* Upgrade Button */}
+        {pokemon.isOwned && upgrade && (
+          <div className="w-full mb-2 md:mb-3">
+            <Button
+              onClick={handleUpgrade}
+              disabled={upgrading || !!(user && user.rare_candy < upgrade.cost)}
+              className="w-full pixel-font text-xs md:text-sm font-bold py-2 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              bgColor={isDarkMode ? '#3b82f6' : '#60a5fa'}
+              style={{
+                color: 'white',
+                borderColor: 'black',
+              }}
+            >
+              {upgrading ? (
+                'Upgrading...'
+              ) : (
+                <div className="flex items-center justify-center gap-1">
+                  <ArrowUpIcon size={16} />
+                  <span>Upgrade</span>
+                  <span>{formatNumber(upgrade.cost)}</span>
+                  <img 
+                    src={`${import.meta.env.BASE_URL}candy.webp`} 
+                    alt="Candy" 
+                    className="w-4 h-4"
+                  />
+                </div>
+              )}
+            </Button>
+            {error && (
+              <div className="text-xs text-red-500 mt-1 text-center font-bold">
+                {error}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Purchase Button */}
         {!pokemon.isOwned && (
@@ -378,7 +440,7 @@ function EvolutionPokemon({
         <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
         {showArrow && (
           <span className="evolutionArrow">
-            <PixelArrowRight className="w-4 h-4 md:w-6 md:h-6" />
+            <ArrowRightIcon className="w-4 h-4 md:w-6 md:h-6" />
           </span>
         )}
       </div>
@@ -410,7 +472,7 @@ function EvolutionPokemon({
       </button>
       {showArrow && (
         <span className="evolutionArrow">
-          <PixelArrowRight className="w-6 h-6 md:w-8 md:h-8" />
+          <ArrowRightIcon className="w-6 h-6 md:w-8 md:h-8" />
         </span>
       )}
     </div>

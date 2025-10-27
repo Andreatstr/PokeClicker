@@ -9,6 +9,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "seed": "tsx src/seedPokemon.ts",
+    "migrate-stats": "tsx src/migrateStats.ts",
+    "check-db": "tsx src/checkDb.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

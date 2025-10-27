@@ -15,6 +15,8 @@ const UPDATE_RARE_CANDY = gql`
         spAttack
         spDefense
         speed
+        clickPower
+        passiveIncome
       }
       owned_pokemon_ids
       favorite_pokemon_id
@@ -37,6 +39,8 @@ const UPGRADE_STAT = gql`
         spAttack
         spDefense
         speed
+        clickPower
+        passiveIncome
       }
       owned_pokemon_ids
       favorite_pokemon_id
