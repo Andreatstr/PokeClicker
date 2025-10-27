@@ -142,7 +142,7 @@ export function BattleView({
 
       {/* Player Pokemon (bottom left) */}
       <div className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6">
-        <div className="flex justify-start items-end gap-4 md:gap-6">
+        <div className="flex justify-start items-end gap-2 md:gap-4">
           <div
             className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 flex-shrink-0 relative group ml-8 -mb-4 md:ml-4 md:-mb-6"
             aria-label={`Click to attack with ${playerPokemon.name}`}
@@ -154,7 +154,7 @@ export function BattleView({
               style={{imageRendering: 'pixelated'}}
             />
           </div>
-          <div className="flex-1 max-w-[140px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-4 md:ml-4">
+          <div className="flex-1 max-w-[120px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-0 md:ml-4">
             <HealthBar
               current={playerHP}
               max={playerMaxHP}

@@ -111,6 +111,50 @@ function App() {
     }
   }, [isDarkMode]);
 
+  // Prevent scrolling on map page
+  useEffect(() => {
+    if (currentPage === 'map') {
+      // Store current scroll position
+      const scrollY = window.scrollY;
+
+      // Prevent scrolling using position fixed
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+
+      // Prevent pull-to-refresh and overscroll on mobile
+      document.body.style.overscrollBehavior = 'none';
+      document.documentElement.style.overscrollBehavior = 'none';
+
+      // Prevent touch scrolling on mobile
+      const preventScroll = (e: TouchEvent) => {
+        if ((e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')) {
+          return;
+        }
+        e.preventDefault();
+      };
+
+      document.addEventListener('touchmove', preventScroll, { passive: false });
+
+      return () => {
+        // Restore scrolling
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        document.body.style.overscrollBehavior = '';
+        document.documentElement.style.overscrollBehavior = '';
+        document.removeEventListener('touchmove', preventScroll);
+
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [currentPage]);
+
   // Save current page to localStorage
   useEffect(() => {
     if (currentPage !== 'login') {
@@ -247,7 +291,7 @@ function App() {
                 </Suspense>
               </section>
             ) : currentPage === 'map' ? (
-              <section className="py-8">
+              <section className="py-2 md:py-8">
                 <PokemonMap isDarkMode={isDarkMode} />
               </section>
             ) : (

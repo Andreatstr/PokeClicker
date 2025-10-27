@@ -51,11 +51,11 @@ export function GameBoy({
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
       {/* GameBoy Console Shell */}
       <Card
-        className={`bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 md:p-6 w-full ${isMobile ? 'max-w-sm' : 'max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl'}`}
+        className={`bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-6 w-full ${isMobile ? 'max-w-sm' : 'max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl'}`}
       >
         <div className="flex flex-col items-center">
           {/* Screen Bezel */}
-          <div className="bg-[#3E3E52] rounded-md p-3 mb-3 w-full shadow-inner border-2 border-[#2a2a3e]">
+          <div className="bg-[#3E3E52] rounded-md p-2 md:p-3 mb-0.5 md:mb-3 w-full shadow-inner border-2 border-[#2a2a3e]">
             {/* Screen Label */}
             <div className="flex items-center justify-between mb-1 px-1">
               <div className="flex items-center gap-1">
@@ -84,7 +84,7 @@ export function GameBoy({
           </div>
 
           {/* Nintendo GAME BOY text */}
-          <div className="mb-3 text-center">
+          <div className="mb-0.5 md:mb-3 text-center">
             <p className="pixel-font text-[10px] text-[#2a2a3e] tracking-wider mb-0.5">
               Nintendo
             </p>
@@ -94,7 +94,7 @@ export function GameBoy({
           </div>
 
           {/* Interactive Controls */}
-          <div className="flex items-center w-full px-1 mb-2">
+          <div className="flex items-center w-full px-1 mb-0.5 md:mb-2">
             {/* Joystick - more to the left */}
             <div className="flex-[0.8] flex justify-center">
               <Joystick
@@ -120,13 +120,13 @@ export function GameBoy({
           </div>
 
           {/* Start/Select Buttons */}
-          <div className="flex gap-3 items-center mb-1">
+          <div className="flex gap-3 items-center mb-0.5 md:mb-1">
             <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
             <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
           </div>
 
           {/* Speaker Holes */}
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-0.5 md:mt-2">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col gap-1">
                 {[...Array(3)].map((_, j) => (
