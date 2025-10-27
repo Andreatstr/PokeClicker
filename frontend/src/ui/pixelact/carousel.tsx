@@ -29,7 +29,12 @@ interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
   initialIndex?: number;
 }
 
-export function Carousel({children, className, initialIndex = 0, ...props}: CarouselProps) {
+export function Carousel({
+  children,
+  className,
+  initialIndex = 0,
+  ...props
+}: CarouselProps) {
   const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
   const [itemsCount, setItemsCount] = React.useState(0);
 
@@ -71,7 +76,14 @@ export function Carousel({children, className, initialIndex = 0, ...props}: Caro
       scrollPrev,
       scrollNext,
     }),
-    [currentIndex, itemsCount, canScrollPrev, canScrollNext, scrollPrev, scrollNext]
+    [
+      currentIndex,
+      itemsCount,
+      canScrollPrev,
+      canScrollNext,
+      scrollPrev,
+      scrollNext,
+    ]
   );
 
   return (
@@ -87,8 +99,19 @@ interface CarouselContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CarouselContent({children, className, ...props}: CarouselContentProps) {
-  const {currentIndex, setItemsCount, scrollPrev, scrollNext, canScrollPrev, canScrollNext} = useCarousel();
+export function CarouselContent({
+  children,
+  className,
+  ...props
+}: CarouselContentProps) {
+  const {
+    currentIndex,
+    setItemsCount,
+    scrollPrev,
+    scrollNext,
+    canScrollPrev,
+    canScrollNext,
+  } = useCarousel();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
   const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
@@ -136,7 +159,10 @@ export function CarouselContent({children, className, ...props}: CarouselContent
       onTouchEnd={onTouchEnd}
     >
       <div
-        className={cn('flex transition-transform duration-300 ease-in-out', className)}
+        className={cn(
+          'flex transition-transform duration-300 ease-in-out',
+          className
+        )}
         style={{
           transform: `translateX(-${currentIndex * 100}%)`,
         }}
@@ -152,18 +178,22 @@ interface CarouselItemProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CarouselItem({children, className, ...props}: CarouselItemProps) {
+export function CarouselItem({
+  children,
+  className,
+  ...props
+}: CarouselItemProps) {
   return (
-    <div
-      className={cn('min-w-full flex-shrink-0', className)}
-      {...props}
-    >
+    <div className={cn('min-w-full flex-shrink-0', className)} {...props}>
       {children}
     </div>
   );
 }
 
-export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function CarouselPrevious({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const {canScrollPrev, scrollPrev} = useCarousel();
 
   return (
@@ -192,7 +222,10 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
   );
 }
 
-export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function CarouselNext({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const {canScrollNext, scrollNext} = useCarousel();
 
   return (

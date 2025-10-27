@@ -8,7 +8,10 @@ export {SearchBar} from './components/SearchBar';
 export {usePokedexQuery} from './hooks/usePokedexQuery';
 export {usePokemonById} from './hooks/usePokemonById';
 export {usePurchasePokemon} from './hooks/usePurchasePokemon';
-export {usePokemonUpgrade, useUpgradePokemonMutation} from './hooks/usePokemonUpgrade';
+export {
+  usePokemonUpgrade,
+  useUpgradePokemonMutation,
+} from './hooks/usePokemonUpgrade';
 
 // Types
 export type {PokedexPokemon} from './hooks/usePokedexQuery';

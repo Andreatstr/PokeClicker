@@ -1,7 +1,25 @@
-import {Dialog, DialogBody, UnlockButton, Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, useCarousel, Button, ArrowUpIcon, ArrowRightIcon} from '@ui/pixelact';
+import {
+  Dialog,
+  DialogBody,
+  UnlockButton,
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  useCarousel,
+  Button,
+  ArrowUpIcon,
+  ArrowRightIcon,
+} from '@ui/pixelact';
 import {StackedProgress} from '@features/clicker';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePokemonById, usePurchasePokemon, usePokemonUpgrade, useUpgradePokemonMutation} from '@features/pokedex';
+import {
+  usePokemonById,
+  usePurchasePokemon,
+  usePokemonUpgrade,
+  useUpgradePokemonMutation,
+} from '@features/pokedex';
 import {useAuth, type User} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useState, useEffect} from 'react';
@@ -74,8 +92,11 @@ function PokemonCardContent({
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Fetch Pokemon upgrade data
-  const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(pokemon.isOwned ? pokemon.id : null);
-  const [upgradePokemonMutation, {loading: upgrading}] = useUpgradePokemonMutation();
+  const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(
+    pokemon.isOwned ? pokemon.id : null
+  );
+  const [upgradePokemonMutation, {loading: upgrading}] =
+    useUpgradePokemonMutation();
 
   // Handle purchase for THIS specific Pokemon
   const handlePurchase = async (e: React.MouseEvent) => {
@@ -154,7 +175,18 @@ function PokemonCardContent({
   const evo8 = usePokemonById(evolutionIds[8] ?? null);
   const evo9 = usePokemonById(evolutionIds[9] ?? null);
 
-  const evolutionDataQueries = [evo0, evo1, evo2, evo3, evo4, evo5, evo6, evo7, evo8, evo9];
+  const evolutionDataQueries = [
+    evo0,
+    evo1,
+    evo2,
+    evo3,
+    evo4,
+    evo5,
+    evo6,
+    evo7,
+    evo8,
+    evo9,
+  ];
 
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
@@ -182,10 +214,11 @@ function PokemonCardContent({
   const sortedEvolutionIds = evolutionIds
     .map((id, index) => ({
       id,
-      pokedexNumber: evolutionDataQueries[index]?.data?.pokemonById?.pokedexNumber ?? id,
+      pokedexNumber:
+        evolutionDataQueries[index]?.data?.pokemonById?.pokedexNumber ?? id,
     }))
     .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
-    .map(item => item.id);
+    .map((item) => item.id);
 
   return (
     <div className="flex flex-col gap-3 md:gap-4 items-center">
@@ -353,9 +386,9 @@ function PokemonCardContent({
                   <span className="px-2 py-1 border border-white rounded bg-black/20 font-bold">
                     {formatNumber(upgrade.cost)}
                   </span>
-                  <img 
-                    src={`${import.meta.env.BASE_URL}candy.webp`} 
-                    alt="Candy" 
+                  <img
+                    src={`${import.meta.env.BASE_URL}candy.webp`}
+                    alt="Candy"
                     className="w-6 h-6"
                   />
                 </div>
@@ -584,17 +617,13 @@ function CarouselWrapper({
   user: User | null;
   ownedPokemonIds: number[];
 }) {
-  const initialIndex = allPokemon.findIndex(p => p.id === currentPokemon.id);
+  const initialIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
 
   return (
     <Carousel className="relative" initialIndex={initialIndex}>
       {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
-      <CarouselPrevious
-        className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl"
-      />
-      <CarouselNext
-        className="hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl"
-      />
+      <CarouselPrevious className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      <CarouselNext className="hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
 
       <CarouselContent>
         {allPokemon.map((poke, index) => (
@@ -651,7 +680,10 @@ function LazyPokemonCard({
 
   if (!shouldRender) {
     return (
-      <div className="flex flex-col gap-3 md:gap-4 items-center w-full max-w-[400px] mx-auto" style={{minHeight: '600px'}}>
+      <div
+        className="flex flex-col gap-3 md:gap-4 items-center w-full max-w-[400px] mx-auto"
+        style={{minHeight: '600px'}}
+      >
         {/* Placeholder - content loads when scrolled into view */}
       </div>
     );

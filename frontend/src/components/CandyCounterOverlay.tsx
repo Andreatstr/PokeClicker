@@ -5,7 +5,9 @@ interface CandyCounterOverlayProps {
   isDarkMode?: boolean;
 }
 
-export function CandyCounterOverlay({isDarkMode = false}: CandyCounterOverlayProps) {
+export function CandyCounterOverlay({
+  isDarkMode = false,
+}: CandyCounterOverlayProps) {
   const {user} = useAuth();
 
   if (!user) return null;
@@ -20,9 +22,9 @@ export function CandyCounterOverlay({isDarkMode = false}: CandyCounterOverlayPro
           color: isDarkMode ? 'white' : 'black',
         }}
       >
-        <img 
-          src={`${import.meta.env.BASE_URL}candy.webp`} 
-          alt="Candy" 
+        <img
+          src={`${import.meta.env.BASE_URL}candy.webp`}
+          alt="Candy"
           className="w-5 h-5"
         />
         <span>{formatNumber(user.rare_candy)}</span>

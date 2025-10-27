@@ -1,9 +1,19 @@
-import {fetchPokemon, fetchPokemonById, Pokemon, PokemonStats} from './pokeapi.js';
+import {
+  fetchPokemon,
+  fetchPokemonById,
+  Pokemon,
+  PokemonStats,
+} from './pokeapi.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {getDatabase} from './db.js';
 import {DEFAULT_USER_STATS} from './types.js';
-import {UserDocument, AuthResponse, PokemonQueryArgs, PokemonUpgradeDocument} from './types';
+import {
+  UserDocument,
+  AuthResponse,
+  PokemonQueryArgs,
+  PokemonUpgradeDocument,
+} from './types';
 import {Collection, ObjectId} from 'mongodb';
 import {type AuthContext, requireAuth} from './auth.js';
 import 'dotenv/config';
@@ -141,23 +151,31 @@ function getPokemonCost(pokemonId: number): number {
 }
 
 // Helper to get Pokemon upgrade cost based on base stats
-function getPokemonUpgradeCost(currentLevel: number, pokemonStats?: PokemonStats): number {
+function getPokemonUpgradeCost(
+  currentLevel: number,
+  pokemonStats?: PokemonStats
+): number {
   // If no stats provided, fall back to old system for backwards compatibility
   if (!pokemonStats) {
     return Math.floor(100 * Math.pow(2.5, currentLevel - 1));
   }
 
   // Calculate base cost multiplier based on Pokemon's total base stats
-  const totalBaseStats = pokemonStats.hp + pokemonStats.attack + pokemonStats.defense + 
-                        pokemonStats.spAttack + pokemonStats.spDefense + pokemonStats.speed;
-  
+  const totalBaseStats =
+    pokemonStats.hp +
+    pokemonStats.attack +
+    pokemonStats.defense +
+    pokemonStats.spAttack +
+    pokemonStats.spDefense +
+    pokemonStats.speed;
+
   // Much more aggressive scaling to match purchase cost differences
   // Weak Pokemon (~200 stats): ~25 base cost
-  // Average Pokemon (~400 stats): ~100 base cost  
+  // Average Pokemon (~400 stats): ~100 base cost
   // Strong Pokemon (~600 stats): ~300 base cost
   // Legendary Pokemon (~800+ stats): ~800+ base cost
   const baseCostMultiplier = Math.max(25, Math.floor(totalBaseStats / 2)); // Much steeper scaling
-  
+
   // Cost formula: baseCost × 2.5^(level-1)
   // Level 1->2: baseCost, Level 2->3: baseCost×2.5, Level 3->4: baseCost×6.25, etc.
   return Math.floor(baseCostMultiplier * Math.pow(2.5, currentLevel - 1));
@@ -196,10 +214,7 @@ export const resolvers = {
       }
 
       if (needsUpdate) {
-        await users.updateOne(
-          {_id: new ObjectId(user.id)},
-          {$set: updates}
-        );
+        await users.updateOne({_id: new ObjectId(user.id)}, {$set: updates});
         // Re-fetch to get updated document
         userDoc = await users.findOne({_id: new ObjectId(user.id)});
         if (!userDoc) {
@@ -226,7 +241,9 @@ export const resolvers = {
         try {
           const db = getDatabase();
           const users = db.collection('users');
-          const user = await users.findOne({_id: new ObjectId(context.user.id)});
+          const user = await users.findOne({
+            _id: new ObjectId(context.user.id),
+          });
           if (user && user.owned_pokemon_ids) {
             isOwned = user.owned_pokemon_ids.includes(id);
           }
@@ -256,7 +273,9 @@ export const resolvers = {
         try {
           const db = getDatabase();
           const users = db.collection('users');
-          const user = await users.findOne({_id: new ObjectId(context.user.id)});
+          const user = await users.findOne({
+            _id: new ObjectId(context.user.id),
+          });
           if (user && user.owned_pokemon_ids) {
             ownedPokemonIds = user.owned_pokemon_ids;
           }
@@ -395,7 +414,9 @@ export const resolvers = {
       const user = requireAuth(context);
 
       const db = getDatabase();
-      const upgrades = db.collection('pokemon_upgrades') as Collection<PokemonUpgradeDocument>;
+      const upgrades = db.collection(
+        'pokemon_upgrades'
+      ) as Collection<PokemonUpgradeDocument>;
 
       // Find existing upgrade for this user+Pokemon
       const upgrade = await upgrades.findOne({
@@ -405,7 +426,7 @@ export const resolvers = {
 
       // If no upgrade exists, return level 1 (default)
       const level = upgrade?.level || 1;
-      
+
       // Fetch Pokemon stats to calculate stats-based upgrade cost
       const pokemon = await fetchPokemonById(pokemonId);
       const cost = getPokemonUpgradeCost(level, pokemon.stats);
@@ -483,14 +504,22 @@ export const resolvers = {
 
       // Initialize new stats if they don't exist (migration for existing users)
       let needsMigration = false;
-      if (stat === 'clickPower' && (userDoc.stats.clickPower === undefined || userDoc.stats.clickPower === null)) {
+      if (
+        stat === 'clickPower' &&
+        (userDoc.stats.clickPower === undefined ||
+          userDoc.stats.clickPower === null)
+      ) {
         needsMigration = true;
         await users.updateOne(
           {_id: new ObjectId(user.id)},
           {$set: {'stats.clickPower': 1}}
         );
       }
-      if (stat === 'passiveIncome' && (userDoc.stats.passiveIncome === undefined || userDoc.stats.passiveIncome === null)) {
+      if (
+        stat === 'passiveIncome' &&
+        (userDoc.stats.passiveIncome === undefined ||
+          userDoc.stats.passiveIncome === null)
+      ) {
         needsMigration = true;
         await users.updateOne(
           {_id: new ObjectId(user.id)},
@@ -510,13 +539,17 @@ export const resolvers = {
       let currentLevel = 1;
       if (stat === 'clickPower' || stat === 'passiveIncome') {
         currentLevel = (userDoc.stats as any)[stat] || 1;
-        console.log(`[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`);
+        console.log(
+          `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
+        );
       } else {
         currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats] || 1;
       }
       const cost = getUpgradeCost(currentLevel, stat);
 
-      console.log(`[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost}, userCandy=${userDoc.rare_candy}`);
+      console.log(
+        `[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost}, userCandy=${userDoc.rare_candy}`
+      );
 
       // Check if user has enough rare candy
       if (userDoc.rare_candy < cost) {
@@ -775,7 +808,9 @@ export const resolvers = {
 
       const db = getDatabase();
       const users = db.collection('users') as Collection<UserDocument>;
-      const upgrades = db.collection('pokemon_upgrades') as Collection<PokemonUpgradeDocument>;
+      const upgrades = db.collection(
+        'pokemon_upgrades'
+      ) as Collection<PokemonUpgradeDocument>;
 
       // Check if user owns this Pokemon
       const userDoc = await users.findOne({_id: new ObjectId(user.id)});
@@ -794,7 +829,7 @@ export const resolvers = {
       });
 
       const currentLevel = existingUpgrade?.level || 1;
-      
+
       // Fetch Pokemon stats to calculate stats-based upgrade cost
       const pokemon = await fetchPokemonById(pokemonId);
       const cost = getPokemonUpgradeCost(currentLevel, pokemon.stats);

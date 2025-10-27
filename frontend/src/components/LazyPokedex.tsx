@@ -163,7 +163,8 @@ function PokemonGrid({
   onPageChange,
   loading,
 }: PokemonGridProps) {
-  const [selectedMobilePokemon, setSelectedMobilePokemon] = useState<PokedexPokemon | null>(null);
+  const [selectedMobilePokemon, setSelectedMobilePokemon] =
+    useState<PokedexPokemon | null>(null);
   const [isMobileView, setIsMobileView] = useState(false);
 
   // Detect mobile
@@ -183,7 +184,9 @@ function PokemonGrid({
     }
     // If selected Pokemon is no longer in the list (e.g., after filtering), reset to first
     if (isMobileView && selectedMobilePokemon && displayedPokemon.length > 0) {
-      const stillExists = displayedPokemon.some(p => p.id === selectedMobilePokemon.id);
+      const stillExists = displayedPokemon.some(
+        (p) => p.id === selectedMobilePokemon.id
+      );
       if (!stillExists) {
         setSelectedMobilePokemon(displayedPokemon[0]);
       }
@@ -258,7 +261,9 @@ function PokemonGrid({
                       >
                         <img
                           src={pokemon.sprite}
-                          alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
+                          alt={
+                            pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'
+                          }
                           className="w-16 h-16 pixelated"
                           style={{
                             imageRendering: 'pixelated',
@@ -292,7 +297,8 @@ function PokemonGrid({
               <ul
                 className="grid gap-4 md:gap-6 list-none p-0 m-0"
                 style={{
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
+                  gridTemplateColumns:
+                    'repeat(auto-fill, minmax(280px, 280px))',
                   justifyContent: 'center',
                 }}
               >

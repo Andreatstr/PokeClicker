@@ -1,5 +1,9 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
-import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
+import {
+  usePokedexQuery,
+  type PokedexPokemon,
+  usePokemonById,
+} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
 import {CandyCounterOverlay} from '@/components/CandyCounterOverlay';
 import {preloadService} from '@/lib/preloadService';
@@ -60,7 +64,9 @@ function App() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // State for cross-region Pokemon navigation
-  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<number | null>(null);
+  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<
+    number | null
+  >(null);
   const {data: crossRegionData} = usePokemonById(crossRegionPokemonId);
 
   // Initialize preloading service
@@ -138,13 +144,15 @@ function App() {
       // Prevent touch scrolling on mobile
       const preventScroll = (e: TouchEvent) => {
         // Allow scrolling within joystick/button areas
-        if ((e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')) {
+        if (
+          (e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')
+        ) {
           return;
         }
         e.preventDefault();
       };
 
-      document.addEventListener('touchmove', preventScroll, { passive: false });
+      document.addEventListener('touchmove', preventScroll, {passive: false});
 
       return () => {
         // Restore scrolling

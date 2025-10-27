@@ -21,22 +21,26 @@ async function migrateStats() {
 
   // FORCE RESET: Update ALL users to have clickPower and passiveIncome at level 1
   // This will overwrite existing values!
-  console.log(`⚠️  Resetting ALL users' clickPower and passiveIncome to level 1...`);
+  console.log(
+    `⚠️  Resetting ALL users' clickPower and passiveIncome to level 1...`
+  );
 
   const result = await users.updateMany(
     {}, // Empty filter = all documents
     {
       $set: {
         'stats.clickPower': 1,
-        'stats.passiveIncome': 1
-      }
+        'stats.passiveIncome': 1,
+      },
     }
   );
 
   console.log(`✅ Migration complete!`);
   console.log(`   - Matched: ${result.matchedCount} users`);
   console.log(`   - Modified: ${result.modifiedCount} users`);
-  console.log(`   - All users now have clickPower and passiveIncome at level 1`);
+  console.log(
+    `   - All users now have clickPower and passiveIncome at level 1`
+  );
 
   // Close database connection
   await closeDatabaseConnection();
