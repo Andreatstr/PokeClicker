@@ -843,10 +843,17 @@ export const resolvers = {
 
       const newCost = getPokemonUpgradeCost(newLevel);
 
+      // Return updated user data so frontend can sync candy count
+      const updatedUserDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!updatedUserDoc) {
+        throw new Error('Failed to fetch updated user data');
+      }
+
       return {
         pokemon_id: pokemonId,
         level: newLevel,
         cost: newCost,
+        user: sanitizeUserForClient(updatedUserDoc),
       };
     },
   },

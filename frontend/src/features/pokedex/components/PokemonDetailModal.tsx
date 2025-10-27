@@ -113,9 +113,17 @@ function PokemonCardContent({
     setError(null);
 
     try {
-      await upgradePokemonMutation({
+      const result = await upgradePokemonMutation({
         variables: {pokemonId: pokemon.id},
       });
+
+      // Immediately update AuthContext with the server response
+      if (result.data?.upgradePokemon?.user && user) {
+        updateUser({
+          ...result.data.upgradePokemon.user,
+          created_at: user.created_at,
+        });
+      }
 
       // Refetch upgrade data to get new level and cost
       await refetchUpgrade();

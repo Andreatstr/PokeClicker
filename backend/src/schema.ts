@@ -74,6 +74,7 @@ export const typeDefs = `#graphql
     pokemon_id: Int!
     level: Int!
     cost: Int!
+    user: User
   }
 
   type Pokemon {
