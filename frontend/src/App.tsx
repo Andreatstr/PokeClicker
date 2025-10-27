@@ -1,6 +1,7 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
 import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
+import {CandyCounterOverlay} from '@/components/CandyCounterOverlay';
 import {preloadService} from '@/lib/preloadService';
 
 // Lazy load heavy components
@@ -332,43 +333,46 @@ function App() {
                     </p>
                   </div>
                 ) : (
-                  <LazyPokedex
-                    // SearchBar props
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    handleClearSearch={handleClearSearch}
-                    isMobile={isMobile}
-                    showMobileFilters={showMobileFilters}
-                    setShowMobileFilters={setShowMobileFilters}
-                    isDarkMode={isDarkMode}
-                    // FiltersAndCount props
-                    loading={loading}
-                    displayedPokemon={displayedPokemon}
-                    totalPokemon={totalPokemon}
-                    selectedTypes={selectedTypes}
-                    selectedRegion={selectedRegion}
-                    sortBy={sortBy}
-                    sortOrder={sortOrder}
-                    tempRegion={tempRegion}
-                    tempTypes={tempTypes}
-                    tempSortBy={tempSortBy}
-                    tempSortOrder={tempSortOrder}
-                    setSelectedRegion={setSelectedRegion}
-                    setSelectedTypes={setSelectedTypes}
-                    setSortBy={setSortBy}
-                    setSortOrder={setSortOrder}
-                    setTempRegion={setTempRegion}
-                    setTempTypes={setTempTypes}
-                    setTempSortBy={setTempSortBy}
-                    setTempSortOrder={setTempSortOrder}
-                    handleClearFilters={handleClearFilters}
-                    // Pagination props
-                    handlePokemonClick={handlePokemonClick}
-                    paginationPage={paginationPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-                  />
+                  <>
+                    <LazyPokedex
+                      // SearchBar props
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      handleClearSearch={handleClearSearch}
+                      isMobile={isMobile}
+                      showMobileFilters={showMobileFilters}
+                      setShowMobileFilters={setShowMobileFilters}
+                      isDarkMode={isDarkMode}
+                      // FiltersAndCount props
+                      loading={loading}
+                      displayedPokemon={displayedPokemon}
+                      totalPokemon={totalPokemon}
+                      selectedTypes={selectedTypes}
+                      selectedRegion={selectedRegion}
+                      sortBy={sortBy}
+                      sortOrder={sortOrder}
+                      tempRegion={tempRegion}
+                      tempTypes={tempTypes}
+                      tempSortBy={tempSortBy}
+                      tempSortOrder={tempSortOrder}
+                      setSelectedRegion={setSelectedRegion}
+                      setSelectedTypes={setSelectedTypes}
+                      setSortBy={setSortBy}
+                      setSortOrder={setSortOrder}
+                      setTempRegion={setTempRegion}
+                      setTempTypes={setTempTypes}
+                      setTempSortBy={setTempSortBy}
+                      setTempSortOrder={setTempSortOrder}
+                      handleClearFilters={handleClearFilters}
+                      // Pagination props
+                      handlePokemonClick={handlePokemonClick}
+                      paginationPage={paginationPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+                    />
+                    <CandyCounterOverlay isDarkMode={isDarkMode} />
+                  </>
                 )}
               </>
             )}

@@ -1,4 +1,4 @@
-import {fetchPokemon, fetchPokemonById, Pokemon} from './pokeapi.js';
+import {fetchPokemon, fetchPokemonById, Pokemon, PokemonStats} from './pokeapi.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {getDatabase} from './db.js';
@@ -140,11 +140,27 @@ function getPokemonCost(pokemonId: number): number {
   return Math.floor(100 * Math.pow(2, tier));
 }
 
-// Helper to get Pokemon upgrade cost (3% all stats per level)
-function getPokemonUpgradeCost(currentLevel: number): number {
-  // Cost formula: 100 × 2.5^(level-1)
-  // Level 1->2: 100, Level 2->3: 250, Level 3->4: 625, etc.
-  return Math.floor(100 * Math.pow(2.5, currentLevel - 1));
+// Helper to get Pokemon upgrade cost based on base stats
+function getPokemonUpgradeCost(currentLevel: number, pokemonStats?: PokemonStats): number {
+  // If no stats provided, fall back to old system for backwards compatibility
+  if (!pokemonStats) {
+    return Math.floor(100 * Math.pow(2.5, currentLevel - 1));
+  }
+
+  // Calculate base cost multiplier based on Pokemon's total base stats
+  const totalBaseStats = pokemonStats.hp + pokemonStats.attack + pokemonStats.defense + 
+                        pokemonStats.spAttack + pokemonStats.spDefense + pokemonStats.speed;
+  
+  // Much more aggressive scaling to match purchase cost differences
+  // Weak Pokemon (~200 stats): ~25 base cost
+  // Average Pokemon (~400 stats): ~100 base cost  
+  // Strong Pokemon (~600 stats): ~300 base cost
+  // Legendary Pokemon (~800+ stats): ~800+ base cost
+  const baseCostMultiplier = Math.max(25, Math.floor(totalBaseStats / 2)); // Much steeper scaling
+  
+  // Cost formula: baseCost × 2.5^(level-1)
+  // Level 1->2: baseCost, Level 2->3: baseCost×2.5, Level 3->4: baseCost×6.25, etc.
+  return Math.floor(baseCostMultiplier * Math.pow(2.5, currentLevel - 1));
 }
 
 export const resolvers = {
@@ -389,7 +405,10 @@ export const resolvers = {
 
       // If no upgrade exists, return level 1 (default)
       const level = upgrade?.level || 1;
-      const cost = getPokemonUpgradeCost(level);
+      
+      // Fetch Pokemon stats to calculate stats-based upgrade cost
+      const pokemon = await fetchPokemonById(pokemonId);
+      const cost = getPokemonUpgradeCost(level, pokemon.stats);
 
       return {
         pokemon_id: pokemonId,
@@ -775,7 +794,10 @@ export const resolvers = {
       });
 
       const currentLevel = existingUpgrade?.level || 1;
-      const cost = getPokemonUpgradeCost(currentLevel);
+      
+      // Fetch Pokemon stats to calculate stats-based upgrade cost
+      const pokemon = await fetchPokemonById(pokemonId);
+      const cost = getPokemonUpgradeCost(currentLevel, pokemon.stats);
 
       // Check if user has enough candy
       if (userDoc.rare_candy < cost) {

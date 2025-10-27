@@ -4,3 +4,4 @@ export {BackgroundMusic} from './BackgroundMusic';
 export {LoadingSpinner} from './LoadingSpinner';
 export {LazyPokedex} from './LazyPokedex';
 export {PaginationControls} from './PaginationControls';
+export {CandyCounterOverlay} from './CandyCounterOverlay';
