@@ -178,6 +178,7 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'transition-all duration-100',
         'font-bold text-lg',
+        'flex items-center justify-center',
         className
       )}
       onClick={scrollPrev}
@@ -185,7 +186,7 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
       aria-label="Previous"
       {...props}
     >
-      <ArrowLeftIcon />
+      <ArrowLeftIcon size={16} className="block mx-auto" />
     </button>
   );
 }
@@ -206,6 +207,7 @@ export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<H
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'transition-all duration-100',
         'font-bold text-lg',
+        'flex items-center justify-center',
         className
       )}
       onClick={scrollNext}
@@ -213,7 +215,7 @@ export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<H
       aria-label="Next"
       {...props}
     >
-      <ArrowRightIcon />
+      <ArrowRightIcon size={16} className="block mx-auto" />
     </button>
   );
 }

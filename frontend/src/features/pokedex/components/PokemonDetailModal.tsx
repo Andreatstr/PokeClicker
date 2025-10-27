@@ -329,7 +329,7 @@ function PokemonCardContent({
             <Button
               onClick={handleUpgrade}
               disabled={upgrading || !!(user && user.rare_candy < upgrade.cost)}
-              className="w-full pixel-font text-xs md:text-sm font-bold py-2 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full pixel-font text-xs md:text-sm font-bold py-6 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               bgColor={isDarkMode ? '#3b82f6' : '#60a5fa'}
               style={{
                 color: 'white',
@@ -339,14 +339,16 @@ function PokemonCardContent({
               {upgrading ? (
                 'Upgrading...'
               ) : (
-                <div className="flex items-center justify-center gap-1">
-                  <ArrowUpIcon size={16} />
+                <div className="flex items-center justify-center gap-3">
+                  <ArrowUpIcon size={20} />
                   <span>Upgrade</span>
-                  <span>{formatNumber(upgrade.cost)}</span>
+                  <span className="px-2 py-1 border border-white rounded bg-black/20 font-bold">
+                    {formatNumber(upgrade.cost)}
+                  </span>
                   <img 
                     src={`${import.meta.env.BASE_URL}candy.webp`} 
                     alt="Candy" 
-                    className="w-4 h-4"
+                    className="w-6 h-6"
                   />
                 </div>
               )}
