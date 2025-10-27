@@ -51,7 +51,7 @@ export function GameBoy({
     <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
       {/* GameBoy Console Shell */}
       <Card
-        className={`bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-6 w-full ${isMobile ? 'max-w-sm' : 'max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-3xl'}`}
+        className={`bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-2 md:p-6 ${isMobile ? 'w-full max-w-sm' : 'w-auto'}`}
       >
         <div className="flex flex-col items-center">
           {/* Screen Bezel */}

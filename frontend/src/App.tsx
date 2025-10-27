@@ -114,22 +114,21 @@ function App() {
   // Prevent scrolling on map page
   useEffect(() => {
     if (currentPage === 'map') {
-      // Store current scroll position
-      const scrollY = window.scrollY;
-
-      // Prevent scrolling using position fixed
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
+      // Prevent scrolling
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
 
       // Prevent pull-to-refresh and overscroll on mobile
       document.body.style.overscrollBehavior = 'none';
       document.documentElement.style.overscrollBehavior = 'none';
 
+      // Set height to viewport height
+      document.documentElement.style.height = '100vh';
+      document.body.style.height = '100vh';
+
       // Prevent touch scrolling on mobile
       const preventScroll = (e: TouchEvent) => {
+        // Allow scrolling within joystick/button areas
         if ((e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')) {
           return;
         }
@@ -140,17 +139,13 @@ function App() {
 
       return () => {
         // Restore scrolling
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.left = '';
-        document.body.style.right = '';
-        document.body.style.width = '';
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
         document.body.style.overscrollBehavior = '';
         document.documentElement.style.overscrollBehavior = '';
+        document.documentElement.style.height = '';
+        document.body.style.height = '';
         document.removeEventListener('touchmove', preventScroll);
-
-        // Restore scroll position
-        window.scrollTo(0, scrollY);
       };
     }
   }, [currentPage]);
@@ -258,7 +253,7 @@ function App() {
       ) : (
         <>
           <main
-            className="min-h-screen px-4 sm:px-6 md:px-8 pb-8 pt-0"
+            className={`min-h-screen pt-0 ${currentPage === 'map' ? 'px-2 sm:px-4 md:px-6 lg:px-8 pb-0 h-screen flex flex-col' : 'px-4 sm:px-6 md:px-8 pb-8'}`}
             style={{backgroundColor: 'var(--background)'}}
           >
             {currentPage === 'clicker' ? (
@@ -291,7 +286,7 @@ function App() {
                 </Suspense>
               </section>
             ) : currentPage === 'map' ? (
-              <section className="py-2 md:py-8">
+              <section className="flex-1 flex items-start justify-center overflow-hidden">
                 <PokemonMap isDarkMode={isDarkMode} />
               </section>
             ) : (
