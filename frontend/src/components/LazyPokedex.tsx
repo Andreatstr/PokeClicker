@@ -1,6 +1,38 @@
 import {Suspense, lazy, useState, useEffect} from 'react';
 import {LoadingSpinner} from './LoadingSpinner';
+import {PaginationControls} from './PaginationControls';
 import {type PokedexPokemon} from '@features/pokedex';
+
+const PixelArrowRight = () => (
+  <svg
+    width="32"
+    height="32"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    className="animate-pulse"
+  >
+    <path
+      fill="currentColor"
+      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
+    />
+  </svg>
+);
+
+const PixelArrowLeft = () => (
+  <svg
+    width="32"
+    height="32"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    className="animate-pulse"
+    style={{ transform: 'scaleX(-1)' }}
+  >
+    <path
+      fill="currentColor"
+      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
+    />
+  </svg>
+);
 
 // Lazy load the heavy Pokedex components
 const SearchBar = lazy(() =>
@@ -47,12 +79,12 @@ interface LazyPokedexProps {
   setTempSortOrder: (value: 'asc' | 'desc') => void;
   handleClearFilters: () => void;
 
-  // PokemonCard props
+  // Pagination props
   handlePokemonClick: (pokemon: PokedexPokemon) => void;
-  displayedCount: number;
+  paginationPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   ITEMS_PER_PAGE: number;
-  hasMore: boolean;
-  handleLoadMore: () => void;
 }
 
 export function LazyPokedex(props: LazyPokedexProps) {
@@ -129,8 +161,9 @@ export function LazyPokedex(props: LazyPokedexProps) {
             handlePokemonClick={props.handlePokemonClick}
             isDarkMode={props.isDarkMode}
             ITEMS_PER_PAGE={props.ITEMS_PER_PAGE}
-            hasMore={props.hasMore}
-            handleLoadMore={props.handleLoadMore}
+            paginationPage={props.paginationPage}
+            totalPages={props.totalPages}
+            onPageChange={props.onPageChange}
             loading={props.loading}
           />
         </Suspense>
@@ -144,8 +177,9 @@ interface PokemonGridProps {
   handlePokemonClick: (pokemon: PokedexPokemon) => void;
   isDarkMode: boolean;
   ITEMS_PER_PAGE: number;
-  hasMore: boolean;
-  handleLoadMore: () => void;
+  paginationPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   loading: boolean;
 }
 
@@ -154,8 +188,9 @@ function PokemonGrid({
   handlePokemonClick,
   isDarkMode,
   ITEMS_PER_PAGE,
-  hasMore,
-  handleLoadMore,
+  paginationPage,
+  totalPages,
+  onPageChange,
   loading,
 }: PokemonGridProps) {
   const [selectedMobilePokemon, setSelectedMobilePokemon] = useState<PokedexPokemon | null>(null);
@@ -226,14 +261,14 @@ function PokemonGrid({
               <div className="w-full relative">
                 {/* Left Scroll Hint - shown when scrolled right */}
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <div className="animate-pulse text-4xl font-bold">←</div>
+                  <PixelArrowLeft />
                 </div>
                 {/* Gradient fade on left edge */}
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-l-4 border-black"></div>
 
                 {/* Right Scroll Hint - shown when more content to the right */}
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <div className="animate-pulse text-4xl font-bold">→</div>
+                  <PixelArrowRight />
                 </div>
                 {/* Gradient fade on right edge to indicate more content */}
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-r-4 border-black"></div>
@@ -265,20 +300,18 @@ function PokemonGrid({
                         </p>
                       </li>
                     ))}
-                    {hasMore && (
-                      <li className="flex-shrink-0 flex items-center justify-center p-4" style={{minWidth: '100px'}}>
-                        <button
-                          className="text-xs py-2 px-4 whitespace-nowrap"
-                          onClick={handleLoadMore}
-                          disabled={loading}
-                        >
-                          {loading ? '...' : 'More'}
-                        </button>
-                      </li>
-                    )}
                   </ul>
                 </div>
               </div>
+
+              {/* Mobile Pagination Controls */}
+              <PaginationControls
+                currentPage={paginationPage}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+                loading={loading}
+                isMobile={true}
+              />
             </div>
           ) : (
             /* Desktop: Grid View */
@@ -307,18 +340,14 @@ function PokemonGrid({
                 ))}
               </ul>
 
-              {/* Load More Button */}
-              {hasMore && (
-                <footer className="flex flex-col items-center gap-4 mt-8">
-                  <button
-                    className="min-w-[200px]"
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                  >
-                    {loading ? 'Loading...' : 'Load more'}
-                  </button>
-                </footer>
-              )}
+              {/* Desktop Pagination Controls */}
+              <PaginationControls
+                currentPage={paginationPage}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+                loading={loading}
+                isMobile={false}
+              />
             </>
           )}
         </>

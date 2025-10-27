@@ -94,13 +94,12 @@ function App() {
     initializePreloading();
   }, [currentPage]);
 
-  const [displayedCount, setDisplayedCount] = useState(20);
-
   const ITEMS_PER_PAGE = 20;
+  const [paginationPage, setPaginationPage] = useState(1);
 
-  // Reset displayedCount when filters change
+  // Reset to page 1 when filters change
   useEffect(() => {
-    setDisplayedCount(ITEMS_PER_PAGE);
+    setPaginationPage(1);
   }, [selectedRegion, selectedTypes, debouncedSearchTerm, sortBy, sortOrder]);
 
   // Mobile
@@ -133,8 +132,8 @@ function App() {
     type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
     sortBy,
     sortOrder,
-    limit: displayedCount,
-    offset: 0,
+    limit: ITEMS_PER_PAGE,
+    offset: (paginationPage - 1) * ITEMS_PER_PAGE,
   });
 
   useEffect(() => {
@@ -212,12 +211,14 @@ function App() {
     }
   };
 
-  const handleLoadMore = () => {
-    setDisplayedCount((prev) => prev + ITEMS_PER_PAGE);
+  const handlePageChange = (page: number) => {
+    setPaginationPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({top: 0, behavior: 'smooth'});
   };
 
   const displayedPokemon = filteredPokemon;
-  const hasMore = displayedCount < totalPokemon;
+  const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
 
   return (
     <>
@@ -322,12 +323,12 @@ function App() {
                     setTempSortBy={setTempSortBy}
                     setTempSortOrder={setTempSortOrder}
                     handleClearFilters={handleClearFilters}
-                    // PokemonCard props
+                    // Pagination props
                     handlePokemonClick={handlePokemonClick}
-                    displayedCount={displayedCount}
+                    paginationPage={paginationPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
                     ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-                    hasMore={hasMore}
-                    handleLoadMore={handleLoadMore}
                   />
                 )}
               </>

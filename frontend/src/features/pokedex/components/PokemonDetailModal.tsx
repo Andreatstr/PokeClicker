@@ -14,6 +14,21 @@ import {
 } from '../utils/typeColors';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 
+const PixelArrowRight = ({className = ''}: {className?: string}) => (
+  <svg
+    width="24"
+    height="24"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    className={className}
+  >
+    <path
+      fill="currentColor"
+      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
+    />
+  </svg>
+);
+
 const ME_QUERY = gql`
   query Me {
     me {
@@ -362,7 +377,9 @@ function EvolutionPokemon({
       <div className="evolutionItem flex items-center gap-1 md:gap-2">
         <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
         {showArrow && (
-          <span className="evolutionArrow text-sm md:text-base">→</span>
+          <span className="evolutionArrow">
+            <PixelArrowRight className="w-4 h-4 md:w-6 md:h-6" />
+          </span>
         )}
       </div>
     );
@@ -392,7 +409,9 @@ function EvolutionPokemon({
         )}
       </button>
       {showArrow && (
-        <span className="evolutionArrow text-2xl md:text-3xl">→</span>
+        <span className="evolutionArrow">
+          <PixelArrowRight className="w-6 h-6 md:w-8 md:h-8" />
+        </span>
       )}
     </div>
   );
