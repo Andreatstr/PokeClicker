@@ -258,9 +258,12 @@ function PokemonGrid({
                       >
                         <img
                           src={pokemon.sprite}
-                          alt={pokemon.name}
+                          alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
                           className="w-16 h-16 pixelated"
-                          style={{imageRendering: 'pixelated'}}
+                          style={{
+                            imageRendering: 'pixelated',
+                            filter: pokemon.isOwned ? 'none' : 'brightness(0)',
+                          }}
                         />
                         <p className="text-[10px] font-bold text-center">
                           No. {pokemon.pokedexNumber}
