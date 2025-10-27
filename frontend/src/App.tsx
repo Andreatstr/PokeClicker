@@ -286,7 +286,7 @@ function App() {
                 </Suspense>
               </section>
             ) : currentPage === 'map' ? (
-              <section className="flex-1 flex items-start justify-center overflow-hidden">
+              <section className="py-8 md:py-0">
                 <PokemonMap isDarkMode={isDarkMode} />
               </section>
             ) : (
