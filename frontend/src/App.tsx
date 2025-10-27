@@ -1,4 +1,5 @@
 import {useState, useEffect, Suspense, lazy} from 'react';
+import {useAuth} from '@features/auth';
 import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
 import {preloadService} from '@/lib/preloadService';
@@ -58,6 +59,7 @@ function App() {
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedOwnedOnly, setSelectedOwnedOnly] = useState(false);
+  const { user } = useAuth();
 
   // State for cross-region Pokemon navigation
   const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<number | null>(null);
@@ -371,6 +373,7 @@ function App() {
                     setSelectedOwnedOnly={setSelectedOwnedOnly}
                     setTempOwnedOnly={setTempOwnedOnly}
                     handleClearFilters={handleClearFilters}
+                    ownedPokemonIds={user?.owned_pokemon_ids ?? []}
                     // Pagination props
                     handlePokemonClick={handlePokemonClick}
                     paginationPage={paginationPage}

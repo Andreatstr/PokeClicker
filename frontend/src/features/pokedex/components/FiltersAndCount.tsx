@@ -38,6 +38,7 @@ interface FiltersAndCountProps {
   setSelectedOwnedOnly: (value: boolean) => void;
   setTempOwnedOnly: (value: boolean) => void;
   handleClearFilters: () => void;
+  ownedPokemonIds: number[];
 }
 
 const typeOptions = [
@@ -101,7 +102,9 @@ export function FiltersAndCount({
   setSelectedOwnedOnly,
   setTempOwnedOnly,
   handleClearFilters,
+  ownedPokemonIds,
 }: FiltersAndCountProps) {
+  const ownedCount = (ownedPokemonIds ?? []).length;
   return (
     <section className="mb-6">
       {showMobileFilters && (
@@ -219,21 +222,31 @@ export function FiltersAndCount({
                 </div>
 
                 {/* OWNED */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="owned-only-toggle"
-                    checked={tempOwnedOnly}
-                    onChange={(e) => setTempOwnedOnly(e.target.checked)}
-                    className="accent-pixelact"
-                  />
-                  <Label
-                    htmlFor="owned-only-toggle"
-                    className="text-xs font-bold"
-                    style={{color: 'var(--foreground)'}}
-                  >
-                    Owned Pokemon
+                <div>
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                    Show
                   </Label>
+
+                  <Select
+                    value={tempOwnedOnly ? 'owned' : 'all'}
+                    onValueChange={(v) => {
+                      const isOwned = v === 'owned';
+                      // prevent enabling "owned" when user has none
+                      if (!isOwned || ownedCount > 0) {
+                        setTempOwnedOnly(isOwned);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full text-sm mt-1" aria-label="Owned filter">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Pokémon</SelectItem>
+                      <SelectItem value="owned" disabled={ownedCount === 0}>
+                        Owned only {ownedCount > 0 ? `(${ownedCount})` : ''}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

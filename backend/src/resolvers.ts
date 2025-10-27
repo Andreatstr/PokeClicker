@@ -243,7 +243,7 @@ export const resolvers = {
         limit = 20,
         offset = 0,
         userId,
-        ownedOnly,
+        ownedOnly = false,
       } = args;
 
       let ownedPokemonIds: number[] = [];
@@ -259,12 +259,19 @@ export const resolvers = {
             _id: new ObjectId(effectiveUserId),
           });
 
-          if (user && user.owned_pokemon_ids) {
-            ownedPokemonIds = user.owned_pokemon_ids;
+          if (user && Array.isArray(user.owned_pokemon_ids)) {
+            ownedPokemonIds = user.owned_pokemon_ids.map((v: any) => Number(v)).filter(Number.isFinite);
           }
         } catch (error) {
           console.error('Error fetching user owned Pokemon:', error);
         }
+      }
+
+      if (ownedOnly && !effectiveUserId) {
+        return {
+          pokemon: [],
+          total: 0,
+        };
       }
 
       // Query MongoDB for scalable filtering/sorting/pagination
@@ -284,6 +291,16 @@ export const resolvers = {
 
       if (search) {
         query.name = {$regex: search.toLowerCase(), $options: 'i'};
+      }
+
+      if (ownedOnly) {
+        if (!ownedPokemonIds || ownedPokemonIds.length === 0) {
+          return {
+            pokemon: [],
+            total: 0,
+          };
+        }
+        query.id = { $in: ownedPokemonIds };
       }
 
       // Build sort object
@@ -316,7 +333,7 @@ export const resolvers = {
       const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
         // If no user is authenticated, guest users see Pokemon as unowned
         const isOwned = effectiveUserId
-          ? ownedPokemonIds.includes(p.id)
+          ? (ownedPokemonIds ?? []).includes(p.id)
           : false;
 
         // Return full Pokemon data regardless of ownership status

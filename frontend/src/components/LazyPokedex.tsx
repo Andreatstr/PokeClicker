@@ -82,6 +82,7 @@ interface LazyPokedexProps {
   setSelectedOwnedOnly: (value: boolean) => void;
   setTempOwnedOnly: (value: boolean) => void;
   handleClearFilters: () => void;
+  ownedPokemonIds: number[];
 
   // Pagination props
   handlePokemonClick: (pokemon: PokedexPokemon) => void;
@@ -155,6 +156,7 @@ export function LazyPokedex(props: LazyPokedexProps) {
           setSelectedOwnedOnly={props.setSelectedOwnedOnly}
           setTempOwnedOnly={props.setTempOwnedOnly}
           handleClearFilters={props.handleClearFilters}
+          ownedPokemonIds={props.ownedPokemonIds}
         />
       </Suspense>
 
