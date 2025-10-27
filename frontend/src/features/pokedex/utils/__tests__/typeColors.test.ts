@@ -64,27 +64,27 @@ describe('getStatBarColors', () => {
 
     expect(colors.hp).toEqual({
       color: 'bg-red-500/60',
-      upgradeColor: 'bg-red-400/80',
+      upgradeColor: 'bg-red-300/90',
     });
     expect(colors.attack).toEqual({
       color: 'bg-orange-500/60',
-      upgradeColor: 'bg-orange-400/80',
+      upgradeColor: 'bg-orange-300/90',
     });
     expect(colors.defense).toEqual({
       color: 'bg-blue-500/60',
-      upgradeColor: 'bg-blue-400/80',
+      upgradeColor: 'bg-blue-300/90',
     });
     expect(colors.spAttack).toEqual({
       color: 'bg-purple-500/60',
-      upgradeColor: 'bg-purple-400/80',
+      upgradeColor: 'bg-purple-300/90',
     });
     expect(colors.spDefense).toEqual({
       color: 'bg-yellow-500/60',
-      upgradeColor: 'bg-yellow-400/80',
+      upgradeColor: 'bg-yellow-300/90',
     });
     expect(colors.speed).toEqual({
       color: 'bg-pink-500/60',
-      upgradeColor: 'bg-pink-400/80',
+      upgradeColor: 'bg-pink-300/90',
     });
   });
 });
