@@ -1,10 +1,3 @@
-interface CachedImage {
-  url: string;
-  blob: Blob;
-  timestamp: number;
-  size: number;
-}
-
 interface CacheStats {
   totalSize: number;
   itemCount: number;
@@ -20,11 +13,8 @@ interface CachedHTMLImageElement extends HTMLImageElement {
 
 class ImageCacheService {
   private memoryCache = new Map<string, CachedHTMLImageElement>();
-  private localStorageCache = new Map<string, CachedImage>();
   private maxMemorySize = 50 * 1024 * 1024; // 50MB
-  private maxLocalStorageSize = 100 * 1024 * 1024; // 100MB
   private currentMemorySize = 0;
-  private currentLocalStorageSize = 0;
   private stats: CacheStats = {
     totalSize: 0,
     itemCount: 0,
@@ -34,33 +24,9 @@ class ImageCacheService {
   };
 
   constructor() {
-    this.loadFromLocalStorage();
+    // No localStorage loading - Blobs cannot be serialized to JSON
   }
 
-  private loadFromLocalStorage() {
-    try {
-      const cached = localStorage.getItem('imageCache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        this.localStorageCache = new Map(data);
-        this.currentLocalStorageSize = Array.from(
-          this.localStorageCache.values()
-        ).reduce((total, item) => total + item.size, 0);
-      }
-    } catch (error) {
-      console.warn('Failed to load image cache from localStorage:', error);
-      this.clearLocalStorage();
-    }
-  }
-
-  private saveToLocalStorage() {
-    try {
-      const data = Array.from(this.localStorageCache.entries());
-      localStorage.setItem('imageCache', JSON.stringify(data));
-    } catch (error) {
-      console.warn('Failed to save image cache to localStorage:', error);
-    }
-  }
 
   private cleanupMemoryCache() {
     if (this.currentMemorySize <= this.maxMemorySize) return;
@@ -84,22 +50,6 @@ class ImageCacheService {
     });
   }
 
-  private cleanupLocalStorageCache() {
-    if (this.currentLocalStorageSize <= this.maxLocalStorageSize) return;
-
-    // Remove oldest entries
-    const entries = Array.from(this.localStorageCache.entries());
-    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-
-    const toRemove = entries.slice(0, Math.floor(entries.length * 0.3));
-    toRemove.forEach(([key]) => {
-      this.currentLocalStorageSize -=
-        this.localStorageCache.get(key)?.size || 0;
-      this.localStorageCache.delete(key);
-    });
-
-    this.saveToLocalStorage();
-  }
 
   async getImage(url: string): Promise<HTMLImageElement> {
     // Check memory cache first
@@ -107,23 +57,6 @@ class ImageCacheService {
       this.stats.hitCount++;
       this.updateStats();
       return this.memoryCache.get(url)!;
-    }
-
-    // Check localStorage cache
-    if (this.localStorageCache.has(url)) {
-      const cached = this.localStorageCache.get(url)!;
-      const img = new Image() as CachedHTMLImageElement;
-      img.src = URL.createObjectURL(cached.blob);
-      img.timestamp = Date.now();
-      img.size = cached.size;
-
-      this.memoryCache.set(url, img);
-      this.currentMemorySize += cached.size;
-      this.cleanupMemoryCache();
-
-      this.stats.hitCount++;
-      this.updateStats();
-      return img;
     }
 
     // Load from network
@@ -146,19 +79,6 @@ class ImageCacheService {
       this.currentMemorySize += blob.size;
       this.cleanupMemoryCache();
 
-      // Cache in localStorage
-      const cachedImage: CachedImage = {
-        url,
-        blob,
-        timestamp: Date.now(),
-        size: blob.size,
-      };
-
-      this.localStorageCache.set(url, cachedImage);
-      this.currentLocalStorageSize += blob.size;
-      this.cleanupLocalStorageCache();
-      this.saveToLocalStorage();
-
       return img;
     } catch (error) {
       console.error('Failed to load image:', url, error);
@@ -167,16 +87,31 @@ class ImageCacheService {
   }
 
   async preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-    const promises = urls.map((url) => this.getImage(url));
-    return Promise.all(promises);
+    // Rate limit: Process sequentially with 200ms delay between each request
+    const delayBetweenRequests = 200;
+    const results: HTMLImageElement[] = [];
+
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        const img = await this.getImage(urls[i]);
+        results.push(img);
+      } catch (error) {
+        console.warn(`Failed to preload image ${urls[i]}:`, error);
+        // Continue with other images even if one fails
+      }
+
+      // Delay between requests (except for the last request)
+      if (i < urls.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests));
+      }
+    }
+
+    return results;
   }
 
   clearCache() {
     this.memoryCache.clear();
-    this.localStorageCache.clear();
     this.currentMemorySize = 0;
-    this.currentLocalStorageSize = 0;
-    localStorage.removeItem('imageCache');
     this.stats = {
       totalSize: 0,
       itemCount: 0,
@@ -186,16 +121,9 @@ class ImageCacheService {
     };
   }
 
-  private clearLocalStorage() {
-    this.localStorageCache.clear();
-    this.currentLocalStorageSize = 0;
-    localStorage.removeItem('imageCache');
-  }
-
   private updateStats() {
-    this.stats.totalSize =
-      this.currentMemorySize + this.currentLocalStorageSize;
-    this.stats.itemCount = this.memoryCache.size + this.localStorageCache.size;
+    this.stats.totalSize = this.currentMemorySize;
+    this.stats.itemCount = this.memoryCache.size;
     const totalRequests = this.stats.hitCount + this.stats.missCount;
     this.stats.hitRate =
       totalRequests > 0 ? this.stats.hitCount / totalRequests : 0;

@@ -71,9 +71,9 @@ class PokemonSpriteCache {
     await imageCache.preloadImages(allUrls);
   }
 
-  // Preload common Pokemon sprites (first 50 Pokemon)
+  // Preload common Pokemon sprites (first 40 Pokemon - 2 pages worth)
   async preloadCommonPokemon(): Promise<void> {
-    const commonIds = Array.from({length: 50}, (_, i) => i + 1);
+    const commonIds = Array.from({length: 40}, (_, i) => i + 1);
     await this.preloadPokemonSprites(commonIds, 'officialArtwork');
   }
 
