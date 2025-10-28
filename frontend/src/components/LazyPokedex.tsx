@@ -1,38 +1,8 @@
 import {Suspense, lazy, useState, useEffect} from 'react';
 import {LoadingSpinner} from './LoadingSpinner';
 import {PaginationControls} from './PaginationControls';
+import {ArrowLeftIcon, ArrowRightIcon} from '@ui/pixelact';
 import {type PokedexPokemon} from '@features/pokedex';
-
-const PixelArrowRight = () => (
-  <svg
-    width="32"
-    height="32"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className="animate-pulse"
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
-
-const PixelArrowLeft = () => (
-  <svg
-    width="32"
-    height="32"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className="animate-pulse"
-    style={{ transform: 'scaleX(-1)' }}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
 
 // Lazy load the heavy Pokedex components
 const SearchBar = lazy(() =>
@@ -207,7 +177,8 @@ function PokemonGrid({
   onPageChange,
   loading,
 }: PokemonGridProps) {
-  const [selectedMobilePokemon, setSelectedMobilePokemon] = useState<PokedexPokemon | null>(null);
+  const [selectedMobilePokemon, setSelectedMobilePokemon] =
+    useState<PokedexPokemon | null>(null);
   const [isMobileView, setIsMobileView] = useState(false);
 
   // Detect mobile
@@ -227,7 +198,9 @@ function PokemonGrid({
     }
     // If selected Pokemon is no longer in the list (e.g., after filtering), reset to first
     if (isMobileView && selectedMobilePokemon && displayedPokemon.length > 0) {
-      const stillExists = displayedPokemon.some(p => p.id === selectedMobilePokemon.id);
+      const stillExists = displayedPokemon.some(
+        (p) => p.id === selectedMobilePokemon.id
+      );
       if (!stillExists) {
         setSelectedMobilePokemon(displayedPokemon[0]);
       }
@@ -275,14 +248,14 @@ function PokemonGrid({
               <div className="w-full relative">
                 {/* Left Scroll Hint - shown when scrolled right */}
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <PixelArrowLeft />
+                  <ArrowLeftIcon size={32} className="animate-pulse" />
                 </div>
                 {/* Gradient fade on left edge */}
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-l-4 border-black"></div>
 
                 {/* Right Scroll Hint - shown when more content to the right */}
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <PixelArrowRight />
+                  <ArrowRightIcon size={32} className="animate-pulse" />
                 </div>
                 {/* Gradient fade on right edge to indicate more content */}
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-r-4 border-black"></div>
@@ -302,9 +275,14 @@ function PokemonGrid({
                       >
                         <img
                           src={pokemon.sprite}
-                          alt={pokemon.name}
+                          alt={
+                            pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'
+                          }
                           className="w-16 h-16 pixelated"
-                          style={{imageRendering: 'pixelated'}}
+                          style={{
+                            imageRendering: 'pixelated',
+                            filter: pokemon.isOwned ? 'none' : 'brightness(0)',
+                          }}
                         />
                         <p className="text-[10px] font-bold text-center">
                           No. {pokemon.pokedexNumber}
@@ -333,7 +311,8 @@ function PokemonGrid({
               <ul
                 className="grid gap-4 md:gap-6 list-none p-0 m-0"
                 style={{
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 280px))',
+                  gridTemplateColumns:
+                    'repeat(auto-fill, minmax(280px, 280px))',
                   justifyContent: 'center',
                 }}
               >

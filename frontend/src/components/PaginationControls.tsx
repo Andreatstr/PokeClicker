@@ -1,3 +1,5 @@
+import {ArrowLeftIcon, ArrowRightIcon} from '@ui/pixelact';
+
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
@@ -5,37 +7,6 @@ interface PaginationControlsProps {
   loading?: boolean;
   isMobile?: boolean;
 }
-
-const PixelArrowRight = ({ className = '' }: { className?: string }) => (
-  <svg
-    width="24"
-    height="24"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
-
-const PixelArrowLeft = ({ className = '' }: { className?: string }) => (
-  <svg
-    width="24"
-    height="24"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-    style={{ transform: 'scaleX(-1)' }}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
 
 export function PaginationControls({
   currentPage,
@@ -71,7 +42,7 @@ export function PaginationControls({
           className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
           aria-label="Previous page"
         >
-          <PixelArrowLeft className="w-6 h-6" />
+          <ArrowLeftIcon className="w-6 h-6" />
         </button>
         <span className="text-sm font-bold">
           {currentPage} / {totalPages}
@@ -82,7 +53,7 @@ export function PaginationControls({
           className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
           aria-label="Next page"
         >
-          <PixelArrowRight className="w-6 h-6" />
+          <ArrowRightIcon className="w-6 h-6" />
         </button>
       </div>
     );
@@ -97,7 +68,7 @@ export function PaginationControls({
           disabled={!hasPrevious || loading}
           className="min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <PixelArrowLeft className="w-5 h-5" />
+          <ArrowLeftIcon className="w-5 h-5" />
           <span>Previous</span>
         </button>
         <span className="pixel-font text-sm whitespace-nowrap">
@@ -109,7 +80,7 @@ export function PaginationControls({
           className="min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <span>Next</span>
-          <PixelArrowRight className="w-5 h-5" />
+          <ArrowRightIcon className="w-5 h-5" />
         </button>
       </div>
     </footer>

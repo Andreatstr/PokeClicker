@@ -1,36 +1,6 @@
 import * as React from 'react';
 import {cn} from '@/lib/utils';
-
-const PixelArrowRight = ({className = ''}: {className?: string}) => (
-  <svg
-    width="20"
-    height="20"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
-
-const PixelArrowLeft = ({className = ''}: {className?: string}) => (
-  <svg
-    width="20"
-    height="20"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-    style={{transform: 'scaleX(-1)'}}
-  >
-    <path
-      fill="currentColor"
-      d="M23 11v2h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1H1v-4h15V9h-1V8h-1V7h-1V6h-1V5h-1V4h-1V3h1V2h1V1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1z"
-    />
-  </svg>
-);
+import {ArrowLeftIcon, ArrowRightIcon} from './icons';
 
 interface CarouselContextValue {
   currentIndex: number;
@@ -56,10 +26,16 @@ export function useCarousel() {
 
 interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  initialIndex?: number;
 }
 
-export function Carousel({children, className, ...props}: CarouselProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+export function Carousel({
+  children,
+  className,
+  initialIndex = 0,
+  ...props
+}: CarouselProps) {
+  const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
   const [itemsCount, setItemsCount] = React.useState(0);
 
   const canScrollPrev = currentIndex > 0;
@@ -100,7 +76,14 @@ export function Carousel({children, className, ...props}: CarouselProps) {
       scrollPrev,
       scrollNext,
     }),
-    [currentIndex, itemsCount, canScrollPrev, canScrollNext, scrollPrev, scrollNext]
+    [
+      currentIndex,
+      itemsCount,
+      canScrollPrev,
+      canScrollNext,
+      scrollPrev,
+      scrollNext,
+    ]
   );
 
   return (
@@ -116,8 +99,19 @@ interface CarouselContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CarouselContent({children, className, ...props}: CarouselContentProps) {
-  const {currentIndex, setItemsCount, scrollPrev, scrollNext, canScrollPrev, canScrollNext} = useCarousel();
+export function CarouselContent({
+  children,
+  className,
+  ...props
+}: CarouselContentProps) {
+  const {
+    currentIndex,
+    setItemsCount,
+    scrollPrev,
+    scrollNext,
+    canScrollPrev,
+    canScrollNext,
+  } = useCarousel();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
   const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
@@ -165,7 +159,10 @@ export function CarouselContent({children, className, ...props}: CarouselContent
       onTouchEnd={onTouchEnd}
     >
       <div
-        className={cn('flex transition-transform duration-300 ease-in-out', className)}
+        className={cn(
+          'flex transition-transform duration-300 ease-in-out',
+          className
+        )}
         style={{
           transform: `translateX(-${currentIndex * 100}%)`,
         }}
@@ -181,18 +178,22 @@ interface CarouselItemProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CarouselItem({children, className, ...props}: CarouselItemProps) {
+export function CarouselItem({
+  children,
+  className,
+  ...props
+}: CarouselItemProps) {
   return (
-    <div
-      className={cn('min-w-full flex-shrink-0', className)}
-      {...props}
-    >
+    <div className={cn('min-w-full flex-shrink-0', className)} {...props}>
       {children}
     </div>
   );
 }
 
-export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function CarouselPrevious({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const {canScrollPrev, scrollPrev} = useCarousel();
 
   return (
@@ -208,6 +209,7 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'transition-all duration-100',
         'font-bold text-lg',
+        'flex items-center justify-center',
         className
       )}
       onClick={scrollPrev}
@@ -215,12 +217,15 @@ export function CarouselPrevious({className, ...props}: React.ButtonHTMLAttribut
       aria-label="Previous"
       {...props}
     >
-      <PixelArrowLeft />
+      <ArrowLeftIcon size={16} className="block mx-auto" />
     </button>
   );
 }
 
-export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function CarouselNext({
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const {canScrollNext, scrollNext} = useCarousel();
 
   return (
@@ -236,6 +241,7 @@ export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<H
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'transition-all duration-100',
         'font-bold text-lg',
+        'flex items-center justify-center',
         className
       )}
       onClick={scrollNext}
@@ -243,7 +249,7 @@ export function CarouselNext({className, ...props}: React.ButtonHTMLAttributes<H
       aria-label="Next"
       {...props}
     >
-      <PixelArrowRight />
+      <ArrowRightIcon size={16} className="block mx-auto" />
     </button>
   );
 }

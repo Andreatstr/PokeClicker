@@ -2,6 +2,7 @@ import {useState, useEffect, Suspense, lazy} from 'react';
 import {useAuth} from '@features/auth';
 import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
 import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
+import {CandyCounterOverlay} from '@/components/CandyCounterOverlay';
 import {preloadService} from '@/lib/preloadService';
 
 // Lazy load heavy components
@@ -62,7 +63,9 @@ function App() {
   const { user } = useAuth();
 
   // State for cross-region Pokemon navigation
-  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<number | null>(null);
+  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<
+    number | null
+  >(null);
   const {data: crossRegionData} = usePokemonById(crossRegionPokemonId);
 
   // Initialize preloading service
@@ -141,13 +144,15 @@ function App() {
       // Prevent touch scrolling on mobile
       const preventScroll = (e: TouchEvent) => {
         // Allow scrolling within joystick/button areas
-        if ((e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')) {
+        if (
+          (e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')
+        ) {
           return;
         }
         e.preventDefault();
       };
 
-      document.addEventListener('touchmove', preventScroll, { passive: false });
+      document.addEventListener('touchmove', preventScroll, {passive: false});
 
       return () => {
         // Restore scrolling
@@ -339,48 +344,51 @@ function App() {
                     </p>
                   </div>
                 ) : (
-                  <LazyPokedex
-                    // SearchBar props
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    handleClearSearch={handleClearSearch}
-                    isMobile={isMobile}
-                    showMobileFilters={showMobileFilters}
-                    setShowMobileFilters={setShowMobileFilters}
-                    isDarkMode={isDarkMode}
-                    // FiltersAndCount props
-                    loading={loading}
-                    displayedPokemon={displayedPokemon}
-                    totalPokemon={totalPokemon}
-                    selectedTypes={selectedTypes}
-                    selectedRegion={selectedRegion}
-                    sortBy={sortBy}
-                    sortOrder={sortOrder}
-                    tempRegion={tempRegion}
-                    tempTypes={tempTypes}
-                    tempSortBy={tempSortBy}
-                    tempSortOrder={tempSortOrder}
-                    selectedOwnedOnly={selectedOwnedOnly}
-                    tempOwnedOnly={tempOwnedOnly}
-                    setSelectedRegion={setSelectedRegion}
-                    setSelectedTypes={setSelectedTypes}
-                    setSortBy={setSortBy}
-                    setSortOrder={setSortOrder}
-                    setTempRegion={setTempRegion}
-                    setTempTypes={setTempTypes}
-                    setTempSortBy={setTempSortBy}
-                    setTempSortOrder={setTempSortOrder}
-                    setSelectedOwnedOnly={setSelectedOwnedOnly}
-                    setTempOwnedOnly={setTempOwnedOnly}
-                    handleClearFilters={handleClearFilters}
-                    ownedPokemonIds={user?.owned_pokemon_ids ?? []}
-                    // Pagination props
-                    handlePokemonClick={handlePokemonClick}
-                    paginationPage={paginationPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-                  />
+                  <>
+                    <LazyPokedex
+                      // SearchBar props
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      handleClearSearch={handleClearSearch}
+                      isMobile={isMobile}
+                      showMobileFilters={showMobileFilters}
+                      setShowMobileFilters={setShowMobileFilters}
+                      isDarkMode={isDarkMode}
+                      // FiltersAndCount props
+                      loading={loading}
+                      displayedPokemon={displayedPokemon}
+                      totalPokemon={totalPokemon}
+                      selectedTypes={selectedTypes}
+                      selectedRegion={selectedRegion}
+                      sortBy={sortBy}
+                      sortOrder={sortOrder}
+                      tempRegion={tempRegion}
+                      tempTypes={tempTypes}
+                      tempSortBy={tempSortBy}
+                      tempSortOrder={tempSortOrder}
+                      selectedOwnedOnly={selectedOwnedOnly}
+                      tempOwnedOnly={tempOwnedOnly}
+                      setSelectedRegion={setSelectedRegion}
+                      setSelectedTypes={setSelectedTypes}
+                      setSortBy={setSortBy}
+                      setSortOrder={setSortOrder}
+                      setTempRegion={setTempRegion}
+                      setTempTypes={setTempTypes}
+                      setTempSortBy={setTempSortBy}
+                      setTempSortOrder={setTempSortOrder}
+                      setSelectedOwnedOnly={setSelectedOwnedOnly}
+                      setTempOwnedOnly={setTempOwnedOnly}
+                      handleClearFilters={handleClearFilters}
+                      ownedPokemonIds={user?.owned_pokemon_ids ?? []}
+                      // Pagination props
+                      handlePokemonClick={handlePokemonClick}
+                      paginationPage={paginationPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+                    />
+                    <CandyCounterOverlay isDarkMode={isDarkMode} />
+                  </>
                 )}
               </>
             )}

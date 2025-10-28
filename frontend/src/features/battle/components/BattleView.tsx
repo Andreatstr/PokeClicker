@@ -75,21 +75,23 @@ export function BattleView({
     <div
       className="relative w-full h-full flex flex-col cursor-pointer"
       style={{
-        background: isDarkMode ? `
+        background: isDarkMode
+          ? `
           linear-gradient(0deg, #064e3b 0%, #065f46 20%, #047857 40%, #065f46 60%, #064e3b 80%, #022c22 100%),
           linear-gradient(0deg, #022c22 0%, #064e3b 15%, #065f46 30%, #059669 45%, #065f46 60%, #064e3b 75%, #022c22 90%, #012117 100%),
           linear-gradient(0deg, #012117 0%, #022c22 10%, #064e3b 25%, #065f46 40%, #047857 55%, #065f46 70%, #064e3b 85%, #022c22 100%),
           linear-gradient(0deg, #0f172a 0%, #064e3b 20%, #065f46 40%, #047857 60%, #065f46 80%, #064e3b 100%),
           linear-gradient(0deg, #022c22 0%, #064e3b 25%, #059669 50%, #064e3b 75%, #022c22 100%),
           linear-gradient(0deg, #065f46 0%, #047857 30%, #10b981 50%, #047857 70%, #065f46 100%)
-        ` : `
+        `
+          : `
           linear-gradient(0deg, #f0fdf4 0%, #dcfce7 15%, #bbf7d0 30%, #86efac 45%, #bbf7d0 60%, #dcfce7 75%, #f0fdf4 100%),
           linear-gradient(0deg, #dcfce7 0%, #bbf7d0 20%, #86efac 40%, #4ade80 60%, #86efac 80%, #bbf7d0 100%),
           linear-gradient(0deg, #bbf7d0 0%, #86efac 15%, #4ade80 30%, #22c55e 50%, #4ade80 70%, #86efac 85%, #bbf7d0 100%),
           linear-gradient(0deg, #ecfdf5 0%, #d1fae5 20%, #a7f3d0 40%, #6ee7b7 60%, #a7f3d0 80%, #d1fae5 100%),
           linear-gradient(0deg, #86efac 0%, #4ade80 25%, #22c55e 50%, #4ade80 75%, #86efac 100%),
           linear-gradient(0deg, #d1fae5 0%, #a7f3d0 20%, #6ee7b7 40%, #34d399 60%, #6ee7b7 80%, #a7f3d0 100%)
-        `
+        `,
       }}
       onClick={handleAttackClick}
     >
@@ -103,7 +105,7 @@ export function BattleView({
           style={{
             top: '20%',
             right: '8px',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
           }}
         />
         {/* Player platform - positioned under player Pokemon (moved left and higher on mobile) */}
@@ -114,7 +116,7 @@ export function BattleView({
           style={{
             bottom: '-16px',
             left: '0px',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
           }}
         />
       </div>
@@ -181,7 +183,6 @@ export function BattleView({
           </div>
         </div>
       )}
-
     </div>
   );
 }

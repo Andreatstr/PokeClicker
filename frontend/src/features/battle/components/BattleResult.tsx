@@ -130,11 +130,16 @@ export function BattleResult({
 
         {/* Continue Button */}
         {showButton ? (
-          <Button onClick={onContinue} className="w-full text-xs md:text-sm py-1.5 md:py-2">
+          <Button
+            onClick={onContinue}
+            className="w-full text-xs md:text-sm py-1.5 md:py-2"
+          >
             {isVictory ? 'Continue' : 'Return to Map'}
           </Button>
         ) : (
-          <div className={`pixel-font text-xl md:text-2xl font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div
+            className={`pixel-font text-xl md:text-2xl font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
+          >
             {countdown}
           </div>
         )}

@@ -41,7 +41,9 @@ export function useBattle({
     };
   });
 
-  const passiveDamageTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const passiveDamageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   // Calculate attack speed based on opponent's stats
   // Weak Pokemon (low total stats) attack ~2 times/second (500ms)

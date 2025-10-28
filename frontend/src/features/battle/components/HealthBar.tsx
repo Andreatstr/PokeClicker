@@ -28,7 +28,8 @@ export function HealthBar({
       <div
         className="pixel-font text-xs mb-1 text-black"
         style={{
-          textShadow: '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white'
+          textShadow:
+            '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white',
         }}
       >
         {label}
@@ -46,7 +47,8 @@ export function HealthBar({
       <div
         className="pixel-font text-[10px] text-black mt-0.5"
         style={{
-          textShadow: '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white'
+          textShadow:
+            '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white',
         }}
       >
         {Math.floor(current)} HP

@@ -117,7 +117,9 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     };
   }, []);
 
-  const [battleAttackFunction, setBattleAttackFunction] = useState<(() => void) | null>(null);
+  const [battleAttackFunction, setBattleAttackFunction] = useState<
+    (() => void) | null
+  >(null);
 
   // Start battle handler
   const startBattle = useCallback(
