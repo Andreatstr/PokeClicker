@@ -3,6 +3,7 @@ import {useAuth} from '@features/auth';
 import {useMutation, useQuery, gql} from '@apollo/client';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
+import {USER_FRAGMENT} from '@/lib/graphql/fragments';
 
 const DELETE_USER = gql`
   mutation DeleteUser {
@@ -11,45 +12,19 @@ const DELETE_USER = gql`
 `;
 
 const SET_FAVORITE_POKEMON = gql`
+  ${USER_FRAGMENT}
   mutation SetFavoritePokemon($pokemonId: Int) {
     setFavoritePokemon(pokemonId: $pokemonId) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
+      ...UserFields
     }
   }
 `;
 
 const SET_SELECTED_POKEMON = gql`
+  ${USER_FRAGMENT}
   mutation SetSelectedPokemon($pokemonId: Int) {
     setSelectedPokemon(pokemonId: $pokemonId) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
+      ...UserFields
     }
   }
 `;

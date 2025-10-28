@@ -1,24 +1,12 @@
 import {useMutation, gql} from '@apollo/client';
 import {type User} from '@features/auth';
+import {USER_FRAGMENT} from '@/lib/graphql/fragments';
 
 const CATCH_POKEMON_MUTATION = gql`
+  ${USER_FRAGMENT}
   mutation CatchPokemon($pokemonId: Int!) {
     catchPokemon(pokemonId: $pokemonId) {
-      _id
-      username
-      rare_candy
-      created_at
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-      }
+      ...UserFields
     }
   }
 `;

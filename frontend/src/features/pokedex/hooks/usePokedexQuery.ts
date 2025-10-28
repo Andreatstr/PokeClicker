@@ -1,6 +1,8 @@
 import {useQuery, gql} from '@apollo/client';
+import {POKEMON_STATS_FRAGMENT} from '@/lib/graphql/fragments';
 
 const POKEDEX_QUERY = gql`
+  ${POKEMON_STATS_FRAGMENT}
   query Pokedex(
     $search: String
     $generation: String
@@ -30,12 +32,7 @@ const POKEDEX_QUERY = gql`
         sprite
         pokedexNumber
         stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
+          ...PokemonStatsFields
         }
         height
         weight

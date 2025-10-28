@@ -1,6 +1,8 @@
 import {useQuery, gql} from '@apollo/client';
+import {POKEMON_STATS_FRAGMENT} from '@/lib/graphql/fragments';
 
 const POKEMON_BY_ID_QUERY = gql`
+  ${POKEMON_STATS_FRAGMENT}
   query PokemonById($id: Int!) {
     pokemonById(id: $id) {
       id
@@ -8,12 +10,7 @@ const POKEMON_BY_ID_QUERY = gql`
       types
       sprite
       stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
+        ...PokemonStatsFields
       }
       height
       weight

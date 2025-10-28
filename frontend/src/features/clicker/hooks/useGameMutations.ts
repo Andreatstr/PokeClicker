@@ -1,50 +1,21 @@
 import {gql, useMutation} from '@apollo/client';
 import type {User} from '@features/auth';
+import {USER_FRAGMENT} from '@/lib/graphql/fragments';
 
 const UPDATE_RARE_CANDY = gql`
+  ${USER_FRAGMENT}
   mutation UpdateRareCandy($amount: Int!) {
     updateRareCandy(amount: $amount) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-        clickPower
-        passiveIncome
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
+      ...UserFields
     }
   }
 `;
 
 const UPGRADE_STAT = gql`
+  ${USER_FRAGMENT}
   mutation UpgradeStat($stat: String!) {
     upgradeStat(stat: $stat) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-        clickPower
-        passiveIncome
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
+      ...UserFields
     }
   }
 `;

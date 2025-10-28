@@ -3,6 +3,7 @@ import {useForm} from 'react-hook-form';
 import {gql, useMutation} from '@apollo/client';
 import {Button} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
+import {USER_FRAGMENT} from '@/lib/graphql/fragments';
 
 type Props = {
   onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;
@@ -14,54 +15,24 @@ type FormValues = {
 };
 
 const LOGIN_MUTATION = gql`
+  ${USER_FRAGMENT}
   mutation Login($username: String!, $password: String!) {
     login(username: $username, password: $password) {
       token
       user {
-        _id
-        username
-        rare_candy
-        created_at
-        stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
-          clickPower
-          passiveIncome
-        }
-        owned_pokemon_ids
-        favorite_pokemon_id
-        selected_pokemon_id
+        ...UserFields
       }
     }
   }
 `;
 
 const SIGNUP_MUTATION = gql`
+  ${USER_FRAGMENT}
   mutation Signup($username: String!, $password: String!) {
     signup(username: $username, password: $password) {
       token
       user {
-        _id
-        username
-        rare_candy
-        created_at
-        stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
-          clickPower
-          passiveIncome
-        }
-        owned_pokemon_ids
-        favorite_pokemon_id
-        selected_pokemon_id
+        ...UserFields
       }
     }
   }
