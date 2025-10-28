@@ -48,15 +48,13 @@ export function TiledMapView({
     wildPokemon
   );
 
-  // State for dismissing the welcome CTA
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
-    // Only show for new users (3 or fewer Pokemon)
     return user && 'owned_pokemon_ids' in user ? user.owned_pokemon_ids.length <= 3 : false;
   });
 
   return (
     <>
-      {/* Tiled Map Background */}
+      {/* Map Background */}
       <div className="absolute inset-0 overflow-hidden">
         {visibleTiles.map((tile) => {
           const key = `${tile.x}_${tile.y}`;
@@ -81,7 +79,7 @@ export function TiledMapView({
           );
         })}
 
-        {/* Wild Pokemon - positioned absolutely on the map */}
+        {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
           <img
             key={`${visiblePoke.pokemon.id}-${index}`}
@@ -102,14 +100,14 @@ export function TiledMapView({
         ))}
       </div>
 
-      {/* Optional subtle loading indicator (non-blocking) */}
+      {/* Loading indicator */}
       {isLoading && (
         <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-40 text-white px-1 py-0.5 pixel-font text-[10px] z-10 pointer-events-none opacity-50">
           •
         </div>
       )}
 
-      {/* Character Sprite - stays centered in viewport */}
+      {/* Character Sprite */}
       <div
         className="absolute"
         style={{
@@ -126,7 +124,7 @@ export function TiledMapView({
         }}
       />
 
-      {/* Welcome CTA for newcomers - dismissible */}
+      {/* Welcome CTA */}
       {!nearbyPokemon && showWelcomeCTA && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
           <div
@@ -156,7 +154,7 @@ export function TiledMapView({
         </div>
       )}
 
-      {/* Battle Prompt Popup */}
+      {/* Battle Prompt */}
       {nearbyPokemon && (
         <div
           className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 z-30 w-[94%] max-w-[640px]"
@@ -195,7 +193,7 @@ export function TiledMapView({
         </div>
       )}
 
-      {/* Home Button (Bottom Left on mobile, Top Left on desktop) */}
+      {/* Home Button */}
       <div className="absolute bottom-2 left-2 md:top-2 md:bottom-auto z-20">
         <button
           onClick={onResetToHome}
@@ -208,7 +206,7 @@ export function TiledMapView({
         </button>
       </div>
 
-      {/* Rare Candy Counter (Top Right) */}
+      {/* Rare Candy Counter */}
       <div className="absolute top-2 right-2 z-20">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)]">
           <img
