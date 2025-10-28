@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
 
@@ -46,6 +47,12 @@ export function TiledMapView({
     viewportSize,
     wildPokemon
   );
+
+  // State for dismissing the welcome CTA
+  const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
+    // Only show for new users (3 or fewer Pokemon)
+    return user && 'owned_pokemon_ids' in user ? user.owned_pokemon_ids.length <= 3 : false;
+  });
 
   return (
     <>
@@ -118,6 +125,36 @@ export function TiledMapView({
           zIndex: 10,
         }}
       />
+
+      {/* Welcome CTA for newcomers - dismissible */}
+      {!nearbyPokemon && showWelcomeCTA && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
+          <div
+            className={`pixel-font text-center px-4 py-3 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+              isDarkMode
+                ? 'bg-gray-800 text-white border-gray-600'
+                : 'bg-white text-black border-black'
+            }`}
+          >
+            <div className="text-sm md:text-base font-bold mb-2">
+              Wild Pokémon are out there!
+            </div>
+            <div className="text-xs md:text-sm opacity-90 mb-3">
+              Explore, battle, and catch 'em all!
+            </div>
+            <button
+              onClick={() => setShowWelcomeCTA(false)}
+              className={`px-4 py-1 text-xs font-bold border rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] ${
+                isDarkMode
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500'
+                  : 'bg-blue-500 hover:bg-blue-400 text-white border-blue-400'
+              }`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Battle Prompt Popup */}
       {nearbyPokemon && (
