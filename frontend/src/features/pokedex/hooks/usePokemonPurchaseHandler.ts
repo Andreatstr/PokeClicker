@@ -1,0 +1,52 @@
+import {useState} from 'react';
+import {usePurchasePokemon} from './usePurchasePokemon';
+import {useAuth} from '@features/auth';
+
+/**
+ * Custom hook to handle Pokemon purchase logic with error handling and animations
+ */
+export function usePokemonPurchaseHandler() {
+  const [purchasePokemon] = usePurchasePokemon();
+  const {updateUser, user} = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handlePurchase = async (
+    pokemonId: number,
+    onSuccess?: (pokemonId: number) => void
+  ) => {
+    setError(null);
+
+    try {
+      const result = await purchasePokemon({
+        variables: {pokemonId},
+      });
+
+      // Immediately update AuthContext with the server response
+      if (result.data?.purchasePokemon && user) {
+        updateUser({
+          ...result.data.purchasePokemon,
+          created_at: user.created_at,
+        });
+      }
+
+      onSuccess?.(pokemonId);
+
+      // Trigger animation after successful purchase
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 800);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
+      setError(errorMessage);
+      setTimeout(() => setError(null), 1200);
+    }
+  };
+
+  return {
+    handlePurchase,
+    error,
+    isAnimating,
+    user,
+  };
+}

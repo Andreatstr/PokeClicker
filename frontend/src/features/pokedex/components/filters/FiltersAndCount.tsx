@@ -9,6 +9,7 @@ import {
   MultiSelect,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
+import {POKEMON_TYPES, POKEMON_REGIONS} from '../../utils/constants';
 
 interface FiltersAndCountProps {
   loading: boolean;
@@ -40,39 +41,6 @@ interface FiltersAndCountProps {
   handleClearFilters: () => void;
   ownedPokemonIds: number[];
 }
-
-const typeOptions = [
-  'normal',
-  'fire',
-  'water',
-  'electric',
-  'grass',
-  'ice',
-  'fighting',
-  'poison',
-  'ground',
-  'flying',
-  'psychic',
-  'bug',
-  'rock',
-  'ghost',
-  'dragon',
-  'dark',
-  'steel',
-  'fairy',
-];
-
-const regionOptions = [
-  {value: 'kanto', label: 'Kanto (1-151)'},
-  {value: 'johto', label: 'Johto (152-251)'},
-  {value: 'hoenn', label: 'Hoenn (252-386)'},
-  {value: 'sinnoh', label: 'Sinnoh (387-493)'},
-  {value: 'unova', label: 'Unova (494-649)'},
-  {value: 'kalos', label: 'Kalos (650-721)'},
-  {value: 'alola', label: 'Alola (722-809)'},
-  {value: 'galar', label: 'Galar (810-905)'},
-  {value: 'paldea', label: 'Paldea (906-1025)'},
-];
 
 export function FiltersAndCount({
   loading,
@@ -152,7 +120,7 @@ export function FiltersAndCount({
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
-                      {regionOptions.map((region) => (
+                      {POKEMON_REGIONS.map((region) => (
                         <SelectItem key={region.value} value={region.value}>
                           {region.label}
                         </SelectItem>
@@ -167,7 +135,7 @@ export function FiltersAndCount({
                     Type
                   </Label>
                   <MultiSelect
-                    options={typeOptions}
+                    options={[...POKEMON_TYPES]}
                     selected={tempTypes}
                     onChange={setTempTypes}
                     className="w-full"

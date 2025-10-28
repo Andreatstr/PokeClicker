@@ -1,115 +1,18 @@
-import {type PokedexPokemon, usePurchasePokemon} from '@features/pokedex';
-import {useAuth} from '@features/auth';
+import {type PokedexPokemon} from '@features/pokedex';
 import '@ui/pixelact/styles/patterns.css';
 import {useState, memo, useEffect} from 'react';
 import {UnlockButton} from '@ui/pixelact';
-import {getTypeColors} from '../utils/typeColors';
+import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
+import {getPokemonCost, getBackgroundImageUrl} from '../../utils/pokemonCost';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
+import {usePokemonPurchaseHandler} from '../../hooks/usePokemonPurchaseHandler';
+import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
   onClick?: (pokemon: PokedexPokemon) => void;
   isDarkMode?: boolean;
-}
-
-// Helper to calculate Pokemon purchase cost (matches backend)
-// Exponential pricing by tier: 100 × 2^(tier)
-function getPokemonCost(pokemonId: number): number {
-  const tier = Math.floor(pokemonId / 10);
-  return Math.floor(100 * Math.pow(2, tier));
-}
-
-function getContrastColor(bgColor: string): string {
-  // Map Tailwind color classes to their hex values
-  const colorMap: Record<string, string> = {
-    'bg-gray-400': '#9ca3af',
-    'bg-gray-500': '#6b7280',
-    'bg-gray-600': '#4b5563',
-    'bg-gray-700': '#374151',
-    'bg-gray-800': '#1f2937',
-    'bg-red-500': '#ef4444',
-    'bg-red-600': '#dc2626',
-    'bg-red-700': '#b91c1c',
-    'bg-red-800': '#991b1b',
-    'bg-red-900': '#7f1d1d',
-    'bg-blue-200': '#bfdbfe',
-    'bg-blue-500': '#3b82f6',
-    'bg-blue-600': '#2563eb',
-    'bg-blue-700': '#1d4ed8',
-    'bg-blue-800': '#1e40af',
-    'bg-yellow-400': '#facc15',
-    'bg-yellow-600': '#ca8a04',
-    'bg-yellow-700': '#a16207',
-    'bg-yellow-800': '#854d0e',
-    'bg-green-400': '#4ade80',
-    'bg-green-500': '#22c55e',
-    'bg-green-600': '#16a34a',
-    'bg-green-700': '#15803d',
-    'bg-green-800': '#166534',
-    'bg-purple-500': '#a855f7',
-    'bg-purple-600': '#9333ea',
-    'bg-purple-700': '#7e22ce',
-    'bg-purple-800': '#6b21a8',
-    'bg-indigo-400': '#818cf8',
-    'bg-indigo-600': '#4f46e5',
-    'bg-indigo-700': '#4338ca',
-    'bg-indigo-800': '#3730a3',
-    'bg-indigo-900': '#312e81',
-    'bg-pink-300': '#f9a8d4',
-    'bg-pink-400': '#f472b6',
-    'bg-pink-500': '#ec4899',
-    'bg-pink-600': '#db2777',
-    'bg-pink-700': '#be185d',
-    'bg-pink-800': '#9d174d',
-    'bg-cyan-400': '#22d3ee',
-    'bg-cyan-500': '#06b6d4',
-    'bg-cyan-600': '#0891b2',
-    'bg-cyan-700': '#0e7490',
-    'bg-amber-600': '#d97706',
-    'bg-amber-700': '#a16207',
-    'bg-amber-800': '#92400e',
-    'bg-lime-500': '#84cc16',
-    'bg-lime-600': '#65a30d',
-    'bg-lime-700': '#4d7c0f',
-    'bg-lime-800': '#365314',
-    'bg-stone-500': '#78716c',
-    'bg-stone-600': '#57534e',
-    'bg-stone-700': '#44403c',
-    'bg-stone-800': '#292524',
-    'bg-violet-500': '#8b5cf6',
-    'bg-violet-600': '#7c3aed',
-    'bg-violet-700': '#6d28d9',
-    'bg-violet-800': '#5b21b6',
-    'bg-slate-600': '#475569',
-    'bg-slate-700': '#334155',
-    'bg-slate-800': '#1e293b',
-    'bg-slate-900': '#0f172a',
-  };
-
-  const hex = colorMap[bgColor] || '#000000';
-
-  // Convert hex to RGB
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-
-  // Calculate relative luminance using proper sRGB formula
-  const toLinear = (c: number) => {
-    const val = c / 255;
-    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
-  };
-
-  const luminance =
-    0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-
-  // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
-  return luminance > 0.5 ? 'text-black' : 'text-white';
-}
-
-function getBackgroundImageUrl(types: string[]): string {
-  const primaryType = types[0];
-  return `${import.meta.env.BASE_URL}pokemon-type-bg/${primaryType}.webp`;
 }
 
 export const PokemonCard = memo(function PokemonCard({
@@ -120,26 +23,13 @@ export const PokemonCard = memo(function PokemonCard({
   const primaryType = pokemon.types[0];
   const typeColors = pokemon.isOwned
     ? getTypeColors(primaryType, isDarkMode)
-    : isDarkMode
-      ? {
-          badge: 'bg-gray-500',
-          cardBg: 'bg-gradient-to-br from-gray-700 to-gray-800',
-          cardBorder: 'border-gray-600',
-          shadow: 'shadow-gray-600/50',
-        }
-      : {
-          badge: 'bg-gray-400',
-          cardBg: 'bg-gradient-to-br from-gray-200 to-gray-300',
-          cardBorder: 'border-gray-400',
-          shadow: 'shadow-gray-400/50',
-        };
+    : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = pokemon.isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
-  const [purchasePokemon] = usePurchasePokemon();
-  const {updateUser, user} = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+
+  const {handlePurchase, error, isAnimating} = usePokemonPurchaseHandler();
+
   const [, setCachedSprite] = useState<HTMLImageElement | null>(null);
   const [, setCachedBackground] = useState<HTMLImageElement | null>(null);
 
@@ -178,33 +68,9 @@ export const PokemonCard = memo(function PokemonCard({
     }
   };
 
-  const handlePurchase = async (e: React.MouseEvent) => {
+  const onPurchaseClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    setError(null);
-
-    try {
-      const result = await purchasePokemon({
-        variables: {pokemonId: pokemon.id},
-      });
-
-      // Immediately update AuthContext with the server response
-      if (result.data?.purchasePokemon && user) {
-        updateUser({
-          ...result.data.purchasePokemon,
-          created_at: user.created_at, // Preserve the created_at field
-        });
-      }
-
-      // Trigger animation after successful purchase
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 800); // Animation duration
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
-      setError(errorMessage);
-      // Clear error after 1.2 seconds
-      setTimeout(() => setError(null), 1200);
-    }
+    handlePurchase(pokemon.id);
   };
 
   return (
@@ -293,7 +159,7 @@ export const PokemonCard = memo(function PokemonCard({
           {/* Purchase Button or Info Grid */}
           {!pokemon.isOwned ? (
             <UnlockButton
-              onClick={handlePurchase}
+              onClick={onPurchaseClick}
               cost={cost}
               error={error}
               pokemonName={pokemon.name}
@@ -377,26 +243,12 @@ export const PokemonCard = memo(function PokemonCard({
 
           {/* Type Tags */}
           {pokemon.isOwned && (
-            <div className="flex flex-wrap gap-1 mt-auto pt-2 min-h-[24px]">
-              {pokemon.types.map((type) => {
-                const typeColors = getTypeColors(type, isDarkMode);
-                const textColor = getContrastColor(typeColors.badge);
-                return (
-                  <span
-                    key={type}
-                    className={`px-2 py-0.5 text-[8px] font-bold uppercase border-2 ${typeColors.badge} ${textColor}`}
-                    style={{
-                      textShadow: 'none',
-                      borderColor: isDarkMode ? '#333333' : 'black',
-                      boxShadow: isDarkMode
-                        ? '2px 2px 0px 0px rgba(51,51,51,1)'
-                        : '2px 2px 0px 0px rgba(0,0,0,1)',
-                    }}
-                  >
-                    {type}
-                  </span>
-                );
-              })}
+            <div className="mt-auto pt-2">
+              <PokemonTypeBadges
+                types={pokemon.types}
+                isDarkMode={isDarkMode}
+                size="small"
+              />
             </div>
           )}
         </div>
