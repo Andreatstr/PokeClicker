@@ -10,6 +10,9 @@ interface BattleState {
   result: 'ongoing' | 'victory' | 'defeat';
   clickCount: number;
   totalDamageDealt: number;
+  chargeProgress: number; // 0..100
+  isCharged: boolean;
+  shieldActiveUntil: number; // epoch ms, 0 when inactive
 }
 
 interface UseBattleProps {
@@ -38,6 +41,9 @@ export function useBattle({
       result: 'ongoing',
       clickCount: 0,
       totalDamageDealt: 0,
+      chargeProgress: 0,
+      isCharged: false,
+      shieldActiveUntil: 0,
     };
   });
 
@@ -101,16 +107,42 @@ export function useBattle({
     setBattleState((prev) => {
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
+      const newCharge = Math.min(100, prev.chargeProgress + 2); // +2% per click
 
       return {
         ...prev,
         opponentHP: newOpponentHP,
         clickCount: prev.clickCount + 1,
         totalDamageDealt: newTotalDamage,
+        chargeProgress: newCharge,
+        isCharged: prev.isCharged || newCharge >= 100,
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
   }, [battleState.result, calculateClickDamage]);
+
+  // Charge over time passively
+  useEffect(() => {
+    if (battleState.result !== 'ongoing') return;
+
+    const tickMs = 200; // 5 ticks/sec
+    const perTick = 0.5; // 0.5% per tick => 2.5%/sec
+    const timer = setInterval(() => {
+      setBattleState((prev) => {
+        if (prev.result !== 'ongoing' || prev.isCharged) return prev;
+        const next = Math.min(100, prev.chargeProgress + perTick);
+        return next === prev.chargeProgress
+          ? prev
+          : {
+              ...prev,
+              chargeProgress: next,
+              isCharged: next >= 100,
+            };
+      });
+    }, tickMs);
+
+    return () => clearInterval(timer);
+  }, [battleState.result]);
 
   useEffect(() => {
     if (battleState.result !== 'ongoing') return;
@@ -122,6 +154,11 @@ export function useBattle({
 
       setBattleState((prev) => {
         if (prev.result !== 'ongoing') return prev;
+
+        // If shield is active, freeze health bar (no damage applied)
+        if (prev.shieldActiveUntil && Date.now() < prev.shieldActiveUntil) {
+          return prev;
+        }
 
         const newPlayerHP = Math.max(0, prev.playerHP - damage);
 
@@ -149,6 +186,41 @@ export function useBattle({
     }
   }, [battleState.result, battleState.totalDamageDealt, onBattleEnd]);
 
+  const triggerSpecialAttack = useCallback(() => {
+    // Use when charged: deal burst damage based on spAttack and opponentMaxHP
+    setBattleState((prev) => {
+      if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
+      const spA = playerPokemon.stats?.spAttack || 0;
+      const scale = Math.min(0.15, 0.02 + spA / 5000); // 2%..15%
+      const burst = Math.max(1, Math.floor(prev.opponentMaxHP * scale));
+      const newOpp = Math.max(0, prev.opponentHP - burst);
+      return {
+        ...prev,
+        opponentHP: newOpp,
+        totalDamageDealt: prev.totalDamageDealt + burst,
+        result: newOpp <= 0 ? 'victory' : prev.result,
+        chargeProgress: 0,
+        isCharged: false,
+      };
+    });
+  }, [playerPokemon]);
+
+  const triggerShield = useCallback(() => {
+    // Use when charged: freeze player HP for duration based on spDefense
+    setBattleState((prev) => {
+      if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
+      const spD = playerPokemon.stats?.spDefense || 0;
+      const duration = Math.min(6000, 1500 + spD * 20); // cap 6s
+      const until = Date.now() + duration;
+      return {
+        ...prev,
+        shieldActiveUntil: until,
+        chargeProgress: 0,
+        isCharged: false,
+      };
+    });
+  }, [playerPokemon]);
+
   return {
     playerHP: battleState.playerHP,
     opponentHP: battleState.opponentHP,
@@ -157,5 +229,10 @@ export function useBattle({
     result: battleState.result,
     clickCount: battleState.clickCount,
     handleAttackClick,
+    chargeProgress: battleState.chargeProgress,
+    isCharged: battleState.isCharged,
+    shieldActiveUntil: battleState.shieldActiveUntil,
+    triggerSpecialAttack,
+    triggerShield,
   };
 }

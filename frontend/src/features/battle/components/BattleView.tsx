@@ -37,6 +37,10 @@ export function BattleView({
     result,
     clickCount,
     handleAttackClick,
+    chargeProgress,
+    isCharged,
+    triggerSpecialAttack,
+    triggerShield,
   } = useBattle({
     playerPokemon,
     opponentPokemon,
@@ -180,6 +184,68 @@ export function BattleView({
           >
             <span className="md:hidden">Tap anywhere to attack!</span>
             <span className="hidden md:inline">Click anywhere to attack!</span>
+          </div>
+        </div>
+      )}
+
+      {/* Charged Attacks UI - positioned to avoid Pokemon overlap */}
+      {result === 'ongoing' && (
+        <div className="absolute bottom-1 left-1 right-1 md:bottom-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-20 flex flex-col md:flex-row gap-1 md:gap-3 items-center">
+          {/* Buttons with visual charge progress - stacked vertically on mobile, horizontal on desktop */}
+          <div className="flex gap-1 md:gap-3">
+            <button
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 ${
+                isDarkMode
+                  ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
+                  : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
+              } ${!isCharged ? 'cursor-not-allowed' : ''} ${
+                isCharged ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50' : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isCharged) triggerSpecialAttack();
+              }}
+              disabled={!isCharged}
+            >
+              {/* Charge progress bar with glow effect */}
+              <div
+                className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
+                  isDarkMode ? 'bg-gradient-to-t from-purple-900 via-purple-600 to-purple-400' : 'bg-gradient-to-t from-purple-800 via-purple-500 to-purple-300'
+                } ${isCharged ? 'shadow-lg shadow-purple-500/50' : ''}`}
+                style={{height: `${chargeProgress}%`}}
+              />
+              <span className={`relative z-10 font-bold transition-colors duration-300 ${
+                !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+              }`}>
+                <span className="md:hidden">Sp.Att</span>
+                <span className="hidden md:inline">Special Attack</span>
+              </span>
+            </button>
+            <button
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 ${
+                isDarkMode
+                  ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
+                  : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
+              } ${!isCharged ? 'cursor-not-allowed' : ''} ${
+                isCharged ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50' : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isCharged) triggerShield();
+              }}
+              disabled={!isCharged}
+            >
+              {/* Charge progress bar with glow effect */}
+              <div
+                className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
+                  isDarkMode ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400' : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
+                } ${isCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
+                style={{height: `${chargeProgress}%`}}
+              />
+              <span className={`relative z-10 font-bold transition-colors duration-300 ${
+                !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+              }`}>Shield</span>
+            </button>
           </div>
         </div>
       )}
