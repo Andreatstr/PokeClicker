@@ -57,12 +57,12 @@ export function getContrastColor(bgColor: string): string {
 export function getStatBarColors(isDarkMode: boolean) {
   if (isDarkMode) {
     return {
-      hp: {color: 'bg-red-500/60', upgradeColor: 'bg-red-300/90'},
-      attack: {color: 'bg-orange-500/60', upgradeColor: 'bg-orange-300/90'},
-      defense: {color: 'bg-blue-500/60', upgradeColor: 'bg-blue-300/90'},
-      spAttack: {color: 'bg-purple-500/60', upgradeColor: 'bg-purple-300/90'},
-      spDefense: {color: 'bg-yellow-500/60', upgradeColor: 'bg-yellow-300/90'},
-      speed: {color: 'bg-pink-500/60', upgradeColor: 'bg-pink-300/90'},
+      hp: {color: 'bg-red-300', upgradeColor: 'bg-red-600'},
+      attack: {color: 'bg-orange-300', upgradeColor: 'bg-orange-600'},
+      defense: {color: 'bg-blue-300', upgradeColor: 'bg-blue-600'},
+      spAttack: {color: 'bg-purple-300', upgradeColor: 'bg-purple-600'},
+      spDefense: {color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600'},
+      speed: {color: 'bg-pink-300', upgradeColor: 'bg-pink-600'},
     };
   } else {
     return {
