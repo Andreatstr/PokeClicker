@@ -210,7 +210,9 @@ export function useBattle({
     setBattleState((prev) => {
       if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
       const spD = playerPokemon.stats?.spDefense || 0;
-      const duration = Math.min(6000, 1500 + spD * 20); // cap 6s
+      // Toned down: shorter base and gentler scaling with a tighter cap
+      // Old: Math.min(6000, 1500 + spD * 20)
+      const duration = Math.min(3500, 800 + spD * 10); // cap 3.5s
       const until = Date.now() + duration;
       return {
         ...prev,

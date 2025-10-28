@@ -190,7 +190,7 @@ export function BattleView({
 
       {/* Charged Attacks UI - positioned to avoid Pokemon overlap */}
       {result === 'ongoing' && (
-        <div className="absolute bottom-1 left-1 right-1 md:bottom-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-20 flex flex-col md:flex-row gap-1 md:gap-3 items-center">
+        <div className="absolute bottom-1 right-1 md:bottom-4 md:right-4 z-20 flex flex-col md:flex-row gap-1 md:gap-3 items-end">
           {/* Buttons with visual charge progress - stacked vertically on mobile, horizontal on desktop */}
           <div className="flex gap-1 md:gap-3">
             <button
