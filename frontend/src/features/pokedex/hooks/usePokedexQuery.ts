@@ -10,6 +10,7 @@ const POKEDEX_QUERY = gql`
     $limit: Int
     $offset: Int
     $userId: String
+    $ownedOnly: Boolean
   ) {
     pokedex(
       search: $search
@@ -20,6 +21,7 @@ const POKEDEX_QUERY = gql`
       limit: $limit
       offset: $offset
       userId: $userId
+      ownedOnly: $ownedOnly
     ) {
       pokemon {
         id
@@ -64,7 +66,7 @@ export interface PokedexPokemon {
   weight?: number | null;
   abilities?: string[] | null;
   evolution?: number[] | null;
-  isOwned: boolean;
+  isOwned?: boolean;
 }
 
 interface PokedexData {
@@ -83,6 +85,7 @@ interface PokedexVariables {
   limit?: number;
   offset?: number;
   userId?: string;
+  ownedOnly?: boolean;
 }
 
 export function usePokedexQuery(variables: PokedexVariables) {

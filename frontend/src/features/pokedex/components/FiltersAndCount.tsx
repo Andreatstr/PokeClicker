@@ -24,6 +24,8 @@ interface FiltersAndCountProps {
   tempTypes: string[];
   tempSortBy: 'id' | 'name' | 'type';
   tempSortOrder: 'asc' | 'desc';
+  selectedOwnedOnly: boolean;
+  tempOwnedOnly: boolean;
   setSelectedRegion: (value: string | null) => void;
   setSelectedTypes: (value: string[]) => void;
   setSortBy: (value: 'id' | 'name' | 'type') => void;
@@ -33,7 +35,10 @@ interface FiltersAndCountProps {
   setTempTypes: (value: string[]) => void;
   setTempSortBy: (value: 'id' | 'name' | 'type') => void;
   setTempSortOrder: (value: 'asc' | 'desc') => void;
+  setSelectedOwnedOnly: (value: boolean) => void;
+  setTempOwnedOnly: (value: boolean) => void;
   handleClearFilters: () => void;
+  ownedPokemonIds: number[];
 }
 
 const typeOptions = [
@@ -79,6 +84,8 @@ export function FiltersAndCount({
   tempTypes,
   tempSortBy,
   tempSortOrder,
+  selectedOwnedOnly,
+  tempOwnedOnly,
   setSelectedRegion,
   setSelectedTypes,
   setSortBy,
@@ -88,7 +95,12 @@ export function FiltersAndCount({
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
+  setSelectedOwnedOnly,
+  setTempOwnedOnly,
+  handleClearFilters,
+  ownedPokemonIds,
 }: FiltersAndCountProps) {
+  const ownedCount = (ownedPokemonIds ?? []).length;
   return (
     <section className="mb-6">
       {showMobileFilters && (
@@ -204,6 +216,34 @@ export function FiltersAndCount({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* OWNED */}
+                <div>
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                    Filter on
+                  </Label>
+
+                  <Select
+                    value={tempOwnedOnly ? 'owned' : 'all'}
+                    onValueChange={(v) => {
+                      const isOwned = v === 'owned';
+                      // prevent enabling "owned" when user has none
+                      if (!isOwned || ownedCount > 0) {
+                        setTempOwnedOnly(isOwned);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full text-sm mt-1" aria-label="Owned filter">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Pokémon</SelectItem>
+                      <SelectItem value="owned" disabled={ownedCount === 0}>
+                        Owned only {ownedCount > 0 ? `(${ownedCount} total)` : ''}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Footer Buttons */}
@@ -216,11 +256,13 @@ export function FiltersAndCount({
                     setTempTypes([]);
                     setTempSortBy('id');
                     setTempSortOrder('asc');
+                    setTempOwnedOnly(false);
 
                     setSelectedRegion(null);
                     setSelectedTypes([]);
                     setSortBy('id');
                     setSortOrder('asc');
+                    setSelectedOwnedOnly(false);
                     setShowMobileFilters(false);
                   }}
                 >
@@ -241,6 +283,7 @@ export function FiltersAndCount({
                     setSelectedTypes(tempTypes);
                     setSortBy(tempSortBy);
                     setSortOrder(tempSortOrder);
+                    setSelectedOwnedOnly(tempOwnedOnly);
                     setShowMobileFilters(false);
                   }}
                 >

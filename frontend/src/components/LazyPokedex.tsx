@@ -39,6 +39,8 @@ interface LazyPokedexProps {
   tempTypes: string[];
   tempSortBy: 'id' | 'name' | 'type';
   tempSortOrder: 'asc' | 'desc';
+  selectedOwnedOnly: boolean;
+  tempOwnedOnly: boolean;
   setSelectedRegion: (value: string | null) => void;
   setSelectedTypes: (value: string[]) => void;
   setSortBy: (value: 'id' | 'name' | 'type') => void;
@@ -47,7 +49,10 @@ interface LazyPokedexProps {
   setTempTypes: (value: string[]) => void;
   setTempSortBy: (value: 'id' | 'name' | 'type') => void;
   setTempSortOrder: (value: 'asc' | 'desc') => void;
+  setSelectedOwnedOnly: (value: boolean) => void;
+  setTempOwnedOnly: (value: boolean) => void;
   handleClearFilters: () => void;
+  ownedPokemonIds: number[];
 
   // Pagination props
   handlePokemonClick: (pokemon: PokedexPokemon) => void;
@@ -58,6 +63,10 @@ interface LazyPokedexProps {
 }
 
 export function LazyPokedex(props: LazyPokedexProps) {
+  const filteredPokemon = props.selectedOwnedOnly
+    ? props.displayedPokemon.filter((p) => p.isOwned)
+    : props.displayedPokemon;
+
   return (
     <>
       {/* Search Bar */}
@@ -103,6 +112,8 @@ export function LazyPokedex(props: LazyPokedexProps) {
           tempTypes={props.tempTypes}
           tempSortBy={props.tempSortBy}
           tempSortOrder={props.tempSortOrder}
+          selectedOwnedOnly={props.selectedOwnedOnly}
+          tempOwnedOnly={props.tempOwnedOnly}
           setSelectedRegion={props.setSelectedRegion}
           setSelectedTypes={props.setSelectedTypes}
           setSortBy={props.setSortBy}
@@ -112,7 +123,10 @@ export function LazyPokedex(props: LazyPokedexProps) {
           setTempTypes={props.setTempTypes}
           setTempSortBy={props.setTempSortBy}
           setTempSortOrder={props.setTempSortOrder}
+          setSelectedOwnedOnly={props.setSelectedOwnedOnly}
+          setTempOwnedOnly={props.setTempOwnedOnly}
           handleClearFilters={props.handleClearFilters}
+          ownedPokemonIds={props.ownedPokemonIds}
         />
       </Suspense>
 
@@ -127,7 +141,7 @@ export function LazyPokedex(props: LazyPokedexProps) {
           }
         >
           <PokemonGrid
-            displayedPokemon={props.displayedPokemon}
+            displayedPokemon={filteredPokemon}
             handlePokemonClick={props.handlePokemonClick}
             isDarkMode={props.isDarkMode}
             ITEMS_PER_PAGE={props.ITEMS_PER_PAGE}
