@@ -84,7 +84,6 @@ export function FiltersAndCount({
   tempTypes,
   tempSortBy,
   tempSortOrder,
-  selectedOwnedOnly,
   tempOwnedOnly,
   setSelectedRegion,
   setSelectedTypes,
@@ -97,7 +96,6 @@ export function FiltersAndCount({
   setTempSortOrder,
   setSelectedOwnedOnly,
   setTempOwnedOnly,
-  handleClearFilters,
   ownedPokemonIds,
 }: FiltersAndCountProps) {
   const ownedCount = (ownedPokemonIds ?? []).length;
@@ -165,7 +163,7 @@ export function FiltersAndCount({
 
                 {/* TYPE */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
                     Type
                   </Label>
                   <MultiSelect
@@ -178,7 +176,7 @@ export function FiltersAndCount({
 
                 {/* SORT BY */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
                     Sort by
                   </Label>
                   <Select
@@ -200,7 +198,7 @@ export function FiltersAndCount({
 
                 {/* ORDER */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
                     Order
                   </Label>
                   <Select
@@ -296,7 +294,7 @@ export function FiltersAndCount({
       )}
 
       {!isMobile && (
-        <p className="text-sm pixel-font style={{color: 'var(--foreground)'}}">
+        <p className="text-sm pixel-font" style={{color: 'var(--foreground)'}}>
           {loading
             ? 'Loading...'
             : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
