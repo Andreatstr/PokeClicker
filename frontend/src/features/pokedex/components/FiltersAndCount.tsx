@@ -73,10 +73,6 @@ export function FiltersAndCount({
   loading,
   displayedPokemon,
   totalPokemon,
-  selectedTypes,
-  selectedRegion,
-  sortBy,
-  sortOrder,
   isMobile,
   showMobileFilters,
   tempRegion,
@@ -92,7 +88,6 @@ export function FiltersAndCount({
   setTempTypes,
   setTempSortBy,
   setTempSortOrder,
-  handleClearFilters,
 }: FiltersAndCountProps) {
   return (
     <section className="mb-6">

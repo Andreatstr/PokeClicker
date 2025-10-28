@@ -181,7 +181,7 @@ export function useMapMovement(
 
         if (dir) {
           setDirection(dir);
-          setWorldPosition((prev) => {
+          setWorldPosition((prev: typeof worldPosition) => {
             const newPos = {...prev};
 
             switch (dir) {
@@ -261,7 +261,9 @@ export function useMapMovement(
 
           if (dir) {
             setDirection(dir);
-            setWorldPosition((prev) => calculateNewPosition(prev, dir));
+            setWorldPosition((prev: typeof worldPosition) =>
+              calculateNewPosition(prev, dir)
+            );
             setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
           }
           setIsMoving(true);
@@ -325,7 +327,9 @@ export function useMapMovement(
       if (wasEmpty) {
         const dir = direction as Direction;
         setDirection(dir);
-        setWorldPosition((prev) => calculateNewPosition(prev, dir));
+        setWorldPosition((prev: typeof worldPosition) =>
+          calculateNewPosition(prev, dir)
+        );
         setAnimationFrame((prev) => (prev + 1) % ANIMATION_FRAMES);
         setIsMoving(true);
       }

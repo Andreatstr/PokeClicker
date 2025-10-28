@@ -9,10 +9,17 @@ export function calculateCandyPerClick(stats: {
   spAttack: number;
   spDefense: number;
   speed: number;
+  clickPower?: number; // New simplified stat
+  passiveIncome?: number;
 }): number {
-  // Exponential scaling: 1.75^(attack-1) for base damage
+  // New simplified system: Use clickPower if available
+  if (stats.clickPower && stats.clickPower > 0) {
+    // Exponential scaling: 1.75^(clickPower-1)
+    return Math.floor(Math.pow(1.75, stats.clickPower - 1));
+  }
+
+  // Legacy fallback: Use old attack + spAttack formula for backwards compatibility
   const baseCandy = Math.floor(Math.pow(1.75, stats.attack - 1));
-  // SpAttack bonus: 0.5 × 1.5^(spAttack-1)
   const spAttackBonus = Math.floor(0.5 * Math.pow(1.5, stats.spAttack - 1));
   return baseCandy + spAttackBonus;
 }

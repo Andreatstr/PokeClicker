@@ -290,13 +290,14 @@ body {
 
 /* Pokemon Battle Background */
 div.battle-background {
-  background: linear-gradient(90deg, 
-    #1e3a8a 0%,     /* Dark blue */
-    #3b82f6 20%,    /* Blue */
-    #60a5fa 40%,    /* Light blue */
-    #93c5fd 60%,    /* Very light blue */
-    #60a5fa 80%,    /* Light blue */
-    #1e3a8a 100%    /* Dark blue */
+  background: linear-gradient(
+    90deg,
+    #1e3a8a 0%,
+    /* Dark blue */ #3b82f6 20%,
+    /* Blue */ #60a5fa 40%,
+    /* Light blue */ #93c5fd 60%,
+    /* Very light blue */ #60a5fa 80%,
+    /* Light blue */ #1e3a8a 100% /* Dark blue */
   ) !important;
   background-color: transparent !important;
   position: relative;
@@ -314,15 +315,9 @@ div.battle-background {
   bottom: 0;
   background: 
     /* Circle 1 - top right - MUCH LARGER */
-    radial-gradient(circle 200px at 85% 25%, 
-      red 0%, 
-      red 100%
-    ),
+    radial-gradient(circle 200px at 85% 25%, red 0%, red 100%),
     /* Circle 2 - bottom left - MUCH LARGER */
-    radial-gradient(circle 200px at 15% 75%, 
-      blue 0%, 
-      blue 100%
-    );
+      radial-gradient(circle 200px at 15% 75%, blue 0%, blue 100%);
   pointer-events: none;
 }
 
@@ -331,15 +326,9 @@ div.battle-background {
   .battle-background::before {
     background: 
       /* Circle 1 - top right */
-      radial-gradient(circle 75px at 85% 25%, 
-        red 0%, 
-        red 100%
-      ),
+      radial-gradient(circle 75px at 85% 25%, red 0%, red 100%),
       /* Circle 2 - bottom left */
-      radial-gradient(circle 75px at 15% 75%, 
-        blue 0%, 
-        blue 100%
-      );
+        radial-gradient(circle 75px at 15% 75%, blue 0%, blue 100%);
   }
 }
 
@@ -347,26 +336,21 @@ div.battle-background {
   .battle-background::before {
     background: 
       /* Circle 1 - top right */
-      radial-gradient(circle 100px at 85% 25%, 
-        red 0%, 
-        red 100%
-      ),
+      radial-gradient(circle 100px at 85% 25%, red 0%, red 100%),
       /* Circle 2 - bottom left */
-      radial-gradient(circle 100px at 15% 75%, 
-        blue 0%, 
-        blue 100%
-      );
+        radial-gradient(circle 100px at 15% 75%, blue 0%, blue 100%);
   }
 }
 
 /* Dark mode battle background */
 .dark .battle-background {
-  background: linear-gradient(135deg, 
-    #1a1a2e 0%,     /* Dark navy */
-    #16213e 25%,    /* Darker navy */
-    #0f3460 50%,    /* Deep blue */
-    #1a1a2e 75%,    /* Dark navy */
-    #0e1b2e 100%    /* Very dark blue */
+  background: linear-gradient(
+    135deg,
+    #1a1a2e 0%,
+    /* Dark navy */ #16213e 25%,
+    /* Darker navy */ #0f3460 50%,
+    /* Deep blue */ #1a1a2e 75%,
+    /* Dark navy */ #0e1b2e 100% /* Very dark blue */
   );
 }
 

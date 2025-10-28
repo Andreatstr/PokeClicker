@@ -49,19 +49,21 @@ interface EvolutionChain {
   chain: EvolutionChainLink;
 }
 
+export interface PokemonStats {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  speed: number;
+}
+
 export interface Pokemon {
   id: number;
   name: string;
   types: string[];
   sprite: string;
-  stats: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-  };
+  stats: PokemonStats;
   height: number;
   weight: number;
   abilities: string[];

@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {Button, Card} from '@ui/pixelact';
+import {ArrowRightIcon} from '@ui/pixelact/icons';
 import {useAuth} from '@features/auth';
 import {useGameMutations} from '@features/clicker';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
@@ -23,7 +24,16 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   // Local state for visual feedback only
   const [isAnimating, setIsAnimating] = useState(false);
   const [candies, setCandies] = useState<Candy[]>([]);
-  const [stats, setStats] = useState(
+  const [stats, setStats] = useState<{
+    hp: number;
+    attack: number;
+    defense: number;
+    spAttack: number;
+    spDefense: number;
+    speed: number;
+    clickPower?: number;
+    passiveIncome?: number;
+  }>(
     user?.stats || {
       hp: 1,
       attack: 1,
@@ -31,6 +41,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       spAttack: 1,
       spDefense: 1,
       speed: 1,
+      clickPower: 1,
+      passiveIncome: 1,
     }
   );
   const [, setCachedAssets] = useState<{
@@ -160,15 +172,18 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   };
 
   // Calculate upgrade cost (differentiated by stat type)
-  const getUpgradeCost = (stat: keyof typeof stats) => {
-    const level = stats[stat];
-    // Different multipliers for different stat types:
-    // Attack/SpAttack: 2.8x (most expensive, highest reward)
-    // HP/Defense/SpDefense: 2.5x (moderate cost)
-    // Speed: 2.2x (cheapest, utility stat)
+  const getUpgradeCost = (stat: string) => {
+    const level = (stats as Record<string, number>)[stat] || 1;
     let multiplier = 2.5; // default
 
-    if (stat === 'attack' || stat === 'spAttack') {
+    // New simplified system
+    if (stat === 'clickPower') {
+      multiplier = 2.8; // More expensive (high reward)
+    } else if (stat === 'passiveIncome') {
+      multiplier = 2.5; // Moderate cost
+    }
+    // Legacy support
+    else if (stat === 'attack' || stat === 'spAttack') {
       multiplier = 2.8;
     } else if (stat === 'speed') {
       multiplier = 2.2;
@@ -181,20 +196,36 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const passiveIncome =
-      Math.floor((stats.hp - 1) * 0.5) + Math.floor((stats.defense - 1) * 0.3);
+    let passiveIncomeAmount = 0;
 
-    if (passiveIncome > 0) {
+    // New simplified system: Use passiveIncome stat if available
+    if (stats.passiveIncome && stats.passiveIncome > 0) {
+      passiveIncomeAmount = Math.floor(Math.pow(1.5, stats.passiveIncome - 1));
+    }
+    // Legacy fallback: Use old HP + Defense formula
+    else {
+      passiveIncomeAmount =
+        Math.floor((stats.hp - 1) * 0.5) +
+        Math.floor((stats.defense - 1) * 0.3);
+    }
+
+    if (passiveIncomeAmount > 0) {
       const interval = setInterval(() => {
         // Update local candy (optimistic UI)
-        setLocalRareCandy((prev) => prev + passiveIncome);
+        setLocalRareCandy((prev) => prev + passiveIncomeAmount);
         // Track unsynced amount
-        setUnsyncedAmount((prev) => prev + passiveIncome);
+        setUnsyncedAmount((prev) => prev + passiveIncomeAmount);
       }, 1000); // Every second
 
       return () => clearInterval(interval);
     }
-  }, [stats.hp, stats.defense, isAuthenticated]);
+  }, [
+    stats.hp,
+    stats.defense,
+    stats.passiveIncome,
+    stats.clickPower,
+    isAuthenticated,
+  ]);
 
   const handleClick = () => {
     if (!isAuthenticated) {
@@ -245,10 +276,13 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     }
 
     // Optimistic updates (both candy and stats)
-    const oldStat = stats[stat];
+    const oldStat = (stats as Record<string, number>)[stat];
     const oldCandy = localRareCandy;
     setLocalRareCandy((prev) => prev - cost); // Deduct cost immediately
-    setStats((prev: typeof stats) => ({...prev, [stat]: prev[stat] + 1}));
+    setStats((prev: typeof stats) => ({
+      ...prev,
+      [stat]: ((prev as Record<string, number>)[stat] || 1) + 1,
+    }));
 
     try {
       const updatedUser = await upgradeStat(stat, updateUser);
@@ -266,14 +300,39 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       setDisplayError(errorMessage);
       // Revert optimistic updates
       setLocalRareCandy(oldCandy);
-      setStats((prev: typeof stats) => ({...prev, [stat]: oldStat}));
+      setStats((prev: typeof stats) => ({...prev, [stat]: oldStat || 1}));
       setTimeout(() => setDisplayError(null), 3000);
     }
   };
 
-  // Get stat description
-  const getStatDescription = (stat: keyof typeof stats) => {
+  // Get stat description (shows current → next level benefit)
+  const getStatDescription = (stat: string) => {
     switch (stat) {
+      case 'clickPower': {
+        const currentLevel = stats.clickPower || 1;
+        const currentCandy = Math.pow(1.75, currentLevel - 1);
+        const nextCandy = Math.pow(1.75, currentLevel);
+        const currentRounded = Math.floor(currentCandy);
+        const nextRounded = Math.floor(nextCandy);
+        return {
+          current: currentRounded,
+          next: nextRounded,
+          unit: 'candy/click',
+        };
+      }
+      case 'passiveIncome': {
+        const currentLevel = stats.passiveIncome || 1;
+        const currentCandy = Math.pow(1.5, currentLevel - 1);
+        const nextCandy = Math.pow(1.5, currentLevel);
+        const currentRounded = Math.floor(currentCandy);
+        const nextRounded = Math.floor(nextCandy);
+        return {
+          current: currentRounded,
+          next: nextRounded,
+          unit: 'candy/sec',
+        };
+      }
+      // Legacy descriptions (kept for backwards compatibility)
       case 'hp': {
         const hpPassive = (stats.hp - 1) * 0.5;
         return `+${hpPassive.toFixed(1)}/s passive`;
@@ -671,135 +730,111 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
             </h2>
           </div>
           <div className="flex flex-col gap-3">
-            {Object.entries(stats)
-              .filter(([key]) => key !== '__typename')
-              .map(([key, value]) => {
-                const cost = getUpgradeCost(key as keyof typeof stats);
-                const description = getStatDescription(
-                  key as keyof typeof stats
-                );
-                return (
-                  <div
-                    key={key}
-                    className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
-                    style={{
-                      background: isDarkMode
-                        ? 'linear-gradient(to bottom right, #1f2937, #111827)'
-                        : 'linear-gradient(to bottom right, var(--card), #e0deda)',
-                      borderColor: isDarkMode ? '#374151' : '#bbb7b2',
-                    }}
-                  >
-                    <div className="flex items-center justify-between gap-4 mb-1">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div
-                          className="w-2 h-8 border"
-                          style={{
-                            backgroundColor:
-                              key === 'hp'
-                                ? isDarkMode
-                                  ? '#16a34a'
-                                  : '#22c55e'
-                                : key === 'attack'
-                                  ? isDarkMode
-                                    ? '#ea580c'
-                                    : '#f97316'
-                                  : key === 'defense'
-                                    ? isDarkMode
-                                      ? '#d97706'
-                                      : '#fb923c'
-                                    : key === 'spAttack'
-                                      ? isDarkMode
-                                        ? '#2563eb'
-                                        : '#3b82f6'
-                                      : key === 'spDefense'
-                                        ? isDarkMode
-                                          ? '#1d4ed8'
-                                          : '#60a5fa'
-                                        : isDarkMode
-                                          ? '#7c3aed'
-                                          : '#a855f7',
-                            borderColor: isDarkMode ? '#374151' : '#bbb7b2',
-                          }}
-                        ></div>
-                        <div className="flex flex-col">
-                          <span
-                            className="pixel-font text-xs"
-                            style={{
-                              color: isDarkMode
-                                ? 'var(--muted-foreground)'
-                                : 'var(--muted-foreground)',
-                            }}
-                          >
-                            {key === 'hp'
-                              ? 'HP'
-                              : key === 'spAttack'
-                                ? 'Sp. Attack'
-                                : key === 'spDefense'
-                                  ? 'Sp. Defense'
-                                  : key.charAt(0).toUpperCase() + key.slice(1)}
-                          </span>
-                          <span
-                            className="pixel-font text-lg font-bold"
-                            style={{
-                              color: isDarkMode
-                                ? 'var(--foreground)'
-                                : 'var(--foreground)',
-                            }}
-                          >
-                            LV {String(value)}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => handleUpgrade(key as keyof typeof stats)}
-                        disabled={
-                          !isAuthenticated ||
-                          getCurrentCandy() < cost ||
-                          isLoading ||
-                          key === 'spDefense' ||
-                          key === 'speed'
-                        }
-                        bgColor={
-                          key === 'hp'
-                            ? isDarkMode
-                              ? '#16a34a'
-                              : '#4ade80'
-                            : key === 'attack'
+            {/* New simplified 2-upgrade system */}
+            {(['clickPower', 'passiveIncome'] as const).map((key) => {
+              const value = stats[key] || 1;
+              const cost = getUpgradeCost(key);
+              const descriptionData = getStatDescription(key);
+              return (
+                <div
+                  key={key}
+                  className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
+                  style={{
+                    background: isDarkMode
+                      ? 'linear-gradient(to bottom right, #1f2937, #111827)'
+                      : 'linear-gradient(to bottom right, var(--card), #e0deda)',
+                    borderColor: isDarkMode ? '#374151' : '#bbb7b2',
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-4 mb-1">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div
+                        className="w-2 h-8 border"
+                        style={{
+                          backgroundColor:
+                            key === 'clickPower'
                               ? isDarkMode
-                                ? '#ea580c'
-                                : '#fb923c'
-                              : key === 'defense'
-                                ? isDarkMode
-                                  ? '#d97706'
-                                  : '#fbbf24'
-                                : key === 'spAttack'
-                                  ? isDarkMode
-                                    ? '#2563eb'
-                                    : '#60a5fa'
-                                  : key === 'spDefense'
-                                    ? isDarkMode
-                                      ? '#1d4ed8'
-                                      : '#93c5fd'
-                                    : isDarkMode
-                                      ? '#7c3aed'
-                                      : '#a855f7'
-                        }
-                        className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                          ↑ {formatNumber(cost)}
+                                ? '#ea580c' // Orange for click power
+                                : '#f97316'
+                              : isDarkMode
+                                ? '#16a34a' // Green for passive income
+                                : '#22c55e',
+                          borderColor: isDarkMode ? '#374151' : '#bbb7b2',
+                        }}
+                      ></div>
+                      <div className="flex flex-col">
+                        <span
+                          className="pixel-font text-xs"
+                          style={{
+                            color: isDarkMode
+                              ? 'var(--muted-foreground)'
+                              : 'var(--muted-foreground)',
+                          }}
+                        >
+                          {key === 'clickPower'
+                            ? 'Click Power'
+                            : 'Passive Income'}
                         </span>
-                      </Button>
+                        <span
+                          className="pixel-font text-lg font-bold"
+                          style={{
+                            color: isDarkMode
+                              ? 'var(--foreground)'
+                              : 'var(--foreground)',
+                          }}
+                        >
+                          LV {String(value)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="ml-5">
-                      <span className="pixel-font text-[10px] text-gray-500 italic">
-                        {description}
+                    <Button
+                      size="sm"
+                      onClick={() => handleUpgrade(key)}
+                      disabled={
+                        !isAuthenticated ||
+                        getCurrentCandy() < cost ||
+                        isLoading
+                      }
+                      bgColor={
+                        key === 'clickPower'
+                          ? isDarkMode
+                            ? '#ea580c' // Orange for click power
+                            : '#fb923c'
+                          : isDarkMode
+                            ? '#16a34a' // Green for passive income
+                            : '#4ade80'
+                      }
+                      className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                        ↑ {formatNumber(cost)}
                       </span>
-                    </div>
+                    </Button>
                   </div>
-                );
-              })}
+                  <div className="ml-5 flex items-center gap-1">
+                    <span
+                      className="pixel-font text-xs"
+                      style={{
+                        color: isDarkMode
+                          ? 'var(--foreground)'
+                          : 'var(--foreground)',
+                      }}
+                    >
+                      {typeof descriptionData === 'object' &&
+                      'current' in descriptionData ? (
+                        <>
+                          {descriptionData.current}
+                          <ArrowRightIcon size={14} className="inline mx-1" />
+                          {descriptionData.next} {descriptionData.unit}
+                        </>
+                      ) : (
+                        descriptionData
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
       </div>

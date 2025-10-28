@@ -13,6 +13,8 @@ export const createMockUser = (overrides = {}): User => ({
     spAttack: 50,
     spDefense: 50,
     speed: 50,
+    clickPower: 1,
+    passiveIncome: 1,
   },
   owned_pokemon_ids: [1, 2, 3],
   ...overrides,

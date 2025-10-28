@@ -14,7 +14,6 @@ export function SearchBar({
   searchTerm,
   setSearchTerm,
   handleClearSearch,
-  isMobile,
   showMobileFilters,
   setShowMobileFilters,
   isDarkMode = false,

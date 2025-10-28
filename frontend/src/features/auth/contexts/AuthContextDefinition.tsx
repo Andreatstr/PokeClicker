@@ -12,6 +12,8 @@ export interface User {
     spAttack: number;
     spDefense: number;
     speed: number;
+    clickPower?: number;
+    passiveIncome?: number;
   };
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number | null;

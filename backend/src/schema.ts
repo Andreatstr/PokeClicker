@@ -21,6 +21,7 @@ export const typeDefs = `#graphql
       offset: Int
       userId: String
     ): PokedexResponse!
+    pokemonUpgrade(pokemonId: Int!): PokemonUpgrade
   }
 
   type HealthCheck {
@@ -46,6 +47,9 @@ export const typeDefs = `#graphql
     spAttack: Int!
     spDefense: Int!
     speed: Int!
+    # New simplified PokeClicker upgrades:
+    clickPower: Int
+    passiveIncome: Int
   }
 
 	type AuthResponse {
@@ -63,6 +67,14 @@ export const typeDefs = `#graphql
     deleteUser: Boolean!
     setFavoritePokemon(pokemonId: Int): User!
     setSelectedPokemon(pokemonId: Int): User!
+    upgradePokemon(pokemonId: Int!): PokemonUpgrade!
+  }
+
+  type PokemonUpgrade {
+    pokemon_id: Int!
+    level: Int!
+    cost: Int!
+    user: User
   }
 
   type Pokemon {

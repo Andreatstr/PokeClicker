@@ -26,6 +26,9 @@ export interface UserStats {
     spAttack: number;
     spDefense: number;
     speed: number;
+    // New simplified PokeClicker upgrades:
+    clickPower?: number;
+    passiveIncome?: number;
   };
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number;
@@ -62,6 +65,19 @@ export const DEFAULT_USER_STATS = {
     spAttack: 1,
     spDefense: 1,
     speed: 1,
+    // New simplified PokeClicker upgrades (start at level 1):
+    clickPower: 1,
+    passiveIncome: 1,
   },
   owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
 };
+
+// Per-Pokemon upgrade document
+export interface PokemonUpgradeDocument {
+  _id?: ObjectId;
+  user_id: ObjectId;
+  pokemon_id: number; // PokéAPI ID
+  level: number; // Upgrade level (starts at 1)
+  created_at: Date;
+  updated_at: Date;
+}

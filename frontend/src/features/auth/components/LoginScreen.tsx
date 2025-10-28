@@ -29,6 +29,8 @@ const LOGIN_MUTATION = gql`
           spAttack
           spDefense
           speed
+          clickPower
+          passiveIncome
         }
         owned_pokemon_ids
         favorite_pokemon_id
@@ -54,6 +56,8 @@ const SIGNUP_MUTATION = gql`
           spAttack
           spDefense
           speed
+          clickPower
+          passiveIncome
         }
         owned_pokemon_ids
         favorite_pokemon_id

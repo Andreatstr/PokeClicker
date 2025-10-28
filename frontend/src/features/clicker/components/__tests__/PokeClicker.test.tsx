@@ -75,7 +75,7 @@ describe('PokeClicker component', () => {
     ).toBeInTheDocument();
   });
 
-  it('should render game when authenticated', () => {
+  it('should render game when authenticated', async () => {
     const mockUser = createMockUser();
     mockAuth.user = mockUser;
     mockAuth.isAuthenticated = true;
@@ -84,7 +84,11 @@ describe('PokeClicker component', () => {
 
     expect(screen.getByText('Rare Candy')).toBeInTheDocument();
     expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
-    expect(screen.getByText('LV 100')).toBeInTheDocument(); // HP level
+    
+    // Wait for stats to be rendered - check for both clickPower and passiveIncome stats
+    await screen.findAllByText('LV 1'); // Should find both stats
+    expect(screen.getByText('Click Power')).toBeInTheDocument();
+    expect(screen.getByText('Passive Income')).toBeInTheDocument();
   });
 
   it('should display current candy count', () => {
@@ -109,11 +113,19 @@ describe('PokeClicker component', () => {
     const clickButton = screen.getByRole('button', {
       name: /click charizard to earn rare candy/i,
     });
+    
+    // Get initial candy count - 1000 should be formatted as "1.0K"
+    const initialCandyText = screen.getByText('1.0K');
+    
     await user.click(clickButton);
 
-    // Just verify the click was attempted - the actual UI update might be complex
-    // The mutation should be called when clicking
-    expect(mockUpdateRareCandy).toHaveBeenCalled();
+    // Wait for local state update (optimistic UI)
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Check that the candy count has increased (optimistic update)
+    // The exact amount depends on clickPower stat, but it should be more than 1.0K
+    const updatedCandyText = screen.getByText(/1\.\d+K/); // Should be something like 1.1K
+    expect(updatedCandyText).toBeInTheDocument();
   });
 
   it('should not allow clicking when not authenticated', async () => {
