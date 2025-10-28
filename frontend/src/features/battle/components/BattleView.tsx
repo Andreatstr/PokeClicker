@@ -41,6 +41,8 @@ export function BattleView({
     isCharged,
     triggerSpecialAttack,
     triggerShield,
+    isActive,
+    startBattle,
   } = useBattle({
     playerPokemon,
     opponentPokemon,
@@ -61,6 +63,28 @@ export function BattleView({
   // Calculate rare candy reward
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
   const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 5);
+
+  // Ready countdown state
+  const [readyCount, setReadyCount] = useState(5);
+
+  useEffect(() => {
+    // Begin a short countdown then start the battle
+    if (result !== 'ongoing') return;
+    if (isActive) return; // already started
+
+    setReadyCount(5);
+    let count = 5;
+    const timer = setInterval(() => {
+      count -= 1;
+      setReadyCount(count);
+      if (count <= 0) {
+        clearInterval(timer);
+        startBattle();
+      }
+    }, 800);
+
+    return () => clearInterval(timer);
+  }, [result, isActive, startBattle]);
 
   if (showResult && battleResult) {
     return (
@@ -184,6 +208,17 @@ export function BattleView({
           >
             <span className="md:hidden">Tap anywhere to attack!</span>
             <span className="hidden md:inline">Click anywhere to attack!</span>
+          </div>
+        </div>
+      )}
+
+      {/* Get Ready Overlay */}
+      {result === 'ongoing' && !isActive && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/50">
+          <div className={`pixel-font text-center ${isDarkMode ? 'text-white' : 'text-white'}`}>
+            <div className="text-lg md:text-2xl mb-2">Get Ready!</div>
+            <div className="text-sm md:text-base opacity-90 mb-4">Tap to attack, charge to unleash specials</div>
+            <div className="text-3xl md:text-5xl font-bold">{readyCount > 0 ? readyCount : 'Go!'}</div>
           </div>
         </div>
       )}

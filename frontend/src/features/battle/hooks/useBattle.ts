@@ -6,7 +6,7 @@ interface BattleState {
   opponentHP: number;
   playerMaxHP: number;
   opponentMaxHP: number;
-  isActive: boolean;
+  isActive: boolean; // ticking damage active
   result: 'ongoing' | 'victory' | 'defeat';
   clickCount: number;
   totalDamageDealt: number;
@@ -37,7 +37,7 @@ export function useBattle({
       opponentHP: scaledOpponentHP,
       playerMaxHP: scaledPlayerHP,
       opponentMaxHP: scaledOpponentHP,
-      isActive: true,
+      isActive: false, // start paused until "Get Ready" completes
       result: 'ongoing',
       clickCount: 0,
       totalDamageDealt: 0,
@@ -100,7 +100,7 @@ export function useBattle({
   }, [playerPokemon, opponentPokemon]);
 
   const handleAttackClick = useCallback(() => {
-    if (battleState.result !== 'ongoing') return;
+    if (battleState.result !== 'ongoing' || !battleState.isActive) return;
 
     const damage = calculateClickDamage();
 
@@ -119,11 +119,11 @@ export function useBattle({
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
-  }, [battleState.result, calculateClickDamage]);
+  }, [battleState.result, battleState.isActive, calculateClickDamage]);
 
   // Charge over time passively
   useEffect(() => {
-    if (battleState.result !== 'ongoing') return;
+    if (battleState.result !== 'ongoing' || !battleState.isActive) return;
 
     const tickMs = 200; // 5 ticks/sec
     const perTick = 0.5; // 0.5% per tick => 2.5%/sec
@@ -142,10 +142,10 @@ export function useBattle({
     }, tickMs);
 
     return () => clearInterval(timer);
-  }, [battleState.result]);
+  }, [battleState.result, battleState.isActive]);
 
   useEffect(() => {
-    if (battleState.result !== 'ongoing') return;
+    if (battleState.result !== 'ongoing' || !battleState.isActive) return;
 
     const attackInterval = getAttackInterval();
 
@@ -175,7 +175,7 @@ export function useBattle({
         clearInterval(passiveDamageTimerRef.current);
       }
     };
-  }, [battleState.result, calculatePassiveDamage, getAttackInterval]);
+  }, [battleState.result, battleState.isActive, calculatePassiveDamage, getAttackInterval]);
 
   useEffect(() => {
     if (battleState.result !== 'ongoing') {
@@ -185,6 +185,13 @@ export function useBattle({
       onBattleEnd(battleState.result, battleState.totalDamageDealt);
     }
   }, [battleState.result, battleState.totalDamageDealt, onBattleEnd]);
+
+  const startBattle = useCallback(() => {
+    setBattleState((prev) => ({
+      ...prev,
+      isActive: true,
+    }));
+  }, []);
 
   const triggerSpecialAttack = useCallback(() => {
     // Use when charged: deal burst damage based on spAttack and opponentMaxHP
@@ -236,5 +243,7 @@ export function useBattle({
     shieldActiveUntil: battleState.shieldActiveUntil,
     triggerSpecialAttack,
     triggerShield,
+    isActive: battleState.isActive,
+    startBattle,
   };
 }
