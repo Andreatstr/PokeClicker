@@ -93,12 +93,28 @@ class ImageCacheService {
       console.warn('IndexedDB cache miss:', error);
     }
 
-    // Load from network
+    // Load from network with retry logic for rate limiting
     this.stats.missCount++;
     this.updateStats();
 
+    return this.fetchImageWithRetry(url);
+  }
+
+  private async fetchImageWithRetry(
+    url: string,
+    retries = 3,
+    delay = 500
+  ): Promise<HTMLImageElement> {
     try {
       const response = await fetch(url);
+      
+      // Handle rate limiting (429) with exponential backoff
+      if (response.status === 429 && retries > 0) {
+        console.warn(`Rate limited on ${url}, retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.fetchImageWithRetry(url, retries - 1, delay * 2);
+      }
+
       if (!response.ok)
         throw new Error(`Failed to load image: ${response.status}`);
 
@@ -120,14 +136,19 @@ class ImageCacheService {
 
       return img;
     } catch (error) {
-      console.error('Failed to load image:', url, error);
+      if (retries > 0) {
+        console.warn(`Error loading ${url}, retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.fetchImageWithRetry(url, retries - 1, delay * 2);
+      }
+      console.error('Failed to load image after retries:', url, error);
       throw error;
     }
   }
 
   async preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-    // Rate limit: Process sequentially with 200ms delay between each request
-    const delayBetweenRequests = 200;
+    // Rate limit: Process sequentially with 500ms delay to avoid GitHub rate limits
+    const delayBetweenRequests = 500;
     const results: HTMLImageElement[] = [];
 
     for (let i = 0; i < urls.length; i++) {
