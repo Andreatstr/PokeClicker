@@ -3,8 +3,8 @@ import type {PokedexPokemon} from '@features/pokedex';
 import {usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
-import {useEffect, useRef} from 'react';
 import {FocusTrap} from 'focus-trap-react';
+import {useModal} from '@/hooks/useModal';
 import {PokemonDetailCard} from './PokemonDetailCard';
 import {PokemonCarousel} from './PokemonCarousel';
 
@@ -39,35 +39,9 @@ export function PokemonDetailModal({
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const {data: userData} = useQuery(ME_QUERY);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  // Store the previously focused element when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-    } else {
-      // Return focus to the trigger element when modal closes
-      if (previousActiveElement.current) {
-        previousActiveElement.current.focus();
-        previousActiveElement.current = null;
-      }
-    }
-  }, [isOpen]);
-
-  // Add Escape key handler to close modal
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      window.addEventListener('keydown', handleEscape);
-    }
-
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  // Use combined modal hook for focus management and escape key handling
+  useModal(isOpen, onClose);
 
   if (!pokemon) return null;
 

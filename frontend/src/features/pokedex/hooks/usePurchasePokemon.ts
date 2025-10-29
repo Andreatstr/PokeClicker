@@ -1,4 +1,4 @@
-import {useMutation} from '@apollo/client';
+import {useMutation, type Reference} from '@apollo/client';
 import {useAuth} from '@features/auth';
 import {
   PURCHASE_POKEMON_MUTATION,
@@ -13,7 +13,55 @@ export function usePurchasePokemon() {
   return useMutation<PurchasePokemonData, PurchasePokemonVariables>(
     PURCHASE_POKEMON_MUTATION,
     {
-      refetchQueries: ['Pokedex'],
+      update(cache, {data}) {
+        if (!data?.purchasePokemon) return;
+
+        // Get the ID of the purchased Pokemon (last item in owned_pokemon_ids array)
+        const purchasedPokemonId =
+          data.purchasePokemon.owned_pokemon_ids[
+            data.purchasePokemon.owned_pokemon_ids.length - 1
+          ];
+
+        // Update all cached pokedex queries by iterating through cache and updating
+        // the isOwned field for the matching Pokemon
+        cache.modify({
+          fields: {
+            pokedex(existingPokedexRef, {readField}) {
+              if (!existingPokedexRef) return existingPokedexRef;
+
+              const pokemonArray = readField<readonly Reference[]>(
+                'pokemon',
+                existingPokedexRef
+              );
+              if (!pokemonArray) return existingPokedexRef;
+
+              // Update each Pokemon reference that matches the purchased ID
+              pokemonArray.forEach((pokemonRef) => {
+                const pokemonId = readField<number>('id', pokemonRef);
+                if (pokemonId === purchasedPokemonId) {
+                  const pokemonCacheId = cache.identify({
+                    __typename: 'Pokemon',
+                    id: pokemonId,
+                  });
+                  if (pokemonCacheId) {
+                    cache.modify({
+                      id: pokemonCacheId,
+                      fields: {
+                        isOwned() {
+                          return true;
+                        },
+                      },
+                      broadcast: false, // Don't broadcast individual updates
+                    });
+                  }
+                }
+              });
+
+              return existingPokedexRef;
+            },
+          },
+        });
+      },
       optimisticResponse: (variables) => {
         // Use actual user data from context instead of placeholder values
         if (!user) {

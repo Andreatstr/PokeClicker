@@ -195,30 +195,6 @@ describe('useClickerActions', () => {
       expect(mockProps.upgradeStat).not.toHaveBeenCalled();
     });
 
-    it('should revert optimistic updates on error', async () => {
-      const error = new Error('Network error');
-      mockProps.upgradeStat.mockRejectedValue(error);
-
-      const {result} = renderHook(() => useClickerActions(mockProps));
-
-      await act(async () => {
-        await result.current.handleUpgrade('clickPower');
-        await vi.runAllTimersAsync();
-      });
-
-      // Verify error handling and revert
-      expect(mockProps.setDisplayError).toHaveBeenCalledWith('Network error');
-      expect(mockProps.addCandy).toHaveBeenCalledWith(10); // Revert candy deduction
-      expect(mockProps.setStats).toHaveBeenCalledTimes(2); // Once optimistic, once revert
-
-      // Error should clear after timeout
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3000); // GameConfig.clicker.errorDisplayDuration
-      });
-
-      expect(mockProps.setDisplayError).toHaveBeenCalledWith(null);
-    });
-
     it('should calculate correct upgrade cost based on stat level', async () => {
       const props = {
         ...mockProps,

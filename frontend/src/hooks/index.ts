@@ -5,3 +5,6 @@ export {useMobileDetection} from './useMobileDetection';
 export {useScrollLock} from './useScrollLock';
 export {usePreloading} from './usePreloading';
 export {usePokemonModal} from './usePokemonModal';
+export {useModal} from './useModal';
+export {useEscapeKey} from './useEscapeKey';
+export {useFocusReturn} from './useFocusReturn';

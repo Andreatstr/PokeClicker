@@ -86,7 +86,7 @@ describe('usePurchasePokemon hook', () => {
     expect(mockUseMutation).toHaveBeenCalledWith(
       expect.any(Object), // PURCHASE_POKEMON_MUTATION
       {
-        refetchQueries: ['Pokedex'],
+        update: expect.any(Function),
         optimisticResponse: expect.any(Function),
       }
     );
@@ -165,7 +165,7 @@ describe('usePurchasePokemon hook', () => {
     expect(result2.purchasePokemon.owned_pokemon_ids).toEqual([999]);
   });
 
-  it('should include refetchQueries option', () => {
+  it('should include cache update function', () => {
     const mockMutation = vi.fn();
     mockUseMutation.mockReturnValue([
       mockMutation,
@@ -184,7 +184,8 @@ describe('usePurchasePokemon hook', () => {
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
 
-    expect(options.refetchQueries).toEqual(['Pokedex']);
+    expect(options.update).toBeDefined();
+    expect(typeof options.update).toBe('function');
   });
 
   it('should return loading state', () => {

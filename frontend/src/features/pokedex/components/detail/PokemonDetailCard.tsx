@@ -41,9 +41,13 @@ export function PokemonDetailCard({
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
+  // This ensures the UI updates when the cache updates
+  const isOwned = ownedPokemonIds.includes(pokemon.id);
+
   // Fetch Pokemon upgrade data
   const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(
-    pokemon.isOwned ? pokemon.id : null
+    isOwned ? pokemon.id : null
   );
   const [upgradePokemonMutation, {loading: upgrading}] =
     useUpgradePokemonMutation();
@@ -116,10 +120,10 @@ export function PokemonDetailCard({
   const evolutionIds = [pokemon.id, ...(pokemon.evolution ?? [])];
 
   const primaryType = pokemon.types[0];
-  const typeColors = pokemon.isOwned
+  const typeColors = isOwned
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
-  const backgroundImageUrl = pokemon.isOwned
+  const backgroundImageUrl = isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
@@ -143,7 +147,7 @@ export function PokemonDetailCard({
         }}
       >
         {/* Owned Corner Tape Badge */}
-        {pokemon.isOwned && (
+        {isOwned && (
           <div className="absolute top-0 left-0 z-20 overflow-visible">
             <div className="relative w-0 h-0">
               {/* Main tape */}
@@ -164,11 +168,11 @@ export function PokemonDetailCard({
 
         {/* Pokemon Name */}
         <h2 className="text-sm md:text-base font-bold text-center mb-2 md:mb-3 capitalize">
-          {pokemon.isOwned ? pokemon.name : '???'}
+          {isOwned ? pokemon.name : '???'}
         </h2>
 
         {/* Type Badges */}
-        {pokemon.isOwned && (
+        {isOwned && (
           <div className="mb-2 md:mb-3">
             <PokemonTypeBadges
               types={pokemon.types}
@@ -189,12 +193,12 @@ export function PokemonDetailCard({
         >
           <img
             src={pokemon.sprite}
-            alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
+            alt={isOwned ? pokemon.name : 'Unknown Pokémon'}
             className="w-full h-full object-contain origin-center"
             loading="lazy"
             style={{
               imageRendering: 'pixelated',
-              filter: pokemon.isOwned ? 'none' : 'brightness(0)',
+              filter: isOwned ? 'none' : 'brightness(0)',
             }}
           />
         </figure>
@@ -244,7 +248,7 @@ export function PokemonDetailCard({
         )}
 
         {/* Purchase Button */}
-        {!pokemon.isOwned && (
+        {!isOwned && (
           <UnlockButton
             onClick={handlePurchase}
             cost={cost}

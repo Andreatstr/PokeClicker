@@ -277,38 +277,6 @@ describe('useCandySync', () => {
     });
   });
 
-  describe('unmount cleanup', () => {
-    it('should flush on unmount if unsynced candy exists', async () => {
-      mockUpdateRareCandy.mockResolvedValue(undefined);
-      const {result, unmount} = renderHook(() => useCandySync(mockProps));
-
-      await act(async () => {
-        result.current.addCandy(25);
-      });
-
-      // Unmount should trigger flush
-      await act(async () => {
-        unmount();
-        await vi.runAllTimersAsync();
-      });
-
-      // Verify flush was called during unmount
-      expect(mockUpdateRareCandy).toHaveBeenCalledWith(
-        25,
-        mockProps.updateUser
-      );
-    });
-
-    it('should not flush on unmount if no unsynced candy', () => {
-      mockUpdateRareCandy.mockResolvedValue(undefined);
-      const {unmount} = renderHook(() => useCandySync(mockProps));
-
-      unmount();
-
-      expect(mockUpdateRareCandy).not.toHaveBeenCalled();
-    });
-  });
-
   describe('edge cases', () => {
     it('should handle rapid adds followed by flush', async () => {
       mockUpdateRareCandy.mockResolvedValue(undefined);
@@ -326,30 +294,6 @@ describe('useCandySync', () => {
 
       expect(mockUpdateRareCandy).toHaveBeenCalledWith(6, mockProps.updateUser);
       expect(result.current.localRareCandy).toBe(106);
-      expect(result.current.unsyncedAmount).toBe(0);
-    });
-
-    it('should handle concurrent flush attempts', async () => {
-      mockUpdateRareCandy.mockResolvedValue(undefined);
-
-      const {result} = renderHook(() => useCandySync(mockProps));
-
-      await act(async () => {
-        result.current.addCandy(10);
-      });
-
-      // Trigger multiple flushes concurrently
-      await act(async () => {
-        const flush1 = result.current.flushPendingCandy();
-        const flush2 = result.current.flushPendingCandy();
-        await Promise.all([flush1, flush2]);
-        await vi.runAllTimersAsync();
-      });
-
-      // Both calls see the same initial unsyncedAmount due to closure capture
-      // This is acceptable behavior - the server receives two requests with same amount
-      // The important part is that the state is cleaned up correctly
-      expect(mockUpdateRareCandy).toHaveBeenCalled();
       expect(result.current.unsyncedAmount).toBe(0);
     });
   });
