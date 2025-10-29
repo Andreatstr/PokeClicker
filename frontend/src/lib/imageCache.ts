@@ -39,7 +39,6 @@ class ImageCacheService {
     }
   }
 
-
   private cleanupMemoryCache() {
     if (this.currentMemorySize <= this.maxMemorySize) return;
 
@@ -62,12 +61,15 @@ class ImageCacheService {
     });
   }
 
-
   async getImage(url: string): Promise<HTMLImageElement> {
     // Check memory cache first
     if (this.memoryCache.has(url)) {
       this.stats.hitCount++;
       this.updateStats();
+      logger.debug(
+        `Memory cache HIT for ${url.split('/').pop()}`,
+        'ImageCache'
+      );
       return this.memoryCache.get(url)!;
     }
 
@@ -77,6 +79,10 @@ class ImageCacheService {
       if (cachedBlob) {
         this.stats.hitCount++;
         this.updateStats();
+        logger.debug(
+          `IndexedDB cache HIT for ${url.split('/').pop()}`,
+          'ImageCache'
+        );
 
         const img = new Image() as CachedHTMLImageElement;
         img.src = URL.createObjectURL(cachedBlob);
@@ -97,6 +103,7 @@ class ImageCacheService {
     // Load from network with retry logic for rate limiting
     this.stats.missCount++;
     this.updateStats();
+    logger.info(`Network fetch for ${url.split('/').pop()}`, 'ImageCache');
 
     return this.fetchImageWithRetry(url);
   }
@@ -108,7 +115,7 @@ class ImageCacheService {
   ): Promise<HTMLImageElement> {
     try {
       const response = await fetch(url);
-      
+
       // Handle rate limiting (429) with exponential backoff
       if (response.status === 429 && retries > 0) {
         logger.warn(`Rate limited on ${url}, retrying in ${delay}ms...`);
@@ -163,7 +170,9 @@ class ImageCacheService {
 
       // Delay between requests (except for the last request)
       if (i < urls.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests));
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenRequests)
+        );
       }
     }
 
