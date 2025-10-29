@@ -108,6 +108,8 @@ class PreloadService {
   }
 
   async preloadForPokedex(): Promise<void> {
+    // Preload first page (20 Pokemon) + type backgrounds
+    // Batched loading prevents rate limits while improving sustainability
     await this.preloadAll({
       preloadCommonPokemon: true,
       preloadCommonTypes: true,

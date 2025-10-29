@@ -147,22 +147,27 @@ class ImageCacheService {
   }
 
   async preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-    // Rate limit: Process sequentially with 500ms delay to avoid GitHub rate limits
-    const delayBetweenRequests = 500;
+    // Batch loading strategy: Load in parallel batches to balance speed vs rate limits
+    // 10 sprites per batch with 1 second between batches = 60 sprites/min max
+    const batchSize = 10;
+    const delayBetweenBatches = 1000;
     const results: HTMLImageElement[] = [];
 
-    for (let i = 0; i < urls.length; i++) {
-      try {
-        const img = await this.getImage(urls[i]);
-        results.push(img);
-      } catch (error) {
-        console.warn(`Failed to preload image ${urls[i]}:`, error);
-        // Continue with other images even if one fails
-      }
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
+      
+      // Load batch in parallel
+      const batchPromises = batch.map(url => this.getImage(url).catch(err => {
+        console.warn(`Failed to preload image ${url}:`, err);
+        return null;
+      }));
 
-      // Delay between requests (except for the last request)
-      if (i < urls.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, delayBetweenRequests));
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults.filter((img): img is HTMLImageElement => img !== null));
+
+      // Delay between batches (except for the last batch)
+      if (i + batchSize < urls.length) {
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
       }
     }
 
