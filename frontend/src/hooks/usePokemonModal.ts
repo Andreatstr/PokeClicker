@@ -9,6 +9,7 @@ export function usePokemonModal() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
     null
   );
+  const [allPokemon, setAllPokemon] = useState<PokedexPokemon[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<
     number | null
@@ -34,8 +35,12 @@ export function usePokemonModal() {
     }
   }, [crossRegionData]);
 
-  const handlePokemonClick = (pokemon: PokedexPokemon) => {
+  const handlePokemonClick = (
+    pokemon: PokedexPokemon,
+    all: PokedexPokemon[]
+  ) => {
     setSelectedPokemon(pokemon);
+    setAllPokemon(all);
     setModalOpen(true);
   };
 
@@ -44,17 +49,34 @@ export function usePokemonModal() {
   };
 
   const handleSelectPokemon = (id: number) => {
-    setCrossRegionPokemonId(id);
+    // Check if the Pokemon is already in the current allPokemon array
+    const existingPokemon = allPokemon.find((p) => p.id === id);
+
+    if (existingPokemon) {
+      // Pokemon is already in the carousel, just update selectedPokemon
+      setSelectedPokemon(existingPokemon);
+    } else {
+      // Pokemon is not in the current list (different region/filter), fetch it
+      setCrossRegionPokemonId(id);
+    }
   };
 
   const handlePurchase = (id: number) => {
     if (selectedPokemon && selectedPokemon.id === id) {
-      setSelectedPokemon({...selectedPokemon, isOwned: true});
+      // Update selectedPokemon
+      const updatedPokemon = {...selectedPokemon, isOwned: true};
+      setSelectedPokemon(updatedPokemon);
+
+      // Also update the Pokemon in allPokemon array for carousel sync
+      setAllPokemon((prevAll) =>
+        prevAll.map((p) => (p.id === id ? {...p, isOwned: true} : p))
+      );
     }
   };
 
   return {
     selectedPokemon,
+    allPokemon,
     isModalOpen,
     handlePokemonClick,
     handleCloseModal,
