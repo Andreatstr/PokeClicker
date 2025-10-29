@@ -4,3 +4,4 @@ export {BackgroundMusic} from './BackgroundMusic';
 export {LoadingSpinner} from './LoadingSpinner';
 export {PaginationControls} from './PaginationControls';
 export {CandyCounterOverlay} from './CandyCounterOverlay';
+export {ErrorBanner} from './ErrorBanner';

@@ -85,26 +85,15 @@ export function getContrastColor(bgColor: string): string {
   return luminance > 0.5 ? 'text-black' : 'text-white';
 }
 
-export function getStatBarColors(isDarkMode: boolean) {
-  if (isDarkMode) {
-    return {
-      hp: {color: 'bg-red-300', upgradeColor: 'bg-red-600'},
-      attack: {color: 'bg-orange-300', upgradeColor: 'bg-orange-600'},
-      defense: {color: 'bg-blue-300', upgradeColor: 'bg-blue-600'},
-      spAttack: {color: 'bg-purple-300', upgradeColor: 'bg-purple-600'},
-      spDefense: {color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600'},
-      speed: {color: 'bg-pink-300', upgradeColor: 'bg-pink-600'},
-    };
-  } else {
-    return {
-      hp: {color: 'bg-red-300', upgradeColor: 'bg-red-600'},
-      attack: {color: 'bg-orange-300', upgradeColor: 'bg-orange-600'},
-      defense: {color: 'bg-blue-300', upgradeColor: 'bg-blue-600'},
-      spAttack: {color: 'bg-purple-300', upgradeColor: 'bg-purple-600'},
-      spDefense: {color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600'},
-      speed: {color: 'bg-pink-300', upgradeColor: 'bg-pink-600'},
-    };
-  }
+export function getStatBarColors() {
+  return {
+    hp: {color: 'bg-red-300', upgradeColor: 'bg-red-600'},
+    attack: {color: 'bg-orange-300', upgradeColor: 'bg-orange-600'},
+    defense: {color: 'bg-blue-300', upgradeColor: 'bg-blue-600'},
+    spAttack: {color: 'bg-purple-300', upgradeColor: 'bg-purple-600'},
+    spDefense: {color: 'bg-yellow-300', upgradeColor: 'bg-yellow-600'},
+    speed: {color: 'bg-pink-300', upgradeColor: 'bg-pink-600'},
+  };
 }
 
 export function getUnknownPokemonColors(isDarkMode: boolean) {

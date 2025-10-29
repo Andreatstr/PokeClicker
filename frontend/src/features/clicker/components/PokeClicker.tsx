@@ -3,18 +3,13 @@ import {useAuth} from '@features/auth';
 import {useGameMutations} from '../hooks/useGameMutations';
 import {useCandySync} from '../hooks/useCandySync';
 import {usePassiveIncome} from '../hooks/usePassiveIncome';
+import {useClickerActions} from '../hooks/useClickerActions';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
-import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
-import {getUpgradeCost} from '../utils/statDescriptions';
 import {GameBoyConsole} from './GameBoyConsole';
 import {RareCandyCounter} from './RareCandyCounter';
 import {UpgradesPanel} from './UpgradesPanel';
-
-interface Candy {
-  id: number;
-  x: number;
-  amount: number;
-}
+import {UnauthenticatedMessage} from './UnauthenticatedMessage';
+import {ErrorBanner} from '@/components';
 
 interface PokeClickerProps {
   isDarkMode?: boolean;
@@ -24,9 +19,6 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
   const {upgradeStat, loading} = useGameMutations();
 
-  // Visual state
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [candies, setCandies] = useState<Candy[]>([]);
   const [stats, setStats] = useState(
     user?.stats || {
       hp: 1,
@@ -49,6 +41,20 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     deductCandy,
     flushPendingCandy,
   } = useCandySync({user, isAuthenticated, updateUser});
+
+  // Clicker actions hook
+  const {isAnimating, candies, handleClick, handleUpgrade} = useClickerActions({
+    stats,
+    isAuthenticated,
+    addCandy,
+    deductCandy,
+    flushPendingCandy,
+    localRareCandy,
+    setDisplayError,
+    setStats,
+    upgradeStat,
+    updateUser,
+  });
 
   // Passive income hook
   usePassiveIncome({
@@ -82,132 +88,19 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     }
   }, [user]);
 
-  // Calculate candies per click
-  const getCandiesPerClick = () => {
-    return calculateCandyPerClick(stats);
-  };
-
-  // Handle click
-  const handleClick = () => {
-    if (!isAuthenticated) {
-      setDisplayError('Please log in to play the game');
-      return;
-    }
-
-    const candiesEarned = getCandiesPerClick();
-
-    // Update local candy immediately (optimistic UI)
-    addCandy(candiesEarned);
-    setIsAnimating(true);
-
-    // Add floating candy animation
-    const newCandy: Candy = {
-      id: Date.now() + Math.random(),
-      x: Math.random() * 60 + 20, // Random position between 20% and 80%
-      amount: candiesEarned,
-    };
-    setCandies((prev) => [...prev, newCandy]);
-
-    // Remove candy after animation
-    setTimeout(() => {
-      setCandies((prev) => prev.filter((c) => c.id !== newCandy.id));
-    }, 1000);
-
-    setTimeout(() => setIsAnimating(false), 150);
-  };
-
-  // Handle upgrade
-  const handleUpgrade = async (stat: keyof typeof stats) => {
-    if (!isAuthenticated) {
-      setDisplayError('Please log in to upgrade stats');
-      return;
-    }
-
-    const cost = getUpgradeCost(stat, stats[stat] || 1);
-
-    if (localRareCandy < cost) {
-      return; // Not enough candy
-    }
-
-    // Flush unsynced candy before upgrading to ensure server has latest amount
-    await flushPendingCandy();
-
-    // Optimistic updates (both candy and stats)
-    const oldStat = stats[stat];
-    deductCandy(cost);
-    setStats((prev) => ({
-      ...prev,
-      [stat]: (prev[stat] || 1) + 1,
-    }));
-
-    try {
-      const updatedUser = await upgradeStat(stat, updateUser);
-      if (updatedUser) {
-        // Server confirmed - update stats from server
-        setStats(updatedUser.stats);
-      }
-    } catch (err) {
-      console.error('Failed to upgrade stat:', err);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to upgrade stat. Please try again.';
-      setDisplayError(errorMessage);
-      // Revert optimistic updates
-      addCandy(cost);
-      setStats((prev) => ({...prev, [stat]: oldStat || 1}));
-      setTimeout(() => setDisplayError(null), 3000);
-    }
-  };
-
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
       {/* Display errors */}
       {displayError && (
-        <div
-          className="fixed top-4 right-4 px-4 py-2 rounded shadow-lg z-50"
-          style={{
-            backgroundColor: isDarkMode ? 'var(--destructive)' : '#ef4444',
-            color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
-          }}
-        >
-          {displayError}
-          <button
-            onClick={() => setDisplayError(null)}
-            className="ml-4 font-bold hover:opacity-70"
-            style={{
-              color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
-            }}
-          >
-            X
-          </button>
-        </div>
+        <ErrorBanner
+          message={displayError}
+          onDismiss={() => setDisplayError(null)}
+          isDarkMode={isDarkMode}
+        />
       )}
 
       {/* Show unauthenticated message */}
-      {!isAuthenticated && (
-        <div
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-8 rounded-lg shadow-xl z-50 text-center"
-          style={{
-            backgroundColor: 'var(--card)',
-            color: 'var(--foreground)',
-            border: '4px solid var(--border)',
-          }}
-        >
-          <h2
-            className="pixel-font text-2xl mb-4"
-            style={{color: 'var(--foreground)'}}
-          >
-            Please Log In
-          </h2>
-          <p
-            className="pixel-font text-sm mb-4"
-            style={{color: 'var(--foreground)'}}
-          >
-            You need to log in to play the clicker game and save your progress.
-          </p>
-        </div>
-      )}
+      {!isAuthenticated && <UnauthenticatedMessage />}
 
       {/* GameBoy Console */}
       <GameBoyConsole

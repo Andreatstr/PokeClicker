@@ -5,7 +5,6 @@ import type {PokemonStats} from '@features/pokedex';
 interface PokemonStatsDisplayProps {
   stats: PokemonStats;
   upgradeLevel?: number;
-  isDarkMode: boolean;
 }
 
 /**
@@ -15,9 +14,8 @@ interface PokemonStatsDisplayProps {
 export function PokemonStatsDisplay({
   stats,
   upgradeLevel = 1,
-  isDarkMode,
 }: PokemonStatsDisplayProps) {
-  const statColors = getStatBarColors(isDarkMode);
+  const statColors = getStatBarColors();
 
   // Calculate upgraded stats (3% per level)
   const statMultiplier = 1 + 0.03 * (upgradeLevel - 1);

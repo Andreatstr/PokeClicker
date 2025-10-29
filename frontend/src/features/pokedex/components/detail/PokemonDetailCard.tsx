@@ -201,7 +201,6 @@ export function PokemonDetailCard({
         <PokemonStatsDisplay
           stats={pokemon.stats!}
           upgradeLevel={upgradeLevel}
-          isDarkMode={isDarkMode}
         />
 
         {/* Upgrade Button */}
