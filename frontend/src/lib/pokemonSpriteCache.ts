@@ -9,6 +9,7 @@ interface PokemonSpriteUrls {
 }
 
 class PokemonSpriteCache {
+  // Use PokeAPI's CDN instead of GitHub raw - better rate limits
   private baseUrl =
     'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
   private officialArtworkUrl =
