@@ -6,7 +6,7 @@ import {
   usePurchasePokemon,
 } from '@features/pokedex';
 import {type User} from '@features/auth';
-import {useState} from 'react';
+import {useState, useRef} from 'react';
 import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
@@ -40,22 +40,37 @@ export function PokemonDetailCard({
 }: PokemonDetailCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
   // This ensures the UI updates when the cache updates
   const isOwned = ownedPokemonIds.includes(pokemon.id);
 
-  // Fetch Pokemon upgrade data
   const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(
     isOwned ? pokemon.id : null
   );
   const [upgradePokemonMutation, {loading: upgrading}] =
     useUpgradePokemonMutation();
 
-  // Handle purchase for THIS specific Pokemon
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Clear any existing error timeout to prevent race conditions
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     setError(null);
+
+    // Client-side validation: Check if user can afford the Pokemon
+    // This prevents the optimistic response from flashing the unlocked state
+    if (user && user.rare_candy < cost) {
+      setError('Not enough Rare Candy!');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
+      return;
+    }
 
     try {
       const result = await purchasePokemonMutation({
@@ -72,21 +87,38 @@ export function PokemonDetailCard({
       }
 
       onPurchaseComplete?.(pokemon.id);
-      // Trigger animation after successful purchase
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 800);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
       setError(errorMessage);
-      setTimeout(() => setError(null), 1200);
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
     }
   };
 
-  // Handle Pokemon upgrade
   const handleUpgrade = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Clear any existing error timeout to prevent race conditions
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     setError(null);
+
+    // Client-side validation: Check if user can afford the upgrade
+    // This prevents the optimistic response from causing UI inconsistencies
+    if (user && upgrade && user.rare_candy < upgrade.cost) {
+      setError('Not enough Rare Candy!');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
+      return;
+    }
 
     try {
       const result = await upgradePokemonMutation({
@@ -102,23 +134,22 @@ export function PokemonDetailCard({
         });
       }
 
-      // Refetch upgrade data to get new level and cost
       await refetchUpgrade();
 
-      // Trigger success animation
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 800);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to upgrade Pokémon';
       setError(errorMessage);
-      setTimeout(() => setError(null), 1200);
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
     }
   };
 
-  // Evolution IDs for the Pokemon
   const evolutionIds = [pokemon.id, ...(pokemon.evolution ?? [])];
-
   const primaryType = pokemon.types[0];
   const typeColors = isOwned
     ? getTypeColors(primaryType, isDarkMode)
@@ -127,8 +158,6 @@ export function PokemonDetailCard({
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
-
-  // Calculate upgrade level for stats display
   const upgradeLevel = upgrade?.level || 1;
 
   return (
@@ -210,7 +239,7 @@ export function PokemonDetailCard({
         />
 
         {/* Upgrade Button */}
-        {pokemon.isOwned && upgrade && (
+        {isOwned && upgrade && (
           <div className="w-full mb-2 md:mb-3">
             <Button
               onClick={handleUpgrade}

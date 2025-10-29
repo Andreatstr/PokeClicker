@@ -40,7 +40,6 @@ export function PokemonDetailModal({
   const {updateUser, user} = useAuth();
   const {data: userData} = useQuery(ME_QUERY);
 
-  // Use combined modal hook for focus management and escape key handling
   useModal(isOpen, onClose);
 
   if (!pokemon) return null;
@@ -59,7 +58,6 @@ export function PokemonDetailModal({
         }}
       >
         <DialogBody>
-          {/* Mobile drawer handle */}
           <div className="md:hidden flex justify-center mb-2">
             <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
           </div>

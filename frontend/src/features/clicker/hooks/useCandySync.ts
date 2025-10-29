@@ -24,31 +24,27 @@ export function useCandySync({
   // Local candy state - THIS is the source of truth for display!
   const [localRareCandy, setLocalRareCandy] = useState(user?.rare_candy || 0);
   const [unsyncedAmount, setUnsyncedAmount] = useState(0);
-  const unsyncedAmountRef = useRef(0); // Ref to track unsynced amount for cleanup
+  const unsyncedAmountRef = useRef(0);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncRef = useRef<number>(Date.now());
-
-  // Error state
   const [displayError, setDisplayError] = useState<string | null>(null);
 
-  // Initialize local candy from server when component mounts
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (user && !hasMountedRef.current) {
       setLocalRareCandy(user.rare_candy);
       setUnsyncedAmount(0);
-      unsyncedAmountRef.current = 0; // Keep ref in sync
+      unsyncedAmountRef.current = 0;
       hasMountedRef.current = true;
     }
   }, [user]);
 
-  // Flush pending candy to server
   const flushPendingCandy = useCallback(async () => {
     if (unsyncedAmount === 0 || !isAuthenticated) return;
 
     const amountToSync = unsyncedAmount;
-    setUnsyncedAmount(0); // Clear unsynced amount (we're syncing it now)
-    unsyncedAmountRef.current = 0; // Keep ref in sync
+    setUnsyncedAmount(0);
+    unsyncedAmountRef.current = 0;
     lastSyncRef.current = Date.now();
 
     if (batchTimerRef.current) {
@@ -57,16 +53,13 @@ export function useCandySync({
     }
 
     try {
-      // Send to server and update Apollo cache (for other pages)
       await updateRareCandy(amountToSync, updateUser);
-      // Success - server and cache are now in sync with our local state
     } catch (err) {
       logger.logError(err, 'SyncCandy');
       setDisplayError('Failed to save progress. Will retry...');
-      // Put the amount back in unsynced so it will be tried again
       setUnsyncedAmount((prev) => {
         const newAmount = prev + amountToSync;
-        unsyncedAmountRef.current = newAmount; // Keep ref in sync
+        unsyncedAmountRef.current = newAmount;
         return newAmount;
       });
       setTimeout(
@@ -76,7 +69,6 @@ export function useCandySync({
     }
   }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
 
-  // Batch update clicks based on configured thresholds
   useEffect(() => {
     if (unsyncedAmount === 0 || !isAuthenticated) return;
 
@@ -88,7 +80,6 @@ export function useCandySync({
     if (shouldFlush) {
       flushPendingCandy();
     } else if (!batchTimerRef.current) {
-      // Set a timer to flush after configured time threshold
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
       }, GameConfig.clicker.batchSyncTimeThreshold);
@@ -102,7 +93,6 @@ export function useCandySync({
     };
   }, [unsyncedAmount, isAuthenticated, flushPendingCandy]);
 
-  // Store flush function in ref for unmount cleanup
   const flushPendingCandyRef = useRef(flushPendingCandy);
   useEffect(() => {
     flushPendingCandyRef.current = flushPendingCandy;
@@ -112,24 +102,21 @@ export function useCandySync({
   // Empty deps - we want this to run ONLY on unmount, refs handle current values
   useEffect(() => {
     return () => {
-      // Use ref to get current unsynced amount and flush function (avoiding stale closure)
       if (unsyncedAmountRef.current > 0) {
         flushPendingCandyRef.current();
       }
     };
   }, []);
 
-  // Add candy locally (optimistic update)
   const addCandy = useCallback((amount: number) => {
     setLocalRareCandy((prev) => prev + amount);
     setUnsyncedAmount((prev) => {
       const newAmount = prev + amount;
-      unsyncedAmountRef.current = newAmount; // Keep ref in sync
+      unsyncedAmountRef.current = newAmount;
       return newAmount;
     });
   }, []);
 
-  // Deduct candy locally (for upgrades)
   const deductCandy = useCallback((amount: number) => {
     setLocalRareCandy((prev) => prev - amount);
   }, []);

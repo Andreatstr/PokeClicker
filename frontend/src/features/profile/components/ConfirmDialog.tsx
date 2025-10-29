@@ -26,7 +26,6 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Use combined modal hook for focus management and escape key handling
   useModal(isOpen, onClose);
 
   return (

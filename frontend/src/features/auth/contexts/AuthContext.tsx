@@ -16,7 +16,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
         // Validate and migrate user data to ensure stats exist
         if (parsedUser && typeof parsedUser === 'object') {
-          // Ensure stats object exists with all required fields
           if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
             logger.warn(
               'User data missing stats object, clearing localStorage',
@@ -27,7 +26,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
             return;
           }
 
-          // Ensure all required stat fields exist (backward compatibility)
           const defaultStats = {
             hp: 1,
             attack: 1,
@@ -60,18 +58,14 @@ export function AuthProvider({children}: {children: ReactNode}) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    // Clear cache and refetch all active queries with new auth context
     await apolloClient.resetStore();
   };
 
   const logout = async () => {
-    // Update React state first
     setToken(null);
     setUser(null);
-    // Remove token from storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    // Evict all ROOT_QUERY entries and garbage collect
     apolloClient.cache.evict({id: 'ROOT_QUERY'});
     apolloClient.cache.gc();
   };
