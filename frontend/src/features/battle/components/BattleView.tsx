@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';

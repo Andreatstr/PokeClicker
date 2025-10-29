@@ -3,7 +3,9 @@ import type {PokedexPokemon} from '@features/pokedex';
 import {usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
+// @ts-expect-error - focus-trap-react has type issues with verbatimModuleSyntax
+import FocusTrap from 'focus-trap-react';
 import {PokemonDetailCard} from './PokemonDetailCard';
 import {PokemonCarousel} from './PokemonCarousel';
 
@@ -38,6 +40,20 @@ export function PokemonDetailModal({
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const {data: userData} = useQuery(ME_QUERY);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  // Store the previously focused element when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+    } else {
+      // Return focus to the trigger element when modal closes
+      if (previousActiveElement.current) {
+        previousActiveElement.current.focus();
+        previousActiveElement.current = null;
+      }
+    }
+  }, [isOpen]);
 
   // Add Escape key handler to close modal
   useEffect(() => {
@@ -60,39 +76,49 @@ export function PokemonDetailModal({
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogBody>
-        {/* Mobile drawer handle */}
-        <div className="md:hidden flex justify-center mb-2">
-          <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
-        </div>
+      <FocusTrap
+        active={isOpen}
+        focusTrapOptions={{
+          allowOutsideClick: true,
+          escapeDeactivates: false, // We handle Escape in our own handler
+          initialFocus: false, // Let the dialog handle initial focus naturally
+          returnFocusOnDeactivate: false, // We handle this manually for better control
+        }}
+      >
+        <DialogBody>
+          {/* Mobile drawer handle */}
+          <div className="md:hidden flex justify-center mb-2">
+            <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
+          </div>
 
-        {allPokemon.length > 1 ? (
-          <PokemonCarousel
-            allPokemon={allPokemon}
-            currentPokemon={pokemon}
-            isDarkMode={isDarkMode}
-            onClose={onClose}
-            onSelectPokemon={onSelectPokemon}
-            onPurchaseComplete={onPurchase}
-            purchasePokemonMutation={purchasePokemon}
-            updateUser={updateUser}
-            user={user}
-            ownedPokemonIds={ownedPokemonIds}
-          />
-        ) : (
-          <PokemonDetailCard
-            pokemon={pokemon}
-            isDarkMode={isDarkMode}
-            onClose={onClose}
-            onSelectPokemon={onSelectPokemon}
-            onPurchaseComplete={onPurchase}
-            purchasePokemonMutation={purchasePokemon}
-            updateUser={updateUser}
-            user={user}
-            ownedPokemonIds={ownedPokemonIds}
-          />
-        )}
-      </DialogBody>
+          {allPokemon.length > 1 ? (
+            <PokemonCarousel
+              allPokemon={allPokemon}
+              currentPokemon={pokemon}
+              isDarkMode={isDarkMode}
+              onClose={onClose}
+              onSelectPokemon={onSelectPokemon}
+              onPurchaseComplete={onPurchase}
+              purchasePokemonMutation={purchasePokemon}
+              updateUser={updateUser}
+              user={user}
+              ownedPokemonIds={ownedPokemonIds}
+            />
+          ) : (
+            <PokemonDetailCard
+              pokemon={pokemon}
+              isDarkMode={isDarkMode}
+              onClose={onClose}
+              onSelectPokemon={onSelectPokemon}
+              onPurchaseComplete={onPurchase}
+              purchasePokemonMutation={purchasePokemon}
+              updateUser={updateUser}
+              user={user}
+              ownedPokemonIds={ownedPokemonIds}
+            />
+          )}
+        </DialogBody>
+      </FocusTrap>
     </Dialog>
   );
 }

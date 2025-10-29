@@ -1,5 +1,4 @@
 import {Suspense, lazy} from 'react';
-import {PokedexPage} from '@features/pokedex';
 import {
   Navbar,
   LoadingSpinner,
@@ -32,7 +31,12 @@ const ProfileDashboard = lazy(() =>
     default: module.ProfileDashboard,
   }))
 );
-import {PokemonMap} from '@features/map';
+const PokedexPage = lazy(() =>
+  import('@features/pokedex').then((module) => ({default: module.PokedexPage}))
+);
+const PokemonMap = lazy(() =>
+  import('@features/map').then((module) => ({default: module.PokemonMap}))
+);
 
 function App() {
   const {isDarkMode, toggleTheme} = useTheme();

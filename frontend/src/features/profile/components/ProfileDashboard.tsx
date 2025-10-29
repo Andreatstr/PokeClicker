@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
 import {PokemonDisplayButton} from './PokemonDisplayButton';
@@ -92,7 +92,8 @@ export function ProfileDashboard({
               <strong>POKEMON OWNED:</strong> {user.owned_pokemon_ids.length}
             </p>
             <p>
-              <strong>TRAINER SINCE:</strong> {formatTrainerSince(user.created_at)}
+              <strong>TRAINER SINCE:</strong>{' '}
+              {formatTrainerSince(user.created_at)}
             </p>
           </div>
         </div>

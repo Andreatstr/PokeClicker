@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {logger} from '@/lib/logger';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 
 // Constants
 const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
@@ -76,7 +76,9 @@ export function useMapMovement(
     if (saved) {
       try {
         const restored = JSON.parse(saved);
-        logger.info(`[MapMovement] Restored position for user ${user._id}: (${restored.x}, ${restored.y})`);
+        logger.info(
+          `[MapMovement] Restored position for user ${user._id}: (${restored.x}, ${restored.y})`
+        );
         return restored;
       } catch (e) {
         logger.logError(e, 'RestorePlayerPosition');
@@ -110,7 +112,9 @@ export function useMapMovement(
       if (saved) {
         try {
           const restored = JSON.parse(saved);
-          logger.info(`[MapMovement] User changed, restoring position: (${restored.x}, ${restored.y})`);
+          logger.info(
+            `[MapMovement] User changed, restoring position: (${restored.x}, ${restored.y})`
+          );
           setWorldPosition(restored);
         } catch (e) {
           logger.logError(e, 'RestorePlayerPosition');
@@ -119,7 +123,9 @@ export function useMapMovement(
         }
       } else {
         // New user - start at center
-        logger.info(`[MapMovement] No saved position for user ${user._id}, starting at center`);
+        logger.info(
+          `[MapMovement] No saved position for user ${user._id}, starting at center`
+        );
         setWorldPosition({x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2});
       }
     }

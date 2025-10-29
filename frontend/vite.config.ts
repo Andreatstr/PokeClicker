@@ -15,6 +15,24 @@ export default defineConfig({
       brotliSize: true,
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          apollo: ['@apollo/client', 'graphql'],
+          'react-vendor': ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          'ui-vendor': [
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-label',
+            '@radix-ui/react-menubar',
+            '@radix-ui/react-select',
+            '@radix-ui/react-slot',
+          ],
+        },
+      },
+    },
+  },
   server: {
     host: true,
     allowedHosts: [

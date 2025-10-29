@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {useMutation} from '@apollo/client';
 import {Button} from '@ui/pixelact';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 import {
   LOGIN_MUTATION,
   SIGNUP_MUTATION,

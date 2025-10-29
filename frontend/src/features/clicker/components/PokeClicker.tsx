@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {logger} from '@/lib/logger';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '../hooks/useGameMutations';
 import {useCandySync} from '../hooks/useCandySync';
 import {usePassiveIncome} from '../hooks/usePassiveIncome';
