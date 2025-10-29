@@ -36,6 +36,8 @@ export function usePurchasePokemon() {
                 spAttack: 1,
                 spDefense: 1,
                 speed: 1,
+                clickPower: 1,
+                passiveIncome: 0,
               },
             },
           };
@@ -65,6 +67,8 @@ export function usePurchasePokemon() {
                   spAttack: user.stats.spAttack,
                   spDefense: user.stats.spDefense,
                   speed: user.stats.speed,
+                  clickPower: user.stats.clickPower ?? 1,
+                  passiveIncome: user.stats.passiveIncome ?? 0,
                 }
               : {
                   __typename: 'UserStats',
@@ -74,6 +78,8 @@ export function usePurchasePokemon() {
                   spAttack: 1,
                   spDefense: 1,
                   speed: 1,
+                  clickPower: 1,
+                  passiveIncome: 0,
                 },
           },
         };

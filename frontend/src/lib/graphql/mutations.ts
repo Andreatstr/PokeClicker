@@ -76,11 +76,10 @@ export const UPGRADE_STAT_MUTATION = gql`
  * Mutation to purchase a Pokemon with rare candy
  */
 export const PURCHASE_POKEMON_MUTATION = gql`
+  ${USER_FRAGMENT}
   mutation PurchasePokemon($pokemonId: Int!) {
     purchasePokemon(pokemonId: $pokemonId) {
-      _id
-      rare_candy
-      owned_pokemon_ids
+      ...UserFields
     }
   }
 `;
@@ -89,10 +88,10 @@ export const PURCHASE_POKEMON_MUTATION = gql`
  * Mutation to catch a Pokemon (from map/battle)
  */
 export const CATCH_POKEMON_MUTATION = gql`
+  ${USER_FRAGMENT}
   mutation CatchPokemon($pokemonId: Int!) {
     catchPokemon(pokemonId: $pokemonId) {
-      _id
-      owned_pokemon_ids
+      ...UserFields
     }
   }
 `;

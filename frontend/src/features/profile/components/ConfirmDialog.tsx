@@ -1,7 +1,6 @@
 import {Dialog, DialogBody} from '@ui/pixelact';
 import {useEffect, useRef} from 'react';
-// @ts-expect-error - focus-trap-react has type issues with verbatimModuleSyntax
-import FocusTrap from 'focus-trap-react';
+import {FocusTrap} from 'focus-trap-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;

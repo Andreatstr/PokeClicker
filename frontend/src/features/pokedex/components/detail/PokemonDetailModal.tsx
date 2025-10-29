@@ -4,8 +4,7 @@ import {usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {useEffect, useRef} from 'react';
-// @ts-expect-error - focus-trap-react has type issues with verbatimModuleSyntax
-import FocusTrap from 'focus-trap-react';
+import {FocusTrap} from 'focus-trap-react';
 import {PokemonDetailCard} from './PokemonDetailCard';
 import {PokemonCarousel} from './PokemonCarousel';
 

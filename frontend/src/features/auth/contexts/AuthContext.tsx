@@ -18,7 +18,10 @@ export function AuthProvider({children}: {children: ReactNode}) {
         if (parsedUser && typeof parsedUser === 'object') {
           // Ensure stats object exists with all required fields
           if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
-            logger.logWarning('User data missing stats object, clearing localStorage');
+            logger.warn(
+              'User data missing stats object, clearing localStorage',
+              'AuthContext'
+            );
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             return;
