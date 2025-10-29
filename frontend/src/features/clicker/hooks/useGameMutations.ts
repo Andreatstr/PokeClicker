@@ -36,11 +36,11 @@ export function useGameMutations() {
         variables: {amount},
       });
 
-      if (result.data?.updateRareCandy && onCompleted) {
+      if (result?.data?.updateRareCandy && onCompleted) {
         onCompleted(result.data.updateRareCandy);
       }
 
-      return result.data?.updateRareCandy;
+      return result?.data?.updateRareCandy;
     } catch (error) {
       console.error('Failed to update rare candy:', error);
       throw error;
@@ -56,11 +56,11 @@ export function useGameMutations() {
         variables: {stat},
       });
 
-      if (result.data?.upgradeStat && onCompleted) {
+      if (result?.data?.upgradeStat && onCompleted) {
         onCompleted(result.data.upgradeStat);
       }
 
-      return result.data?.upgradeStat;
+      return result?.data?.upgradeStat;
     } catch (error) {
       console.error('Failed to upgrade stat:', error);
       throw error;
