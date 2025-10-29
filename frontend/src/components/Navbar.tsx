@@ -60,7 +60,7 @@ export function Navbar({
               className="text-xs md:text-sm"
               onClick={() => onPageChange('clicker')}
             >
-              PokeClicker
+              Clicker
             </Button>
             <Button
               className="text-xs md:text-sm"
@@ -72,7 +72,7 @@ export function Navbar({
               className="text-xs md:text-sm"
               onClick={() => onPageChange('map')}
             >
-              Map
+              World
             </Button>
 
             <Button onClick={onToggleTheme} className="p-2">
@@ -127,7 +127,7 @@ export function Navbar({
                 className="w-full text-sm"
                 onClick={() => onPageChange('clicker')}
               >
-                PokeClicker
+                Clicker
               </Button>
               <Button
                 className="w-full text-sm"
@@ -139,7 +139,7 @@ export function Navbar({
                 className="w-full text-sm"
                 onClick={() => onPageChange('map')}
               >
-                Map
+                World
               </Button>
             </div>
 

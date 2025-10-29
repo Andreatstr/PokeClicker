@@ -337,7 +337,7 @@ export const resolvers = {
           });
 
           if (user && Array.isArray(user.owned_pokemon_ids)) {
-            ownedPokemonIds = user.owned_pokemon_ids.map((v: number | string) => Number(v)).filter(Number.isFinite);
+            ownedPokemonIds = user.owned_pokemon_ids.map((v: unknown) => Number(v)).filter(Number.isFinite);
           }
         } catch (error) {
           console.error('Error fetching user owned Pokemon:', error);
