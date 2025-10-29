@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
 
@@ -47,9 +48,13 @@ export function TiledMapView({
     wildPokemon
   );
 
+  const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
+    return user && 'owned_pokemon_ids' in user ? user.owned_pokemon_ids.length <= 3 : false;
+  });
+
   return (
     <>
-      {/* Tiled Map Background */}
+      {/* Map Background */}
       <div className="absolute inset-0 overflow-hidden">
         {visibleTiles.map((tile) => {
           const key = `${tile.x}_${tile.y}`;
@@ -74,7 +79,7 @@ export function TiledMapView({
           );
         })}
 
-        {/* Wild Pokemon - positioned absolutely on the map */}
+        {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
           <img
             key={`${visiblePoke.pokemon.id}-${index}`}
@@ -95,14 +100,14 @@ export function TiledMapView({
         ))}
       </div>
 
-      {/* Optional subtle loading indicator (non-blocking) */}
+      {/* Loading indicator */}
       {isLoading && (
         <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-40 text-white px-1 py-0.5 pixel-font text-[10px] z-10 pointer-events-none opacity-50">
           •
         </div>
       )}
 
-      {/* Character Sprite - stays centered in viewport */}
+      {/* Character Sprite */}
       <div
         className="absolute"
         style={{
@@ -119,7 +124,37 @@ export function TiledMapView({
         }}
       />
 
-      {/* Battle Prompt Popup */}
+      {/* Welcome CTA */}
+      {!nearbyPokemon && showWelcomeCTA && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
+          <div
+            className={`pixel-font text-center px-4 py-3 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+              isDarkMode
+                ? 'bg-gray-800 text-white border-gray-600'
+                : 'bg-white text-black border-black'
+            }`}
+          >
+            <div className="text-sm md:text-base font-bold mb-2">
+              Wild Pokémon are out there!
+            </div>
+            <div className="text-xs md:text-sm opacity-90 mb-3">
+              Explore, battle, and catch 'em all!
+            </div>
+            <button
+              onClick={() => setShowWelcomeCTA(false)}
+              className={`px-4 py-1 text-xs font-bold border rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] ${
+                isDarkMode
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500'
+                  : 'bg-blue-500 hover:bg-blue-400 text-white border-blue-400'
+              }`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Battle Prompt */}
       {nearbyPokemon && (
         <div
           className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 z-30 w-[94%] max-w-[640px]"
@@ -158,7 +193,7 @@ export function TiledMapView({
         </div>
       )}
 
-      {/* Home Button (Bottom Left on mobile, Top Left on desktop) */}
+      {/* Home Button */}
       <div className="absolute bottom-2 left-2 md:top-2 md:bottom-auto z-20">
         <button
           onClick={onResetToHome}
@@ -171,7 +206,7 @@ export function TiledMapView({
         </button>
       </div>
 
-      {/* Rare Candy Counter (Top Right) */}
+      {/* Rare Candy Counter */}
       <div className="absolute top-2 right-2 z-20">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)]">
           <img
