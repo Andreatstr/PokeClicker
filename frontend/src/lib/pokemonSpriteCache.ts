@@ -36,7 +36,7 @@ class PokemonSpriteCache {
 
   async getPokemonSprite(
     pokemonId: number,
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): Promise<HTMLImageElement> {
     const urls = this.getSpriteUrls(pokemonId);
     const url = urls[variant];
@@ -54,7 +54,7 @@ class PokemonSpriteCache {
 
   async preloadPokemonSprites(
     pokemonIds: number[],
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): Promise<HTMLImageElement[]> {
     const urls = pokemonIds.map((id) => this.getSpriteUrls(id)[variant]);
     return imageCache.preloadImages(urls);
@@ -65,7 +65,7 @@ class PokemonSpriteCache {
 
     pokemonIds.forEach((id) => {
       const urls = this.getSpriteUrls(id);
-      allUrls.push(urls.officialArtwork, urls.frontDefault, urls.frontShiny);
+      allUrls.push(urls.frontDefault);
     });
 
     await imageCache.preloadImages(allUrls);
@@ -74,7 +74,7 @@ class PokemonSpriteCache {
   // Preload common Pokemon sprites (first 40 Pokemon - 2 pages worth)
   async preloadCommonPokemon(): Promise<void> {
     const commonIds = Array.from({length: 40}, (_, i) => i + 1);
-    await this.preloadPokemonSprites(commonIds, 'officialArtwork');
+    await this.preloadPokemonSprites(commonIds, 'frontDefault');
   }
 
   // Preload Pokemon sprites for a specific range
@@ -83,13 +83,13 @@ class PokemonSpriteCache {
       {length: endId - startId + 1},
       (_, i) => startId + i
     );
-    await this.preloadPokemonSprites(ids, 'officialArtwork');
+    await this.preloadPokemonSprites(ids, 'frontDefault');
   }
 
   // Get cached sprite URL without loading the image
   getPokemonSpriteUrl(
     pokemonId: number,
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): string {
     return this.getSpriteUrls(pokemonId)[variant];
   }

@@ -54,10 +54,7 @@ async function fetchPokemonMetadata(id: number) {
     }
     const data = (await response.json()) as PokeAPIPokemon;
 
-    const sprite =
-      data.sprites.other?.['official-artwork']?.front_default ||
-      data.sprites.front_default ||
-      '';
+    const sprite = data.sprites.front_default || '';
 
     return {
       id: data.id,
