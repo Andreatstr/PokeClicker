@@ -61,105 +61,109 @@ export function UpgradesPanel({
         </h2>
       </div>
       <div className="flex flex-col gap-3">
-        {/* New simplified 2-upgrade system */}
-        {stats && (['clickPower', 'passiveIncome'] as const).map((key) => {
-          const value = stats[key] || 1;
-          const cost = getUpgradeCost(key, value);
-          const descriptionData = getStatDescription(key, stats);
-          return (
-            <div
-              key={key}
-              className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
-              style={{
-                background: isDarkMode
-                  ? 'linear-gradient(to bottom right, #1f2937, #111827)'
-                  : 'linear-gradient(to bottom right, var(--card), #e0deda)',
-                borderColor: isDarkMode ? '#374151' : '#bbb7b2',
-              }}
-            >
-              <div className="flex items-center justify-between gap-4 mb-1">
-                <div className="flex items-center gap-3 flex-1">
-                  <div
-                    className="w-2 h-8 border"
-                    style={{
-                      backgroundColor:
-                        key === 'clickPower'
-                          ? isDarkMode
-                            ? '#ea580c' // Orange for click power
-                            : '#f97316'
-                          : isDarkMode
-                            ? '#16a34a' // Green for passive income
-                            : '#22c55e',
-                      borderColor: isDarkMode ? '#374151' : '#bbb7b2',
-                    }}
-                  ></div>
-                  <div className="flex flex-col">
-                    <span
-                      className="pixel-font text-xs"
+        {stats &&
+          (['clickPower', 'passiveIncome'] as const).map((key) => {
+            const value = stats[key] || 1;
+            const cost = getUpgradeCost(key, value);
+            const descriptionData = getStatDescription(key, stats);
+            return (
+              <div
+                key={key}
+                className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
+                style={{
+                  background: isDarkMode
+                    ? 'linear-gradient(to bottom right, #1f2937, #111827)'
+                    : 'linear-gradient(to bottom right, var(--card), #e0deda)',
+                  borderColor: isDarkMode ? '#374151' : '#bbb7b2',
+                }}
+              >
+                <div className="flex items-center justify-between gap-4 mb-1">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div
+                      className="w-2 h-8 border"
                       style={{
-                        color: isDarkMode
-                          ? 'var(--muted-foreground)'
-                          : 'var(--muted-foreground)',
+                        backgroundColor:
+                          key === 'clickPower'
+                            ? isDarkMode
+                              ? '#ea580c' // Orange for click power
+                              : '#f97316'
+                            : isDarkMode
+                              ? '#16a34a' // Green for passive income
+                              : '#22c55e',
+                        borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                       }}
-                    >
-                      {key === 'clickPower' ? 'Click Power' : 'Passive Income'}
-                    </span>
-                    <span
-                      className="pixel-font text-lg font-bold"
-                      style={{
-                        color: isDarkMode
-                          ? 'var(--foreground)'
-                          : 'var(--foreground)',
-                      }}
-                    >
-                      LV {String(value)}
-                    </span>
+                    ></div>
+                    <div className="flex flex-col">
+                      <span
+                        className="pixel-font text-xs"
+                        style={{
+                          color: isDarkMode
+                            ? 'var(--muted-foreground)'
+                            : 'var(--muted-foreground)',
+                        }}
+                      >
+                        {key === 'clickPower'
+                          ? 'Click Power'
+                          : 'Passive Income'}
+                      </span>
+                      <span
+                        className="pixel-font text-lg font-bold"
+                        style={{
+                          color: isDarkMode
+                            ? 'var(--foreground)'
+                            : 'var(--foreground)',
+                        }}
+                      >
+                        LV {String(value)}
+                      </span>
+                    </div>
                   </div>
+                  <Button
+                    size="sm"
+                    onClick={() => onUpgrade(key)}
+                    disabled={
+                      !isAuthenticated || currentCandy < cost || isLoading
+                    }
+                    bgColor={
+                      key === 'clickPower'
+                        ? isDarkMode
+                          ? '#ea580c' // Orange for click power
+                          : '#fb923c'
+                        : isDarkMode
+                          ? '#16a34a' // Green for passive income
+                          : '#4ade80'
+                    }
+                    className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                      ↑ {formatNumber(cost)}
+                    </span>
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => onUpgrade(key)}
-                  disabled={!isAuthenticated || currentCandy < cost || isLoading}
-                  bgColor={
-                    key === 'clickPower'
-                      ? isDarkMode
-                        ? '#ea580c' // Orange for click power
-                        : '#fb923c'
-                      : isDarkMode
-                        ? '#16a34a' // Green for passive income
-                        : '#4ade80'
-                  }
-                  className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                    ↑ {formatNumber(cost)}
+                <div className="ml-5 flex items-center gap-1">
+                  <span
+                    className="pixel-font text-xs"
+                    style={{
+                      color: isDarkMode
+                        ? 'var(--foreground)'
+                        : 'var(--foreground)',
+                    }}
+                  >
+                    {typeof descriptionData === 'object' &&
+                    'current' in descriptionData ? (
+                      <>
+                        {descriptionData.current}
+                        <ArrowRightIcon size={14} className="inline mx-1" />
+                        {descriptionData.next} {descriptionData.unit}
+                      </>
+                    ) : (
+                      descriptionData
+                    )}
                   </span>
-                </Button>
+                </div>
               </div>
-              <div className="ml-5 flex items-center gap-1">
-                <span
-                  className="pixel-font text-xs"
-                  style={{
-                    color: isDarkMode
-                      ? 'var(--foreground)'
-                      : 'var(--foreground)',
-                  }}
-                >
-                  {typeof descriptionData === 'object' &&
-                  'current' in descriptionData ? (
-                    <>
-                      {descriptionData.current}
-                      <ArrowRightIcon size={14} className="inline mx-1" />
-                      {descriptionData.next} {descriptionData.unit}
-                    </>
-                  ) : (
-                    descriptionData
-                  )}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </Card>
   );

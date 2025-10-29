@@ -23,7 +23,6 @@ export function usePassiveIncome({
   onIncomeGenerated,
 }: UsePassiveIncomeProps) {
   useEffect(() => {
-    // Guard against undefined stats or unauthenticated state
     if (!isAuthenticated || !stats) return;
 
     let passiveIncomeAmount = 0;
@@ -42,7 +41,7 @@ export function usePassiveIncome({
     if (passiveIncomeAmount > 0) {
       const interval = setInterval(() => {
         onIncomeGenerated(passiveIncomeAmount);
-      }, 1000); // Every second
+      }, 1000);
 
       return () => clearInterval(interval);
     }
