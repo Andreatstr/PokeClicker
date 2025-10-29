@@ -23,7 +23,8 @@ export function usePassiveIncome({
   onIncomeGenerated,
 }: UsePassiveIncomeProps) {
   useEffect(() => {
-    if (!isAuthenticated) return;
+    // Guard against undefined stats or unauthenticated state
+    if (!isAuthenticated || !stats) return;
 
     let passiveIncomeAmount = 0;
 
@@ -45,12 +46,5 @@ export function usePassiveIncome({
 
       return () => clearInterval(interval);
     }
-  }, [
-    stats.hp,
-    stats.defense,
-    stats.passiveIncome,
-    stats.clickPower,
-    isAuthenticated,
-    onIncomeGenerated,
-  ]);
+  }, [stats, isAuthenticated, onIncomeGenerated]);
 }

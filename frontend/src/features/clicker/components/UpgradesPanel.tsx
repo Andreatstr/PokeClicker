@@ -62,7 +62,7 @@ export function UpgradesPanel({
       </div>
       <div className="flex flex-col gap-3">
         {/* New simplified 2-upgrade system */}
-        {(['clickPower', 'passiveIncome'] as const).map((key) => {
+        {stats && (['clickPower', 'passiveIncome'] as const).map((key) => {
           const value = stats[key] || 1;
           const cost = getUpgradeCost(key, value);
           const descriptionData = getStatDescription(key, stats);

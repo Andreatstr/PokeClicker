@@ -33,7 +33,12 @@ function sanitizeUserForClient(
     username: userDoc.username,
     rare_candy: userDoc.rare_candy ?? 0,
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
-    stats: userDoc.stats,
+    stats: {
+      ...userDoc.stats,
+      // Ensure new stats exist with defaults for backward compatibility
+      clickPower: userDoc.stats.clickPower ?? 1,
+      passiveIncome: userDoc.stats.passiveIncome ?? 1,
+    },
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
     selected_pokemon_id: userDoc.selected_pokemon_id,

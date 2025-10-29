@@ -8,6 +8,9 @@ export type {PokedexFilterContextValue} from './contexts/PokedexFilterContext';
 // Components - Page
 export {PokedexPage} from './components/PokedexPage';
 
+// Components - Grid
+export {PokemonGrid} from './components/grid/PokemonGrid';
+
 // Components - Card
 export {PokemonCard} from './components/card/PokemonCard';
 

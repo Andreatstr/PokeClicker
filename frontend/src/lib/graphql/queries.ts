@@ -131,6 +131,33 @@ export const POKEMON_UPGRADE_QUERY = gql`
 // ============================================================================
 
 /**
+ * Query to fetch current authenticated user's full profile
+ */
+export const ME_QUERY = gql`
+  query Me {
+    me {
+      _id
+      username
+      rare_candy
+      created_at
+      stats {
+        hp
+        attack
+        defense
+        spAttack
+        spDefense
+        speed
+        clickPower
+        passiveIncome
+      }
+      owned_pokemon_ids
+      favorite_pokemon_id
+      selected_pokemon_id
+    }
+  }
+`;
+
+/**
  * Query to fetch current user health check (used for auth verification)
  */
 export const HEALTH_QUERY = gql`

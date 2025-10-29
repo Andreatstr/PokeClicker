@@ -33,6 +33,13 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     }
   );
 
+  // Sync stats when user data loads
+  useEffect(() => {
+    if (user?.stats) {
+      setStats(user.stats);
+    }
+  }, [user?.stats]);
+
   // Candy sync hook
   const {
     localRareCandy,

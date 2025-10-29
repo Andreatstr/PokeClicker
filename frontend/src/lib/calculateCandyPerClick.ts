@@ -11,7 +11,12 @@ export function calculateCandyPerClick(stats: {
   speed: number;
   clickPower?: number; // New simplified stat
   passiveIncome?: number;
-}): number {
+} | undefined): number {
+  // Guard against undefined stats
+  if (!stats) {
+    return 1; // Minimum fallback value
+  }
+
   // New simplified system: Use clickPower if available
   if (stats.clickPower && stats.clickPower > 0) {
     // Exponential scaling: 1.75^(clickPower-1)
@@ -19,7 +24,7 @@ export function calculateCandyPerClick(stats: {
   }
 
   // Legacy fallback: Use old attack + spAttack formula for backwards compatibility
-  const baseCandy = Math.floor(Math.pow(1.75, stats.attack - 1));
-  const spAttackBonus = Math.floor(0.5 * Math.pow(1.5, stats.spAttack - 1));
+  const baseCandy = Math.floor(Math.pow(1.75, (stats.attack || 1) - 1));
+  const spAttackBonus = Math.floor(0.5 * Math.pow(1.5, (stats.spAttack || 1) - 1));
   return baseCandy + spAttackBonus;
 }
