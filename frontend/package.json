@@ -21,6 +21,7 @@
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
     "test:integration": "vitest run --reporter=verbose src/__tests__",
     "split-tiles": "npx tsx scripts/split-tiles.ts",
+    "analyze": "vite build && start dist/stats.html",
     "prepare": "husky"
   },
   "dependencies": {
@@ -70,6 +71,7 @@
     "lint-staged": "^16.2.6",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.44.0",
