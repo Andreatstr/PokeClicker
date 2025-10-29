@@ -9,7 +9,7 @@ export class NavbarPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.clickerTab = page.getByRole("button", { name: /pokeclicker/i });
+    this.clickerTab = page.getByRole("button", { name: /clicker/i });
     this.pokedexTab = page.getByRole("button", { name: /pokedex/i });
     this.themeToggle = page
       .locator("button")
