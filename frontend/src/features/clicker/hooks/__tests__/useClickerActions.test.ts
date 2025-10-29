@@ -1,5 +1,5 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
-import {renderHook, act, waitFor} from '@testing-library/react';
+import {renderHook, act} from '@testing-library/react';
 import {useClickerActions} from '../useClickerActions';
 import type {User} from '@features/auth';
 
@@ -203,17 +203,17 @@ describe('useClickerActions', () => {
 
       await act(async () => {
         await result.current.handleUpgrade('clickPower');
+        await vi.runAllTimersAsync();
       });
 
-      await waitFor(() => {
-        expect(mockProps.setDisplayError).toHaveBeenCalledWith('Network error');
-        expect(mockProps.addCandy).toHaveBeenCalledWith(10); // Revert candy deduction
-        expect(mockProps.setStats).toHaveBeenCalledTimes(2); // Once optimistic, once revert
-      });
+      // Verify error handling and revert
+      expect(mockProps.setDisplayError).toHaveBeenCalledWith('Network error');
+      expect(mockProps.addCandy).toHaveBeenCalledWith(10); // Revert candy deduction
+      expect(mockProps.setStats).toHaveBeenCalledTimes(2); // Once optimistic, once revert
 
       // Error should clear after timeout
-      act(() => {
-        vi.advanceTimersByTime(3000); // GameConfig.clicker.errorDisplayDuration
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3000); // GameConfig.clicker.errorDisplayDuration
       });
 
       expect(mockProps.setDisplayError).toHaveBeenCalledWith(null);
@@ -245,8 +245,8 @@ describe('useClickerActions', () => {
         await result.current.handleUpgrade('clickPower');
       });
 
-      // Cost for level 3->4 = Math.floor(10 * 2.5^2) = 62
-      expect(mockProps.deductCandy).toHaveBeenCalledWith(62);
+      // Cost for level 3->4 = Math.floor(10 * 2.8^2) = 78 (clickPower uses 2.8 multiplier)
+      expect(mockProps.deductCandy).toHaveBeenCalledWith(78);
     });
 
     it('should flush pending candy before upgrading', async () => {

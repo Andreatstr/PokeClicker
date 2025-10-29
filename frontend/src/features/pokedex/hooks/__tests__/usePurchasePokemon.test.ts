@@ -2,6 +2,7 @@ import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {renderHook} from '@testing-library/react';
 import {ApolloError} from '@apollo/client';
 import {usePurchasePokemon} from '../usePurchasePokemon';
+import {AuthProvider} from '../../../auth/contexts/AuthContext';
 
 // Mock Apollo Client useMutation
 vi.mock('@apollo/client', () => ({
@@ -34,6 +35,11 @@ vi.mock('@apollo/client', () => ({
 const {useMutation} = await import('@apollo/client');
 const mockUseMutation = useMutation as any;
 
+// Test wrapper with AuthProvider
+const Wrapper = ({children}: {children: React.ReactNode}) => {
+  return AuthProvider({children});
+};
+
 describe('usePurchasePokemon hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -53,7 +59,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    const {result} = renderHook(() => usePurchasePokemon());
+    const {result} = renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     expect(result.current).toHaveLength(2);
     expect(result.current[0]).toBe(mockMutation);
@@ -75,12 +81,12 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    renderHook(() => usePurchasePokemon());
+    renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     expect(mockUseMutation).toHaveBeenCalledWith(
       expect.any(Object), // PURCHASE_POKEMON_MUTATION
       {
-        refetchQueries: ['Pokedex', 'Me'],
+        refetchQueries: ['Pokedex'],
         optimisticResponse: expect.any(Function),
       }
     );
@@ -100,7 +106,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    renderHook(() => usePurchasePokemon());
+    renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
@@ -144,7 +150,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    renderHook(() => usePurchasePokemon());
+    renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
@@ -173,12 +179,12 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    renderHook(() => usePurchasePokemon());
+    renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
 
-    expect(options.refetchQueries).toEqual(['Pokedex', 'Me']);
+    expect(options.refetchQueries).toEqual(['Pokedex']);
   });
 
   it('should return loading state', () => {
@@ -195,7 +201,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    const {result} = renderHook(() => usePurchasePokemon());
+    const {result} = renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     expect(result.current[1].loading).toBe(true);
   });
@@ -222,7 +228,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    const {result} = renderHook(() => usePurchasePokemon());
+    const {result} = renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     expect(result.current[1].error).toBe(mockError);
   });
@@ -241,7 +247,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    const {result} = renderHook(() => usePurchasePokemon());
+    const {result} = renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     expect(typeof result.current[0]).toBe('function');
     expect(result.current[0]).toBe(mockMutation);
@@ -261,7 +267,7 @@ describe('usePurchasePokemon hook', () => {
       },
     ]);
 
-    renderHook(() => usePurchasePokemon());
+    renderHook(() => usePurchasePokemon(), {wrapper: Wrapper});
 
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
