@@ -61,7 +61,8 @@ export function PokemonDetailCard({
       // Immediately update AuthContext with the server response
       if (result.data?.purchasePokemon && user) {
         updateUser({
-          ...result.data.purchasePokemon,
+          ...user, // Keep existing user data (stats, etc.)
+          ...result.data.purchasePokemon, // Only update fields that changed (rare_candy, owned_pokemon_ids)
           created_at: user.created_at,
         });
       }
@@ -91,7 +92,8 @@ export function PokemonDetailCard({
       // Immediately update AuthContext with the server response
       if (result.data?.upgradePokemon?.user && user) {
         updateUser({
-          ...result.data.upgradePokemon.user,
+          ...user, // Keep existing user data (stats, owned_pokemon_ids, etc.)
+          ...result.data.upgradePokemon.user, // Only update fields that changed (rare_candy)
           created_at: user.created_at,
         });
       }

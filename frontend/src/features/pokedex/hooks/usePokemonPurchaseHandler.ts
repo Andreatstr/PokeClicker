@@ -25,7 +25,8 @@ export function usePokemonPurchaseHandler() {
       // Immediately update AuthContext with the server response
       if (result.data?.purchasePokemon && user) {
         updateUser({
-          ...result.data.purchasePokemon,
+          ...user, // Keep existing user data (stats, etc.)
+          ...result.data.purchasePokemon, // Only update fields that changed
           created_at: user.created_at,
         });
       }
