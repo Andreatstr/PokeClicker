@@ -95,6 +95,7 @@ export function useCandySync({
         flushPendingCandy();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Add candy locally (optimistic update)

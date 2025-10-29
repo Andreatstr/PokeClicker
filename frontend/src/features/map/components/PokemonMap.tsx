@@ -105,16 +105,18 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     };
     updateSize();
     let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && viewportRef.current) {
+    const currentViewport = viewportRef.current;
+    if (typeof ResizeObserver !== 'undefined' && currentViewport) {
       ro = new ResizeObserver(() => updateSize());
-      ro.observe(viewportRef.current);
+      ro.observe(currentViewport);
     } else {
       window.addEventListener('resize', updateSize);
     }
     return () => {
-      if (ro && viewportRef.current) ro.unobserve(viewportRef.current);
+      if (ro && currentViewport) ro.unobserve(currentViewport);
       window.removeEventListener('resize', updateSize);
     };
+     
   }, []);
 
   const [battleAttackFunction, setBattleAttackFunction] = useState<

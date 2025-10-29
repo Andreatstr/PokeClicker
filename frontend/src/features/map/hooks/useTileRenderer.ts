@@ -195,6 +195,7 @@ export function useTileRenderer(
     }, 16); // ~60fps updates for smooth map movement
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera.x, camera.y, viewportSize.width, viewportSize.height]);
 
   return {

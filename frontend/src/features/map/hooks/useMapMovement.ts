@@ -222,7 +222,7 @@ export function useMapMovement(
         movementIntervalRef.current = null;
       }
     };
-  }, [isMoving]);
+  }, [isMoving, collisionChecker]);
 
   // Handle key down
   const handleKeyDown = useCallback(
