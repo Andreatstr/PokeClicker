@@ -1,8 +1,10 @@
-import {Suspense, lazy, useState, useEffect} from 'react';
-import {LoadingSpinner} from './LoadingSpinner';
-import {PaginationControls} from './PaginationControls';
+import {useState, useEffect, Suspense, lazy} from 'react';
+import {useAuth} from '@features/auth';
+import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
+import {usePokedexFilters} from '@/hooks';
+import {LoadingSpinner} from '@/components/LoadingSpinner';
+import {PaginationControls} from '@/components/PaginationControls';
 import {ArrowLeftIcon, ArrowRightIcon} from '@ui/pixelact';
-import {type PokedexPokemon} from '@features/pokedex';
 
 // Lazy load the heavy Pokedex components
 const SearchBar = lazy(() =>
@@ -17,116 +19,153 @@ const PokemonCard = lazy(() =>
   import('@features/pokedex').then((module) => ({default: module.PokemonCard}))
 );
 
-interface LazyPokedexProps {
-  // SearchBar props
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  handleClearSearch: () => void;
-  isMobile: boolean;
-  showMobileFilters: boolean;
-  setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
+interface PokedexPageProps {
   isDarkMode: boolean;
-
-  // FiltersAndCount props
-  loading: boolean;
-  displayedPokemon: PokedexPokemon[];
-  totalPokemon: number;
-  selectedTypes: string[];
-  selectedRegion: string | null;
-  sortBy: 'id' | 'name' | 'type';
-  sortOrder: 'asc' | 'desc';
-  tempRegion: string | null;
-  tempTypes: string[];
-  tempSortBy: 'id' | 'name' | 'type';
-  tempSortOrder: 'asc' | 'desc';
-  selectedOwnedOnly: boolean;
-  tempOwnedOnly: boolean;
-  setSelectedRegion: (value: string | null) => void;
-  setSelectedTypes: (value: string[]) => void;
-  setSortBy: (value: 'id' | 'name' | 'type') => void;
-  setSortOrder: (value: 'asc' | 'desc') => void;
-  setTempRegion: (value: string | null) => void;
-  setTempTypes: (value: string[]) => void;
-  setTempSortBy: (value: 'id' | 'name' | 'type') => void;
-  setTempSortOrder: (value: 'asc' | 'desc') => void;
-  setSelectedOwnedOnly: (value: boolean) => void;
-  setTempOwnedOnly: (value: boolean) => void;
-  handleClearFilters: () => void;
-  ownedPokemonIds: number[];
-
-  // Pagination props
-  handlePokemonClick: (pokemon: PokedexPokemon) => void;
-  paginationPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  ITEMS_PER_PAGE: number;
+  onPokemonClick: (pokemon: PokedexPokemon) => void;
 }
 
-export function LazyPokedex(props: LazyPokedexProps) {
-  const filteredPokemon = props.selectedOwnedOnly
-    ? props.displayedPokemon.filter((p) => p.isOwned)
-    : props.displayedPokemon;
+export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
+  const {user} = useAuth();
+  const [isMobile, setIsMobile] = useState(false);
+  const {
+    searchTerm,
+    setSearchTerm,
+    debouncedSearchTerm,
+    selectedRegion,
+    setSelectedRegion,
+    selectedTypes,
+    setSelectedTypes,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    selectedOwnedOnly,
+    setSelectedOwnedOnly,
+    paginationPage,
+    setPaginationPage,
+    showMobileFilters,
+    setShowMobileFilters,
+    tempRegion,
+    setTempRegion,
+    tempTypes,
+    setTempTypes,
+    tempSortBy,
+    setTempSortBy,
+    tempSortOrder,
+    setTempSortOrder,
+    tempOwnedOnly,
+    setTempOwnedOnly,
+    handleClearFilters,
+    handleClearSearch,
+  } = usePokedexFilters();
+
+  const ITEMS_PER_PAGE = 20;
+
+  const {loading, error, data} = usePokedexQuery({
+    search: debouncedSearchTerm || undefined,
+    generation: selectedRegion || undefined,
+    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    sortBy,
+    sortOrder,
+    limit: ITEMS_PER_PAGE,
+    offset: (paginationPage - 1) * ITEMS_PER_PAGE,
+    ownedOnly: selectedOwnedOnly,
+  });
+
+  // Detect mobile
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setShowMobileFilters(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setShowMobileFilters]);
+
+  const filteredPokemon = data?.pokedex.pokemon || [];
+  const totalPokemon = data?.pokedex.total || 0;
+
+  const handlePageChange = (page: number) => {
+    setPaginationPage(page);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  };
+
+  const displayedPokemon = filteredPokemon;
+  const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="pixel-font text-xl text-red-600">Error loading Pokémon</p>
+        <p
+          className="pixel-font text-sm"
+          style={{color: 'var(--muted-foreground)'}}
+        >
+          {error.message}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
       {/* Search Bar */}
       <Suspense
         fallback={
-          <LoadingSpinner
-            message="Loading search..."
-            isDarkMode={props.isDarkMode}
-          />
+          <LoadingSpinner message="Loading search..." isDarkMode={isDarkMode} />
         }
       >
         <SearchBar
-          searchTerm={props.searchTerm}
-          setSearchTerm={props.setSearchTerm}
-          handleClearSearch={props.handleClearSearch}
-          isMobile={props.isMobile}
-          showMobileFilters={props.showMobileFilters}
-          setShowMobileFilters={props.setShowMobileFilters}
-          isDarkMode={props.isDarkMode}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          handleClearSearch={handleClearSearch}
+          isMobile={isMobile}
+          showMobileFilters={showMobileFilters}
+          setShowMobileFilters={setShowMobileFilters}
+          isDarkMode={isDarkMode}
         />
       </Suspense>
 
       {/* Filters and Count */}
       <Suspense
         fallback={
-          <LoadingSpinner
-            message="Loading filters..."
-            isDarkMode={props.isDarkMode}
-          />
+          <LoadingSpinner message="Loading filters..." isDarkMode={isDarkMode} />
         }
       >
         <FiltersAndCount
-          loading={props.loading}
-          displayedPokemon={props.displayedPokemon}
-          totalPokemon={props.totalPokemon}
-          selectedTypes={props.selectedTypes}
-          selectedRegion={props.selectedRegion}
-          sortBy={props.sortBy}
-          sortOrder={props.sortOrder}
-          isMobile={props.isMobile}
-          showMobileFilters={props.showMobileFilters}
-          tempRegion={props.tempRegion}
-          tempTypes={props.tempTypes}
-          tempSortBy={props.tempSortBy}
-          tempSortOrder={props.tempSortOrder}
-          selectedOwnedOnly={props.selectedOwnedOnly}
-          tempOwnedOnly={props.tempOwnedOnly}
-          setSelectedRegion={props.setSelectedRegion}
-          setSelectedTypes={props.setSelectedTypes}
-          setSortBy={props.setSortBy}
-          setSortOrder={props.setSortOrder}
-          setShowMobileFilters={props.setShowMobileFilters}
-          setTempRegion={props.setTempRegion}
-          setTempTypes={props.setTempTypes}
-          setTempSortBy={props.setTempSortBy}
-          setTempSortOrder={props.setTempSortOrder}
-          setSelectedOwnedOnly={props.setSelectedOwnedOnly}
-          setTempOwnedOnly={props.setTempOwnedOnly}
-          handleClearFilters={props.handleClearFilters}
-          ownedPokemonIds={props.ownedPokemonIds}
+          loading={loading}
+          displayedPokemon={displayedPokemon}
+          totalPokemon={totalPokemon}
+          selectedTypes={selectedTypes}
+          selectedRegion={selectedRegion}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          isMobile={isMobile}
+          showMobileFilters={showMobileFilters}
+          tempRegion={tempRegion}
+          tempTypes={tempTypes}
+          tempSortBy={tempSortBy}
+          tempSortOrder={tempSortOrder}
+          selectedOwnedOnly={selectedOwnedOnly}
+          tempOwnedOnly={tempOwnedOnly}
+          setSelectedRegion={setSelectedRegion}
+          setSelectedTypes={setSelectedTypes}
+          setSortBy={setSortBy}
+          setSortOrder={setSortOrder}
+          setShowMobileFilters={setShowMobileFilters}
+          setTempRegion={setTempRegion}
+          setTempTypes={setTempTypes}
+          setTempSortBy={setTempSortBy}
+          setTempSortOrder={setTempSortOrder}
+          setSelectedOwnedOnly={setSelectedOwnedOnly}
+          setTempOwnedOnly={setTempOwnedOnly}
+          handleClearFilters={handleClearFilters}
+          ownedPokemonIds={user?.owned_pokemon_ids ?? []}
         />
       </Suspense>
 
@@ -136,19 +175,23 @@ export function LazyPokedex(props: LazyPokedexProps) {
           fallback={
             <LoadingSpinner
               message="Loading Pokemon..."
-              isDarkMode={props.isDarkMode}
+              isDarkMode={isDarkMode}
             />
           }
         >
           <PokemonGrid
-            displayedPokemon={filteredPokemon}
-            handlePokemonClick={props.handlePokemonClick}
-            isDarkMode={props.isDarkMode}
-            ITEMS_PER_PAGE={props.ITEMS_PER_PAGE}
-            paginationPage={props.paginationPage}
-            totalPages={props.totalPages}
-            onPageChange={props.onPageChange}
-            loading={props.loading}
+            displayedPokemon={
+              selectedOwnedOnly
+                ? displayedPokemon.filter((p) => p.isOwned)
+                : displayedPokemon
+            }
+            handlePokemonClick={onPokemonClick}
+            isDarkMode={isDarkMode}
+            ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+            paginationPage={paginationPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            loading={loading}
           />
         </Suspense>
       </section>
@@ -191,12 +234,11 @@ function PokemonGrid({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Set first Pokemon as selected on mobile by default (only when no selection exists)
+  // Set first Pokemon as selected on mobile by default
   useEffect(() => {
     if (isMobileView && displayedPokemon.length > 0 && !selectedMobilePokemon) {
       setSelectedMobilePokemon(displayedPokemon[0]);
     }
-    // If selected Pokemon is no longer in the list (e.g., after filtering), reset to first
     if (isMobileView && selectedMobilePokemon && displayedPokemon.length > 0) {
       const stillExists = displayedPokemon.some(
         (p) => p.id === selectedMobilePokemon.id
@@ -246,18 +288,14 @@ function PokemonGrid({
 
               {/* Bottom: Horizontal Scrollable Pokemon List */}
               <div className="w-full relative">
-                {/* Left Scroll Hint - shown when scrolled right */}
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
                   <ArrowLeftIcon size={32} className="animate-pulse" />
                 </div>
-                {/* Gradient fade on left edge */}
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-l-4 border-black"></div>
 
-                {/* Right Scroll Hint - shown when more content to the right */}
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
                   <ArrowRightIcon size={32} className="animate-pulse" />
                 </div>
-                {/* Gradient fade on right edge to indicate more content */}
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-r-4 border-black"></div>
 
                 <div className="overflow-x-auto border-4 border-black bg-white dark:bg-gray-900 shadow-[4px_4px_0px_rgba(0,0,0,1)]">

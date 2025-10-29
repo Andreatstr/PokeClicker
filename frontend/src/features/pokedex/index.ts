@@ -1,3 +1,6 @@
+// Components - Page
+export {PokedexPage} from './components/PokedexPage';
+
 // Components - Card
 export {PokemonCard} from './components/card/PokemonCard';
 
