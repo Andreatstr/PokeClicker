@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
+import {logger} from '@/lib/logger';
 
 interface BackgroundMusicProps {
   isDarkMode?: boolean;
@@ -38,16 +39,16 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       try {
         if (isPlaying) {
           audioRef.current.pause();
-          console.log('Audio paused');
+          logger.info('Audio paused');
         } else {
-          console.log('Attempting to play audio...');
-          console.log('Audio source:', audioRef.current.src);
-          console.log('Audio ready state:', audioRef.current.readyState);
+          logger.info('Attempting to play audio...');
+          logger.info(`Audio source: ${audioRef.current.src}`);
+          logger.info(`Audio ready state: ${audioRef.current.readyState}`);
           await audioRef.current.play();
-          console.log('Audio playing');
+          logger.info('Audio playing');
         }
       } catch (error) {
-        console.error('Error playing audio:', error);
+        logger.logError(error, 'PlayingAudio');
       }
     }
   };

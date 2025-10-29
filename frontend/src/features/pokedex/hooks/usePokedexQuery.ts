@@ -1,92 +1,13 @@
-import {useQuery, gql} from '@apollo/client';
+import {useQuery} from '@apollo/client';
+import {
+  POKEDEX_QUERY,
+  type PokedexData,
+  type PokedexVariables,
+  type PokedexPokemon,
+} from '@/lib/graphql';
 
-const POKEDEX_QUERY = gql`
-  query Pokedex(
-    $search: String
-    $generation: String
-    $type: String
-    $sortBy: String
-    $sortOrder: String
-    $limit: Int
-    $offset: Int
-    $userId: String
-    $ownedOnly: Boolean
-  ) {
-    pokedex(
-      search: $search
-      generation: $generation
-      type: $type
-      sortBy: $sortBy
-      sortOrder: $sortOrder
-      limit: $limit
-      offset: $offset
-      userId: $userId
-      ownedOnly: $ownedOnly
-    ) {
-      pokemon {
-        id
-        name
-        types
-        sprite
-        pokedexNumber
-        stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
-        }
-        height
-        weight
-        abilities
-        evolution
-        isOwned
-      }
-      total
-    }
-  }
-`;
-
-export interface PokedexPokemon {
-  id: number;
-  name: string;
-  types: string[];
-  sprite: string;
-  pokedexNumber: number;
-  stats?: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-  } | null;
-  height?: number | null;
-  weight?: number | null;
-  abilities?: string[] | null;
-  evolution?: number[] | null;
-  isOwned?: boolean;
-}
-
-interface PokedexData {
-  pokedex: {
-    pokemon: PokedexPokemon[];
-    total: number;
-  };
-}
-
-interface PokedexVariables {
-  search?: string;
-  generation?: string;
-  type?: string;
-  sortBy?: string;
-  sortOrder?: string;
-  limit?: number;
-  offset?: number;
-  userId?: string;
-  ownedOnly?: boolean;
-}
+// Re-export the PokedexPokemon type for convenience
+export type {PokedexPokemon};
 
 export function usePokedexQuery(variables: PokedexVariables) {
   const {data, loading, error, refetch} = useQuery<

@@ -33,7 +33,12 @@ function sanitizeUserForClient(
     username: userDoc.username,
     rare_candy: userDoc.rare_candy ?? 0,
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
-    stats: userDoc.stats,
+    stats: {
+      ...userDoc.stats,
+      // Ensure new stats exist with defaults for backward compatibility
+      clickPower: userDoc.stats.clickPower ?? 1,
+      passiveIncome: userDoc.stats.passiveIncome ?? 1,
+    },
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
     selected_pokemon_id: userDoc.selected_pokemon_id,
@@ -202,7 +207,7 @@ export const resolvers = {
 
       // Automatic migration: Initialize new stats for existing users
       let needsUpdate = false;
-      const updates: any = {};
+      const updates: Record<string, number> = {};
 
       if (!userDoc.stats.clickPower) {
         updates['stats.clickPower'] = 1;
@@ -332,7 +337,7 @@ export const resolvers = {
           });
 
           if (user && Array.isArray(user.owned_pokemon_ids)) {
-            ownedPokemonIds = user.owned_pokemon_ids.map((v: any) => Number(v)).filter(Number.isFinite);
+            ownedPokemonIds = user.owned_pokemon_ids.map((v: unknown) => Number(v)).filter(Number.isFinite);
           }
         } catch (error) {
           console.error('Error fetching user owned Pokemon:', error);
@@ -557,7 +562,7 @@ export const resolvers = {
       // Calculate cost - for new stats, ensure we use the correct level
       let currentLevel = 1;
       if (stat === 'clickPower' || stat === 'passiveIncome') {
-        currentLevel = (userDoc.stats as any)[stat] || 1;
+        currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
         console.log(
           `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
         );

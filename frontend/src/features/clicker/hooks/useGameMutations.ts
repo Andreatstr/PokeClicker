@@ -1,60 +1,19 @@
-import {gql, useMutation} from '@apollo/client';
+import {useMutation} from '@apollo/client';
 import type {User} from '@features/auth';
-
-const UPDATE_RARE_CANDY = gql`
-  mutation UpdateRareCandy($amount: Int!) {
-    updateRareCandy(amount: $amount) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-        clickPower
-        passiveIncome
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
-    }
-  }
-`;
-
-const UPGRADE_STAT = gql`
-  mutation UpgradeStat($stat: String!) {
-    upgradeStat(stat: $stat) {
-      _id
-      username
-      rare_candy
-      created_at
-      stats {
-        hp
-        attack
-        defense
-        spAttack
-        spDefense
-        speed
-        clickPower
-        passiveIncome
-      }
-      owned_pokemon_ids
-      favorite_pokemon_id
-      selected_pokemon_id
-    }
-  }
-`;
+import {
+  UPDATE_RARE_CANDY_MUTATION,
+  UPGRADE_STAT_MUTATION,
+  type UpdateRareCandyData,
+  type UpgradeStatData,
+} from '@/lib/graphql';
+import {logger} from '@/lib/logger';
 
 export function useGameMutations() {
   const [updateRareCandyMutation, {loading: updatingCandy, error: candyError}] =
-    useMutation<{updateRareCandy: User}>(UPDATE_RARE_CANDY);
+    useMutation<UpdateRareCandyData>(UPDATE_RARE_CANDY_MUTATION);
 
   const [upgradeStatMutation, {loading: upgradingStat, error: statError}] =
-    useMutation<{upgradeStat: User}>(UPGRADE_STAT);
+    useMutation<UpgradeStatData>(UPGRADE_STAT_MUTATION);
 
   const updateRareCandy = async (
     amount: number,
@@ -65,13 +24,13 @@ export function useGameMutations() {
         variables: {amount},
       });
 
-      if (result.data?.updateRareCandy && onCompleted) {
+      if (result?.data?.updateRareCandy && onCompleted) {
         onCompleted(result.data.updateRareCandy);
       }
 
-      return result.data?.updateRareCandy;
+      return result?.data?.updateRareCandy;
     } catch (error) {
-      console.error('Failed to update rare candy:', error);
+      logger.logError(error, 'UpdateRareCandy');
       throw error;
     }
   };
@@ -85,13 +44,13 @@ export function useGameMutations() {
         variables: {stat},
       });
 
-      if (result.data?.upgradeStat && onCompleted) {
+      if (result?.data?.upgradeStat && onCompleted) {
         onCompleted(result.data.upgradeStat);
       }
 
-      return result.data?.upgradeStat;
+      return result?.data?.upgradeStat;
     } catch (error) {
-      console.error('Failed to upgrade stat:', error);
+      logger.logError(error, 'UpgradeStat');
       throw error;
     }
   };

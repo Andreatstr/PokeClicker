@@ -195,6 +195,12 @@ export function useTileRenderer(
     }, 16); // ~60fps updates for smooth map movement
 
     return () => clearTimeout(timeoutId);
+    // ESLint wants us to add [wildPokemon] as a dependency, but wildPokemon is an array
+    // that gets recreated frequently (on spawn/despawn). Since arrays are compared by reference,
+    // this would cause the effect to re-run constantly, recalculating ALL visible tiles
+    // even when only Pokemon positions changed (not camera/viewport).
+    // This is a performance optimization - we only need to recalculate when the view changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera.x, camera.y, viewportSize.width, viewportSize.height]);
 
   return {

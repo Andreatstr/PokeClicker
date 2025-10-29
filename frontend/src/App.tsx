@@ -1,9 +1,18 @@
-import {useState, useEffect, Suspense, lazy} from 'react';
-import {useAuth} from '@features/auth';
-import {usePokedexQuery, type PokedexPokemon, usePokemonById} from '@features/pokedex';
-import {Navbar, LoadingSpinner, LazyPokedex} from '@/components';
-import {CandyCounterOverlay} from '@/components/CandyCounterOverlay';
-import {preloadService} from '@/lib/preloadService';
+import {Suspense, lazy} from 'react';
+import {
+  Navbar,
+  LoadingSpinner,
+  CandyCounterOverlay,
+  BackgroundMusic,
+} from '@/components';
+import {ErrorDisplay} from '@/components/ErrorDisplay';
+import {
+  useTheme,
+  usePageNavigation,
+  useScrollLock,
+  usePreloading,
+  usePokemonModal,
+} from '@/hooks';
 
 // Lazy load heavy components
 const PokeClicker = lazy(() =>
@@ -22,257 +31,97 @@ const ProfileDashboard = lazy(() =>
     default: module.ProfileDashboard,
   }))
 );
-import {PokemonMap} from '@features/map';
-import {BackgroundMusic} from '@components/BackgroundMusic';
+const PokedexPage = lazy(() =>
+  import('@features/pokedex').then((module) => ({default: module.PokedexPage}))
+);
+const PokemonMap = lazy(() =>
+  import('@features/map').then((module) => ({default: module.PokemonMap}))
+);
 
 function App() {
-  const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
-    null
-  );
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check localStorage first, then system preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
-    }
-    // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-  const [currentPage, setCurrentPage] = useState<
-    'clicker' | 'pokedex' | 'map' | 'login' | 'profile'
-  >(() => {
-    const hasAuth = localStorage.getItem('authToken');
-    if (!hasAuth) return 'login';
+  const {isDarkMode, toggleTheme} = useTheme();
+  const {currentPage, setCurrentPage} = usePageNavigation();
+  const {
+    selectedPokemon,
+    allPokemon,
+    isModalOpen,
+    handlePokemonClick,
+    handleCloseModal,
+    handleSelectPokemon,
+    handlePurchase,
+  } = usePokemonModal();
 
-    // If authenticated, restore last page or default to pokedex
-    const savedPage = localStorage.getItem('currentPage') as
-      | 'clicker'
-      | 'pokedex'
-      | 'profile'
-      | null;
-    return savedPage || 'pokedex';
-  });
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [selectedOwnedOnly, setSelectedOwnedOnly] = useState(false);
-  const { user } = useAuth();
+  useScrollLock(currentPage === 'map');
+  usePreloading(currentPage);
 
-  // State for cross-region Pokemon navigation
-  const [crossRegionPokemonId, setCrossRegionPokemonId] = useState<
-    number | null
-  >(null);
-  const {data: crossRegionData} = usePokemonById(crossRegionPokemonId);
-
-  // Initialize preloading service
-  useEffect(() => {
-    const initializePreloading = async () => {
-      try {
-        // Preload based on current page
-        switch (currentPage) {
-          case 'pokedex':
-            await preloadService.preloadForPokedex();
-            break;
-          case 'clicker':
-            await preloadService.preloadForClicker();
-            break;
-          case 'map':
-            await preloadService.preloadForMap();
-            break;
-          default:
-            // Preload common assets for login screen
-            await preloadService.preloadAll({
-              preloadCommonPokemon: true,
-              preloadCommonTypes: true,
-              preloadGameAssets: true,
-              preloadMapAssets: false,
-            });
-        }
-      } catch (error) {
-        console.warn('Failed to initialize preloading:', error);
-      }
-    };
-
-    initializePreloading();
-  }, [currentPage]);
-
-  const ITEMS_PER_PAGE = 20;
-  const [paginationPage, setPaginationPage] = useState(1);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setPaginationPage(1);
-  }, [selectedRegion, selectedTypes, debouncedSearchTerm, sortBy, sortOrder]);
-
-  // Mobile
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [tempRegion, setTempRegion] = useState(selectedRegion);
-  const [tempTypes, setTempTypes] = useState(selectedTypes);
-  const [tempSortBy, setTempSortBy] = useState(sortBy);
-  const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
-  const [tempOwnedOnly, setTempOwnedOnly] = useState(false);
-
-  // Apply initial theme on mount
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
-  // Prevent scrolling on map page
-  useEffect(() => {
-    if (currentPage === 'map') {
-      // Prevent scrolling
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-
-      // Prevent pull-to-refresh and overscroll on mobile
-      document.body.style.overscrollBehavior = 'none';
-      document.documentElement.style.overscrollBehavior = 'none';
-
-      // Set height to viewport height
-      document.documentElement.style.height = '100vh';
-      document.body.style.height = '100vh';
-
-      // Prevent touch scrolling on mobile
-      const preventScroll = (e: TouchEvent) => {
-        // Allow scrolling within joystick/button areas
-        if (
-          (e.target as HTMLElement).closest('.overflow-scroll, .overflow-auto')
-        ) {
-          return;
-        }
-        e.preventDefault();
-      };
-
-      document.addEventListener('touchmove', preventScroll, {passive: false});
-
-      return () => {
-        // Restore scrolling
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-        document.body.style.overscrollBehavior = '';
-        document.documentElement.style.overscrollBehavior = '';
-        document.documentElement.style.height = '';
-        document.body.style.height = '';
-        document.removeEventListener('touchmove', preventScroll);
-      };
-    }
-  }, [currentPage]);
-
-  // Save current page to localStorage
-  useEffect(() => {
-    if (currentPage !== 'login') {
-      localStorage.setItem('currentPage', currentPage);
-    }
-  }, [currentPage]);
-
-  const {loading, error, data, refetch} = usePokedexQuery({
-    search: debouncedSearchTerm || undefined,
-    generation: selectedRegion || undefined,
-    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
-    sortBy,
-    sortOrder,
-    limit: ITEMS_PER_PAGE,
-    offset: (paginationPage - 1) * ITEMS_PER_PAGE,
-    ownedOnly: selectedOwnedOnly,
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-
-      if (!mobile) {
-        setShowMobileFilters(false);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const handlePokemonClick = (pokemon: PokedexPokemon) => {
-    setSelectedPokemon(pokemon);
-    setModalOpen(true);
+  const getMainClassName = () => {
+    const baseClasses = 'min-h-screen pt-0';
+    const mapClasses =
+      'px-2 sm:px-4 md:px-6 lg:px-8 pb-0 h-screen flex flex-col';
+    const defaultClasses = 'px-4 sm:px-6 md:px-8 pb-8';
+    return `${baseClasses} ${currentPage === 'map' ? mapClasses : defaultClasses}`;
   };
 
-  // Update selectedPokemon when cross-region data loads
-  useEffect(() => {
-    if (crossRegionData?.pokemonById) {
-      const crossRegionPokemon: PokedexPokemon = {
-        id: crossRegionData.pokemonById.id,
-        name: crossRegionData.pokemonById.name,
-        types: crossRegionData.pokemonById.types,
-        sprite: crossRegionData.pokemonById.sprite,
-        stats: crossRegionData.pokemonById.stats,
-        evolution: crossRegionData.pokemonById.evolution,
-        isOwned: crossRegionData.pokemonById.isOwned,
-        pokedexNumber: crossRegionData.pokemonById.pokedexNumber,
-      };
-      setSelectedPokemon(crossRegionPokemon);
-      setCrossRegionPokemonId(null); // Reset after loading
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'clicker':
+        return (
+          <section className="py-8">
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading clicker game..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
+              <PokeClicker isDarkMode={isDarkMode} />
+            </Suspense>
+          </section>
+        );
+
+      case 'profile':
+        return (
+          <section className="py-8">
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading profile..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
+              <ProfileDashboard
+                isDarkMode={isDarkMode}
+                onNavigate={setCurrentPage}
+              />
+            </Suspense>
+          </section>
+        );
+
+      case 'map':
+        return (
+          <section className="py-8 md:py-0">
+            <PokemonMap isDarkMode={isDarkMode} />
+          </section>
+        );
+
+      default: // pokedex
+        return (
+          <>
+            <PokedexPage
+              isDarkMode={isDarkMode}
+              onPokemonClick={handlePokemonClick}
+            />
+            <CandyCounterOverlay isDarkMode={isDarkMode} />
+          </>
+        );
     }
-  }, [crossRegionData]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  const filteredPokemon = data?.pokedex.pokemon || [];
-  const totalPokemon = data?.pokedex.total || 0;
-
-  const handleClearFilters = () => {
-    setSelectedRegion(null);
-    setSelectedTypes([]);
-    setSortBy('id');
-    setSortOrder('asc');
-    setSelectedOwnedOnly(false);
-    setTempOwnedOnly(false);
   };
-
-  const handleClearSearch = () => {
-    setSearchTerm('');
-  };
-
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    // Save to localStorage
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-
-    // Apply CSS class to document
-    if (newTheme) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    setPaginationPage(page);
-    // Scroll to top when page changes
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  };
-
-  const displayedPokemon = filteredPokemon;
-  const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
 
   return (
     <>
+      <ErrorDisplay />
       <Navbar
         currentPage={currentPage}
         onPageChange={setCurrentPage}
@@ -293,105 +142,10 @@ function App() {
       ) : (
         <>
           <main
-            className={`min-h-screen pt-0 ${currentPage === 'map' ? 'px-2 sm:px-4 md:px-6 lg:px-8 pb-0 h-screen flex flex-col' : 'px-4 sm:px-6 md:px-8 pb-8'}`}
+            className={getMainClassName()}
             style={{backgroundColor: 'var(--background)'}}
           >
-            {currentPage === 'clicker' ? (
-              <section className="py-8">
-                <Suspense
-                  fallback={
-                    <LoadingSpinner
-                      message="Loading clicker game..."
-                      isDarkMode={isDarkMode}
-                    />
-                  }
-                >
-                  <PokeClicker isDarkMode={isDarkMode} />
-                </Suspense>
-              </section>
-            ) : currentPage === 'profile' ? (
-              <section className="py-8">
-                <Suspense
-                  fallback={
-                    <LoadingSpinner
-                      message="Loading profile..."
-                      isDarkMode={isDarkMode}
-                    />
-                  }
-                >
-                  <ProfileDashboard
-                    isDarkMode={isDarkMode}
-                    onNavigate={setCurrentPage}
-                  />
-                </Suspense>
-              </section>
-            ) : currentPage === 'map' ? (
-              <section className="py-8 md:py-0">
-                <PokemonMap isDarkMode={isDarkMode} />
-              </section>
-            ) : (
-              <>
-                {error ? (
-                  <div className="text-center py-16">
-                    <p className="pixel-font text-xl text-red-600">
-                      Error loading Pokémon
-                    </p>
-                    <p
-                      className="pixel-font text-sm"
-                      style={{color: 'var(--muted-foreground)'}}
-                    >
-                      {error.message}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <LazyPokedex
-                      // SearchBar props
-                      searchTerm={searchTerm}
-                      setSearchTerm={setSearchTerm}
-                      handleClearSearch={handleClearSearch}
-                      isMobile={isMobile}
-                      showMobileFilters={showMobileFilters}
-                      setShowMobileFilters={setShowMobileFilters}
-                      isDarkMode={isDarkMode}
-                      // FiltersAndCount props
-                      loading={loading}
-                      displayedPokemon={displayedPokemon}
-                      totalPokemon={totalPokemon}
-                      selectedTypes={selectedTypes}
-                      selectedRegion={selectedRegion}
-                      sortBy={sortBy}
-                      sortOrder={sortOrder}
-                      tempRegion={tempRegion}
-                      tempTypes={tempTypes}
-                      tempSortBy={tempSortBy}
-                      tempSortOrder={tempSortOrder}
-                      selectedOwnedOnly={selectedOwnedOnly}
-                      tempOwnedOnly={tempOwnedOnly}
-                      setSelectedRegion={setSelectedRegion}
-                      setSelectedTypes={setSelectedTypes}
-                      setSortBy={setSortBy}
-                      setSortOrder={setSortOrder}
-                      setTempRegion={setTempRegion}
-                      setTempTypes={setTempTypes}
-                      setTempSortBy={setTempSortBy}
-                      setTempSortOrder={setTempSortOrder}
-                      setSelectedOwnedOnly={setSelectedOwnedOnly}
-                      setTempOwnedOnly={setTempOwnedOnly}
-                      handleClearFilters={handleClearFilters}
-                      ownedPokemonIds={user?.owned_pokemon_ids ?? []}
-                      // Pagination props
-                      handlePokemonClick={handlePokemonClick}
-                      paginationPage={paginationPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                      ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-                    />
-                    <CandyCounterOverlay isDarkMode={isDarkMode} />
-                  </>
-                )}
-              </>
-            )}
+            {renderPage()}
           </main>
 
           {isModalOpen && (
@@ -405,25 +159,11 @@ function App() {
             >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
-                allPokemon={filteredPokemon}
+                allPokemon={allPokemon}
                 isOpen={isModalOpen}
-                onClose={() => setModalOpen(false)}
-                onSelectPokemon={(id) => {
-                  // First, try to find Pokemon in filtered list
-                  const next = filteredPokemon.find((p) => p.id === id);
-                  if (next) {
-                    setSelectedPokemon(next);
-                  } else {
-                    // If not found (cross-region), fetch using pokemonById query
-                    setCrossRegionPokemonId(id);
-                  }
-                }}
-                onPurchase={(id) => {
-                  if (selectedPokemon && selectedPokemon.id === id) {
-                    setSelectedPokemon({...selectedPokemon, isOwned: true});
-                  }
-                  refetch();
-                }}
+                onClose={handleCloseModal}
+                onSelectPokemon={handleSelectPokemon}
+                onPurchase={handlePurchase}
                 isDarkMode={isDarkMode}
               />
             </Suspense>

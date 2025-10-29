@@ -1,4 +1,5 @@
 import {imageCache} from './imageCache';
+import {logger} from '@/lib/logger';
 
 interface PokemonSpriteUrls {
   officialArtwork: string;
@@ -9,6 +10,7 @@ interface PokemonSpriteUrls {
 }
 
 class PokemonSpriteCache {
+  // Use PokeAPI's CDN instead of GitHub raw - better rate limits
   private baseUrl =
     'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
   private officialArtworkUrl =
@@ -36,7 +38,7 @@ class PokemonSpriteCache {
 
   async getPokemonSprite(
     pokemonId: number,
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): Promise<HTMLImageElement> {
     const urls = this.getSpriteUrls(pokemonId);
     const url = urls[variant];
@@ -44,17 +46,14 @@ class PokemonSpriteCache {
     try {
       return await imageCache.getImage(url);
     } catch (error) {
-      console.error(
-        `Failed to load Pokemon sprite for ID ${pokemonId}, variant ${variant}:`,
-        error
-      );
+      logger.logError(error, `LoadPokemonSprite:${pokemonId}:${variant}`);
       throw error;
     }
   }
 
   async preloadPokemonSprites(
     pokemonIds: number[],
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): Promise<HTMLImageElement[]> {
     const urls = pokemonIds.map((id) => this.getSpriteUrls(id)[variant]);
     return imageCache.preloadImages(urls);
@@ -65,16 +64,17 @@ class PokemonSpriteCache {
 
     pokemonIds.forEach((id) => {
       const urls = this.getSpriteUrls(id);
-      allUrls.push(urls.officialArtwork, urls.frontDefault, urls.frontShiny);
+      allUrls.push(urls.frontDefault);
     });
 
     await imageCache.preloadImages(allUrls);
   }
 
-  // Preload common Pokemon sprites (first 50 Pokemon)
+  // Preload common Pokemon sprites (first 20 Pokemon - 1 page worth)
+  // Reduced to avoid GitHub rate limits
   async preloadCommonPokemon(): Promise<void> {
-    const commonIds = Array.from({length: 50}, (_, i) => i + 1);
-    await this.preloadPokemonSprites(commonIds, 'officialArtwork');
+    const commonIds = Array.from({length: 20}, (_, i) => i + 1);
+    await this.preloadPokemonSprites(commonIds, 'frontDefault');
   }
 
   // Preload Pokemon sprites for a specific range
@@ -83,13 +83,13 @@ class PokemonSpriteCache {
       {length: endId - startId + 1},
       (_, i) => startId + i
     );
-    await this.preloadPokemonSprites(ids, 'officialArtwork');
+    await this.preloadPokemonSprites(ids, 'frontDefault');
   }
 
   // Get cached sprite URL without loading the image
   getPokemonSpriteUrl(
     pokemonId: number,
-    variant: keyof PokemonSpriteUrls = 'officialArtwork'
+    variant: keyof PokemonSpriteUrls = 'frontDefault'
   ): string {
     return this.getSpriteUrls(pokemonId)[variant];
   }

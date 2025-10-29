@@ -1,4 +1,5 @@
 import {useState, useEffect, type ReactNode} from 'react';
+import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
 import {AuthContext, type User} from './AuthContextDefinition';
 
@@ -11,10 +12,41 @@ export function AuthProvider({children}: {children: ReactNode}) {
     const savedUser = localStorage.getItem('user');
     if (savedToken && savedUser) {
       try {
+        const parsedUser = JSON.parse(savedUser);
+
+        // Validate and migrate user data to ensure stats exist
+        if (parsedUser && typeof parsedUser === 'object') {
+          if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
+            logger.warn(
+              'User data missing stats object, clearing localStorage',
+              'AuthContext'
+            );
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            return;
+          }
+
+          const defaultStats = {
+            hp: 1,
+            attack: 1,
+            defense: 1,
+            spAttack: 1,
+            spDefense: 1,
+            speed: 1,
+            clickPower: 1,
+            passiveIncome: 1,
+          };
+
+          parsedUser.stats = {
+            ...defaultStats,
+            ...parsedUser.stats,
+          };
+        }
+
         setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+        setUser(parsedUser);
       } catch (e) {
-        console.error('Failed to parse saved user:', e);
+        logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
       }
@@ -26,18 +58,14 @@ export function AuthProvider({children}: {children: ReactNode}) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    // Clear cache and refetch all active queries with new auth context
     await apolloClient.resetStore();
   };
 
   const logout = async () => {
-    // Update React state first
     setToken(null);
     setUser(null);
-    // Remove token from storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    // Evict all ROOT_QUERY entries and garbage collect
     apolloClient.cache.evict({id: 'ROOT_QUERY'});
     apolloClient.cache.gc();
   };

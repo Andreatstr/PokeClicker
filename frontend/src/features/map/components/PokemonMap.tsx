@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
+import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
 import {TiledMapView} from './TiledMapView';
@@ -105,16 +106,18 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     };
     updateSize();
     let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && viewportRef.current) {
+    const currentViewport = viewportRef.current;
+    if (typeof ResizeObserver !== 'undefined' && currentViewport) {
       ro = new ResizeObserver(() => updateSize());
-      ro.observe(viewportRef.current);
+      ro.observe(currentViewport);
     } else {
       window.addEventListener('resize', updateSize);
     }
     return () => {
-      if (ro && viewportRef.current) ro.unobserve(viewportRef.current);
+      if (ro && currentViewport) ro.unobserve(currentViewport);
       window.removeEventListener('resize', updateSize);
     };
+     
   }, []);
 
   const [battleAttackFunction, setBattleAttackFunction] = useState<
@@ -195,7 +198,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
           // Remove the caught Pokemon from the map and spawn a new one
           pokemon.removePokemon(battleSpawnId);
         } catch (error) {
-          console.error('Failed to award battle rewards:', error);
+          logger.logError(error, 'AwardBattleRewards');
         }
       }
 

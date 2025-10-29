@@ -19,7 +19,7 @@ class GameAssetsCache {
     if (Object.keys(this.gameAssets).length === 0) {
       this.gameAssets = {
         charizardSprite:
-          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
+          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',
         candyImage: `${this.baseUrl}candy.webp`,
         rareCandyIcon:
           'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',

@@ -1,8 +1,17 @@
-import {useEffect, useState} from 'react';
+import {useState, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
-import {gql, useMutation} from '@apollo/client';
+import {useMutation} from '@apollo/client';
 import {Button} from '@ui/pixelact';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
+import {
+  LOGIN_MUTATION,
+  SIGNUP_MUTATION,
+  type LoginData,
+  type SignupData,
+  type AuthVariables,
+} from '@/lib/graphql';
+import {logger} from '@/lib/logger';
+import {useMobileDetection} from '@/hooks';
 
 type Props = {
   onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;
@@ -13,79 +22,20 @@ type FormValues = {
   password: string;
 };
 
-const LOGIN_MUTATION = gql`
-  mutation Login($username: String!, $password: String!) {
-    login(username: $username, password: $password) {
-      token
-      user {
-        _id
-        username
-        rare_candy
-        created_at
-        stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
-          clickPower
-          passiveIncome
-        }
-        owned_pokemon_ids
-        favorite_pokemon_id
-        selected_pokemon_id
-      }
-    }
-  }
-`;
-
-const SIGNUP_MUTATION = gql`
-  mutation Signup($username: String!, $password: String!) {
-    signup(username: $username, password: $password) {
-      token
-      user {
-        _id
-        username
-        rare_candy
-        created_at
-        stats {
-          hp
-          attack
-          defense
-          spAttack
-          spDefense
-          speed
-          clickPower
-          passiveIncome
-        }
-        owned_pokemon_ids
-        favorite_pokemon_id
-        selected_pokemon_id
-      }
-    }
-  }
-`;
-
 export function LoginScreen({onNavigate}: Props) {
-  const [isMobile, setIsMobile] = useState(false);
   const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
   const {login: authLogin} = useAuth();
 
+  // Use centralized mobile detection hook
+  const isMobile = useMobileDetection(768);
+
   const [loginMutation, {loading: loginLoading, error: loginError}] =
-    useMutation(LOGIN_MUTATION);
+    useMutation<LoginData, AuthVariables>(LOGIN_MUTATION);
   const [signupMutation, {loading: signupLoading, error: signupError}] =
-    useMutation(SIGNUP_MUTATION);
+    useMutation<SignupData, AuthVariables>(SIGNUP_MUTATION);
 
   const loading = loginLoading || signupLoading;
   const error = loginError || signupError;
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const {
     register,
@@ -108,7 +58,9 @@ export function LoginScreen({onNavigate}: Props) {
       });
 
       const authData =
-        result.data?.[modalType === 'login' ? 'login' : 'signup'];
+        modalType === 'login'
+          ? (result.data as LoginData | undefined)?.login
+          : (result.data as SignupData | undefined)?.signup;
 
       if (authData?.token && authData?.user) {
         await authLogin(authData.token, authData.user);
@@ -117,7 +69,7 @@ export function LoginScreen({onNavigate}: Props) {
         onNavigate('clicker');
       }
     } catch (err) {
-      console.error('Authentication error:', err);
+      logger.logError(err, 'Authentication');
     }
   }
 

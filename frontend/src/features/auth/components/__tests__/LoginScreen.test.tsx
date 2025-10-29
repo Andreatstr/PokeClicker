@@ -1,5 +1,5 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
-import {render, screen, fireEvent, waitFor} from '@testing-library/react';
+import {render, screen, fireEvent, waitFor} from '../../../../test/utils';
 import userEvent from '@testing-library/user-event';
 import {LoginScreen} from '../LoginScreen';
 
@@ -7,32 +7,30 @@ import {LoginScreen} from '../LoginScreen';
 const mockLoginMutation = vi.fn();
 const mockSignupMutation = vi.fn();
 
-vi.mock('@apollo/client', () => ({
-  useMutation: vi.fn((mutation) => {
-    // Return different mocks based on the mutation
-    if (
-      mutation &&
-      mutation.definitions &&
-      mutation.definitions[0] &&
-      mutation.definitions[0].name
-    ) {
-      const mutationName = mutation.definitions[0].name.value;
-      if (mutationName === 'Login') {
-        return [mockLoginMutation, {loading: false, error: null}];
-      } else if (mutationName === 'Signup') {
-        return [mockSignupMutation, {loading: false, error: null}];
+vi.mock('@apollo/client', async () => {
+  const actual = await vi.importActual('@apollo/client');
+  return {
+    ...actual,
+    useMutation: vi.fn((mutation) => {
+      // Return different mocks based on the mutation
+      if (
+        mutation &&
+        mutation.definitions &&
+        mutation.definitions[0] &&
+        mutation.definitions[0].name
+      ) {
+        const mutationName = mutation.definitions[0].name.value;
+        if (mutationName === 'Login') {
+          return [mockLoginMutation, {loading: false, error: null}];
+        } else if (mutationName === 'Signup') {
+          return [mockSignupMutation, {loading: false, error: null}];
+        }
       }
-    }
-    // Default to login mutation
-    return [mockLoginMutation, {loading: false, error: null}];
-  }),
-  gql: vi.fn(),
-  HttpLink: vi.fn(),
-  setContext: vi.fn(),
-  ApolloClient: vi.fn(),
-  InMemoryCache: vi.fn(),
-  from: vi.fn(),
-}));
+      // Default to login mutation
+      return [mockLoginMutation, {loading: false, error: null}];
+    }),
+  };
+});
 
 // Mock useAuth
 const mockLogin = vi.fn();

@@ -1,9 +1,5 @@
-interface CachedImage {
-  url: string;
-  blob: Blob;
-  timestamp: number;
-  size: number;
-}
+import {indexedDBCache} from './indexedDBCache';
+import {logger} from '@/lib/logger';
 
 interface CacheStats {
   totalSize: number;
@@ -20,11 +16,8 @@ interface CachedHTMLImageElement extends HTMLImageElement {
 
 class ImageCacheService {
   private memoryCache = new Map<string, CachedHTMLImageElement>();
-  private localStorageCache = new Map<string, CachedImage>();
   private maxMemorySize = 50 * 1024 * 1024; // 50MB
-  private maxLocalStorageSize = 100 * 1024 * 1024; // 100MB
   private currentMemorySize = 0;
-  private currentLocalStorageSize = 0;
   private stats: CacheStats = {
     totalSize: 0,
     itemCount: 0,
@@ -34,31 +27,15 @@ class ImageCacheService {
   };
 
   constructor() {
-    this.loadFromLocalStorage();
+    // Initialize IndexedDB cleanup on startup
+    this.initCleanup();
   }
 
-  private loadFromLocalStorage() {
+  private async initCleanup() {
     try {
-      const cached = localStorage.getItem('imageCache');
-      if (cached) {
-        const data = JSON.parse(cached);
-        this.localStorageCache = new Map(data);
-        this.currentLocalStorageSize = Array.from(
-          this.localStorageCache.values()
-        ).reduce((total, item) => total + item.size, 0);
-      }
+      await indexedDBCache.cleanup();
     } catch (error) {
-      console.warn('Failed to load image cache from localStorage:', error);
-      this.clearLocalStorage();
-    }
-  }
-
-  private saveToLocalStorage() {
-    try {
-      const data = Array.from(this.localStorageCache.entries());
-      localStorage.setItem('imageCache', JSON.stringify(data));
-    } catch (error) {
-      console.warn('Failed to save image cache to localStorage:', error);
+      logger.logError(error, 'CleanupIndexeddb');
     }
   }
 
@@ -84,54 +61,68 @@ class ImageCacheService {
     });
   }
 
-  private cleanupLocalStorageCache() {
-    if (this.currentLocalStorageSize <= this.maxLocalStorageSize) return;
-
-    // Remove oldest entries
-    const entries = Array.from(this.localStorageCache.entries());
-    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-
-    const toRemove = entries.slice(0, Math.floor(entries.length * 0.3));
-    toRemove.forEach(([key]) => {
-      this.currentLocalStorageSize -=
-        this.localStorageCache.get(key)?.size || 0;
-      this.localStorageCache.delete(key);
-    });
-
-    this.saveToLocalStorage();
-  }
-
   async getImage(url: string): Promise<HTMLImageElement> {
     // Check memory cache first
     if (this.memoryCache.has(url)) {
       this.stats.hitCount++;
       this.updateStats();
+      logger.debug(
+        `Memory cache HIT for ${url.split('/').pop()}`,
+        'ImageCache'
+      );
       return this.memoryCache.get(url)!;
     }
 
-    // Check localStorage cache
-    if (this.localStorageCache.has(url)) {
-      const cached = this.localStorageCache.get(url)!;
-      const img = new Image() as CachedHTMLImageElement;
-      img.src = URL.createObjectURL(cached.blob);
-      img.timestamp = Date.now();
-      img.size = cached.size;
+    // Check IndexedDB cache
+    try {
+      const cachedBlob = await indexedDBCache.get(url);
+      if (cachedBlob) {
+        this.stats.hitCount++;
+        this.updateStats();
+        logger.debug(
+          `IndexedDB cache HIT for ${url.split('/').pop()}`,
+          'ImageCache'
+        );
 
-      this.memoryCache.set(url, img);
-      this.currentMemorySize += cached.size;
-      this.cleanupMemoryCache();
+        const img = new Image() as CachedHTMLImageElement;
+        img.src = URL.createObjectURL(cachedBlob);
+        img.timestamp = Date.now();
+        img.size = cachedBlob.size;
 
-      this.stats.hitCount++;
-      this.updateStats();
-      return img;
+        // Cache in memory for faster subsequent access
+        this.memoryCache.set(url, img);
+        this.currentMemorySize += cachedBlob.size;
+        this.cleanupMemoryCache();
+
+        return img;
+      }
+    } catch (error) {
+      logger.logError(error, 'IndexedDBCacheMiss');
     }
 
-    // Load from network
+    // Load from network with retry logic for rate limiting
     this.stats.missCount++;
     this.updateStats();
+    logger.info(`Network fetch for ${url.split('/').pop()}`, 'ImageCache');
 
+    return this.fetchImageWithRetry(url);
+  }
+
+  private async fetchImageWithRetry(
+    url: string,
+    retries = 3,
+    delay = 500
+  ): Promise<HTMLImageElement> {
     try {
       const response = await fetch(url);
+
+      // Handle rate limiting (429) with exponential backoff
+      if (response.status === 429 && retries > 0) {
+        logger.warn(`Rate limited on ${url}, retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.fetchImageWithRetry(url, retries - 1, delay * 2);
+      }
+
       if (!response.ok)
         throw new Error(`Failed to load image: ${response.status}`);
 
@@ -146,37 +137,60 @@ class ImageCacheService {
       this.currentMemorySize += blob.size;
       this.cleanupMemoryCache();
 
-      // Cache in localStorage
-      const cachedImage: CachedImage = {
-        url,
-        blob,
-        timestamp: Date.now(),
-        size: blob.size,
-      };
-
-      this.localStorageCache.set(url, cachedImage);
-      this.currentLocalStorageSize += blob.size;
-      this.cleanupLocalStorageCache();
-      this.saveToLocalStorage();
+      // Cache in IndexedDB for persistence
+      indexedDBCache.set(url, blob).catch((err) => {
+        logger.logError(err, 'CacheInIndexeddb');
+      });
 
       return img;
     } catch (error) {
-      console.error('Failed to load image:', url, error);
+      if (retries > 0) {
+        logger.warn(`Error loading ${url}, retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.fetchImageWithRetry(url, retries - 1, delay * 2);
+      }
+      logger.error('Failed to load image after retries:', url, error);
       throw error;
     }
   }
 
   async preloadImages(urls: string[]): Promise<HTMLImageElement[]> {
-    const promises = urls.map((url) => this.getImage(url));
-    return Promise.all(promises);
+    // Batch loading strategy: Load in parallel batches to balance speed vs rate limits
+    // 10 sprites per batch with 1 second between batches = 60 sprites/min max
+    const batchSize = 10;
+    const delayBetweenBatches = 1000;
+    const results: HTMLImageElement[] = [];
+
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
+
+      // Load batch in parallel
+      const batchPromises = batch.map((url) =>
+        this.getImage(url).catch((err) => {
+          console.warn(`Failed to preload image ${url}:`, err);
+          return null;
+        })
+      );
+
+      const batchResults = await Promise.all(batchPromises);
+      results.push(
+        ...batchResults.filter((img): img is HTMLImageElement => img !== null)
+      );
+
+      // Delay between batches (except for the last batch)
+      if (i + batchSize < urls.length) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches)
+        );
+      }
+    }
+
+    return results;
   }
 
-  clearCache() {
+  async clearCache() {
     this.memoryCache.clear();
-    this.localStorageCache.clear();
     this.currentMemorySize = 0;
-    this.currentLocalStorageSize = 0;
-    localStorage.removeItem('imageCache');
     this.stats = {
       totalSize: 0,
       itemCount: 0,
@@ -184,18 +198,18 @@ class ImageCacheService {
       missCount: 0,
       hitCount: 0,
     };
-  }
 
-  private clearLocalStorage() {
-    this.localStorageCache.clear();
-    this.currentLocalStorageSize = 0;
-    localStorage.removeItem('imageCache');
+    // Also clear IndexedDB
+    try {
+      await indexedDBCache.clear();
+    } catch (error) {
+      logger.logError(error, 'ClearIndexeddb');
+    }
   }
 
   private updateStats() {
-    this.stats.totalSize =
-      this.currentMemorySize + this.currentLocalStorageSize;
-    this.stats.itemCount = this.memoryCache.size + this.localStorageCache.size;
+    this.stats.totalSize = this.currentMemorySize;
+    this.stats.itemCount = this.memoryCache.size;
     const totalRequests = this.stats.hitCount + this.stats.missCount;
     this.stats.hitRate =
       totalRequests > 0 ? this.stats.hitCount / totalRequests : 0;

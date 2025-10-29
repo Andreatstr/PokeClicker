@@ -45,7 +45,7 @@ test.describe("Clicker Game", () => {
   }) => {
     const initialCandy = await clicker.getCandyCount();
     await clicker.clickPokemon();
-    await page.waitForTimeout(2500);
+    await page.waitForTimeout(500);
 
     const newCandy = await clicker.getCandyCount();
     expect(newCandy).toBeGreaterThan(initialCandy);
@@ -59,7 +59,7 @@ test.describe("Clicker Game", () => {
     await clicker.clickPokemon();
 
     // Stats should still be accessible
-    const hpLevel = await clicker.getStatLevel("hp");
-    expect(hpLevel).toBeGreaterThanOrEqual(1);
+    const clickPowerLevel = await clicker.getStatLevel("clickPower");
+    expect(clickPowerLevel).toBeGreaterThanOrEqual(1);
   });
 });

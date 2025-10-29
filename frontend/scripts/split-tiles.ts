@@ -175,8 +175,8 @@ async function main(): Promise<boolean> {
   return true;
 }
 
-// Run the script
-if (require.main === module) {
+// Run the script (ESM entry point check)
+if (import.meta.url === `file://${process.argv[1]}`) {
   main()
     .then((success) => {
       process.exit(success ? 0 : 1);

@@ -42,3 +42,24 @@ global.Audio = vi.fn().mockImplementation(() => ({
   volume: 1,
   currentTime: 0,
 }));
+
+// Mock IndexedDB
+const indexedDBMock = {
+  open: vi.fn().mockImplementation(() => {
+    const request = {
+      result: {},
+      error: null,
+      onsuccess: null as ((event: Event) => void) | null,
+      onerror: null as ((event: Event) => void) | null,
+      onupgradeneeded: null as ((event: Event) => void) | null,
+    };
+    setTimeout(() => {
+      if (request.onsuccess) {
+        request.onsuccess(new Event('success'));
+      }
+    }, 0);
+    return request;
+  }),
+};
+
+global.indexedDB = indexedDBMock as unknown as IDBFactory;

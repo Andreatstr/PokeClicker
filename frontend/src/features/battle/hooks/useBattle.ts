@@ -105,6 +105,9 @@ export function useBattle({
     const damage = calculateClickDamage();
 
     setBattleState((prev) => {
+      // Check if battle is still ongoing
+      if (prev.result !== 'ongoing') return prev;
+
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
       const newCharge = Math.min(100, prev.chargeProgress + 2); // +2% per click
@@ -175,7 +178,12 @@ export function useBattle({
         clearInterval(passiveDamageTimerRef.current);
       }
     };
-  }, [battleState.result, battleState.isActive, calculatePassiveDamage, getAttackInterval]);
+  }, [
+    battleState.result,
+    battleState.isActive,
+    calculatePassiveDamage,
+    getAttackInterval,
+  ]);
 
   useEffect(() => {
     if (battleState.result !== 'ongoing') {

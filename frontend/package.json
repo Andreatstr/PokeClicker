@@ -20,7 +20,9 @@
     "test:unit": "vitest run --reporter=verbose src/lib src/features/*/utils",
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
     "test:integration": "vitest run --reporter=verbose src/__tests__",
-    "split-tiles": "npx tsx scripts/split-tiles.ts"
+    "split-tiles": "npx tsx scripts/split-tiles.ts",
+    "analyze": "vite build && start dist/stats.html",
+    "prepare": "husky"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",
@@ -31,16 +33,13 @@
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "fs": "0.0.1-security",
+    "focus-trap-react": "^11.0.4",
     "graphql": "^16.11.0",
     "lucide-react": "^0.544.0",
-    "path": "^0.12.7",
     "pixel-retroui": "^2.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.65.0",
-    "react-router-dom": "^7.9.3",
-    "react-window": "^2.2.1",
     "sharp": "^0.34.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7"
@@ -54,8 +53,6 @@
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/react-window": "^2.0.0",
     "@vitejs/plugin-react": "^5.0.3",
     "@vitest/coverage-v8": "4.0.1",
     "autoprefixer": "^10.4.21",
@@ -64,13 +61,25 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "husky": "^9.1.7",
     "jsdom": "^27.0.1",
+    "lint-staged": "^16.2.6",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.44.0",
     "vite": "^7.1.7",
     "vitest": "^4.0.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   }
 }

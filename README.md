@@ -39,7 +39,7 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **Styling**: Tailwind CSS + Radix UI komponenter
 - **Backend**: GraphQL API (Node.js + TypeScript) _(planlagt for del 2)_
 - **Database**: MongoDB på VM
-- **Testing**: Vitest + React Testing Library (97 tests, 52% coverage) ✅
+- **Testing**: Vitest + React Testing Library (159 tests passing - 107 frontend, 52 backend) ✅
 
 ## Status: Tredje underveisinnlevering (Del3)
 
@@ -83,6 +83,16 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 - **Environment files**: Alle `.env` filer er gitignored for å forhindre utilsiktet commit av sensitive data
 - **Rate limiting**: Game-optimized limits som tillater høyfrekvent klikking
 - **JWT security**: Ingen hardkodede secrets, proper validation
+
+## Development Workflow
+
+### Pre-commit Hooks
+- **Husky + lint-staged**: Automated code quality checks on every commit
+- **ESLint**: Automatically runs and fixes issues on staged files
+- **Prettier**: Code formatting enforced on commit
+- **Setup**: Hooks installed automatically with `npm install`
+
+This ensures consistent code quality across all commits and prevents broken code from entering the repository.
 
 ## Bærekraftig utvikling (Del3 - Fullført)
 
@@ -186,6 +196,20 @@ For å redusere antall API-kall til PokéAPI og forbedre responstid, bruker vi `
 - Type-filtrering: ~270ms → ~90ms (3x raskere)
 
 Cachen fungerer også som fallback hvis PokéAPI skulle være nede, så lenge dataen har blitt hentet minst én gang tidligere.
+
+### Image Caching Strategy
+
+**Batch Loading (Optimized):**
+- Load 10 sprites in parallel per batch
+- 1 second delay between batches (60 sprites/min max)
+- Prevents API rate limiting while maintaining good performance
+- IndexedDB for persistent caching across sessions
+
+**Performance:**
+- Batch parallel loading: ~10 images per second
+- Sequential fallback for rate limit compliance
+- Automatic retry on failed loads
+- Reduced initial preload: 40 Pokemon (2 pages) instead of 50
 
 ### Arkitektonisk beslutning: Pokédex-spørring med MongoDB
 
@@ -498,32 +522,50 @@ VITE_GRAPHQL_URL=http://localhost:3001/
 
 ### Test Suite Oversikt
 
-Prosjektet inkluderer en omfattende testsuite med **97 bestående tester** som dekker:
+Prosjektet inkluderer en omfattende testsuite med **159 bestående tester** som dekker:
 
-- ✅ **Utility-funksjoner** (lib/utils.ts, typeColors.ts) - 100% dekning
-- ✅ **Custom hooks** (useAuth, useGameMutations, usePokedexQuery, etc.) - 100% dekning  
-- ✅ **Komponenttester** (LoginScreen, PokeClicker) - Kjernefunksjonalitet testet
-- ✅ **Integrasjonstester** - Apollo Client mocking og GraphQL operasjoner
+- ✅ **Frontend tester**: 107 tester
+  - Utility-funksjoner (lib/utils.ts, typeColors.ts) - 100% dekning
+  - Custom hooks (useAuth, useGameMutations, usePokedexQuery, etc.) - 100% dekning
+  - Komponenttester (LoginScreen, PokeClicker) - Kjernefunksjonalitet testet
+  - Integrasjonstester - Apollo Client mocking og GraphQL operasjoner
+- ✅ **Backend tester**: 52 tester
+  - GraphQL resolvers - Comprehensive unit tests
+  - Authentication module - JWT and bcrypt testing
+  - Database operations - MongoDB integration tests
 
 ### Kjøre Tester
 
+**Frontend tester:**
 ```bash
 # Naviger til frontend directory
 cd frontend
 
 # Kjør alle tester
-pnpm test
+npm test
 
 # Kjør tester med coverage rapport
-pnpm test:coverage
+npm test:coverage
 
 # Kjør tester i watch mode (for utvikling)
-pnpm test:watch
+npm test:watch
 
 # Kjør spesifikke test kategorier
-pnpm test:unit        # Utility funksjoner og hooks
-pnpm test:components  # Komponenttester
-pnpm test:integration # Integrasjonstester
+npm test:unit        # Utility funksjoner og hooks
+npm test:components  # Komponenttester
+npm test:integration # Integrasjonstester
+```
+
+**Backend tester:**
+```bash
+# Naviger til backend directory
+cd backend
+
+# Kjør alle tester
+npm test
+
+# Kjør tester i watch mode
+npm test:watch
 ```
 
 ### Test Konfigurasjon

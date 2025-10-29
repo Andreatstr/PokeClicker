@@ -9,97 +9,44 @@ import {
   MultiSelect,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
+import {usePokedexFilterContext} from '../../contexts/usePokedexFilterContext';
+import {POKEMON_TYPES, POKEMON_REGIONS} from '../../utils/constants';
 
 interface FiltersAndCountProps {
   loading: boolean;
   displayedPokemon: PokedexPokemon[];
   totalPokemon: number;
-  selectedTypes: string[];
-  selectedRegion: string | null;
-  sortBy: 'id' | 'name' | 'type';
-  sortOrder: 'asc' | 'desc';
   isMobile: boolean;
-  showMobileFilters: boolean;
-  tempRegion: string | null;
-  tempTypes: string[];
-  tempSortBy: 'id' | 'name' | 'type';
-  tempSortOrder: 'asc' | 'desc';
-  selectedOwnedOnly: boolean;
-  tempOwnedOnly: boolean;
-  setSelectedRegion: (value: string | null) => void;
-  setSelectedTypes: (value: string[]) => void;
-  setSortBy: (value: 'id' | 'name' | 'type') => void;
-  setSortOrder: (value: 'asc' | 'desc') => void;
-  setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
-  setTempRegion: (value: string | null) => void;
-  setTempTypes: (value: string[]) => void;
-  setTempSortBy: (value: 'id' | 'name' | 'type') => void;
-  setTempSortOrder: (value: 'asc' | 'desc') => void;
-  setSelectedOwnedOnly: (value: boolean) => void;
-  setTempOwnedOnly: (value: boolean) => void;
-  handleClearFilters: () => void;
   ownedPokemonIds: number[];
 }
-
-const typeOptions = [
-  'normal',
-  'fire',
-  'water',
-  'electric',
-  'grass',
-  'ice',
-  'fighting',
-  'poison',
-  'ground',
-  'flying',
-  'psychic',
-  'bug',
-  'rock',
-  'ghost',
-  'dragon',
-  'dark',
-  'steel',
-  'fairy',
-];
-
-const regionOptions = [
-  {value: 'kanto', label: 'Kanto (1-151)'},
-  {value: 'johto', label: 'Johto (152-251)'},
-  {value: 'hoenn', label: 'Hoenn (252-386)'},
-  {value: 'sinnoh', label: 'Sinnoh (387-493)'},
-  {value: 'unova', label: 'Unova (494-649)'},
-  {value: 'kalos', label: 'Kalos (650-721)'},
-  {value: 'alola', label: 'Alola (722-809)'},
-  {value: 'galar', label: 'Galar (810-905)'},
-  {value: 'paldea', label: 'Paldea (906-1025)'},
-];
 
 export function FiltersAndCount({
   loading,
   displayedPokemon,
   totalPokemon,
   isMobile,
-  showMobileFilters,
-  tempRegion,
-  tempTypes,
-  tempSortBy,
-  tempSortOrder,
-  selectedOwnedOnly,
-  tempOwnedOnly,
-  setSelectedRegion,
-  setSelectedTypes,
-  setSortBy,
-  setSortOrder,
-  setShowMobileFilters,
-  setTempRegion,
-  setTempTypes,
-  setTempSortBy,
-  setTempSortOrder,
-  setSelectedOwnedOnly,
-  setTempOwnedOnly,
-  handleClearFilters,
   ownedPokemonIds,
 }: FiltersAndCountProps) {
+  // Get all filter state and handlers from context
+  const {
+    showMobileFilters,
+    tempRegion,
+    tempTypes,
+    tempSortBy,
+    tempSortOrder,
+    tempOwnedOnly,
+    setSelectedRegion,
+    setSelectedTypes,
+    setSortBy,
+    setSortOrder,
+    setShowMobileFilters,
+    setTempRegion,
+    setTempTypes,
+    setTempSortBy,
+    setTempSortOrder,
+    setSelectedOwnedOnly,
+    setTempOwnedOnly,
+  } = usePokedexFilterContext();
   const ownedCount = (ownedPokemonIds ?? []).length;
   return (
     <section className="mb-6">
@@ -154,7 +101,7 @@ export function FiltersAndCount({
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
-                      {regionOptions.map((region) => (
+                      {POKEMON_REGIONS.map((region) => (
                         <SelectItem key={region.value} value={region.value}>
                           {region.label}
                         </SelectItem>
@@ -165,11 +112,14 @@ export function FiltersAndCount({
 
                 {/* TYPE */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Type
                   </Label>
                   <MultiSelect
-                    options={typeOptions}
+                    options={[...POKEMON_TYPES]}
                     selected={tempTypes}
                     onChange={setTempTypes}
                     className="w-full"
@@ -178,7 +128,10 @@ export function FiltersAndCount({
 
                 {/* SORT BY */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Sort by
                   </Label>
                   <Select
@@ -200,7 +153,10 @@ export function FiltersAndCount({
 
                 {/* ORDER */}
                 <div>
-                  <Label className="text-xs font-bold style={{color: 'var(--foreground)'}}">
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Order
                   </Label>
                   <Select
@@ -219,7 +175,10 @@ export function FiltersAndCount({
 
                 {/* OWNED */}
                 <div>
-                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Filter on
                   </Label>
 
@@ -233,13 +192,17 @@ export function FiltersAndCount({
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm mt-1" aria-label="Owned filter">
+                    <SelectTrigger
+                      className="w-full text-sm mt-1"
+                      aria-label="Owned filter"
+                    >
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Pokémon</SelectItem>
                       <SelectItem value="owned" disabled={ownedCount === 0}>
-                        Owned only {ownedCount > 0 ? `(${ownedCount} total)` : ''}
+                        Owned only{' '}
+                        {ownedCount > 0 ? `(${ownedCount} total)` : ''}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -296,7 +259,7 @@ export function FiltersAndCount({
       )}
 
       {!isMobile && (
-        <p className="text-sm pixel-font style={{color: 'var(--foreground)'}}">
+        <p className="text-sm pixel-font" style={{color: 'var(--foreground)'}}>
           {loading
             ? 'Loading...'
             : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}

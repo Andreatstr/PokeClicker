@@ -1,6 +1,7 @@
 import {pokemonSpriteCache} from './pokemonSpriteCache';
 import {typeBackgroundCache} from './typeBackgroundCache';
 import {gameAssetsCache} from './gameAssetsCache';
+import {logger} from '@/lib/logger';
 
 interface PreloadOptions {
   preloadCommonPokemon?: boolean;
@@ -33,7 +34,7 @@ class PreloadService {
 
   async preloadAll(options: PreloadOptions = {}): Promise<void> {
     if (this.isPreloading) {
-      console.warn('Preloading already in progress');
+      logger.warn('Preloading already in progress');
       return;
     }
 
@@ -98,9 +99,9 @@ class PreloadService {
       await Promise.all(tasks.map((task) => task()));
 
       this.updateProgress(100);
-      console.log('All assets preloaded successfully');
+      logger.info('All assets preloaded successfully');
     } catch (error) {
-      console.error('Failed to preload assets:', error);
+      logger.logError(error, 'PreloadAssets');
       throw error;
     } finally {
       this.isPreloading = false;
@@ -108,6 +109,8 @@ class PreloadService {
   }
 
   async preloadForPokedex(): Promise<void> {
+    // Preload first page (20 Pokemon) + type backgrounds
+    // Batched loading prevents rate limits while improving sustainability
     await this.preloadAll({
       preloadCommonPokemon: true,
       preloadCommonTypes: true,

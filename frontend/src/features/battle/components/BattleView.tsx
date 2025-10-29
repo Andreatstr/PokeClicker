@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
@@ -53,16 +53,27 @@ export function BattleView({
     },
   });
 
-  // Expose attack function to parent component
-  useEffect(() => {
-    if (onAttackFunctionReady && result === 'ongoing') {
-      onAttackFunctionReady(handleAttackClick);
-    }
-  }, [onAttackFunctionReady, handleAttackClick, result]);
+  // Keep attack function ref up to date
+  const attackFunctionRef = useRef(handleAttackClick);
+  attackFunctionRef.current = handleAttackClick;
 
-  // Calculate rare candy reward
+  // Expose attack function to parent component (only once on mount)
+  useEffect(() => {
+    if (onAttackFunctionReady) {
+      // Create a stable wrapper that calls the latest attack function
+      onAttackFunctionReady(() => {
+        if (attackFunctionRef.current) {
+          attackFunctionRef.current();
+        }
+      });
+    }
+    // Only run once on mount to avoid setState during render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Calculate rare candy reward (must match PokemonMap.tsx multiplier)
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
-  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 5);
+  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 10);
 
   // Ready countdown state
   const [readyCount, setReadyCount] = useState(5);
@@ -215,10 +226,16 @@ export function BattleView({
       {/* Get Ready Overlay */}
       {result === 'ongoing' && !isActive && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/50">
-          <div className={`pixel-font text-center ${isDarkMode ? 'text-white' : 'text-white'}`}>
+          <div
+            className={`pixel-font text-center ${isDarkMode ? 'text-white' : 'text-white'}`}
+          >
             <div className="text-lg md:text-2xl mb-2">Get Ready!</div>
-            <div className="text-sm md:text-base opacity-90 mb-4">Tap to attack, charge to unleash specials</div>
-            <div className="text-3xl md:text-5xl font-bold">{readyCount > 0 ? readyCount : 'Go!'}</div>
+            <div className="text-sm md:text-base opacity-90 mb-4">
+              Tap to attack, charge to unleash specials
+            </div>
+            <div className="text-3xl md:text-5xl font-bold">
+              {readyCount > 0 ? readyCount : 'Go!'}
+            </div>
           </div>
         </div>
       )}
@@ -234,7 +251,9 @@ export function BattleView({
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
               } ${!isCharged ? 'cursor-not-allowed' : ''} ${
-                isCharged ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50' : ''
+                isCharged
+                  ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50'
+                  : ''
               }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -245,13 +264,17 @@ export function BattleView({
               {/* Charge progress bar with glow effect */}
               <div
                 className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
-                  isDarkMode ? 'bg-gradient-to-t from-purple-900 via-purple-600 to-purple-400' : 'bg-gradient-to-t from-purple-800 via-purple-500 to-purple-300'
+                  isDarkMode
+                    ? 'bg-gradient-to-t from-purple-900 via-purple-600 to-purple-400'
+                    : 'bg-gradient-to-t from-purple-800 via-purple-500 to-purple-300'
                 } ${isCharged ? 'shadow-lg shadow-purple-500/50' : ''}`}
                 style={{height: `${chargeProgress}%`}}
               />
-              <span className={`relative z-10 font-bold transition-colors duration-300 ${
-                !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
-              }`}>
+              <span
+                className={`relative z-10 font-bold transition-colors duration-300 ${
+                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                }`}
+              >
                 <span className="md:hidden">Sp.Att</span>
                 <span className="hidden md:inline">Special Attack</span>
               </span>
@@ -262,7 +285,9 @@ export function BattleView({
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
               } ${!isCharged ? 'cursor-not-allowed' : ''} ${
-                isCharged ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50' : ''
+                isCharged
+                  ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50'
+                  : ''
               }`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -273,13 +298,19 @@ export function BattleView({
               {/* Charge progress bar with glow effect */}
               <div
                 className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
-                  isDarkMode ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400' : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
+                  isDarkMode
+                    ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400'
+                    : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
                 } ${isCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
                 style={{height: `${chargeProgress}%`}}
               />
-              <span className={`relative z-10 font-bold transition-colors duration-300 ${
-                !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
-              }`}>Shield</span>
+              <span
+                className={`relative z-10 font-bold transition-colors duration-300 ${
+                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                }`}
+              >
+                Shield
+              </span>
             </button>
           </div>
         </div>

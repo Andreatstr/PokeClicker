@@ -5,13 +5,16 @@ import './index.css';
 import App from './App.tsx';
 import {apolloClient} from '@lib/apolloClient';
 import {AuthProvider} from '@features/auth';
+import {ErrorProvider} from '@/contexts/ErrorContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <ApolloProvider client={apolloClient}>
-        <App />
-      </ApolloProvider>
-    </AuthProvider>
+    <ErrorProvider>
+      <AuthProvider>
+        <ApolloProvider client={apolloClient}>
+          <App />
+        </ApolloProvider>
+      </AuthProvider>
+    </ErrorProvider>
   </StrictMode>
 );

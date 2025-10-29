@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
+import {logger} from '@/lib/logger';
 import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
 
@@ -64,7 +65,7 @@ function generateRandomPokemonId(maxOwnedId: number): number {
 }
 
 export function usePokemonSpawning(
-  collisionChecker: CollisionChecker,
+  collisionChecker: CollisionChecker & {collisionMapLoaded?: boolean},
   playerPosition: {x: number; y: number}
 ): PokemonState {
   const {user} = useAuth();
@@ -87,12 +88,13 @@ export function usePokemonSpawning(
   useEffect(() => {
     if (user?._id) {
       const saved = localStorage.getItem(userStorageKey);
+
       if (saved) {
         try {
           const restored = JSON.parse(saved);
           setWildPokemon(restored);
         } catch (e) {
-          console.warn('Failed to restore Pokemon spawns:', e);
+          logger.logError(e, 'RestorePokemonSpawns');
           setWildPokemon([]); // Clear on error
         }
       } else {
@@ -150,7 +152,14 @@ export function usePokemonSpawning(
 
   // Place Pokemon at random walkable locations when data loads
   useEffect(() => {
-    if (allPokemon.length >= NUM_SPAWNS && wildPokemon.length === 0) {
+    // Check all conditions including collision map
+    const collisionMapReady = collisionChecker.collisionMapLoaded !== false;
+
+    if (
+      allPokemon.length >= NUM_SPAWNS &&
+      wildPokemon.length === 0 &&
+      collisionMapReady
+    ) {
       const placedPokemon: PokemonSpawn[] = [];
 
       // Generate 50 Pokemon using progression-based selection
@@ -176,7 +185,14 @@ export function usePokemonSpawning(
 
       setWildPokemon(placedPokemon);
     }
-  }, [allPokemon, getRandomWalkablePosition, wildPokemon.length, maxOwnedId]);
+  }, [
+    allPokemon,
+    getRandomWalkablePosition,
+    wildPokemon.length,
+    maxOwnedId,
+    collisionChecker.collisionMapLoaded,
+    user?._id,
+  ]);
 
   // Remove a caught Pokemon and spawn a new one based on progression
   const removePokemon = useCallback(
