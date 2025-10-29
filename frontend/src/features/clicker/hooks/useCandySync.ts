@@ -109,6 +109,7 @@ export function useCandySync({
   }, [flushPendingCandy]);
 
   // Flush when component unmounts (navigating away from clicker)
+  // Empty deps - we want this to run ONLY on unmount, refs handle current values
   useEffect(() => {
     return () => {
       // Use ref to get current unsynced amount and flush function (avoiding stale closure)
@@ -116,8 +117,6 @@ export function useCandySync({
         flushPendingCandyRef.current();
       }
     };
-    // Empty deps - we want this to run ONLY on unmount, refs handle current values
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Add candy locally (optimistic update)

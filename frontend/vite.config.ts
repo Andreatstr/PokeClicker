@@ -21,7 +21,6 @@ export default defineConfig({
         manualChunks: {
           apollo: ['@apollo/client', 'graphql'],
           'react-vendor': ['react', 'react-dom'],
-          router: ['react-router-dom'],
           'ui-vendor': [
             '@radix-ui/react-avatar',
             '@radix-ui/react-label',
