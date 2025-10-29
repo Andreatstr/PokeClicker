@@ -112,6 +112,93 @@ Etter:
 - **Redusert dataforbruk**: Kun nødvendige komponenter lastes
 - **Forbedret brukeropplevelse**: Loading states med kontekstuelle meldinger
 
+### Bundle Optimization og Circular Dependency Fixes
+
+**Problem:** Ved analyse av produksjonsbygget oppdaget vi flere problemer:
+- Største chunk var 621 KB (188 KB gzipped) - over Rollup's 500 KB anbefaling
+- 4 advarsler om circular dependencies fra `useAuth` hook
+- Vendor-kode (Apollo Client, React, UI-biblioteker) blandet med app-kode
+- PokedexPage og PokemonMap lastet eager, selv når ikke nødvendig
+
+**Analyse av rotårsaker:**
+
+1. **Circular Dependencies:**
+   - `features/auth/index.ts` (barrel export) eksporterte både `useAuth` og `AuthContext`
+   - `AuthContext` importerte andre moduler som indirekte importerte fra samme barrel
+   - Dette skapte sykliske avhengigheter mellom chunks under code-splitting
+   - Påvirket filer: PokeClicker.tsx, LoginScreen.tsx, ProfileDashboard.tsx, BattleView.tsx, useMapMovement.ts, useProfileHandlers.ts
+
+2. **Stor initial bundle:**
+   - `@apollo/client` (~210 KB) lastet i main chunk
+   - PokedexPage (~150 KB estimert) lastet eager
+   - PokemonMap (~100 KB med collision detection) lastet eager
+   - Ingen separasjon av vendor-kode for optimal caching
+
+**Vår løsning i tre faser:**
+
+**Fase 1: Fix Circular Dependencies**
+```typescript
+// Før (barrel export import):
+import {useAuth} from '@features/auth';
+
+// Etter (direkte import):
+import {useAuth} from '@features/auth/hooks/useAuth';
+```
+- Endret 6 filer til å importere direkte fra hook-filen
+- Eliminerte alle 4 circular dependency advarsler
+- Sikrer forutsigbar execution order under code-splitting
+
+**Fase 2: Lazy Load Heavy Components**
+```typescript
+// App.tsx - lazy load PokedexPage og PokemonMap
+const PokedexPage = lazy(() =>
+  import('@features/pokedex').then(m => ({default: m.PokedexPage}))
+);
+const PokemonMap = lazy(() =>
+  import('@features/map').then(m => ({default: m.PokemonMap}))
+);
+```
+- Reduserer initial bundle fra 621 KB til 321 KB (48% reduksjon)
+- Map og Pokedex lastes kun når bruker navigerer dit
+- Raskere initial page load, spesielt på trege forbindelser
+
+**Fase 3: Manual Chunk Configuration**
+```typescript
+// vite.config.ts
+build: {
+  rollupOptions: {
+    output: {
+      manualChunks: {
+        'apollo': ['@apollo/client', 'graphql'],
+        'react-vendor': ['react', 'react-dom'],
+        'router': ['react-router-dom'],
+        'ui-vendor': ['@radix-ui/react-avatar', '@radix-ui/react-label', ...],
+      },
+    },
+  },
+}
+```
+- Separerer vendor-kode i dedikerte chunks
+- Bedre long-term caching (vendor-kode endres sjelden)
+- Apollo chunk: 210 KB (62 KB gzipped)
+- UI vendor chunk: 97 KB (32 KB gzipped)
+
+**Resultater:**
+
+| Metric | Før | Etter | Forbedring |
+|--------|-----|-------|------------|
+| Største chunk | 621 KB (188 KB gzip) | 321 KB (97 KB gzip) | **-48%** |
+| Circular warnings | 4 advarsler | 0 advarsler | **100% eliminert** |
+| Chunk size warning | 1 advarsel | 0 advarsler | **Eliminert** |
+| Vendor caching | Blandet med app-kode | Separerte chunks | **Optimalisert** |
+| Build output | Advarsler | Ren build | **Kvalitetsforbedring** |
+
+**Hvorfor dette er viktig for bærekraft:**
+- **Mindre dataoverføring**: 48% mindre initial bundle = mindre CO₂-utslipp fra dataoverføring
+- **Raskere laster på mobil**: Viktig for brukere med trege forbindelser eller datalimiter
+- **Bedre caching**: Vendor-chunks kan caches lenge, reduserer repeat downloads
+- **On-demand loading**: Bare last kode som faktisk brukes
+
 ### Issue #81: Virtual Rendering for Carousel Navigation
 - **Problem**: Åpning av Pokemon-modal med 50 filtrerte Pokemon resulterte i 500+ GraphQL queries (50 Pokemon × 10 evolution queries hver)
 - **Årsak**: Carousel rendret alle Pokemon samtidig, hver med egne evolution chain queries
