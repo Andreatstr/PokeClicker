@@ -1,3 +1,5 @@
+import {indexedDBCache} from './indexedDBCache';
+
 interface CacheStats {
   totalSize: number;
   itemCount: number;
@@ -24,7 +26,16 @@ class ImageCacheService {
   };
 
   constructor() {
-    // No localStorage loading - Blobs cannot be serialized to JSON
+    // Initialize IndexedDB cleanup on startup
+    this.initCleanup();
+  }
+
+  private async initCleanup() {
+    try {
+      await indexedDBCache.cleanup();
+    } catch (error) {
+      console.warn('Failed to cleanup IndexedDB:', error);
+    }
   }
 
 
@@ -59,6 +70,29 @@ class ImageCacheService {
       return this.memoryCache.get(url)!;
     }
 
+    // Check IndexedDB cache
+    try {
+      const cachedBlob = await indexedDBCache.get(url);
+      if (cachedBlob) {
+        this.stats.hitCount++;
+        this.updateStats();
+
+        const img = new Image() as CachedHTMLImageElement;
+        img.src = URL.createObjectURL(cachedBlob);
+        img.timestamp = Date.now();
+        img.size = cachedBlob.size;
+
+        // Cache in memory for faster subsequent access
+        this.memoryCache.set(url, img);
+        this.currentMemorySize += cachedBlob.size;
+        this.cleanupMemoryCache();
+
+        return img;
+      }
+    } catch (error) {
+      console.warn('IndexedDB cache miss:', error);
+    }
+
     // Load from network
     this.stats.missCount++;
     this.updateStats();
@@ -78,6 +112,11 @@ class ImageCacheService {
       this.memoryCache.set(url, img);
       this.currentMemorySize += blob.size;
       this.cleanupMemoryCache();
+
+      // Cache in IndexedDB for persistence
+      indexedDBCache.set(url, blob).catch((err) => {
+        console.warn('Failed to cache in IndexedDB:', err);
+      });
 
       return img;
     } catch (error) {
@@ -109,7 +148,7 @@ class ImageCacheService {
     return results;
   }
 
-  clearCache() {
+  async clearCache() {
     this.memoryCache.clear();
     this.currentMemorySize = 0;
     this.stats = {
@@ -119,6 +158,13 @@ class ImageCacheService {
       missCount: 0,
       hitCount: 0,
     };
+
+    // Also clear IndexedDB
+    try {
+      await indexedDBCache.clear();
+    } catch (error) {
+      console.warn('Failed to clear IndexedDB:', error);
+    }
   }
 
   private updateStats() {
