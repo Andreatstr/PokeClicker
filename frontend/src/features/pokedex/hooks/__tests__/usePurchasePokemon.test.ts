@@ -80,7 +80,7 @@ describe('usePurchasePokemon hook', () => {
     expect(mockUseMutation).toHaveBeenCalledWith(
       expect.any(Object), // PURCHASE_POKEMON_MUTATION
       {
-        refetchQueries: ['Pokedex', 'Me'],
+        refetchQueries: ['Pokedex'],
         optimisticResponse: expect.any(Function),
       }
     );
@@ -178,7 +178,7 @@ describe('usePurchasePokemon hook', () => {
     const callArgs = mockUseMutation.mock.calls[0];
     const options = callArgs[1];
 
-    expect(options.refetchQueries).toEqual(['Pokedex', 'Me']);
+    expect(options.refetchQueries).toEqual(['Pokedex']);
   });
 
   it('should return loading state', () => {

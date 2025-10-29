@@ -202,7 +202,7 @@ export const resolvers = {
 
       // Automatic migration: Initialize new stats for existing users
       let needsUpdate = false;
-      const updates: any = {};
+      const updates: Record<string, number> = {};
 
       if (!userDoc.stats.clickPower) {
         updates['stats.clickPower'] = 1;
@@ -332,7 +332,7 @@ export const resolvers = {
           });
 
           if (user && Array.isArray(user.owned_pokemon_ids)) {
-            ownedPokemonIds = user.owned_pokemon_ids.map((v: any) => Number(v)).filter(Number.isFinite);
+            ownedPokemonIds = user.owned_pokemon_ids.map((v: unknown) => Number(v)).filter(Number.isFinite);
           }
         } catch (error) {
           console.error('Error fetching user owned Pokemon:', error);
@@ -557,7 +557,7 @@ export const resolvers = {
       // Calculate cost - for new stats, ensure we use the correct level
       let currentLevel = 1;
       if (stat === 'clickPower' || stat === 'passiveIncome') {
-        currentLevel = (userDoc.stats as any)[stat] || 1;
+        currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
         console.log(
           `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
         );

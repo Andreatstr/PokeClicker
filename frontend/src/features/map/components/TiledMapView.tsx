@@ -49,7 +49,9 @@ export function TiledMapView({
   );
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
-    return user && 'owned_pokemon_ids' in user ? user.owned_pokemon_ids.length <= 3 : false;
+    return user && 'owned_pokemon_ids' in user && Array.isArray(user.owned_pokemon_ids) 
+      ? user.owned_pokemon_ids.length <= 3 
+      : false;
   });
 
   return (
