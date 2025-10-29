@@ -1,15 +1,5 @@
-import {useQuery, gql} from '@apollo/client';
 import {Dialog, DialogBody} from '@ui/pixelact';
-
-const GET_POKEMON_BY_IDS = gql`
-  query GetPokemonByIds($ids: [Int!]!) {
-    pokemonByIds(ids: $ids) {
-      id
-      name
-      sprite
-    }
-  }
-`;
+import {usePokemonBasicBulk} from '../hooks/usePokemonBasic';
 
 interface FavoritePokemonSelectorProps {
   isOpen: boolean;
@@ -27,10 +17,9 @@ export function FavoritePokemonSelector({
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
   // Fetch all owned Pokemon in a single query
-  const {data, loading} = useQuery(GET_POKEMON_BY_IDS, {
-    variables: {ids: ownedPokemonIds},
-    skip: !isOpen || ownedPokemonIds.length === 0,
-  });
+  const {data, loading} = usePokemonBasicBulk(
+    isOpen ? ownedPokemonIds : []
+  );
 
   const ownedPokemon = data?.pokemonByIds || [];
 

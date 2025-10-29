@@ -1,44 +1,11 @@
 import {useState} from 'react';
 import {useAuth} from '@features/auth';
-import {useMutation, useQuery, gql} from '@apollo/client';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
-import {USER_FRAGMENT} from '@/lib/graphql/fragments';
-
-const DELETE_USER = gql`
-  mutation DeleteUser {
-    deleteUser
-  }
-`;
-
-const SET_FAVORITE_POKEMON = gql`
-  ${USER_FRAGMENT}
-  mutation SetFavoritePokemon($pokemonId: Int) {
-    setFavoritePokemon(pokemonId: $pokemonId) {
-      ...UserFields
-    }
-  }
-`;
-
-const SET_SELECTED_POKEMON = gql`
-  ${USER_FRAGMENT}
-  mutation SetSelectedPokemon($pokemonId: Int) {
-    setSelectedPokemon(pokemonId: $pokemonId) {
-      ...UserFields
-    }
-  }
-`;
-
-const GET_POKEMON_BY_ID = gql`
-  query GetPokemonById($id: Int!) {
-    pokemonById(id: $id) {
-      id
-      name
-      sprite
-      types
-    }
-  }
-`;
+import {PokemonDisplayButton} from './PokemonDisplayButton';
+import {usePokemonBasic} from '../hooks/usePokemonBasic';
+import {useProfileHandlers} from '../hooks/useProfileHandlers';
+import {formatTrainerSince} from '../utils/formatDate';
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
@@ -49,68 +16,46 @@ export function ProfileDashboard({
   isDarkMode = false,
   onNavigate,
 }: ProfileDashboardProps) {
-  const {user, logout, updateUser} = useAuth();
+  const {user} = useAuth();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [showSelectedSelector, setShowSelectedSelector] = useState(false);
-  const [deleteUser, {loading: deleting}] = useMutation(DELETE_USER);
-  const [setFavoritePokemon] = useMutation(SET_FAVORITE_POKEMON);
-  const [setSelectedPokemon] = useMutation(SET_SELECTED_POKEMON);
 
-  const {data: favoritePokemonData} = useQuery(GET_POKEMON_BY_ID, {
-    variables: {id: user?.favorite_pokemon_id},
-    skip: !user?.favorite_pokemon_id,
-  });
+  const {
+    handleLogout,
+    handleDeleteAccount,
+    handleSetFavorite,
+    handleSetSelected,
+    deleting,
+  } = useProfileHandlers(onNavigate);
 
-  const {data: selectedPokemonData} = useQuery(GET_POKEMON_BY_ID, {
-    variables: {id: user?.selected_pokemon_id},
-    skip: !user?.selected_pokemon_id,
-  });
+  const {data: favoritePokemonData} = usePokemonBasic(
+    user?.favorite_pokemon_id
+  );
+  const {data: selectedPokemonData} = usePokemonBasic(
+    user?.selected_pokemon_id
+  );
 
   if (!user) {
     return null;
   }
 
-  const handleLogout = async () => {
-    await logout();
-    onNavigate?.('login');
+  const onDeleteConfirm = async () => {
+    await handleDeleteAccount();
+    setDeleteDialogOpen(false);
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      await deleteUser();
-      await logout();
-      setDeleteDialogOpen(false);
-      onNavigate?.('login');
-    } catch (error) {
-      console.error('Failed to delete account:', error);
-      alert('Failed to delete account. Please try again.');
-    }
-  };
-
-  const handleSetFavorite = async (pokemonId: number | null) => {
-    try {
-      const result = await setFavoritePokemon({variables: {pokemonId}});
-      if (result.data?.setFavoritePokemon) {
-        updateUser(result.data.setFavoritePokemon);
-      }
+  const onFavoriteSelect = async (pokemonId: number | null) => {
+    const success = await handleSetFavorite(pokemonId);
+    if (success) {
       setShowFavoriteSelector(false);
-    } catch (error) {
-      console.error('Failed to set favorite Pokemon:', error);
-      alert('Failed to set favorite Pokemon. Please try again.');
     }
   };
 
-  const handleSetSelected = async (pokemonId: number | null) => {
-    try {
-      const result = await setSelectedPokemon({variables: {pokemonId}});
-      if (result.data?.setSelectedPokemon) {
-        updateUser(result.data.setSelectedPokemon);
-      }
+  const onSelectedSelect = async (pokemonId: number | null) => {
+    const success = await handleSetSelected(pokemonId);
+    if (success) {
       setShowSelectedSelector(false);
-    } catch (error) {
-      console.error('Failed to set selected Pokemon:', error);
-      alert('Failed to set selected Pokemon. Please try again.');
     }
   };
 
@@ -147,19 +92,7 @@ export function ProfileDashboard({
               <strong>POKEMON OWNED:</strong> {user.owned_pokemon_ids.length}
             </p>
             <p>
-              <strong>TRAINER SINCE:</strong>{' '}
-              {(() => {
-                try {
-                  const date = new Date(user.created_at);
-                  if (isNaN(date.getTime())) return 'Unknown';
-                  return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  });
-                } catch {
-                  return 'Unknown';
-                }
-              })()}
+              <strong>TRAINER SINCE:</strong> {formatTrainerSince(user.created_at)}
             </p>
           </div>
         </div>
@@ -204,66 +137,18 @@ export function ProfileDashboard({
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
         >
           <h2 className="text-lg sm:text-xl font-bold">FAVORITE</h2>
-
-          {favoritePokemonData?.pokemonById ? (
-            <button
-              onClick={() => setShowFavoriteSelector(true)}
-              className="px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
-              style={{
-                borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
-              }}
-              title="Click to change favorite (long press to remove)"
-            >
-              <img
-                src={favoritePokemonData.pokemonById.sprite}
-                alt={favoritePokemonData.pokemonById.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
-                style={{imageRendering: 'pixelated'}}
-              />
-              <p className="text-sm sm:text-base capitalize font-bold text-left flex-1">
-                {favoritePokemonData.pokemonById.name}
-              </p>
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowFavoriteSelector(true)}
-              disabled={user.owned_pokemon_ids.length === 0}
-              className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
-              style={{
-                borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor:
-                  user.owned_pokemon_ids.length === 0
-                    ? '#555'
-                    : isDarkMode
-                      ? '#2a2a2a'
-                      : '#f5f1e8',
-                cursor:
-                  user.owned_pokemon_ids.length === 0
-                    ? 'not-allowed'
-                    : 'pointer',
-                opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
-              }}
-              title={
-                user.owned_pokemon_ids.length === 0
-                  ? 'Catch a Pokemon first!'
-                  : 'Click to select favorite'
-              }
-            >
-              <div
-                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0"
-                style={{color: isDarkMode ? '#666' : '#999'}}
-              >
-                ?
-              </div>
-              <p
-                className="text-sm sm:text-base font-bold text-left flex-1"
-                style={{color: isDarkMode ? '#666' : '#999'}}
-              >
-                None
-              </p>
-            </button>
-          )}
+          <PokemonDisplayButton
+            pokemon={favoritePokemonData?.pokemonById}
+            onClick={() => setShowFavoriteSelector(true)}
+            disabled={user.owned_pokemon_ids.length === 0}
+            title="Click to change favorite"
+            emptyTitle={
+              user.owned_pokemon_ids.length === 0
+                ? 'Catch a Pokemon first!'
+                : 'Click to select favorite'
+            }
+            isDarkMode={isDarkMode}
+          />
         </div>
 
         {/* Clicker Pokemon Section */}
@@ -272,66 +157,18 @@ export function ProfileDashboard({
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
         >
           <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
-
-          {selectedPokemonData?.pokemonById ? (
-            <button
-              onClick={() => setShowSelectedSelector(true)}
-              className="px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
-              style={{
-                borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
-              }}
-              title="Click to change clicker Pokemon"
-            >
-              <img
-                src={selectedPokemonData.pokemonById.sprite}
-                alt={selectedPokemonData.pokemonById.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
-                style={{imageRendering: 'pixelated'}}
-              />
-              <p className="text-sm sm:text-base capitalize font-bold text-left flex-1">
-                {selectedPokemonData.pokemonById.name}
-              </p>
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowSelectedSelector(true)}
-              disabled={user.owned_pokemon_ids.length === 0}
-              className="px-6 py-4 border-4 transition-all hover:scale-105 flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
-              style={{
-                borderColor: isDarkMode ? '#333333' : 'black',
-                backgroundColor:
-                  user.owned_pokemon_ids.length === 0
-                    ? '#555'
-                    : isDarkMode
-                      ? '#2a2a2a'
-                      : '#f5f1e8',
-                cursor:
-                  user.owned_pokemon_ids.length === 0
-                    ? 'not-allowed'
-                    : 'pointer',
-                opacity: user.owned_pokemon_ids.length === 0 ? 0.5 : 1,
-              }}
-              title={
-                user.owned_pokemon_ids.length === 0
-                  ? 'Catch a Pokemon first!'
-                  : 'Click to select clicker Pokemon'
-              }
-            >
-              <div
-                className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0"
-                style={{color: isDarkMode ? '#666' : '#999'}}
-              >
-                ?
-              </div>
-              <p
-                className="text-sm sm:text-base font-bold text-left flex-1"
-                style={{color: isDarkMode ? '#666' : '#999'}}
-              >
-                None
-              </p>
-            </button>
-          )}
+          <PokemonDisplayButton
+            pokemon={selectedPokemonData?.pokemonById}
+            onClick={() => setShowSelectedSelector(true)}
+            disabled={user.owned_pokemon_ids.length === 0}
+            title="Click to change clicker Pokemon"
+            emptyTitle={
+              user.owned_pokemon_ids.length === 0
+                ? 'Catch a Pokemon first!'
+                : 'Click to select clicker Pokemon'
+            }
+            isDarkMode={isDarkMode}
+          />
         </div>
 
         {/* Action Buttons */}
@@ -399,7 +236,7 @@ export function ProfileDashboard({
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteAccount}
+        onConfirm={onDeleteConfirm}
         title="DELETE ACCOUNT"
         message="Are you sure you want to delete your account? This action cannot be undone. All your Pokemon and progress will be lost forever."
         confirmText="DELETE"
@@ -410,7 +247,7 @@ export function ProfileDashboard({
       <FavoritePokemonSelector
         isOpen={showFavoriteSelector}
         onClose={() => setShowFavoriteSelector(false)}
-        onSelect={handleSetFavorite}
+        onSelect={onFavoriteSelect}
         ownedPokemonIds={user.owned_pokemon_ids}
         isDarkMode={isDarkMode}
       />
@@ -418,7 +255,7 @@ export function ProfileDashboard({
       <FavoritePokemonSelector
         isOpen={showSelectedSelector}
         onClose={() => setShowSelectedSelector(false)}
-        onSelect={handleSetSelected}
+        onSelect={onSelectedSelect}
         ownedPokemonIds={user.owned_pokemon_ids}
         isDarkMode={isDarkMode}
       />
