@@ -95,6 +95,10 @@ export function useCandySync({
         flushPendingCandy();
       }
     };
+    // ESLint wants us to add [unsyncedAmount, flushPendingCandy] as dependencies,
+    // but that would cause the cleanup to run on EVERY candy change instead of only on unmount.
+    // This would break the batching logic and cause race conditions with server sync.
+    // We intentionally want this to run ONLY when navigating away from the clicker page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

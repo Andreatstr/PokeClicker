@@ -222,7 +222,14 @@ export function useMapMovement(
         movementIntervalRef.current = null;
       }
     };
-  }, [isMoving, collisionChecker]);
+    // ESLint wants us to add [collisionChecker] as a dependency, but collisionChecker
+    // is a new object reference on every render (returned from useCollisionMap).
+    // Adding it would cause the movement interval to restart constantly, breaking
+    // the ability to hold movement buttons (you'd have to tap repeatedly instead).
+    // The collision check inside uses collisionChecker.isPositionWalkable which is
+    // stable via useCallback, so the functionality works correctly without the dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMoving]);
 
   // Handle key down
   const handleKeyDown = useCallback(
