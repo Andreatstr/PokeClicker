@@ -36,7 +36,8 @@ test.describe("Authentication", () => {
 
     await page.evaluate(() => localStorage.clear());
     await page.reload();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
+    await page.waitForTimeout(1000);
 
     if (await login.isOnLoginPage()) {
       await login.login(username, password);

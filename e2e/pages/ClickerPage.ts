@@ -4,12 +4,8 @@ import { BasePage } from "./BasePage";
 export class ClickerPage extends BasePage {
   readonly candyCount: Locator;
   readonly clickButton: Locator;
-  readonly hpStat: Locator;
-  readonly attackStat: Locator;
-  readonly defenseStat: Locator;
-  readonly spAttackStat: Locator;
-  readonly spDefenseStat: Locator;
-  readonly speedStat: Locator;
+  readonly clickPowerStat: Locator;
+  readonly passiveIncomeStat: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -19,23 +15,11 @@ export class ClickerPage extends BasePage {
       .locator("..")
       .locator("..")
       .getByText(/^\d+$/);
-    // Click button is the Charizard button
-    this.clickButton = page.getByRole('button', { name: /click charizard/i });
-    // Stats are found by their label text (HP, Attack, etc.) and going up to parent container
-    this.hpStat = page.getByText("HP", { exact: true }).locator("../..");
-    this.attackStat = page
-      .getByText("Attack", { exact: true })
-      .locator("../..");
-    this.defenseStat = page
-      .getByText("Defense", { exact: true })
-      .locator("../..");
-    this.spAttackStat = page
-      .getByText("Sp. Attack", { exact: true })
-      .locator("../..");
-    this.spDefenseStat = page
-      .getByText("Sp. Defense", { exact: true })
-      .locator("../..");
-    this.speedStat = page.getByText("Speed", { exact: true }).locator("../..");
+    // Click button is the Pokemon button
+    this.clickButton = page.getByRole('button', { name: /click pokemon to earn rare candy/i });
+    // Stats are now simplified to Click Power and Passive Income
+    this.clickPowerStat = page.getByText("Click Power", { exact: true }).locator("../..");
+    this.passiveIncomeStat = page.getByText("Passive Income", { exact: true }).locator("../..");
   }
 
   async clickPokemon() {
@@ -49,15 +33,11 @@ export class ClickerPage extends BasePage {
   }
 
   async getStatLevel(
-    stat: "hp" | "attack" | "defense" | "spAttack" | "spDefense" | "speed",
+    stat: "clickPower" | "passiveIncome",
   ): Promise<number> {
     const locatorMap = {
-      hp: this.hpStat,
-      attack: this.attackStat,
-      defense: this.defenseStat,
-      spAttack: this.spAttackStat,
-      spDefense: this.spDefenseStat,
-      speed: this.speedStat,
+      clickPower: this.clickPowerStat,
+      passiveIncome: this.passiveIncomeStat,
     };
 
     // Stats display as "LV 1", "LV 2", etc.
@@ -66,16 +46,12 @@ export class ClickerPage extends BasePage {
     return match ? parseInt(match[1]) : 1;
   }
 
-  async upgradeHp() {
-    await this.hpStat.locator("button").click();
+  async upgradeClickPower() {
+    await this.clickPowerStat.locator("button").click();
   }
 
-  async upgradeAttack() {
-    await this.attackStat.locator("button").click();
-  }
-
-  async upgradeDefense() {
-    await this.defenseStat.locator("button").click();
+  async upgradePassiveIncome() {
+    await this.passiveIncomeStat.locator("button").click();
   }
 
   async clearLocalStorage() {

@@ -28,7 +28,8 @@ export class PokedexPage extends BasePage {
 
   // Pokemon grid elements
   readonly pokemonCards: Locator;
-  readonly loadMoreButton: Locator;
+  readonly nextPageButton: Locator;
+  readonly previousPageButton: Locator;
   readonly countText: Locator;
   readonly noResultsText: Locator;
 
@@ -38,7 +39,7 @@ export class PokedexPage extends BasePage {
     // Search
     this.searchInput = page.locator('input[type="search"]');
     this.clearSearchButton = page.locator('div[role="button"][aria-label="Clear search"]');
-    this.mobileFiltersButton = page.getByRole("button", { name: "Filters", exact: true });
+    this.mobileFiltersButton = page.getByRole("button", { name: /open filter options/i });
 
     // Desktop filters
     this.regionSelect = page.locator('label:has-text("REGION")').locator('..').locator('button[role="combobox"]');
@@ -61,7 +62,8 @@ export class PokedexPage extends BasePage {
 
     // Pokemon grid
     this.pokemonCards = page.locator("ul li");
-    this.loadMoreButton = page.getByRole("button", { name: /load more/i });
+    this.nextPageButton = page.getByRole("button", { name: /next/i });
+    this.previousPageButton = page.getByRole("button", { name: /previous/i });
     this.countText = page.getByText(/showing \d+ of \d+ pokémon/i);
     this.noResultsText = page.getByText(/no pokemon found/i);
   }
@@ -132,11 +134,15 @@ export class PokedexPage extends BasePage {
   }
 
   async selectMobileSortBy(sortBy: "id" | "name" | "type") {
+    await this.page.waitForTimeout(200);
+    await this.mobileSortBySelect.scrollIntoViewIfNeeded();
     await this.mobileSortBySelect.click();
     await this.page.getByRole("option", { name: new RegExp(sortBy, "i") }).click();
   }
 
   async selectMobileSortOrder(order: "asc" | "desc") {
+    await this.page.waitForTimeout(200);
+    await this.mobileSortOrderSelect.scrollIntoViewIfNeeded();
     await this.mobileSortOrderSelect.click();
     await this.page.getByRole("option", { name: new RegExp(order, "i") }).click();
   }
@@ -168,8 +174,13 @@ export class PokedexPage extends BasePage {
     await this.page.getByText(name, { exact: true }).first().click();
   }
 
-  async loadMore() {
-    await this.loadMoreButton.click();
+  async goToNextPage() {
+    await this.nextPageButton.click();
+    await this.page.waitForTimeout(500); // Wait for new cards to load
+  }
+
+  async goToPreviousPage() {
+    await this.previousPageButton.click();
     await this.page.waitForTimeout(500); // Wait for new cards to load
   }
 
