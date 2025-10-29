@@ -1,23 +1,19 @@
 import {Button, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
+import {usePokedexFilterContext} from '../../contexts/PokedexFilterContext';
 
 interface SearchBarProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  handleClearSearch: () => void;
-  isMobile: boolean;
-  showMobileFilters: boolean;
-  setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
   isDarkMode?: boolean;
 }
 
-export function SearchBar({
-  searchTerm,
-  setSearchTerm,
-  handleClearSearch,
-  showMobileFilters,
-  setShowMobileFilters,
-  isDarkMode = false,
-}: SearchBarProps) {
+export function SearchBar({isDarkMode = false}: SearchBarProps) {
+  // Get search state and handlers from context
+  const {
+    searchTerm,
+    setSearchTerm,
+    handleClearSearch,
+    showMobileFilters,
+    setShowMobileFilters,
+  } = usePokedexFilterContext();
   return (
     <section className="mb-6 mt-6 sm:mt-4 max-w-4xl mx-auto">
       <form

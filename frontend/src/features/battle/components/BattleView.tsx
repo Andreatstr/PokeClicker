@@ -65,9 +65,9 @@ export function BattleView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Calculate rare candy reward
+  // Calculate rare candy reward (must match PokemonMap.tsx multiplier)
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
-  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 5);
+  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 10);
 
   if (showResult && battleResult) {
     return (

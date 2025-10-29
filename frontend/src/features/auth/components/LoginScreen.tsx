@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useState, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {useMutation} from '@apollo/client';
 import {Button} from '@ui/pixelact';
@@ -11,6 +11,7 @@ import {
   type AuthVariables,
 } from '@/lib/graphql';
 import {logger} from '@/lib/logger';
+import {useMobileDetection} from '@/hooks';
 
 type Props = {
   onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;
@@ -22,9 +23,11 @@ type FormValues = {
 };
 
 export function LoginScreen({onNavigate}: Props) {
-  const [isMobile, setIsMobile] = useState(false);
   const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
   const {login: authLogin} = useAuth();
+
+  // Use centralized mobile detection hook
+  const isMobile = useMobileDetection(768);
 
   const [loginMutation, {loading: loginLoading, error: loginError}] =
     useMutation<LoginData, AuthVariables>(LOGIN_MUTATION);
@@ -33,13 +36,6 @@ export function LoginScreen({onNavigate}: Props) {
 
   const loading = loginLoading || signupLoading;
   const error = loginError || signupError;
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const {
     register,

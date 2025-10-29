@@ -24,6 +24,7 @@ export function useCandySync({
   // Local candy state - THIS is the source of truth for display!
   const [localRareCandy, setLocalRareCandy] = useState(user?.rare_candy || 0);
   const [unsyncedAmount, setUnsyncedAmount] = useState(0);
+  const unsyncedAmountRef = useRef(0); // Ref to track unsynced amount for cleanup
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncRef = useRef<number>(Date.now());
 
@@ -36,6 +37,7 @@ export function useCandySync({
     if (user && !hasMountedRef.current) {
       setLocalRareCandy(user.rare_candy);
       setUnsyncedAmount(0);
+      unsyncedAmountRef.current = 0; // Keep ref in sync
       hasMountedRef.current = true;
     }
   }, [user]);
@@ -46,6 +48,7 @@ export function useCandySync({
 
     const amountToSync = unsyncedAmount;
     setUnsyncedAmount(0); // Clear unsynced amount (we're syncing it now)
+    unsyncedAmountRef.current = 0; // Keep ref in sync
     lastSyncRef.current = Date.now();
 
     if (batchTimerRef.current) {
@@ -61,7 +64,11 @@ export function useCandySync({
       logger.logError(err, 'SyncCandy');
       setDisplayError('Failed to save progress. Will retry...');
       // Put the amount back in unsynced so it will be tried again
-      setUnsyncedAmount((prev) => prev + amountToSync);
+      setUnsyncedAmount((prev) => {
+        const newAmount = prev + amountToSync;
+        unsyncedAmountRef.current = newAmount; // Keep ref in sync
+        return newAmount;
+      });
       setTimeout(
         () => setDisplayError(null),
         GameConfig.clicker.errorDisplayDuration
@@ -95,24 +102,32 @@ export function useCandySync({
     };
   }, [unsyncedAmount, isAuthenticated, flushPendingCandy]);
 
+  // Store flush function in ref for unmount cleanup
+  const flushPendingCandyRef = useRef(flushPendingCandy);
+  useEffect(() => {
+    flushPendingCandyRef.current = flushPendingCandy;
+  }, [flushPendingCandy]);
+
   // Flush when component unmounts (navigating away from clicker)
   useEffect(() => {
     return () => {
-      if (unsyncedAmount > 0) {
-        flushPendingCandy();
+      // Use ref to get current unsynced amount and flush function (avoiding stale closure)
+      if (unsyncedAmountRef.current > 0) {
+        flushPendingCandyRef.current();
       }
     };
-    // ESLint wants us to add [unsyncedAmount, flushPendingCandy] as dependencies,
-    // but that would cause the cleanup to run on EVERY candy change instead of only on unmount.
-    // This would break the batching logic and cause race conditions with server sync.
-    // We intentionally want this to run ONLY when navigating away from the clicker page.
+    // Empty deps - we want this to run ONLY on unmount, refs handle current values
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Add candy locally (optimistic update)
   const addCandy = useCallback((amount: number) => {
     setLocalRareCandy((prev) => prev + amount);
-    setUnsyncedAmount((prev) => prev + amount);
+    setUnsyncedAmount((prev) => {
+      const newAmount = prev + amount;
+      unsyncedAmountRef.current = newAmount; // Keep ref in sync
+      return newAmount;
+    });
   }, []);
 
   // Deduct candy locally (for upgrades)

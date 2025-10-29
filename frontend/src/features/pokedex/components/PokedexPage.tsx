@@ -1,7 +1,11 @@
-import {useState, useEffect, Suspense, lazy} from 'react';
+import {useState, useEffect, Suspense, lazy, useCallback} from 'react';
 import {useAuth} from '@features/auth';
-import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
-import {usePokedexFilters} from '@/hooks';
+import {
+  usePokedexQuery,
+  type PokedexPokemon,
+  PokedexFilterProvider,
+} from '@features/pokedex';
+import {usePokedexFilters, useMobileDetection} from '@/hooks';
 import {LoadingSpinner} from '@/components/LoadingSpinner';
 import {PaginationControls} from '@/components/PaginationControls';
 import {ArrowLeftIcon, ArrowRightIcon} from '@ui/pixelact';
@@ -26,40 +30,34 @@ interface PokedexPageProps {
 
 export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   const {user} = useAuth();
-  const [isMobile, setIsMobile] = useState(false);
+
+  // Use centralized mobile detection hook
+  const isMobile = useMobileDetection(768);
+
+  // Get filter state from custom hook
+  const filterState = usePokedexFilters();
   const {
-    searchTerm,
-    setSearchTerm,
     debouncedSearchTerm,
     selectedRegion,
-    setSelectedRegion,
     selectedTypes,
-    setSelectedTypes,
     sortBy,
-    setSortBy,
     sortOrder,
-    setSortOrder,
     selectedOwnedOnly,
-    setSelectedOwnedOnly,
     paginationPage,
-    setPaginationPage,
-    showMobileFilters,
     setShowMobileFilters,
-    tempRegion,
-    setTempRegion,
-    tempTypes,
-    setTempTypes,
-    tempSortBy,
-    setTempSortBy,
-    tempSortOrder,
-    setTempSortOrder,
-    tempOwnedOnly,
-    setTempOwnedOnly,
-    handleClearFilters,
-    handleClearSearch,
-  } = usePokedexFilters();
+    setPaginationPage,
+  } = filterState;
 
   const ITEMS_PER_PAGE = 20;
+
+  // Memoize page change handler to prevent unnecessary re-renders
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setPaginationPage(page);
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    },
+    [setPaginationPage]
+  );
 
   const {loading, error, data} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
@@ -72,28 +70,15 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
     ownedOnly: selectedOwnedOnly,
   });
 
-  // Detect mobile
+  // Close mobile filters when switching to desktop view
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-      if (!mobile) {
-        setShowMobileFilters(false);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [setShowMobileFilters]);
+    if (!isMobile) {
+      setShowMobileFilters(false);
+    }
+  }, [isMobile, setShowMobileFilters]);
 
   const filteredPokemon = data?.pokedex.pokemon || [];
   const totalPokemon = data?.pokedex.total || 0;
-
-  const handlePageChange = (page: number) => {
-    setPaginationPage(page);
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  };
 
   const displayedPokemon = filteredPokemon;
   const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
@@ -113,22 +98,14 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   }
 
   return (
-    <>
+    <PokedexFilterProvider value={filterState}>
       {/* Search Bar */}
       <Suspense
         fallback={
           <LoadingSpinner message="Loading search..." isDarkMode={isDarkMode} />
         }
       >
-        <SearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          handleClearSearch={handleClearSearch}
-          isMobile={isMobile}
-          showMobileFilters={showMobileFilters}
-          setShowMobileFilters={setShowMobileFilters}
-          isDarkMode={isDarkMode}
-        />
+        <SearchBar isDarkMode={isDarkMode} />
       </Suspense>
 
       {/* Filters and Count */}
@@ -141,30 +118,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           loading={loading}
           displayedPokemon={displayedPokemon}
           totalPokemon={totalPokemon}
-          selectedTypes={selectedTypes}
-          selectedRegion={selectedRegion}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
           isMobile={isMobile}
-          showMobileFilters={showMobileFilters}
-          tempRegion={tempRegion}
-          tempTypes={tempTypes}
-          tempSortBy={tempSortBy}
-          tempSortOrder={tempSortOrder}
-          selectedOwnedOnly={selectedOwnedOnly}
-          tempOwnedOnly={tempOwnedOnly}
-          setSelectedRegion={setSelectedRegion}
-          setSelectedTypes={setSelectedTypes}
-          setSortBy={setSortBy}
-          setSortOrder={setSortOrder}
-          setShowMobileFilters={setShowMobileFilters}
-          setTempRegion={setTempRegion}
-          setTempTypes={setTempTypes}
-          setTempSortBy={setTempSortBy}
-          setTempSortOrder={setTempSortOrder}
-          setSelectedOwnedOnly={setSelectedOwnedOnly}
-          setTempOwnedOnly={setTempOwnedOnly}
-          handleClearFilters={handleClearFilters}
           ownedPokemonIds={user?.owned_pokemon_ids ?? []}
         />
       </Suspense>
@@ -195,7 +149,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           />
         </Suspense>
       </section>
-    </>
+    </PokedexFilterProvider>
   );
 }
 
@@ -222,17 +176,9 @@ function PokemonGrid({
 }: PokemonGridProps) {
   const [selectedMobilePokemon, setSelectedMobilePokemon] =
     useState<PokedexPokemon | null>(null);
-  const [isMobileView, setIsMobileView] = useState(false);
 
-  // Detect mobile
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Use centralized mobile detection hook
+  const isMobileView = useMobileDetection(768);
 
   // Set first Pokemon as selected on mobile by default
   useEffect(() => {

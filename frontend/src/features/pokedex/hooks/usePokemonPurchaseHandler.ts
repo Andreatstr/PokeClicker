@@ -8,7 +8,7 @@ import {useAuth} from '@features/auth';
  */
 export function usePokemonPurchaseHandler() {
   const [purchasePokemon] = usePurchasePokemon();
-  const {updateUser, user} = useAuth();
+  const {updateUser} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -23,13 +23,10 @@ export function usePokemonPurchaseHandler() {
         variables: {pokemonId},
       });
 
-      // Immediately update AuthContext with the server response
-      if (result.data?.purchasePokemon && user) {
-        updateUser({
-          ...user, // Keep existing user data (stats, etc.)
-          ...result.data.purchasePokemon, // Only update fields that changed
-          created_at: user.created_at,
-        });
+      // Update AuthContext with the server response
+      // Apollo optimistic response already updated the UI immediately
+      if (result.data?.purchasePokemon) {
+        updateUser(result.data.purchasePokemon);
       }
 
       onSuccess?.(pokemonId);
@@ -52,6 +49,5 @@ export function usePokemonPurchaseHandler() {
     handlePurchase,
     error,
     isAnimating,
-    user,
   };
 }

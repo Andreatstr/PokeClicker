@@ -1,3 +1,10 @@
+// Contexts
+export {
+  PokedexFilterProvider,
+  usePokedexFilterContext,
+} from './contexts/PokedexFilterContext';
+export type {PokedexFilterContextValue} from './contexts/PokedexFilterContext';
+
 // Components - Page
 export {PokedexPage} from './components/PokedexPage';
 

@@ -65,7 +65,7 @@ function generateRandomPokemonId(maxOwnedId: number): number {
 }
 
 export function usePokemonSpawning(
-  collisionChecker: CollisionChecker,
+  collisionChecker: CollisionChecker & {collisionMapLoaded?: boolean},
   playerPosition: {x: number; y: number}
 ): PokemonState {
   const {user} = useAuth();
@@ -86,11 +86,17 @@ export function usePokemonSpawning(
 
   // Restore Pokemon spawns from user-specific localStorage when user changes
   useEffect(() => {
+    logger.info(`[PokemonSpawn] User changed: ${user?._id || 'logged out'}`);
+    logger.info(`[PokemonSpawn] Storage key: ${userStorageKey}`);
+
     if (user?._id) {
       const saved = localStorage.getItem(userStorageKey);
+      logger.info(`[PokemonSpawn] Saved data exists: ${!!saved}`);
+
       if (saved) {
         try {
           const restored = JSON.parse(saved);
+          logger.info(`[PokemonSpawn] Restored ${restored.length} Pokemon spawns`);
           setWildPokemon(restored);
         } catch (e) {
           logger.logError(e, 'RestorePokemonSpawns');
@@ -98,10 +104,12 @@ export function usePokemonSpawning(
         }
       } else {
         // No saved data for this user, start fresh
+        logger.info(`[PokemonSpawn] No saved spawns for user, will generate new ones`);
         setWildPokemon([]);
       }
     } else {
       // User logged out, clear spawns
+      logger.info(`[PokemonSpawn] User logged out, clearing spawns`);
       setWildPokemon([]);
     }
   }, [user?._id, userStorageKey]);
@@ -151,7 +159,23 @@ export function usePokemonSpawning(
 
   // Place Pokemon at random walkable locations when data loads
   useEffect(() => {
-    if (allPokemon.length >= NUM_SPAWNS && wildPokemon.length === 0) {
+    logger.info(`[PokemonSpawn] Spawn generation check:`);
+    logger.info(`  - allPokemon.length: ${allPokemon.length}`);
+    logger.info(`  - wildPokemon.length: ${wildPokemon.length}`);
+    logger.info(`  - NUM_SPAWNS: ${NUM_SPAWNS}`);
+    logger.info(`  - user: ${user?._id || 'null'}`);
+    logger.info(`  - collisionMapLoaded: ${collisionChecker.collisionMapLoaded ?? 'not provided'}`);
+    logger.info(`  - maxOwnedId: ${maxOwnedId}`);
+
+    // Check all conditions including collision map
+    const collisionMapReady = collisionChecker.collisionMapLoaded !== false;
+
+    if (
+      allPokemon.length >= NUM_SPAWNS &&
+      wildPokemon.length === 0 &&
+      collisionMapReady
+    ) {
+      logger.info(`[PokemonSpawn] All conditions met! Generating ${NUM_SPAWNS} Pokemon...`);
       const placedPokemon: PokemonSpawn[] = [];
 
       // Generate 50 Pokemon using progression-based selection
@@ -175,9 +199,23 @@ export function usePokemonSpawning(
         }
       }
 
+      logger.info(`[PokemonSpawn] Successfully generated ${placedPokemon.length} Pokemon!`);
       setWildPokemon(placedPokemon);
+    } else if (!collisionMapReady) {
+      logger.info(`[PokemonSpawn] Waiting for collision map to load...`);
+    } else if (allPokemon.length < NUM_SPAWNS) {
+      logger.info(`[PokemonSpawn] Waiting for Pokemon data (need ${NUM_SPAWNS}, have ${allPokemon.length})...`);
+    } else if (wildPokemon.length > 0) {
+      logger.info(`[PokemonSpawn] Already have ${wildPokemon.length} spawned Pokemon`);
     }
-  }, [allPokemon, getRandomWalkablePosition, wildPokemon.length, maxOwnedId]);
+  }, [
+    allPokemon,
+    getRandomWalkablePosition,
+    wildPokemon.length,
+    maxOwnedId,
+    collisionChecker.collisionMapLoaded,
+    user?._id,
+  ]);
 
   // Remove a caught Pokemon and spawn a new one based on progression
   const removePokemon = useCallback(

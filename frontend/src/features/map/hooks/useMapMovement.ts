@@ -1,5 +1,6 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {logger} from '@/lib/logger';
+import {useAuth} from '@features/auth';
 
 // Constants
 const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
@@ -57,16 +58,33 @@ export function useMapMovement(
   collisionChecker: CollisionChecker,
   renderSize: {width: number; height: number}
 ): MovementState & MovementActions & CameraInfo {
-  // Character position in world coordinates - restore from localStorage if available
+  const {user} = useAuth();
+
+  // Create user-specific position key (same pattern as Pokemon spawns)
+  const userPositionKey = user?._id
+    ? `${PLAYER_POSITION_KEY}_${user._id}`
+    : PLAYER_POSITION_KEY;
+
+  // Character position in world coordinates - restore from user-specific localStorage
   const [worldPosition, setWorldPosition] = useState(() => {
-    const saved = localStorage.getItem(PLAYER_POSITION_KEY);
+    if (!user?._id) {
+      // Not logged in - use default center
+      return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
+    }
+
+    const saved = localStorage.getItem(userPositionKey);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const restored = JSON.parse(saved);
+        logger.info(`[MapMovement] Restored position for user ${user._id}: (${restored.x}, ${restored.y})`);
+        return restored;
       } catch (e) {
         logger.logError(e, 'RestorePlayerPosition');
       }
     }
+
+    // First time for this user - start at center
+    logger.info(`[MapMovement] New user ${user._id}, starting at map center`);
     return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
   });
   const [direction, setDirection] = useState<Direction>('down');
@@ -78,10 +96,34 @@ export function useMapMovement(
   const movementIntervalRef = useRef<number | null>(null);
   const animationResetTimeoutRef = useRef<number | null>(null);
 
-  // Save player position to localStorage whenever it changes
+  // Save player position to user-specific localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(PLAYER_POSITION_KEY, JSON.stringify(worldPosition));
-  }, [worldPosition]);
+    if (user?._id) {
+      localStorage.setItem(userPositionKey, JSON.stringify(worldPosition));
+    }
+  }, [worldPosition, userPositionKey, user?._id]);
+
+  // Reset position when user changes (login/logout)
+  useEffect(() => {
+    if (user?._id) {
+      const saved = localStorage.getItem(userPositionKey);
+      if (saved) {
+        try {
+          const restored = JSON.parse(saved);
+          logger.info(`[MapMovement] User changed, restoring position: (${restored.x}, ${restored.y})`);
+          setWorldPosition(restored);
+        } catch (e) {
+          logger.logError(e, 'RestorePlayerPosition');
+          logger.info(`[MapMovement] Failed to restore, resetting to center`);
+          setWorldPosition({x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2});
+        }
+      } else {
+        // New user - start at center
+        logger.info(`[MapMovement] No saved position for user ${user._id}, starting at center`);
+        setWorldPosition({x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2});
+      }
+    }
+  }, [user?._id, userPositionKey]);
 
   // Handle sprite animation when moving
   useEffect(() => {

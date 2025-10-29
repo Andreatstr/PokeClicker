@@ -9,36 +9,14 @@ import {
   MultiSelect,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
+import {usePokedexFilterContext} from '../../contexts/PokedexFilterContext';
 import {POKEMON_TYPES, POKEMON_REGIONS} from '../../utils/constants';
 
 interface FiltersAndCountProps {
   loading: boolean;
   displayedPokemon: PokedexPokemon[];
   totalPokemon: number;
-  selectedTypes: string[];
-  selectedRegion: string | null;
-  sortBy: 'id' | 'name' | 'type';
-  sortOrder: 'asc' | 'desc';
   isMobile: boolean;
-  showMobileFilters: boolean;
-  tempRegion: string | null;
-  tempTypes: string[];
-  tempSortBy: 'id' | 'name' | 'type';
-  tempSortOrder: 'asc' | 'desc';
-  selectedOwnedOnly: boolean;
-  tempOwnedOnly: boolean;
-  setSelectedRegion: (value: string | null) => void;
-  setSelectedTypes: (value: string[]) => void;
-  setSortBy: (value: 'id' | 'name' | 'type') => void;
-  setSortOrder: (value: 'asc' | 'desc') => void;
-  setShowMobileFilters: (value: boolean | ((prev: boolean) => boolean)) => void;
-  setTempRegion: (value: string | null) => void;
-  setTempTypes: (value: string[]) => void;
-  setTempSortBy: (value: 'id' | 'name' | 'type') => void;
-  setTempSortOrder: (value: 'asc' | 'desc') => void;
-  setSelectedOwnedOnly: (value: boolean) => void;
-  setTempOwnedOnly: (value: boolean) => void;
-  handleClearFilters: () => void;
   ownedPokemonIds: number[];
 }
 
@@ -47,25 +25,28 @@ export function FiltersAndCount({
   displayedPokemon,
   totalPokemon,
   isMobile,
-  showMobileFilters,
-  tempRegion,
-  tempTypes,
-  tempSortBy,
-  tempSortOrder,
-  tempOwnedOnly,
-  setSelectedRegion,
-  setSelectedTypes,
-  setSortBy,
-  setSortOrder,
-  setShowMobileFilters,
-  setTempRegion,
-  setTempTypes,
-  setTempSortBy,
-  setTempSortOrder,
-  setSelectedOwnedOnly,
-  setTempOwnedOnly,
   ownedPokemonIds,
 }: FiltersAndCountProps) {
+  // Get all filter state and handlers from context
+  const {
+    showMobileFilters,
+    tempRegion,
+    tempTypes,
+    tempSortBy,
+    tempSortOrder,
+    tempOwnedOnly,
+    setSelectedRegion,
+    setSelectedTypes,
+    setSortBy,
+    setSortOrder,
+    setShowMobileFilters,
+    setTempRegion,
+    setTempTypes,
+    setTempSortBy,
+    setTempSortOrder,
+    setSelectedOwnedOnly,
+    setTempOwnedOnly,
+  } = usePokedexFilterContext();
   const ownedCount = (ownedPokemonIds ?? []).length;
   return (
     <section className="mb-6">

@@ -1,10 +1,12 @@
 import {useState, useEffect} from 'react';
+import type {PokedexFilterContextValue} from '@features/pokedex/contexts/PokedexFilterContext';
 
 /**
  * Custom hook for managing Pokedex filter state
  * Handles both desktop and mobile (temporary) filter states
+ * Returns a context value object for use with PokedexFilterContext
  */
-export function usePokedexFilters() {
+export function usePokedexFilters(): PokedexFilterContextValue {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
@@ -50,9 +52,13 @@ export function usePokedexFilters() {
   };
 
   return {
+    // Search state
     searchTerm,
     setSearchTerm,
     debouncedSearchTerm,
+    handleClearSearch,
+
+    // Filter state
     selectedRegion,
     setSelectedRegion,
     selectedTypes,
@@ -63,8 +69,13 @@ export function usePokedexFilters() {
     setSortOrder,
     selectedOwnedOnly,
     setSelectedOwnedOnly,
+    handleClearFilters,
+
+    // Pagination state
     paginationPage,
     setPaginationPage,
+
+    // Mobile filter state
     showMobileFilters,
     setShowMobileFilters,
     tempRegion,
@@ -77,7 +88,5 @@ export function usePokedexFilters() {
     setTempSortOrder,
     tempOwnedOnly,
     setTempOwnedOnly,
-    handleClearFilters,
-    handleClearSearch,
   };
 }
