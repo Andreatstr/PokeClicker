@@ -1,6 +1,5 @@
 import {gql, useMutation, useQuery} from '@apollo/client';
 import type {User} from '@features/auth';
-import {USER_FRAGMENT} from '@/lib/graphql/fragments';
 
 const GET_POKEMON_UPGRADE = gql`
   query PokemonUpgrade($pokemonId: Int!) {
@@ -13,14 +12,14 @@ const GET_POKEMON_UPGRADE = gql`
 `;
 
 const UPGRADE_POKEMON = gql`
-  ${USER_FRAGMENT}
   mutation UpgradePokemon($pokemonId: Int!) {
     upgradePokemon(pokemonId: $pokemonId) {
       pokemon_id
       level
       cost
       user {
-        ...UserFields
+        _id
+        rare_candy
       }
     }
   }
