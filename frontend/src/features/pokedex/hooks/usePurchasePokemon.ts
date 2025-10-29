@@ -1,23 +1,9 @@
-import {useMutation, gql} from '@apollo/client';
-import {type User} from '@features/auth';
-
-const PURCHASE_POKEMON_MUTATION = gql`
-  mutation PurchasePokemon($pokemonId: Int!) {
-    purchasePokemon(pokemonId: $pokemonId) {
-      _id
-      rare_candy
-      owned_pokemon_ids
-    }
-  }
-`;
-
-interface PurchasePokemonData {
-  purchasePokemon: User;
-}
-
-interface PurchasePokemonVariables {
-  pokemonId: number;
-}
+import {useMutation} from '@apollo/client';
+import {
+  PURCHASE_POKEMON_MUTATION,
+  type PurchasePokemonData,
+  type PurchasePokemonVariables,
+} from '@/lib/graphql';
 
 export function usePurchasePokemon() {
   return useMutation<PurchasePokemonData, PurchasePokemonVariables>(

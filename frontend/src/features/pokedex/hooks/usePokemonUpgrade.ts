@@ -1,42 +1,22 @@
-import {gql, useMutation, useQuery} from '@apollo/client';
-import type {User} from '@features/auth';
+import {useMutation, useQuery} from '@apollo/client';
+import {
+  POKEMON_UPGRADE_QUERY,
+  UPGRADE_POKEMON_MUTATION,
+  type PokemonUpgrade,
+  type PokemonUpgradeData,
+  type PokemonUpgradeVariables,
+  type UpgradePokemonData,
+} from '@/lib/graphql';
 
-const GET_POKEMON_UPGRADE = gql`
-  query PokemonUpgrade($pokemonId: Int!) {
-    pokemonUpgrade(pokemonId: $pokemonId) {
-      pokemon_id
-      level
-      cost
-    }
-  }
-`;
-
-const UPGRADE_POKEMON = gql`
-  mutation UpgradePokemon($pokemonId: Int!) {
-    upgradePokemon(pokemonId: $pokemonId) {
-      pokemon_id
-      level
-      cost
-      user {
-        _id
-        rare_candy
-      }
-    }
-  }
-`;
-
-export interface PokemonUpgrade {
-  pokemon_id: number;
-  level: number;
-  cost: number;
-  user?: User;
-}
+// Re-export type for convenience
+export type {PokemonUpgrade};
 
 export function usePokemonUpgrade(pokemonId: number | null) {
-  const {data, loading, error, refetch} = useQuery<{
-    pokemonUpgrade: PokemonUpgrade;
-  }>(GET_POKEMON_UPGRADE, {
-    variables: {pokemonId},
+  const {data, loading, error, refetch} = useQuery<
+    PokemonUpgradeData,
+    PokemonUpgradeVariables
+  >(POKEMON_UPGRADE_QUERY, {
+    variables: {pokemonId: pokemonId!},
     skip: !pokemonId,
   });
 
@@ -49,9 +29,8 @@ export function usePokemonUpgrade(pokemonId: number | null) {
 }
 
 export function useUpgradePokemonMutation() {
-  const [upgradePokemon, {loading, error}] = useMutation<{
-    upgradePokemon: PokemonUpgrade;
-  }>(UPGRADE_POKEMON);
+  const [upgradePokemon, {loading, error}] =
+    useMutation<UpgradePokemonData>(UPGRADE_POKEMON_MUTATION);
 
   return [upgradePokemon, {loading, error}] as const;
 }

@@ -1,4 +1,6 @@
 import {useState, useCallback} from 'react';
+import {logger} from '@/lib/logger';
+import {GameConfig} from '@/config';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getUpgradeCost} from '../utils/statDescriptions';
 import type {User} from '@features/auth';
@@ -80,9 +82,12 @@ export function useClickerActions({
     // Remove candy after animation
     setTimeout(() => {
       setCandies((prev) => prev.filter((c) => c.id !== newCandy.id));
-    }, 1000);
+    }, GameConfig.clicker.candyFloatAnimationDuration);
 
-    setTimeout(() => setIsAnimating(false), 150);
+    setTimeout(
+      () => setIsAnimating(false),
+      GameConfig.clicker.clickAnimationDuration
+    );
   }, [isAuthenticated, stats, addCandy, setDisplayError]);
 
   // Handle upgrade
@@ -117,7 +122,7 @@ export function useClickerActions({
           setStats(updatedUser.stats);
         }
       } catch (err) {
-        console.error('Failed to upgrade stat:', err);
+        logger.logError(err, 'UpgradeStat');
         const errorMessage =
           err instanceof Error
             ? err.message
@@ -126,7 +131,10 @@ export function useClickerActions({
         // Revert optimistic updates
         addCandy(cost);
         setStats((prev) => ({...prev, [stat]: oldStat || 1}));
-        setTimeout(() => setDisplayError(null), 3000);
+        setTimeout(
+          () => setDisplayError(null),
+          GameConfig.clicker.errorDisplayDuration
+        );
       }
     },
     [

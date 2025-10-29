@@ -1,4 +1,5 @@
 import {ArrowRightIcon} from '@ui/pixelact';
+import {logger} from '@/lib/logger';
 import {usePokemonById} from '@features/pokedex';
 import {useState, useEffect} from 'react';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
@@ -29,7 +30,7 @@ export function EvolutionPokemon({
           const sprite = await pokemonSpriteCache.getPokemonSprite(id);
           setCachedSprite(sprite);
         } catch (error) {
-          console.warn('Failed to preload evolution sprite:', error);
+          logger.logError(error, 'PreloadEvolutionSprite');
         }
       }
     };

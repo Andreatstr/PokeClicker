@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
+import {logger} from '@/lib/logger';
 
 // Map dimensions
 const MAP_WIDTH = 10560;
@@ -32,7 +33,7 @@ export function useCollisionMap(): CollisionMapState {
       setCollisionMapLoaded(true);
     };
     img.onerror = () => {
-      console.error('Failed to load collision map');
+      logger.error('Failed to load collision map');
     };
   }, []);
 
@@ -65,7 +66,7 @@ export function useCollisionMap(): CollisionMapState {
         const brightness = (r + g + b) / 3;
         return brightness > 200;
       } catch (error) {
-        console.error('Error checking collision:', error);
+        logger.logError(error, 'CheckingCollision');
         return true; // Allow movement on error
       }
     },

@@ -1,4 +1,5 @@
 import {imageCache} from './imageCache';
+import {logger} from '@/lib/logger';
 
 interface TypeBackgroundUrls {
   [type: string]: string;
@@ -25,7 +26,7 @@ class TypeBackgroundCache {
     try {
       return await imageCache.getImage(url);
     } catch (error) {
-      console.error(`Failed to load type background for ${type}:`, error);
+      logger.logError(error, `LoadTypeBackground:${type}`);
       // Fallback to unknown type background
       const fallbackUrl = `${this.baseUrl}/unknown.webp`;
       return imageCache.getImage(fallbackUrl);

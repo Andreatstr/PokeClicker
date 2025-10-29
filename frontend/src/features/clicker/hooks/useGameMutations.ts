@@ -1,31 +1,19 @@
-import {gql, useMutation} from '@apollo/client';
+import {useMutation} from '@apollo/client';
 import type {User} from '@features/auth';
-import {USER_FRAGMENT} from '@/lib/graphql/fragments';
-
-const UPDATE_RARE_CANDY = gql`
-  ${USER_FRAGMENT}
-  mutation UpdateRareCandy($amount: Int!) {
-    updateRareCandy(amount: $amount) {
-      ...UserFields
-    }
-  }
-`;
-
-const UPGRADE_STAT = gql`
-  ${USER_FRAGMENT}
-  mutation UpgradeStat($stat: String!) {
-    upgradeStat(stat: $stat) {
-      ...UserFields
-    }
-  }
-`;
+import {
+  UPDATE_RARE_CANDY_MUTATION,
+  UPGRADE_STAT_MUTATION,
+  type UpdateRareCandyData,
+  type UpgradeStatData,
+} from '@/lib/graphql';
+import {logger} from '@/lib/logger';
 
 export function useGameMutations() {
   const [updateRareCandyMutation, {loading: updatingCandy, error: candyError}] =
-    useMutation<{updateRareCandy: User}>(UPDATE_RARE_CANDY);
+    useMutation<UpdateRareCandyData>(UPDATE_RARE_CANDY_MUTATION);
 
   const [upgradeStatMutation, {loading: upgradingStat, error: statError}] =
-    useMutation<{upgradeStat: User}>(UPGRADE_STAT);
+    useMutation<UpgradeStatData>(UPGRADE_STAT_MUTATION);
 
   const updateRareCandy = async (
     amount: number,
@@ -42,7 +30,7 @@ export function useGameMutations() {
 
       return result?.data?.updateRareCandy;
     } catch (error) {
-      console.error('Failed to update rare candy:', error);
+      logger.logError(error, 'UpdateRareCandy');
       throw error;
     }
   };
@@ -62,7 +50,7 @@ export function useGameMutations() {
 
       return result?.data?.upgradeStat;
     } catch (error) {
-      console.error('Failed to upgrade stat:', error);
+      logger.logError(error, 'UpgradeStat');
       throw error;
     }
   };

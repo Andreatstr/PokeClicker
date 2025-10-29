@@ -1,4 +1,5 @@
 import {useState, useEffect, type ReactNode} from 'react';
+import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
 import {AuthContext, type User} from './AuthContextDefinition';
 
@@ -14,7 +15,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        console.error('Failed to parse saved user:', e);
+        logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
       }

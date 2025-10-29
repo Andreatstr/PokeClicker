@@ -1,4 +1,5 @@
 import {type PokedexPokemon} from '@features/pokedex';
+import {logger} from '@/lib/logger';
 import '@ui/pixelact/styles/patterns.css';
 import {useState, memo, useEffect} from 'react';
 import {UnlockButton} from '@ui/pixelact';
@@ -48,7 +49,7 @@ export const PokemonCard = memo(function PokemonCard({
           setCachedBackground(background);
         }
       } catch (error) {
-        console.warn('Failed to preload Pokemon assets:', error);
+        logger.logError(error, 'PreloadPokemonAssets');
       }
     };
 

@@ -1,4 +1,5 @@
 import {useEffect} from 'react';
+import {logger} from '@/lib/logger';
 import {preloadService} from '@/lib/preloadService';
 
 type PageType = 'clicker' | 'pokedex' | 'map' | 'login' | 'profile';
@@ -29,7 +30,7 @@ export function usePreloading(currentPage: PageType) {
             });
         }
       } catch (error) {
-        console.warn('Failed to initialize preloading:', error);
+        logger.logError(error, 'PreloadInitialization');
       }
     };
 

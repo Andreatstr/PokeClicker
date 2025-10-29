@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth';
 import {useGameMutations} from '../hooks/useGameMutations';
 import {useCandySync} from '../hooks/useCandySync';
@@ -75,7 +76,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
           gameAssetsCache.getPokemonBackground(),
         ]);
       } catch (error) {
-        console.warn('Failed to preload game assets:', error);
+        logger.logError(error, 'PreloadGameAssets');
       }
     };
     preloadAssets();

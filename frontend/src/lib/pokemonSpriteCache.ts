@@ -1,4 +1,5 @@
 import {imageCache} from './imageCache';
+import {logger} from '@/lib/logger';
 
 interface PokemonSpriteUrls {
   officialArtwork: string;
@@ -45,10 +46,7 @@ class PokemonSpriteCache {
     try {
       return await imageCache.getImage(url);
     } catch (error) {
-      console.error(
-        `Failed to load Pokemon sprite for ID ${pokemonId}, variant ${variant}:`,
-        error
-      );
+      logger.logError(error, `LoadPokemonSprite:${pokemonId}:${variant}`);
       throw error;
     }
   }

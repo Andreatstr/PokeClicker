@@ -1,4 +1,5 @@
 import {indexedDBCache} from './indexedDBCache';
+import {logger} from '@/lib/logger';
 
 interface CacheStats {
   totalSize: number;
@@ -34,7 +35,7 @@ class ImageCacheService {
     try {
       await indexedDBCache.cleanup();
     } catch (error) {
-      console.warn('Failed to cleanup IndexedDB:', error);
+      logger.logError(error, 'CleanupIndexeddb');
     }
   }
 
@@ -90,7 +91,7 @@ class ImageCacheService {
         return img;
       }
     } catch (error) {
-      console.warn('IndexedDB cache miss:', error);
+      logger.logError(error, 'IndexedDBCacheMiss');
     }
 
     // Load from network with retry logic for rate limiting
@@ -110,7 +111,7 @@ class ImageCacheService {
       
       // Handle rate limiting (429) with exponential backoff
       if (response.status === 429 && retries > 0) {
-        console.warn(`Rate limited on ${url}, retrying in ${delay}ms...`);
+        logger.warn(`Rate limited on ${url}, retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return this.fetchImageWithRetry(url, retries - 1, delay * 2);
       }
@@ -131,17 +132,17 @@ class ImageCacheService {
 
       // Cache in IndexedDB for persistence
       indexedDBCache.set(url, blob).catch((err) => {
-        console.warn('Failed to cache in IndexedDB:', err);
+        logger.logError(err, 'CacheInIndexeddb');
       });
 
       return img;
     } catch (error) {
       if (retries > 0) {
-        console.warn(`Error loading ${url}, retrying in ${delay}ms...`);
+        logger.warn(`Error loading ${url}, retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return this.fetchImageWithRetry(url, retries - 1, delay * 2);
       }
-      console.error('Failed to load image after retries:', url, error);
+      logger.error('Failed to load image after retries:', url, error);
       throw error;
     }
   }
@@ -156,7 +157,7 @@ class ImageCacheService {
         const img = await this.getImage(urls[i]);
         results.push(img);
       } catch (error) {
-        console.warn(`Failed to preload image ${urls[i]}:`, error);
+        logger.logError(error, `PreloadImage:${urls[i]}`);
         // Continue with other images even if one fails
       }
 
@@ -184,7 +185,7 @@ class ImageCacheService {
     try {
       await indexedDBCache.clear();
     } catch (error) {
-      console.warn('Failed to clear IndexedDB:', error);
+      logger.logError(error, 'ClearIndexeddb');
     }
   }
 

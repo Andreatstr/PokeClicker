@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {GameConfig} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 
@@ -35,12 +36,15 @@ export function usePokemonPurchaseHandler() {
 
       // Trigger animation after successful purchase
       setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 800);
+      setTimeout(
+        () => setIsAnimating(false),
+        GameConfig.purchase.successAnimationDuration
+      );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
       setError(errorMessage);
-      setTimeout(() => setError(null), 1200);
+      setTimeout(() => setError(null), GameConfig.purchase.errorDisplayDuration);
     }
   };
 

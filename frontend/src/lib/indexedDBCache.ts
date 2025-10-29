@@ -1,3 +1,5 @@
+import {logger} from '@/lib/logger';
+
 /**
  * IndexedDB wrapper for caching image blobs
  * Provides persistent storage that survives page refreshes
@@ -30,7 +32,7 @@ class IndexedDBCache {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error('Failed to open IndexedDB:', request.error);
+        logger.logError(request.error, 'OpenIndexedDB');
         reject(request.error);
       };
 
@@ -86,7 +88,7 @@ class IndexedDBCache {
       };
 
       request.onerror = () => {
-        console.error('Failed to get from IndexedDB:', request.error);
+        logger.logError(request.error, 'GetFromIndexedDB');
         reject(request.error);
       };
     });
@@ -113,7 +115,7 @@ class IndexedDBCache {
 
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        console.error('Failed to set in IndexedDB:', request.error);
+        logger.logError(request.error, 'SetInIndexedDB');
         reject(request.error);
       };
     });
@@ -133,7 +135,7 @@ class IndexedDBCache {
 
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        console.error('Failed to delete from IndexedDB:', request.error);
+        logger.logError(request.error, 'DeleteFromIndexedDB');
         reject(request.error);
       };
     });
@@ -153,7 +155,7 @@ class IndexedDBCache {
 
       request.onsuccess = () => resolve();
       request.onerror = () => {
-        console.error('Failed to clear IndexedDB:', request.error);
+        logger.logError(request.error, 'ClearIndexedDB');
         reject(request.error);
       };
     });
@@ -179,7 +181,7 @@ class IndexedDBCache {
       };
 
       request.onerror = () => {
-        console.error('Failed to get stats from IndexedDB:', request.error);
+        logger.logError(request.error, 'GetStatsFromIndexedDB');
         reject(request.error);
       };
     });
@@ -216,7 +218,7 @@ class IndexedDBCache {
       };
 
       request.onerror = () => {
-        console.error('Failed to cleanup IndexedDB:', request.error);
+        logger.logError(request.error, 'CleanupIndexedDB');
         reject(request.error);
       };
     });

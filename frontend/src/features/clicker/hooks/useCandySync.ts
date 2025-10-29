@@ -1,4 +1,6 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
+import {logger} from '@/lib/logger';
+import {GameConfig} from '@/config';
 import {useGameMutations} from './useGameMutations';
 import type {User} from '@features/auth';
 
@@ -56,28 +58,33 @@ export function useCandySync({
       await updateRareCandy(amountToSync, updateUser);
       // Success - server and cache are now in sync with our local state
     } catch (err) {
-      console.error('Failed to sync candy:', err);
+      logger.logError(err, 'SyncCandy');
       setDisplayError('Failed to save progress. Will retry...');
       // Put the amount back in unsynced so it will be tried again
       setUnsyncedAmount((prev) => prev + amountToSync);
-      setTimeout(() => setDisplayError(null), 3000);
+      setTimeout(
+        () => setDisplayError(null),
+        GameConfig.clicker.errorDisplayDuration
+      );
     }
   }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
 
-  // Batch update clicks every 10 seconds or after 50 clicks
+  // Batch update clicks based on configured thresholds
   useEffect(() => {
     if (unsyncedAmount === 0 || !isAuthenticated) return;
 
     const shouldFlush =
-      unsyncedAmount >= 50 || Date.now() - lastSyncRef.current >= 10000;
+      unsyncedAmount >= GameConfig.clicker.batchSyncClickThreshold ||
+      Date.now() - lastSyncRef.current >=
+        GameConfig.clicker.batchSyncTimeThreshold;
 
     if (shouldFlush) {
       flushPendingCandy();
     } else if (!batchTimerRef.current) {
-      // Set a timer to flush after 10 seconds
+      // Set a timer to flush after configured time threshold
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
-      }, 10000);
+      }, GameConfig.clicker.batchSyncTimeThreshold);
     }
 
     return () => {

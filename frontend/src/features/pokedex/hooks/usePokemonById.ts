@@ -1,53 +1,18 @@
-import {useQuery, gql} from '@apollo/client';
-import {POKEMON_STATS_FRAGMENT} from '@/lib/graphql/fragments';
+import {useQuery} from '@apollo/client';
+import {
+  POKEMON_BY_ID_QUERY,
+  type PokemonByIdData,
+  type PokemonByIdVariables,
+  type PokemonStats,
+  type PokemonById,
+} from '@/lib/graphql';
 
-const POKEMON_BY_ID_QUERY = gql`
-  ${POKEMON_STATS_FRAGMENT}
-  query PokemonById($id: Int!) {
-    pokemonById(id: $id) {
-      id
-      name
-      types
-      sprite
-      stats {
-        ...PokemonStatsFields
-      }
-      height
-      weight
-      abilities
-      evolution
-      isOwned
-      pokedexNumber
-    }
-  }
-`;
-
-export interface PokemonStats {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-}
-
-export interface PokemonById {
-  id: number;
-  name: string;
-  types: string[];
-  sprite: string;
-  stats: PokemonStats;
-  height: number;
-  weight: number;
-  abilities: string[];
-  evolution: number[];
-  isOwned: boolean;
-  pokedexNumber: number;
-}
+// Re-export types for convenience
+export type {PokemonStats, PokemonById};
 
 export function usePokemonById(id: number | null) {
-  return useQuery<{pokemonById: PokemonById | null}>(POKEMON_BY_ID_QUERY, {
-    variables: {id},
+  return useQuery<PokemonByIdData, PokemonByIdVariables>(POKEMON_BY_ID_QUERY, {
+    variables: {id: id!},
     skip: id === null,
   });
 }

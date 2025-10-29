@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
+import {logger} from '@/lib/logger';
 import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
 
@@ -92,7 +93,7 @@ export function usePokemonSpawning(
           const restored = JSON.parse(saved);
           setWildPokemon(restored);
         } catch (e) {
-          console.warn('Failed to restore Pokemon spawns:', e);
+          logger.logError(e, 'RestorePokemonSpawns');
           setWildPokemon([]); // Clear on error
         }
       } else {

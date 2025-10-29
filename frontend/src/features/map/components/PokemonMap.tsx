@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
+import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
 import {TiledMapView} from './TiledMapView';
@@ -197,7 +198,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
           // Remove the caught Pokemon from the map and spawn a new one
           pokemon.removePokemon(battleSpawnId);
         } catch (error) {
-          console.error('Failed to award battle rewards:', error);
+          logger.logError(error, 'AwardBattleRewards');
         }
       }
 

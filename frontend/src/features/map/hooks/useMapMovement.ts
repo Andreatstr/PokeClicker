@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
+import {logger} from '@/lib/logger';
 
 // Constants
 const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
@@ -63,7 +64,7 @@ export function useMapMovement(
       try {
         return JSON.parse(saved);
       } catch (e) {
-        console.warn('Failed to restore player position:', e);
+        logger.logError(e, 'RestorePlayerPosition');
       }
     }
     return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};

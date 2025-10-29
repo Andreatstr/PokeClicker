@@ -6,6 +6,7 @@ import {
   CandyCounterOverlay,
   BackgroundMusic,
 } from '@/components';
+import {ErrorDisplay} from '@/components/ErrorDisplay';
 import {
   useTheme,
   usePageNavigation,
@@ -115,6 +116,7 @@ function App() {
 
   return (
     <>
+      <ErrorDisplay />
       <Navbar
         currentPage={currentPage}
         onPageChange={setCurrentPage}

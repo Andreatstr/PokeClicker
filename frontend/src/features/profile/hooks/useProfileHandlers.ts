@@ -4,6 +4,7 @@ import {
   useSetFavoritePokemon,
   useSetSelectedPokemon,
 } from './useProfileMutations';
+import {logger} from '@/lib/logger';
 
 /**
  * Custom hook that encapsulates all profile-related action handlers
@@ -27,7 +28,7 @@ export function useProfileHandlers(
       await logout();
       onNavigate?.('login');
     } catch (error) {
-      console.error('Failed to delete account:', error);
+      logger.logError(error, 'DeleteAccount');
       alert('Failed to delete account. Please try again.');
       throw error;
     }
@@ -41,7 +42,7 @@ export function useProfileHandlers(
       }
       return true;
     } catch (error) {
-      console.error('Failed to set favorite Pokemon:', error);
+      logger.logError(error, 'SetFavoritePokemon');
       alert('Failed to set favorite Pokemon. Please try again.');
       return false;
     }
@@ -55,7 +56,7 @@ export function useProfileHandlers(
       }
       return true;
     } catch (error) {
-      console.error('Failed to set selected Pokemon:', error);
+      logger.logError(error, 'SetSelectedPokemon');
       alert('Failed to set selected Pokemon. Please try again.');
       return false;
     }
