@@ -94,11 +94,12 @@ export function useBattle({
   }, [playerPokemon, opponentPokemon]);
 
   const handleAttackClick = useCallback(() => {
-    if (battleState.result !== 'ongoing') return;
-
     const damage = calculateClickDamage();
 
     setBattleState((prev) => {
+      // Check if battle is still ongoing
+      if (prev.result !== 'ongoing') return prev;
+
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
 
@@ -110,7 +111,7 @@ export function useBattle({
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
-  }, [battleState.result, calculateClickDamage]);
+  }, [calculateClickDamage]);
 
   useEffect(() => {
     if (battleState.result !== 'ongoing') return;

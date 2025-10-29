@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {HealthBar} from './HealthBar';
@@ -47,12 +47,23 @@ export function BattleView({
     },
   });
 
-  // Expose attack function to parent component
+  // Keep attack function ref up to date
+  const attackFunctionRef = useRef(handleAttackClick);
+  attackFunctionRef.current = handleAttackClick;
+
+  // Expose attack function to parent component (only once on mount)
   useEffect(() => {
-    if (onAttackFunctionReady && result === 'ongoing') {
-      onAttackFunctionReady(handleAttackClick);
+    if (onAttackFunctionReady) {
+      // Create a stable wrapper that calls the latest attack function
+      onAttackFunctionReady(() => {
+        if (attackFunctionRef.current) {
+          attackFunctionRef.current();
+        }
+      });
     }
-  }, [onAttackFunctionReady, handleAttackClick, result]);
+    // Only run once on mount to avoid setState during render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Calculate rare candy reward
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
