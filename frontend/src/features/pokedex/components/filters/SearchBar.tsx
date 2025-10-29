@@ -1,5 +1,5 @@
 import {Button, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
-import {usePokedexFilterContext} from '../../contexts/PokedexFilterContext';
+import {usePokedexFilterContext} from '../../contexts/usePokedexFilterContext';
 
 interface SearchBarProps {
   isDarkMode?: boolean;

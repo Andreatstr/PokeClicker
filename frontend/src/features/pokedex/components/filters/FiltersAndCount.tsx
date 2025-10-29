@@ -9,7 +9,7 @@ import {
   MultiSelect,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePokedexFilterContext} from '../../contexts/PokedexFilterContext';
+import {usePokedexFilterContext} from '../../contexts/usePokedexFilterContext';
 import {POKEMON_TYPES, POKEMON_REGIONS} from '../../utils/constants';
 
 interface FiltersAndCountProps {
@@ -112,7 +112,10 @@ export function FiltersAndCount({
 
                 {/* TYPE */}
                 <div>
-                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Type
                   </Label>
                   <MultiSelect
@@ -125,7 +128,10 @@ export function FiltersAndCount({
 
                 {/* SORT BY */}
                 <div>
-                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Sort by
                   </Label>
                   <Select
@@ -147,7 +153,10 @@ export function FiltersAndCount({
 
                 {/* ORDER */}
                 <div>
-                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Order
                   </Label>
                   <Select
@@ -166,7 +175,10 @@ export function FiltersAndCount({
 
                 {/* OWNED */}
                 <div>
-                  <Label className="text-xs font-bold" style={{color: 'var(--foreground)'}}>
+                  <Label
+                    className="text-xs font-bold"
+                    style={{color: 'var(--foreground)'}}
+                  >
                     Filter on
                   </Label>
 
@@ -180,13 +192,17 @@ export function FiltersAndCount({
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm mt-1" aria-label="Owned filter">
+                    <SelectTrigger
+                      className="w-full text-sm mt-1"
+                      aria-label="Owned filter"
+                    >
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Pokémon</SelectItem>
                       <SelectItem value="owned" disabled={ownedCount === 0}>
-                        Owned only {ownedCount > 0 ? `(${ownedCount} total)` : ''}
+                        Owned only{' '}
+                        {ownedCount > 0 ? `(${ownedCount} total)` : ''}
                       </SelectItem>
                     </SelectContent>
                   </Select>

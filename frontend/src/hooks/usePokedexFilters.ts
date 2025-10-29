@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import type {PokedexFilterContextValue} from '@features/pokedex/contexts/PokedexFilterContext';
+import type {PokedexFilterContextValue} from '@features/pokedex/contexts/PokedexFilterContextDefinition';
 
 /**
  * Custom hook for managing Pokedex filter state

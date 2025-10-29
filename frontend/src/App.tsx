@@ -43,6 +43,7 @@ function App() {
   const {currentPage, setCurrentPage} = usePageNavigation();
   const {
     selectedPokemon,
+    allPokemon,
     isModalOpen,
     handlePokemonClick,
     handleCloseModal,
@@ -158,7 +159,7 @@ function App() {
             >
               <PokemonDetailModal
                 pokemon={selectedPokemon}
-                allPokemon={[]}
+                allPokemon={allPokemon}
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onSelectPokemon={handleSelectPokemon}

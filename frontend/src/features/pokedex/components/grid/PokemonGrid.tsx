@@ -11,7 +11,10 @@ const PokemonCard = lazy(() =>
 
 interface PokemonGridProps {
   displayedPokemon: PokedexPokemon[];
-  handlePokemonClick: (pokemon: PokedexPokemon) => void;
+  handlePokemonClick: (
+    pokemon: PokedexPokemon,
+    allDisplayed: PokedexPokemon[]
+  ) => void;
   isDarkMode: boolean;
   ITEMS_PER_PAGE: number;
   paginationPage: number;
@@ -81,7 +84,9 @@ export function PokemonGrid({
                   >
                     <PokemonCard
                       pokemon={selectedMobilePokemon}
-                      onClick={handlePokemonClick}
+                      onClick={(poke) =>
+                        handlePokemonClick(poke, displayedPokemon)
+                      }
                       isDarkMode={isDarkMode}
                     />
                   </Suspense>
@@ -166,7 +171,9 @@ export function PokemonGrid({
                   >
                     <PokemonCard
                       pokemon={pokemon}
-                      onClick={handlePokemonClick}
+                      onClick={(poke) =>
+                        handlePokemonClick(poke, displayedPokemon)
+                      }
                       isDarkMode={isDarkMode}
                     />
                   </li>

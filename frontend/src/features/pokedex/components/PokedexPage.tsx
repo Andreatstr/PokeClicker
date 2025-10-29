@@ -21,7 +21,10 @@ const FiltersAndCount = lazy(() =>
 
 interface PokedexPageProps {
   isDarkMode: boolean;
-  onPokemonClick: (pokemon: PokedexPokemon) => void;
+  onPokemonClick: (
+    pokemon: PokedexPokemon,
+    allDisplayed: PokedexPokemon[]
+  ) => void;
 }
 
 export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
@@ -107,7 +110,10 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
       {/* Filters and Count */}
       <Suspense
         fallback={
-          <LoadingSpinner message="Loading filters..." isDarkMode={isDarkMode} />
+          <LoadingSpinner
+            message="Loading filters..."
+            isDarkMode={isDarkMode}
+          />
         }
       >
         <FiltersAndCount
