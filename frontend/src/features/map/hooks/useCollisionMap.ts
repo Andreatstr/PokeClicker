@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 
 // Map dimensions
 const MAP_WIDTH = 10560;
@@ -72,12 +72,8 @@ export function useCollisionMap(): CollisionMapState {
     [collisionMapLoaded]
   );
 
-  // Memoize the returned object to prevent unnecessary re-renders
-  return useMemo(
-    () => ({
-      collisionMapLoaded,
-      isPositionWalkable,
-    }),
-    [collisionMapLoaded, isPositionWalkable]
-  );
+  return {
+    collisionMapLoaded,
+    isPositionWalkable,
+  };
 }
