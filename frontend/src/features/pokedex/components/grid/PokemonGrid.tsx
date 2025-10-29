@@ -21,6 +21,7 @@ interface PokemonGridProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   loading: boolean;
+  ownedPokemonIds: number[];
 }
 
 export function PokemonGrid({
@@ -32,6 +33,7 @@ export function PokemonGrid({
   totalPages,
   onPageChange,
   loading,
+  ownedPokemonIds,
 }: PokemonGridProps) {
   const [selectedMobilePokemon, setSelectedMobilePokemon] =
     useState<PokedexPokemon | null>(null);
@@ -88,6 +90,7 @@ export function PokemonGrid({
                         handlePokemonClick(poke, displayedPokemon)
                       }
                       isDarkMode={isDarkMode}
+                      ownedPokemonIds={ownedPokemonIds}
                     />
                   </Suspense>
                 )}
@@ -175,6 +178,7 @@ export function PokemonGrid({
                         handlePokemonClick(poke, displayedPokemon)
                       }
                       isDarkMode={isDarkMode}
+                      ownedPokemonIds={ownedPokemonIds}
                     />
                   </li>
                 ))}

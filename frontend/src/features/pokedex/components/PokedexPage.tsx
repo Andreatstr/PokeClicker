@@ -8,6 +8,16 @@ import {
 import {usePokedexFilters, useMobileDetection} from '@/hooks';
 import {LoadingSpinner} from '@/components/LoadingSpinner';
 import {PokemonGrid} from './grid/PokemonGrid';
+import {useQuery, gql} from '@apollo/client';
+
+const ME_QUERY = gql`
+  query Me {
+    me {
+      _id
+      owned_pokemon_ids
+    }
+  }
+`;
 
 // Lazy load the heavy Pokedex components
 const SearchBar = lazy(() =>
@@ -29,6 +39,7 @@ interface PokedexPageProps {
 
 export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   const {user} = useAuth();
+  const {data: meData} = useQuery(ME_QUERY);
 
   // Use centralized mobile detection hook
   const isMobile = useMobileDetection(768);
@@ -148,6 +159,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
             totalPages={totalPages}
             onPageChange={handlePageChange}
             loading={loading}
+            ownedPokemonIds={meData?.me?.owned_pokemon_ids ?? []}
           />
         </Suspense>
       </section>

@@ -2,6 +2,7 @@ import {describe, it, expect, beforeEach, vi, afterEach} from 'vitest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
+import type {Pokemon} from '../pokeapi';
 
 // Mock MongoDB
 const mockFind = vi.fn();
@@ -138,7 +139,7 @@ describe('GraphQL Resolvers', () => {
           spDefense: 2,
           speed: 6,
           // Missing clickPower and passiveIncome
-        } as any,
+        } as Partial<UserStats>,
         owned_pokemon_ids: [1],
       };
 
@@ -205,7 +206,7 @@ describe('GraphQL Resolvers', () => {
         owned_pokemon_ids: [25, 1, 4],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as any);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
       mockFindOne.mockResolvedValue(mockUser);
 
       const context: AuthContext = {
@@ -234,7 +235,7 @@ describe('GraphQL Resolvers', () => {
         owned_pokemon_ids: [25, 1],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as any);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
       mockFindOne.mockResolvedValue(mockUser);
 
       const context: AuthContext = {
@@ -257,7 +258,7 @@ describe('GraphQL Resolvers', () => {
         types: ['electric'],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as any);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
 
       const context: AuthContext = {};
 
@@ -317,7 +318,7 @@ describe('GraphQL Resolvers', () => {
       expect(result.user).not.toHaveProperty('password_hash');
 
       // Verify token is valid
-      const decoded = jwt.verify(result.token, JWT_SECRET) as any;
+      const decoded = jwt.verify(result.token, JWT_SECRET) as jwt.JwtPayload;
       expect(decoded.username).toBe('newuser');
     });
 
@@ -400,7 +401,7 @@ describe('GraphQL Resolvers', () => {
       expect(result.user.rare_candy).toBe(50);
 
       // Verify token
-      const decoded = jwt.verify(result.token, JWT_SECRET) as any;
+      const decoded = jwt.verify(result.token, JWT_SECRET) as jwt.JwtPayload;
       expect(decoded.username).toBe('testuser');
     });
 

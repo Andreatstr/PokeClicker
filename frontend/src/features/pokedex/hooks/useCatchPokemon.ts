@@ -47,7 +47,6 @@ export function useCatchPokemon() {
                           return true;
                         },
                       },
-                      broadcast: false, // Don't broadcast individual updates
                     });
                   }
                 }

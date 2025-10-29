@@ -33,14 +33,12 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     }
   );
 
-  // Sync stats when user data loads
   useEffect(() => {
     if (user?.stats) {
       setStats(user.stats);
     }
   }, [user?.stats]);
 
-  // Candy sync hook
   const {
     localRareCandy,
     displayError,
@@ -50,7 +48,6 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     flushPendingCandy,
   } = useCandySync({user, isAuthenticated, updateUser});
 
-  // Clicker actions hook
   const {isAnimating, candies, handleClick, handleUpgrade} = useClickerActions({
     stats,
     isAuthenticated,
@@ -64,14 +61,12 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     updateUser,
   });
 
-  // Passive income hook
   usePassiveIncome({
     stats,
     isAuthenticated,
     onIncomeGenerated: addCandy,
   });
 
-  // Preload game assets
   useEffect(() => {
     const preloadAssets = async () => {
       try {
@@ -89,7 +84,6 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     preloadAssets();
   }, []);
 
-  // Sync stats with user data when it changes
   useEffect(() => {
     if (user) {
       setStats(user.stats);
@@ -98,7 +92,6 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
-      {/* Display errors */}
       {displayError && (
         <ErrorBanner
           message={displayError}
@@ -107,10 +100,8 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         />
       )}
 
-      {/* Show unauthenticated message */}
       {!isAuthenticated && <UnauthenticatedMessage />}
 
-      {/* GameBoy Console */}
       <GameBoyConsole
         isDarkMode={isDarkMode}
         isAuthenticated={isAuthenticated}
@@ -120,12 +111,9 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         onClickScreen={handleClick}
       />
 
-      {/* Stats and Upgrades */}
       <div className="flex flex-col gap-6 w-full max-w-md lg:max-w-lg">
-        {/* Rare Candy Counter */}
         <RareCandyCounter isDarkMode={isDarkMode} candyCount={localRareCandy} />
 
-        {/* Upgrades */}
         <UpgradesPanel
           isDarkMode={isDarkMode}
           stats={stats}

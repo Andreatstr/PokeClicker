@@ -1,22 +1,40 @@
-import {useState} from 'react';
+import {useState, useRef} from 'react';
 import {GameConfig} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
+import {getPokemonCost} from '../utils/pokemonCost';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations
  */
 export function usePokemonPurchaseHandler() {
   const [purchasePokemon] = usePurchasePokemon();
-  const {updateUser} = useAuth();
+  const {updateUser, user} = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const errorTimeoutRef = useRef<number | null>(null);
 
   const handlePurchase = async (
     pokemonId: number,
     onSuccess?: (pokemonId: number) => void
   ) => {
+    // Clear any existing error timeout to prevent race conditions
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     setError(null);
+
+    // Client-side validation: Check if user can afford the Pokemon
+    // This prevents the optimistic response from flashing the unlocked state
+    const cost = getPokemonCost(pokemonId);
+    if (user && user.rare_candy < cost) {
+      setError('Not enough Rare Candy!');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, GameConfig.purchase.errorDisplayDuration);
+      return;
+    }
 
     try {
       const result = await purchasePokemon({
@@ -41,7 +59,10 @@ export function usePokemonPurchaseHandler() {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
       setError(errorMessage);
-      setTimeout(() => setError(null), GameConfig.purchase.errorDisplayDuration);
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, GameConfig.purchase.errorDisplayDuration);
     }
   };
 

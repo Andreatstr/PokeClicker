@@ -14,18 +14,24 @@ interface PokemonCardProps {
   pokemon: PokedexPokemon;
   onClick?: (pokemon: PokedexPokemon) => void;
   isDarkMode?: boolean;
+  ownedPokemonIds: number[];
 }
 
 export const PokemonCard = memo(function PokemonCard({
   pokemon,
   onClick,
   isDarkMode = false,
+  ownedPokemonIds,
 }: PokemonCardProps) {
+  // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
+  // This ensures the UI updates when the cache updates
+  const isOwned = ownedPokemonIds.includes(pokemon.id);
+
   const primaryType = pokemon.types[0];
-  const typeColors = pokemon.isOwned
+  const typeColors = isOwned
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
-  const backgroundImageUrl = pokemon.isOwned
+  const backgroundImageUrl = isOwned
     ? getBackgroundImageUrl(pokemon.types)
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
 
@@ -38,7 +44,7 @@ export const PokemonCard = memo(function PokemonCard({
   useEffect(() => {
     const preloadAssets = async () => {
       try {
-        if (pokemon.isOwned) {
+        if (isOwned) {
           // Preload Pokemon sprite
           const sprite = await pokemonSpriteCache.getPokemonSprite(pokemon.id);
           setCachedSprite(sprite);
@@ -54,7 +60,7 @@ export const PokemonCard = memo(function PokemonCard({
     };
 
     preloadAssets();
-  }, [pokemon.id, pokemon.isOwned, primaryType]);
+  }, [pokemon.id, isOwned, primaryType]);
 
   const cost = getPokemonCost(pokemon.id);
 
@@ -116,12 +122,12 @@ export const PokemonCard = memo(function PokemonCard({
       >
         <img
           src={pokemon.sprite}
-          alt={pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'}
+          alt={isOwned ? pokemon.name : 'Unknown Pokémon'}
           className="w-full h-full object-contain origin-center"
           loading="lazy"
           style={{
             imageRendering: 'pixelated',
-            filter: pokemon.isOwned ? 'none' : 'brightness(0)',
+            filter: isOwned ? 'none' : 'brightness(0)',
           }}
         />
       </figure>
@@ -134,9 +140,9 @@ export const PokemonCard = memo(function PokemonCard({
           {/* Pokemon Name */}
           <div className="flex items-center justify-between min-h-[20px]">
             <strong className="font-bold text-sm capitalize truncate">
-              {pokemon.isOwned ? pokemon.name : '???'}
+              {isOwned ? pokemon.name : '???'}
             </strong>
-            {pokemon.isOwned && (
+            {isOwned && (
               <span
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
                 style={{
@@ -158,7 +164,7 @@ export const PokemonCard = memo(function PokemonCard({
           </div>
 
           {/* Purchase Button or Info Grid */}
-          {!pokemon.isOwned ? (
+          {!isOwned ? (
             <UnlockButton
               onClick={onPurchaseClick}
               cost={cost}
@@ -243,7 +249,7 @@ export const PokemonCard = memo(function PokemonCard({
           )}
 
           {/* Type Tags */}
-          {pokemon.isOwned && (
+          {isOwned && (
             <div className="mt-auto pt-2">
               <PokemonTypeBadges
                 types={pokemon.types}

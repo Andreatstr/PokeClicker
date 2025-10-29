@@ -51,7 +51,6 @@ export function usePurchasePokemon() {
                           return true;
                         },
                       },
-                      broadcast: false, // Don't broadcast individual updates
                     });
                   }
                 }
