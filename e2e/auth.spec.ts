@@ -54,6 +54,6 @@ test.describe("Authentication", () => {
     await page.waitForTimeout(1000);
 
     expect(await login.isOnLoginPage()).toBe(false);
-    await expect(page.getByText("Rare Candy")).toBeVisible();
+    await expect(page.getByText("search")).toBeVisible();
   });
 });
