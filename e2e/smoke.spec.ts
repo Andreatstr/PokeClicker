@@ -86,6 +86,9 @@ test.describe("Smoke Tests", () => {
     await navbar.navigateToPokedex();
     await page.waitForTimeout(1000);
 
+    // Wait for at least one Pokemon card to be visible
+    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 10000 });
+
     const cardCount = await pokedex.getPokemonCardCount();
     expect(cardCount).toBeGreaterThan(0);
   });
