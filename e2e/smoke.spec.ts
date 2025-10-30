@@ -80,11 +80,19 @@ test.describe("Smoke Tests", () => {
 
     if (await login.isOnLoginPage()) {
       await login.quickRegister();
-      await page.waitForTimeout(1000);
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(2000);
     }
 
     await navbar.navigateToPokedex();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    // Wait for Pokemon data to load - check for the search input first
+    await expect(page.getByPlaceholder(/search/i)).toBeVisible();
+
+    // Wait for at least one Pokemon card to appear
+    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 15000 });
 
     const cardCount = await pokedex.getPokemonCardCount();
     expect(cardCount).toBeGreaterThan(0);
