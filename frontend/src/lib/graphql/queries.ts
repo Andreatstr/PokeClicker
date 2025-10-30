@@ -113,6 +113,17 @@ export const POKEMON_BY_IDS = gql`
 // POKEMON UPGRADE QUERIES
 // ============================================================================
 
+export interface PokemonUpgradeData {
+  pokemonUpgrade: {
+    pokemon_id: number;
+    level: number;
+  };
+}
+
+export interface PokemonUpgradeVariables {
+  pokemonId: number;
+}
+
 /**
  * Query to get Pokemon upgrade information (level and cost)
  */
