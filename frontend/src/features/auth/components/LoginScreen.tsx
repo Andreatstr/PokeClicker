@@ -14,7 +14,7 @@ import {logger} from '@/lib/logger';
 import {useMobileDetection} from '@/hooks';
 
 type Props = {
-  onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;
+  onNavigate: (page: 'pokedex' | 'clicker' | 'login') => void;
 };
 
 type FormValues = {
@@ -66,7 +66,7 @@ export function LoginScreen({onNavigate}: Props) {
         await authLogin(authData.token, authData.user);
         reset();
         setModalType(null);
-        onNavigate('clicker');
+        onNavigate('pokedex');
       }
     } catch (err) {
       logger.logError(err, 'Authentication');
