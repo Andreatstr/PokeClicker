@@ -20,7 +20,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "workspaces": [
     "frontend",
