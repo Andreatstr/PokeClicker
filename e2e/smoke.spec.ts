@@ -23,7 +23,7 @@ test.describe("Smoke Tests", () => {
       await page.waitForTimeout(1000);
 
       expect(await login.isOnLoginPage()).toBe(false);
-      await expect(page.getByText(/search/i)).toBeVisible();
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible();
     }
   });
 
