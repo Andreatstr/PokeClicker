@@ -24,7 +24,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
 
   // Fetch user's favorite Pokemon for battles
-  const {data: favoritePokemonData} = usePokemonById(
+  const {pokemon: favoritePokemon, refreshStats} = usePokemonById(
     user?.favorite_pokemon_id || null
   );
 
@@ -125,22 +125,23 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
 
   // Start battle handler
   const startBattle = useCallback(
-    (opponent: PokedexPokemon, spawnId: string) => {
+    async (opponent: PokedexPokemon, spawnId: string) => {
       // Store the spawn ID for removal after victory
       setBattleSpawnId(spawnId);
 
       // Use the user's favorite Pokemon
-      if (favoritePokemonData?.pokemonById) {
+      if (favoritePokemon?.id) {
         const playerPokemon: PokedexPokemon = {
-          id: favoritePokemonData.pokemonById.id,
-          name: favoritePokemonData.pokemonById.name,
-          types: favoritePokemonData.pokemonById.types,
-          sprite: favoritePokemonData.pokemonById.sprite,
-          pokedexNumber: favoritePokemonData.pokemonById.id,
-          stats: favoritePokemonData.pokemonById.stats,
+          id: favoritePokemon.id,
+          name: favoritePokemon.name,
+          types: favoritePokemon.types,
+          sprite: favoritePokemon.sprite,
+          pokedexNumber: favoritePokemon.id,
+          stats: favoritePokemon.stats,
           isOwned: true,
         };
 
+        await refreshStats();
         setPlayerPokemon(playerPokemon);
         setBattleOpponent(opponent);
         setInBattle(true);
@@ -169,7 +170,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
         setInBattle(true);
       }
     },
-    [favoritePokemonData]
+    [favoritePokemon]
   );
 
   // Battle complete handler
