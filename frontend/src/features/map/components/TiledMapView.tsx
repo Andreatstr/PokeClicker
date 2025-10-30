@@ -75,28 +75,6 @@ export function TiledMapView(props: TiledMapViewProps){
     <>
       {/* Map Background */}
       <div ref={containerRef} className="absolute inset-0 overflow-hidden">
-        {/* {visibleTiles.map((tile) => {
-          const key = `${tile.x}_${tile.y}`;
-          return (
-            <div
-              key={key}
-              className="absolute transition-none"
-              style={{
-                left: `${tile.screenX}px`,
-                top: `${tile.screenY}px`,
-                width: `${TILE_SIZE}px`,
-                height: `${TILE_SIZE}px`,
-                backgroundImage: tile.loaded ? `url('${tile.src}')` : 'none',
-                backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: '0 0',
-                imageRendering: 'pixelated',
-                opacity: tile.loaded ? 1 : 0.3,
-                backgroundColor: tile.loaded ? 'transparent' : '#1a2a1a',
-              }}
-            />
-          );
-        })} */}
 
         {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
@@ -106,7 +84,7 @@ export function TiledMapView(props: TiledMapViewProps){
             alt={visiblePoke.pokemon.name}
             className="absolute transition-none"
             style={{
-              left: `${visiblePoke.screenX - 24}px`, // Pre-calculated screen coordinates
+              left: `${visiblePoke.screenX - 24}px`,
               top: `${visiblePoke.screenY - 24}px`,
               width: '48px',
               height: '48px',

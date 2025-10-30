@@ -11,8 +11,6 @@ interface CollisionMapState {
 }
 
 export function useCollisionMap(): CollisionMapState {
-  // const collisionCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const collisionCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   const collisionPixelsRef = useRef<Uint8ClampedArray | null>(null);
   const [collisionMapLoaded, setCollisionMapLoaded] = useState(false);
 
@@ -68,33 +66,8 @@ export function useCollisionMap(): CollisionMapState {
       const b = pixels[idx + 2];
 
       const brightness = (r + g + b) / 3;
-      return brightness > 200; // same threshold you used
+      return brightness > 200;
     }, [collisionMapLoaded]);
-
-  //     try {
-  //       const pixelData = collisionCtxRef.current.getImageData(
-  //         checkX,
-  //         checkY,
-  //         1,
-  //         1
-  //       ).data;
-
-  //       // Check if pixel is white (walkable)
-  //       // White pixels have high RGB values (close to 255)
-  //       const r = pixelData[0];
-  //       const g = pixelData[1];
-  //       const b = pixelData[2];
-
-  //       // Consider it walkable if it's mostly white (brightness > 200)
-  //       const brightness = (r + g + b) / 3;
-  //       return brightness > 200;
-  //     } catch (error) {
-  //       logger.logError(error, 'CheckingCollision');
-  //       return true; // Allow movement on error
-  //     }
-  //   },
-  //   [collisionMapLoaded]
-  // );
 
   return {
     collisionMapLoaded,
