@@ -21,7 +21,7 @@ export function useCanvasRenderer(params: {
   containerRef: React.RefObject<HTMLDivElement | null>;
   visibleTiles: VisibleTile[];
   tileCacheRef: React.RefObject<TileCache>;
-  viewportSize: { width: number; height: number };
+  viewportSize: {width: number; height: number};
   tileSize?: number;
   backgroundColor?: string;
 }) {
@@ -72,7 +72,7 @@ export function useCanvasRenderer(params: {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    const ctx = canvas.getContext('2d', {alpha: false, desynchronized: true});
     if (!ctx) {
       return;
     }
@@ -96,7 +96,12 @@ export function useCanvasRenderer(params: {
         const t = tiles[i];
         const key = `${t.x}_${t.y}`;
         const entry = cache[key];
-        if (entry && entry.image && entry.image.complete && entry.image.naturalWidth > 0) {
+        if (
+          entry &&
+          entry.image &&
+          entry.image.complete &&
+          entry.image.naturalWidth > 0
+        ) {
           ctx.drawImage(entry.image, t.screenX, t.screenY, tileSize, tileSize);
           entry.lastUsed = Date.now();
         } else {
@@ -114,7 +119,13 @@ export function useCanvasRenderer(params: {
       mounted = false;
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [containerRef, viewportSize.width, viewportSize.height, tileSize, backgroundColor]);
+  }, [
+    containerRef,
+    viewportSize.width,
+    viewportSize.height,
+    tileSize,
+    backgroundColor,
+  ]);
 
   return {
     canvasRef,

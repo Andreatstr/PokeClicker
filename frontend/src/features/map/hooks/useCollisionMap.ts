@@ -67,7 +67,9 @@ export function useCollisionMap(): CollisionMapState {
 
       const brightness = (r + g + b) / 3;
       return brightness > 200;
-    }, [collisionMapLoaded]);
+    },
+    [collisionMapLoaded]
+  );
 
   return {
     collisionMapLoaded,

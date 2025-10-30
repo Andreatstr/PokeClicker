@@ -31,7 +31,7 @@ interface TiledMapViewProps {
   onResetToHome: () => void;
 }
 
-export function TiledMapView(props: TiledMapViewProps){
+export function TiledMapView(props: TiledMapViewProps) {
   const {
     camera,
     screenPos,
@@ -45,11 +45,8 @@ export function TiledMapView(props: TiledMapViewProps){
     onResetToHome,
   } = props;
 
-  const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} = useTileRenderer(
-    camera,
-    viewportSize,
-    wildPokemon
-  );
+  const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} =
+    useTileRenderer(camera, viewportSize, wildPokemon);
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -74,7 +71,6 @@ export function TiledMapView(props: TiledMapViewProps){
     <>
       {/* Map Background */}
       <div ref={containerRef} className="absolute inset-0 overflow-hidden">
-
         {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
           <img

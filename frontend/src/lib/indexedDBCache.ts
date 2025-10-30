@@ -46,7 +46,9 @@ class IndexedDBCache {
 
         // Create object store if it doesn't exist
         if (!db.objectStoreNames.contains(STORE_NAME)) {
-          const objectStore = db.createObjectStore(STORE_NAME, {keyPath: 'url'});
+          const objectStore = db.createObjectStore(STORE_NAME, {
+            keyPath: 'url',
+          });
           objectStore.createIndex('timestamp', 'timestamp', {unique: false});
         }
       };
@@ -201,7 +203,8 @@ class IndexedDBCache {
       const request = index.openCursor();
 
       request.onsuccess = (event) => {
-        const cursor = (event.target as IDBRequest).result as IDBCursorWithValue;
+        const cursor = (event.target as IDBRequest)
+          .result as IDBCursorWithValue;
 
         if (cursor) {
           const item = cursor.value as CachedImage;

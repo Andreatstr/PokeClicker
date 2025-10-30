@@ -81,7 +81,7 @@ export function LoginScreen({onNavigate}: Props) {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
         poster="/project2/loginBackground.webp"
       >
         <source src="/project2/loginBackgroundVideo.mp4" type="video/mp4" />

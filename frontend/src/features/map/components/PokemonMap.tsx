@@ -117,7 +117,6 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       if (ro && currentViewport) ro.unobserve(currentViewport);
       window.removeEventListener('resize', updateSize);
     };
-     
   }, []);
 
   const [battleAttackFunction, setBattleAttackFunction] = useState<

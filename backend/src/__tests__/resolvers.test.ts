@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
 import type {Pokemon} from '../pokeapi';
-import type {UserStats} from '../types';
 
 // Mock MongoDB
 const mockFind = vi.fn();
