@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
 import type {Pokemon} from '../pokeapi';
+import type {UserStats} from '../types';
 
 // Mock MongoDB
 const mockFind = vi.fn();
@@ -139,7 +140,7 @@ describe('GraphQL Resolvers', () => {
           spDefense: 2,
           speed: 6,
           // Missing clickPower and passiveIncome
-        } as Partial<UserStats>,
+        },
         owned_pokemon_ids: [1],
       };
 
@@ -176,8 +177,28 @@ describe('GraphQL Resolvers', () => {
     it('should fetch Pokemon with given arguments', async () => {
       const mockPokemonData = {
         pokemon: [
-          {id: 1, name: 'Bulbasaur', types: ['grass', 'poison']},
-          {id: 2, name: 'Ivysaur', types: ['grass', 'poison']},
+          {
+            id: 1,
+            name: 'Bulbasaur',
+            types: ['grass', 'poison'],
+            sprite: 'url',
+            stats: {hp: 45, attack: 49, defense: 49, spAttack: 65, spDefense: 65, speed: 45},
+            height: 7,
+            weight: 69,
+            abilities: ['overgrow'],
+            evolution: [1, 2, 3],
+          },
+          {
+            id: 2,
+            name: 'Ivysaur',
+            types: ['grass', 'poison'],
+            sprite: 'url',
+            stats: {hp: 60, attack: 62, defense: 63, spAttack: 80, spDefense: 80, speed: 60},
+            height: 10,
+            weight: 130,
+            abilities: ['overgrow'],
+            evolution: [1, 2, 3],
+          },
         ],
         total: 2,
       };
@@ -194,11 +215,16 @@ describe('GraphQL Resolvers', () => {
 
   describe('Query.pokemonById', () => {
     it('should fetch Pokemon by ID and check ownership for authenticated user', async () => {
-      const mockPokemon = {
+      const mockPokemon: Pokemon = {
         id: 25,
-        pokedexNumber: 25,
         name: 'Pikachu',
         types: ['electric'],
+        sprite: 'url',
+        stats: {hp: 35, attack: 55, defense: 40, spAttack: 50, spDefense: 50, speed: 90},
+        height: 4,
+        weight: 60,
+        abilities: ['static'],
+        evolution: [25],
       };
 
       const mockUser = {
@@ -206,7 +232,7 @@ describe('GraphQL Resolvers', () => {
         owned_pokemon_ids: [25, 1, 4],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon);
       mockFindOne.mockResolvedValue(mockUser);
 
       const context: AuthContext = {
@@ -224,10 +250,16 @@ describe('GraphQL Resolvers', () => {
     });
 
     it('should return isOwned false when user does not own Pokemon', async () => {
-      const mockPokemon = {
+      const mockPokemon: Pokemon = {
         id: 150,
         name: 'Mewtwo',
         types: ['psychic'],
+        sprite: 'url',
+        stats: {hp: 106, attack: 110, defense: 90, spAttack: 154, spDefense: 90, speed: 130},
+        height: 20,
+        weight: 1220,
+        abilities: ['pressure'],
+        evolution: [150],
       };
 
       const mockUser = {
@@ -235,7 +267,7 @@ describe('GraphQL Resolvers', () => {
         owned_pokemon_ids: [25, 1],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon);
       mockFindOne.mockResolvedValue(mockUser);
 
       const context: AuthContext = {
@@ -252,13 +284,19 @@ describe('GraphQL Resolvers', () => {
     });
 
     it('should return isOwned false for unauthenticated user', async () => {
-      const mockPokemon = {
+      const mockPokemon: Pokemon = {
         id: 25,
         name: 'Pikachu',
         types: ['electric'],
+        sprite: 'url',
+        stats: {hp: 35, attack: 55, defense: 40, spAttack: 50, spDefense: 50, speed: 90},
+        height: 4,
+        weight: 60,
+        abilities: ['static'],
+        evolution: [25],
       };
 
-      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon as Pokemon);
+      vi.mocked(fetchPokemonById).mockResolvedValue(mockPokemon);
 
       const context: AuthContext = {};
 
@@ -272,7 +310,7 @@ describe('GraphQL Resolvers', () => {
     });
 
     it('should return null when Pokemon not found', async () => {
-      vi.mocked(fetchPokemonById).mockResolvedValue(null);
+      vi.mocked(fetchPokemonById).mockResolvedValue(null as unknown as Pokemon);
 
       const context: AuthContext = {};
 
