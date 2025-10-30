@@ -20,7 +20,7 @@ import {
   DYNAMIC_FACET_THRESHOLD,
   FACET_TIMEOUT_MS,
   USE_STATIC_FALLBACK,
-} from './index.js';
+} from './config.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
