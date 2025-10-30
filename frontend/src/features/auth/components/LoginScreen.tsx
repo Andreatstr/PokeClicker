@@ -116,7 +116,7 @@ export function LoginScreen({onNavigate}: Props) {
           </Button>
           <Button
             className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
-            onClick={() => onNavigate('clicker')}
+            onClick={() => onNavigate('pokedex')}
           >
             Guest user
           </Button>
