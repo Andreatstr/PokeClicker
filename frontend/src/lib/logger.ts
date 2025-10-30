@@ -110,8 +110,7 @@ class Logger {
   logError(error: unknown, context?: string): void {
     if (!this.shouldLog('error')) return;
 
-    const errorMessage =
-      error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
 
     console.error(

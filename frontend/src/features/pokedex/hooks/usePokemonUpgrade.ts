@@ -29,8 +29,9 @@ export function usePokemonUpgrade(pokemonId: number | null) {
 }
 
 export function useUpgradePokemonMutation() {
-  const [upgradePokemon, {loading, error}] =
-    useMutation<UpgradePokemonData>(UPGRADE_POKEMON_MUTATION);
+  const [upgradePokemon, {loading, error}] = useMutation<UpgradePokemonData>(
+    UPGRADE_POKEMON_MUTATION
+  );
 
   return [upgradePokemon, {loading, error}] as const;
 }

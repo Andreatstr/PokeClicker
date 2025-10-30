@@ -184,7 +184,17 @@ export class PokedexPage extends BasePage {
     await this.page.waitForTimeout(500); // Wait for new cards to load
   }
 
+  async isMobile(): Promise<boolean> {
+    const viewport = this.page.viewportSize();
+    return viewport ? viewport.width <= 768 : false;
+  }
+
   async getDisplayedCount(): Promise<string> {
+    // Skip checking count text on mobile since it's not rendered there
+    if (await this.isMobile()) {
+      return "Mobile view — count text not visible";
+    }
+
     const text = await this.countText.textContent();
     return text || "";
   }

@@ -17,9 +17,7 @@ export function FavoritePokemonSelector({
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
   // Fetch all owned Pokemon in a single query
-  const {data, loading} = usePokemonBasicBulk(
-    isOpen ? ownedPokemonIds : []
-  );
+  const {data, loading} = usePokemonBasicBulk(isOpen ? ownedPokemonIds : []);
 
   const ownedPokemon = data?.pokemonByIds || [];
 

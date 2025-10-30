@@ -26,10 +26,7 @@ interface ErrorProviderProps {
 }
 
 // ErrorProvider - Wrap your app with this to provide error handling
-export function ErrorProvider({
-  children,
-  maxErrors = 5,
-}: ErrorProviderProps) {
+export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
   const [errors, setErrors] = useState<AppError[]>([]);
 
   const removeError = useCallback((errorId: string) => {
@@ -75,4 +72,3 @@ export function ErrorProvider({
     </ErrorContext.Provider>
   );
 }
-

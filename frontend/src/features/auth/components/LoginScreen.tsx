@@ -14,7 +14,7 @@ import {logger} from '@/lib/logger';
 import {useMobileDetection} from '@/hooks';
 
 type Props = {
-  onNavigate: (page: 'clicker' | 'pokedex' | 'login') => void;
+  onNavigate: (page: 'pokedex' | 'clicker' | 'login') => void;
 };
 
 type FormValues = {
@@ -66,7 +66,7 @@ export function LoginScreen({onNavigate}: Props) {
         await authLogin(authData.token, authData.user);
         reset();
         setModalType(null);
-        onNavigate('clicker');
+        onNavigate('pokedex');
       }
     } catch (err) {
       logger.logError(err, 'Authentication');
@@ -81,7 +81,7 @@ export function LoginScreen({onNavigate}: Props) {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
         poster="/project2/loginBackground.webp"
       >
         <source src="/project2/loginBackgroundVideo.mp4" type="video/mp4" />
