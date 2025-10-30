@@ -181,7 +181,14 @@ describe('GraphQL Resolvers', () => {
             name: 'Bulbasaur',
             types: ['grass', 'poison'],
             sprite: 'url',
-            stats: {hp: 45, attack: 49, defense: 49, spAttack: 65, spDefense: 65, speed: 45},
+            stats: {
+              hp: 45,
+              attack: 49,
+              defense: 49,
+              spAttack: 65,
+              spDefense: 65,
+              speed: 45,
+            },
             height: 7,
             weight: 69,
             abilities: ['overgrow'],
@@ -192,7 +199,14 @@ describe('GraphQL Resolvers', () => {
             name: 'Ivysaur',
             types: ['grass', 'poison'],
             sprite: 'url',
-            stats: {hp: 60, attack: 62, defense: 63, spAttack: 80, spDefense: 80, speed: 60},
+            stats: {
+              hp: 60,
+              attack: 62,
+              defense: 63,
+              spAttack: 80,
+              spDefense: 80,
+              speed: 60,
+            },
             height: 10,
             weight: 130,
             abilities: ['overgrow'],
@@ -219,7 +233,14 @@ describe('GraphQL Resolvers', () => {
         name: 'Pikachu',
         types: ['electric'],
         sprite: 'url',
-        stats: {hp: 35, attack: 55, defense: 40, spAttack: 50, spDefense: 50, speed: 90},
+        stats: {
+          hp: 35,
+          attack: 55,
+          defense: 40,
+          spAttack: 50,
+          spDefense: 50,
+          speed: 90,
+        },
         height: 4,
         weight: 60,
         abilities: ['static'],
@@ -254,7 +275,14 @@ describe('GraphQL Resolvers', () => {
         name: 'Mewtwo',
         types: ['psychic'],
         sprite: 'url',
-        stats: {hp: 106, attack: 110, defense: 90, spAttack: 154, spDefense: 90, speed: 130},
+        stats: {
+          hp: 106,
+          attack: 110,
+          defense: 90,
+          spAttack: 154,
+          spDefense: 90,
+          speed: 130,
+        },
         height: 20,
         weight: 1220,
         abilities: ['pressure'],
@@ -288,7 +316,14 @@ describe('GraphQL Resolvers', () => {
         name: 'Pikachu',
         types: ['electric'],
         sprite: 'url',
-        stats: {hp: 35, attack: 55, defense: 40, spAttack: 50, spDefense: 50, speed: 90},
+        stats: {
+          hp: 35,
+          attack: 55,
+          defense: 40,
+          spAttack: 50,
+          spDefense: 50,
+          speed: 90,
+        },
         height: 4,
         weight: 60,
         abilities: ['static'],
@@ -379,10 +414,13 @@ describe('GraphQL Resolvers', () => {
 
     it('should throw error for username too long', async () => {
       await expect(
-        resolvers.Mutation.signup({}, {
-          username: 'a'.repeat(21),
-          password: 'password123',
-        })
+        resolvers.Mutation.signup(
+          {},
+          {
+            username: 'a'.repeat(21),
+            password: 'password123',
+          }
+        )
       ).rejects.toThrow('Username must be between 3 and 20 characters');
     });
 
@@ -396,10 +434,13 @@ describe('GraphQL Resolvers', () => {
       mockInsertOne.mockRejectedValue({code: 11000});
 
       await expect(
-        resolvers.Mutation.signup({}, {
-          username: 'existinguser',
-          password: 'password123',
-        })
+        resolvers.Mutation.signup(
+          {},
+          {
+            username: 'existinguser',
+            password: 'password123',
+          }
+        )
       ).rejects.toThrow('Username already exists');
     });
   });
@@ -458,10 +499,13 @@ describe('GraphQL Resolvers', () => {
       mockFindOne.mockResolvedValue(null);
 
       await expect(
-        resolvers.Mutation.login({}, {
-          username: 'nonexistent',
-          password: 'password123',
-        })
+        resolvers.Mutation.login(
+          {},
+          {
+            username: 'nonexistent',
+            password: 'password123',
+          }
+        )
       ).rejects.toThrow('Incorrect username or password');
     });
 
@@ -488,10 +532,13 @@ describe('GraphQL Resolvers', () => {
       mockFindOne.mockResolvedValue(mockUser);
 
       await expect(
-        resolvers.Mutation.login({}, {
-          username: 'testuser',
-          password: 'wrongpassword',
-        })
+        resolvers.Mutation.login(
+          {},
+          {
+            username: 'testuser',
+            password: 'wrongpassword',
+          }
+        )
       ).rejects.toThrow('Incorrect username or password');
     });
   });
