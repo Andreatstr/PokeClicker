@@ -42,10 +42,16 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
-      - name: Start MongoDB
+      - name: Check MongoDB status
         run: |
-          sudo systemctl start mongodb
-          sleep 5
+          # Check if MongoDB is already running
+          if systemctl is-active --quiet mongodb || systemctl is-active --quiet mongod; then
+            echo "MongoDB is already running"
+          else
+            echo "MongoDB is not running, attempting to start..."
+            systemctl start mongodb 2>/dev/null || systemctl start mongod 2>/dev/null || echo "Could not start MongoDB with systemctl, assuming it's already available"
+          fi
+          sleep 2
 
       - name: Find available port and start backend server
         run: |
