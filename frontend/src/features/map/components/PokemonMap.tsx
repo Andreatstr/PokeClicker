@@ -24,8 +24,9 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
 
   // Fetch user's favorite Pokemon for battles
-    const { pokemon: favoritePokemon, refreshStats } = usePokemonById(user?.favorite_pokemon_id || null);
-
+  const {pokemon: favoritePokemon, refreshStats} = usePokemonById(
+    user?.favorite_pokemon_id || null
+  );
 
   // Mutations for awarding battle rewards
   const [catchPokemon] = useCatchPokemon();
@@ -140,7 +141,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
           isOwned: true,
         };
 
-        await refreshStats()
+        await refreshStats();
         setPlayerPokemon(playerPokemon);
         setBattleOpponent(opponent);
         setInBattle(true);

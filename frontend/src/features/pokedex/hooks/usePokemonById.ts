@@ -17,17 +17,26 @@ export type {PokemonStats, PokemonById};
 export function usePokemonById(id: number | null) {
   const {isAuthenticated} = useAuth();
 
-  const {data: pokeData, loading: pokemonLoading, refetch: refetchPokemon} = 
-    useQuery<PokemonByIdData, PokemonByIdVariables>(POKEMON_BY_ID_QUERY, {
-      variables: {id: id!},
-      skip: id === null,
-    });
+  const {
+    data: pokeData,
+    loading: pokemonLoading,
+    refetch: refetchPokemon,
+  } = useQuery<PokemonByIdData, PokemonByIdVariables>(POKEMON_BY_ID_QUERY, {
+    variables: {id: id!},
+    skip: id === null,
+  });
 
-  const {data: upgradeData, loading: upgradeLoading, refetch: refetchUpgrade} = 
-    useQuery<PokemonUpgradeData, PokemonUpgradeVariables>(POKEMON_UPGRADE_QUERY, {
+  const {
+    data: upgradeData,
+    loading: upgradeLoading,
+    refetch: refetchUpgrade,
+  } = useQuery<PokemonUpgradeData, PokemonUpgradeVariables>(
+    POKEMON_UPGRADE_QUERY,
+    {
       variables: {pokemonId: id!},
       skip: !id || !isAuthenticated,
-    });
+    }
+  );
 
   const pokemon = useMemo(() => {
     if (!pokeData?.pokemonById) return null;
@@ -57,10 +66,7 @@ export function usePokemonById(id: number | null) {
 
   // Function to refresh pokemon stats
   const refreshStats = async () => {
-    await Promise.all([
-      refetchPokemon(),
-      isAuthenticated && refetchUpgrade(),
-    ]);
+    await Promise.all([refetchPokemon(), isAuthenticated && refetchUpgrade()]);
   };
 
   return {
