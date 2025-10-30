@@ -36,6 +36,7 @@ export type {
   PokedexPokemon,
   PokedexData,
   PokedexVariables,
+  FilterFacets,
   PokemonById,
   PokemonByIdData,
   PokemonByIdVariables,
