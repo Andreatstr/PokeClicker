@@ -15,22 +15,13 @@ export function usePokemonModal() {
     number | null
   >(null);
 
-  const {data: crossRegionData} = usePokemonById(crossRegionPokemonId);
+  const {pokemon: crossRegionData} = usePokemonById(crossRegionPokemonId);
 
   // Update selectedPokemon when cross-region data loads
   useEffect(() => {
-    if (crossRegionData?.pokemonById) {
-      const crossRegionPokemon: PokedexPokemon = {
-        id: crossRegionData.pokemonById.id,
-        name: crossRegionData.pokemonById.name,
-        types: crossRegionData.pokemonById.types,
-        sprite: crossRegionData.pokemonById.sprite,
-        stats: crossRegionData.pokemonById.stats,
-        evolution: crossRegionData.pokemonById.evolution,
-        isOwned: crossRegionData.pokemonById.isOwned,
-        pokedexNumber: crossRegionData.pokemonById.pokedexNumber,
-      };
-      setSelectedPokemon(crossRegionPokemon);
+    if (crossRegionData) {
+      // crossRegionData is already a PokedexPokemon, so use it directly
+      setSelectedPokemon(crossRegionData);
       setCrossRegionPokemonId(null);
     }
   }, [crossRegionData]);

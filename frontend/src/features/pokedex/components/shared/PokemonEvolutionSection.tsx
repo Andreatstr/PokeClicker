@@ -47,8 +47,7 @@ export function PokemonEvolutionSection({
   const sortedEvolutionIds = evolutionIds
     .map((id, index) => ({
       id,
-      pokedexNumber:
-        evolutionDataQueries[index]?.data?.pokemonById?.pokedexNumber ?? id,
+      pokedexNumber: evolutionDataQueries[index]?.pokemon?.pokedexNumber ?? id,
     }))
     .sort((a, b) => a.pokedexNumber - b.pokedexNumber)
     .map((item) => item.id);
