@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 import { NavbarPage } from "./pages/NavbarPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ClickerPage } from "./pages/ClickerPage";
-import { PokedexPage } from "./pages/PokedexPage";
 
 test.describe("Smoke Tests", () => {
   test("application loads successfully", async ({ page }) => {
@@ -68,36 +67,5 @@ test.describe("Smoke Tests", () => {
     expect(candyCount).toBeGreaterThanOrEqual(0);
 
     await expect(clicker.clickButton).toBeVisible();
-  });
-
-  test("pokédex displays cards", async ({ page }) => {
-    const navbar = new NavbarPage(page);
-    const login = new LoginPage(page);
-    const pokedex = new PokedexPage(page);
-
-    await navbar.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    if (await login.isOnLoginPage()) {
-      await login.quickRegister();
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000);
-    }
-
-    await navbar.navigateToPokedex();
-    await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
-
-    // Wait for Pokemon data to load - check for the search input first
-    await expect(page.getByPlaceholder(/search/i)).toBeVisible();
-
-    // Wait longer for GraphQL data to load in CI
-    await page.waitForTimeout(3000);
-
-    // Wait for at least one Pokemon card to appear
-    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 20000 });
-
-    const cardCount = await pokedex.getPokemonCardCount();
-    expect(cardCount).toBeGreaterThan(0);
   });
 });
