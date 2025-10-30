@@ -67,9 +67,11 @@ jobs:
         env:
           MONGODB_URI: mongodb://localhost:27017/pokeclicker_test
 
+      - name: Create .env file for frontend
+        run: |
+          echo "VITE_GRAPHQL_URL=http://localhost:${{ env.BACKEND_PORT }}/" > frontend/.env.local
+
       - name: Run smoke tests
-        env:
-          VITE_GRAPHQL_URL: http://localhost:${{ env.BACKEND_PORT }}/
         run: npx playwright test smoke.spec.ts --project=chromium
 
       - uses: actions/upload-artifact@v3

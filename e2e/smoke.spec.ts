@@ -91,11 +91,11 @@ test.describe("Smoke Tests", () => {
     // Wait for Pokemon data to load - check for the search input first
     await expect(page.getByPlaceholder(/search/i)).toBeVisible();
 
-    // Wait for at least one Pokemon card to appear
-    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 15000 });
+    // Wait longer for GraphQL data to load in CI
+    await page.waitForTimeout(3000);
 
-    // Wait for at least one Pokemon card to be visible
-    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 10000 });
+    // Wait for at least one Pokemon card to appear
+    await expect(pokedex.pokemonCards.first()).toBeVisible({ timeout: 20000 });
 
     const cardCount = await pokedex.getPokemonCardCount();
     expect(cardCount).toBeGreaterThan(0);
