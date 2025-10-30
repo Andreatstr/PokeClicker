@@ -170,7 +170,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
         setInBattle(true);
       }
     },
-    [favoritePokemon]
+    [favoritePokemon, refreshStats]
   );
 
   // Battle complete handler

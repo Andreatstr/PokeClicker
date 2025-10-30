@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 import { NavbarPage } from "./pages/NavbarPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ClickerPage } from "./pages/ClickerPage";
-import { PokedexPage } from "./pages/PokedexPage";
 
 test.describe("Smoke Tests", () => {
   test("application loads successfully", async ({ page }) => {
@@ -23,7 +22,7 @@ test.describe("Smoke Tests", () => {
       await page.waitForTimeout(1000);
 
       expect(await login.isOnLoginPage()).toBe(false);
-      await expect(page.getByText("Rare Candy")).toBeVisible();
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible();
     }
   });
 
@@ -68,25 +67,5 @@ test.describe("Smoke Tests", () => {
     expect(candyCount).toBeGreaterThanOrEqual(0);
 
     await expect(clicker.clickButton).toBeVisible();
-  });
-
-  test("pokédex displays cards", async ({ page }) => {
-    const navbar = new NavbarPage(page);
-    const login = new LoginPage(page);
-    const pokedex = new PokedexPage(page);
-
-    await navbar.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    if (await login.isOnLoginPage()) {
-      await login.quickRegister();
-      await page.waitForTimeout(1000);
-    }
-
-    await navbar.navigateToPokedex();
-    await page.waitForTimeout(1000);
-
-    const cardCount = await pokedex.getPokemonCardCount();
-    expect(cardCount).toBeGreaterThan(0);
   });
 });

@@ -42,9 +42,36 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
-      - name: Run smoke tests
+      - name: Check MongoDB status
+        run: |
+          # Check if MongoDB is already running
+          if systemctl is-active --quiet mongodb || systemctl is-active --quiet mongod; then
+            echo "MongoDB is already running"
+          else
+            echo "MongoDB is not running, attempting to start..."
+            systemctl start mongodb 2>/dev/null || systemctl start mongod 2>/dev/null || echo "Could not start MongoDB with systemctl, assuming it's already available"
+          fi
+          sleep 2
+
+      - name: Find available port and start backend server
+        run: |
+          # Find an available port between 3000-4000
+          PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
+          echo "Using port: $PORT"
+          echo "BACKEND_PORT=$PORT" >> $GITHUB_ENV
+
+          cd backend
+          PORT=$PORT npm run start &
+          sleep 5
+          curl --retry 10 --retry-delay 1 --retry-connrefused "http://localhost:$PORT/?query=%7Bhealth%7Bstatus%7D%7D"
         env:
-          VITE_GRAPHQL_URL: http://localhost:3026/
+          MONGODB_URI: mongodb://localhost:27017/pokeclicker_test
+
+      - name: Create .env file for frontend
+        run: |
+          echo "VITE_GRAPHQL_URL=http://localhost:${{ env.BACKEND_PORT }}/" > frontend/.env.local
+
+      - name: Run smoke tests
         run: npx playwright test smoke.spec.ts --project=chromium
 
       - uses: actions/upload-artifact@v3

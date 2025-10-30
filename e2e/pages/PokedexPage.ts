@@ -60,8 +60,8 @@ export class PokedexPage extends BasePage {
     this.clearMobileFiltersButton = this.mobileFilterModal.getByRole("button", { name: /clear/i });
     this.closeModalButton = this.mobileFilterModal.locator('button[aria-label="Close filter dialog"]');
 
-    // Pokemon grid
-    this.pokemonCards = page.locator("ul li");
+    // Pokemon grid - target the card wrapper in the grid
+    this.pokemonCards = page.locator('ul[style*="grid-template-columns"] > li, ul.flex > li');
     this.nextPageButton = page.getByRole("button", { name: /next/i });
     this.previousPageButton = page.getByRole("button", { name: /previous/i });
     this.countText = page.getByText(/showing \d+ of \d+ pokémon/i);

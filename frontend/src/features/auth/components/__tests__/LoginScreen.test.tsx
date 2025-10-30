@@ -263,13 +263,13 @@ describe('LoginScreen component', () => {
     expect(screen.getByLabelText('Password:')).toBeInTheDocument();
   });
 
-  it('should navigate to clicker when guest user is clicked', async () => {
+  it('should navigate to pokedex when guest user is clicked', async () => {
     const user = userEvent.setup();
     render(<LoginScreen onNavigate={mockOnNavigate} />);
 
     await user.click(screen.getByText('Guest user'));
 
-    expect(mockOnNavigate).toHaveBeenCalledWith('clicker');
+    expect(mockOnNavigate).toHaveBeenCalledWith('pokedex');
   });
 
   it('should show loading state during authentication', async () => {
