@@ -1,4 +1,5 @@
-import {useQuery} from '@apollo/client';
+import {useQuery, ApolloError} from '@apollo/client';
+import type {ApolloQueryResult} from '@apollo/client';
 import {useMemo} from 'react';
 import {useAuth} from '@/features/auth/hooks/useAuth';
 import {
@@ -12,14 +13,24 @@ import {
   type PokemonById,
 } from '@/lib/graphql';
 
+interface UsePokemonByIdReturn {
+  pokemon: PokemonById | null;
+  loading: boolean;
+  error?: ApolloError;
+  refreshStats: () => Promise<void>;
+  networkStatus?: number;
+  refetch?: () => Promise<ApolloQueryResult<PokemonByIdData>>;
+}
+
 export type {PokemonStats, PokemonById};
 
-export function usePokemonById(id: number | null) {
+export function usePokemonById(id: number | null): UsePokemonByIdReturn {
   const {isAuthenticated} = useAuth();
 
   const {
     data: pokeData,
     loading: pokemonLoading,
+    error: pokeError,
     refetch: refetchPokemon,
   } = useQuery<PokemonByIdData, PokemonByIdVariables>(POKEMON_BY_ID_QUERY, {
     variables: {id: id!},
@@ -72,6 +83,9 @@ export function usePokemonById(id: number | null) {
   return {
     pokemon,
     loading,
+    error: pokeError,
     refreshStats,
+    networkStatus: pokemonLoading ? 1 : 7,
+    refetch: refetchPokemon,
   };
 }
