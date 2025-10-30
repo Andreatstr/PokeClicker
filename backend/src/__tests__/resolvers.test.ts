@@ -1,4 +1,4 @@
-import {describe, it, expect, beforeEach, vi, afterEach} from 'vitest';
+import {describe, it, expect, beforeEach, beforeAll, vi, afterEach} from 'vitest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
@@ -31,6 +31,11 @@ vi.mock('../pokeapi.js', () => ({
   fetchPokemon: vi.fn(),
   fetchPokemonById: vi.fn(),
 }));
+
+beforeAll(() => {
+  process.env.JWT_SECRET = 'testsecret';
+  process.env.JWT_EXPIRES = '1h';
+});
 
 import {resolvers} from '../resolvers';
 import {fetchPokemon, fetchPokemonById} from '../pokeapi';
