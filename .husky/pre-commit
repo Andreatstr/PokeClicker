@@ -1,5 +1,19 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+echo "Running pre-commit checks..."
 
-cd frontend || exit 0
-npx lint-staged
+# Run frontend checks
+echo "→ Checking frontend..."
+cd frontend || exit 1
+npm run format:check || { echo "Frontend formatting failed. Run 'npm run format' to fix."; exit 1; }
+npm run lint || { echo "Frontend linting failed."; exit 1; }
+npm run test:run || { echo "Frontend tests failed."; exit 1; }
+cd ..
+
+# Run backend checks
+echo "→ Checking backend..."
+cd backend || exit 1
+npm run format:check || { echo "Backend formatting failed. Run 'npm run format' to fix."; exit 1; }
+npm run lint || { echo "Backend linting failed."; exit 1; }
+npm run test:run || { echo "Backend tests failed."; exit 1; }
+cd ..
+
+echo "✓ All pre-commit checks passed!"
