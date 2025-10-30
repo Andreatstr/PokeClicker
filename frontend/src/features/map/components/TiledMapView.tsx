@@ -8,7 +8,6 @@ import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
 const SPRITE_WIDTH = 68;
 const SPRITE_HEIGHT = 72;
 const MOVE_SPEED = 120;
-const TILE_SIZE = 512;
 
 interface PokemonSpawn {
   spawnId: string;

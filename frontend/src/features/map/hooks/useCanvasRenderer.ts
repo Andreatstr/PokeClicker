@@ -1,6 +1,5 @@
 import {useEffect, useRef} from 'react';
-
-const TILE_SIZE = 512;
+import {TILE_SIZE} from '@/config/gameConfig';
 
 interface VisibleTile {
   x: number;

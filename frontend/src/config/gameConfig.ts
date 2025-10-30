@@ -2,6 +2,7 @@
  * Game Configuration Constants
  * Centralized location for all game balance and mechanics constants
  */
+export const TILE_SIZE = 512;
 
 export const GameConfig = {
   /**
