@@ -79,9 +79,10 @@ async function seedPokemon() {
   const count = await collection.countDocuments();
   if (count > 0) {
     console.log(
-      `Database already contains ${count} Pokemon. Skipping seed. Delete the collection to re-seed.`
+      `Database already contains ${count} Pokemon. Dropping collection to re-seed...`
     );
-    process.exit(0);
+    await collection.drop();
+    console.log('Collection dropped successfully.');
   }
 
   console.log('Fetching Pokemon metadata from PokéAPI...');
@@ -117,8 +118,44 @@ async function seedPokemon() {
   await collection.createIndex({types: 1});
   await collection.createIndex({id: 1}, {unique: true});
 
+  // Compute and store static filter counts for large dataset fallback
+  console.log('Computing static filter counts...');
+
+  const generationCounts = await collection
+    .aggregate([{$group: {_id: '$generation', count: {$sum: 1}}}])
+    .toArray();
+
+  const typeCounts = await collection
+    .aggregate([
+      {$unwind: '$types'},
+      {$group: {_id: '$types', count: {$sum: 1}}},
+    ])
+    .toArray();
+
+  const countsCollection = db.collection('filter_counts');
+
+  // Drop existing filter_counts collection if it exists
+  const existingCounts = await countsCollection.countDocuments();
+  if (existingCounts > 0) {
+    console.log('Dropping existing filter_counts collection...');
+    await countsCollection.drop();
+  }
+
+  // Insert new counts
+  await countsCollection.insertOne({
+    _id: 'global_counts',
+    byGeneration: Object.fromEntries(
+      generationCounts.map((g) => [g._id, g.count])
+    ),
+    byType: Object.fromEntries(typeCounts.map((t) => [t._id, t.count])),
+    total: await collection.countDocuments({}),
+    lastUpdated: new Date(),
+  });
+
+  console.log('Static filter counts stored successfully');
+
   console.log(
-    `Successfully seeded ${pokemonMetadata.length} Pokemon with indexes!`
+    `Successfully seeded ${pokemonMetadata.length} Pokemon with indexes and filter counts!`
   );
   process.exit(0);
 }

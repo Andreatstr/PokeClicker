@@ -14,8 +14,13 @@ import {
   PokemonQueryArgs,
   PokemonUpgradeDocument,
 } from './types';
-import {Collection, ObjectId} from 'mongodb';
+import {Collection, ObjectId, type Db} from 'mongodb';
 import {type AuthContext, requireAuth} from './auth.js';
+import {
+  DYNAMIC_FACET_THRESHOLD,
+  FACET_TIMEOUT_MS,
+  USE_STATIC_FALLBACK,
+} from './index.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
@@ -301,7 +306,7 @@ export const resolvers = {
       args: {
         search?: string;
         generation?: string;
-        type?: string;
+        types?: string[];
         sortBy?: string;
         sortOrder?: string;
         limit?: number;
@@ -314,7 +319,7 @@ export const resolvers = {
       const {
         search,
         generation,
-        type,
+        types,
         sortBy = 'id',
         sortOrder = 'asc',
         limit = 20,
@@ -350,6 +355,7 @@ export const resolvers = {
         return {
           pokemon: [],
           total: 0,
+          facets: null,
         };
       }
 
@@ -358,18 +364,19 @@ export const resolvers = {
       const metadataCollection = db.collection('pokemon_metadata');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query: any = {};
+      const baseMatch: any = {};
 
       if (generation) {
-        query.generation = generation.toLowerCase();
+        baseMatch.generation = generation.toLowerCase();
       }
 
-      if (type) {
-        query.types = type.toLowerCase();
+      // FIX: Multi-type UNION filtering
+      if (types && types.length > 0) {
+        baseMatch.types = {$in: types.map((t) => t.toLowerCase())};
       }
 
       if (search) {
-        query.name = {$regex: search.toLowerCase(), $options: 'i'};
+        baseMatch.name = {$regex: search.toLowerCase(), $options: 'i'};
       }
 
       if (ownedOnly) {
@@ -377,58 +384,149 @@ export const resolvers = {
           return {
             pokemon: [],
             total: 0,
+            facets: null,
           };
         }
-        query.id = {$in: ownedPokemonIds};
+        baseMatch.id = {$in: ownedPokemonIds};
       }
 
       // Build sort object
       const sort: Record<string, 1 | -1> = {};
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
-      } else if (sortBy === 'type') {
-        sort['types.0'] = sortOrder === 'asc' ? 1 : -1;
       } else {
+        // Remove type sorting as it's inconsistent for dual-type Pokemon
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
 
-      // Get total count for pagination
-      const total = await metadataCollection.countDocuments(query);
+      // Check total dataset size for adaptive faceting strategy
+      const totalPokemonCount = await metadataCollection.countDocuments({});
+      const useDynamicFacets = totalPokemonCount <= DYNAMIC_FACET_THRESHOLD;
 
-      // Query MongoDB with filtering, sorting, and pagination
+      let facets = null;
+
+      if (useDynamicFacets) {
+        // STRATEGY 1: Dynamic faceted aggregation for small datasets
+        try {
+          const facetResult = await Promise.race([
+            computeDynamicFacets(
+              metadataCollection,
+              baseMatch,
+              generation,
+              types,
+              search,
+              ownedOnly,
+              ownedPokemonIds,
+              sort,
+              offset,
+              limit
+            ),
+            new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error('Facet timeout')),
+                FACET_TIMEOUT_MS
+              )
+            ),
+          ]);
+
+          const result = facetResult as {
+            paginatedResults: Array<{id: number}>;
+            total: number;
+            facets: {
+              byGeneration: Array<{generation: string; count: number}>;
+              byType: Array<{type: string; count: number}>;
+            };
+          };
+
+          facets = {
+            ...result.facets,
+            isDynamic: true,
+          };
+
+          // Fetch full Pokemon details
+          const pokemonPromises = result.paginatedResults.map((meta) =>
+            fetchPokemonById(meta.id)
+          );
+          const paginatedPokemon = await Promise.all(pokemonPromises);
+
+          const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
+            ...p,
+            pokedexNumber: p.id,
+            evolution: p.evolution || [],
+            isOwned: effectiveUserId
+              ? (ownedPokemonIds ?? []).includes(p.id)
+              : false,
+          }));
+
+          return {pokemon: pokedexPokemon, total: result.total, facets};
+        } catch (error) {
+          console.warn(
+            'Dynamic facets failed or timed out, falling back to static counts',
+            error
+          );
+          // Fall through to static counts fallback
+        }
+      }
+
+      // STRATEGY 2: Static counts fallback (or if dynamic failed)
+      if (USE_STATIC_FALLBACK) {
+        const staticCounts = await getStaticFilterCounts(db);
+        if (staticCounts) {
+          // Compute owned count for static fallback
+          const ownedMatchQuery: Record<string, unknown> = {...baseMatch};
+          delete ownedMatchQuery.id; // Remove owned filter
+          if (ownedPokemonIds.length > 0) {
+            ownedMatchQuery.id = {$in: ownedPokemonIds};
+          }
+          const staticOwnedCount =
+            ownedPokemonIds.length > 0
+              ? await metadataCollection.countDocuments(ownedMatchQuery)
+              : 0;
+
+          facets = {
+            byGeneration: Object.entries(staticCounts.byGeneration).map(
+              ([gen, count]) => ({
+                generation: gen,
+                count: count as number,
+              })
+            ),
+            byType: Object.entries(staticCounts.byType).map(
+              ([type, count]) => ({
+                type,
+                count: count as number,
+              })
+            ),
+            isDynamic: false,
+            ownedCount: staticOwnedCount,
+            totalCount: staticCounts.total,
+          };
+        }
+      }
+
+      // Standard query for Pokemon (without facets in aggregation)
+      const total = await metadataCollection.countDocuments(baseMatch);
       const pokemonMetadata = await metadataCollection
-        .find(query)
+        .find(baseMatch)
         .sort(sort)
         .skip(offset)
         .limit(limit)
         .toArray();
 
-      // Fetch full details only for the paginated Pokemon
       const pokemonPromises = pokemonMetadata.map((meta) =>
         fetchPokemonById(meta.id)
       );
       const paginatedPokemon = await Promise.all(pokemonPromises);
 
-      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
-        // If no user is authenticated, guest users see Pokemon as unowned
-        const isOwned = effectiveUserId
+      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
+        ...p,
+        pokedexNumber: p.id,
+        evolution: p.evolution || [],
+        isOwned: effectiveUserId
           ? (ownedPokemonIds ?? []).includes(p.id)
-          : false;
+          : false,
+      }));
 
-        // Return full Pokemon data regardless of ownership status
-        // The isOwned flag allows frontend to show ownership indicators
-        return {
-          ...p,
-          pokedexNumber: p.id,
-          evolution: p.evolution || [],
-          isOwned,
-        };
-      });
-
-      return {
-        pokemon: pokedexPokemon,
-        total,
-      };
+      return {pokemon: pokedexPokemon, total, facets};
     },
 
     // Get Pokemon upgrade level for a specific Pokemon
@@ -919,3 +1017,124 @@ export const resolvers = {
     },
   },
 };
+
+/**
+ * Helper: Compute dynamic faceted counts using MongoDB aggregation
+ * Returns paginated results, total count, and filter counts for generation and types
+ */
+async function computeDynamicFacets(
+  metadataCollection: Collection,
+  baseMatch: Record<string, unknown>,
+  generation: string | undefined,
+  types: string[] | undefined,
+  search: string | undefined,
+  ownedOnly: boolean,
+  ownedPokemonIds: number[],
+  sort: Record<string, 1 | -1>,
+  offset: number,
+  limit: number
+) {
+  const pipeline = [
+    {
+      $facet: {
+        // Main results - just paginated data
+        paginatedResults: [
+          {$match: baseMatch},
+          {$sort: sort},
+          {$skip: offset},
+          {$limit: limit},
+        ],
+
+        // Total count
+        totalCount: [{$match: baseMatch}, {$count: 'count'}],
+
+        // Generation counts (apply all filters EXCEPT generation)
+        generationCounts: [
+          // Apply type filter if present
+          ...(types && types.length > 0
+            ? [{$match: {types: {$in: types.map((t) => t.toLowerCase())}}}]
+            : []),
+          // Apply search filter if present
+          ...(search
+            ? [{$match: {name: {$regex: search.toLowerCase(), $options: 'i'}}}]
+            : []),
+          // Apply owned filter if present
+          ...(ownedOnly && ownedPokemonIds.length > 0
+            ? [{$match: {id: {$in: ownedPokemonIds}}}]
+            : []),
+
+          {$group: {_id: '$generation', count: {$sum: 1}}},
+          {$project: {generation: '$_id', count: 1, _id: 0}},
+        ],
+
+        // Type counts (apply all filters EXCEPT types)
+        typeCounts: [
+          // Apply generation filter if present
+          ...(generation
+            ? [{$match: {generation: generation.toLowerCase()}}]
+            : []),
+          // Apply search filter if present
+          ...(search
+            ? [{$match: {name: {$regex: search.toLowerCase(), $options: 'i'}}}]
+            : []),
+          // Apply owned filter if present
+          ...(ownedOnly && ownedPokemonIds.length > 0
+            ? [{$match: {id: {$in: ownedPokemonIds}}}]
+            : []),
+
+          {$unwind: '$types'},
+          {$group: {_id: '$types', count: {$sum: 1}}},
+          {$project: {type: '$_id', count: 1, _id: 0}},
+        ],
+
+        // Owned count (how many owned Pokemon match current filters, excluding ownedOnly)
+        ownedCount: [
+          // Apply all filters EXCEPT ownedOnly
+          ...(generation
+            ? [{$match: {generation: generation.toLowerCase()}}]
+            : []),
+          ...(types && types.length > 0
+            ? [{$match: {types: {$in: types.map((t) => t.toLowerCase())}}}]
+            : []),
+          ...(search
+            ? [{$match: {name: {$regex: search.toLowerCase(), $options: 'i'}}}]
+            : []),
+          // Filter to only owned Pokemon
+          ...(ownedPokemonIds.length > 0
+            ? [{$match: {id: {$in: ownedPokemonIds}}}]
+            : []),
+
+          {$count: 'count'},
+        ],
+      },
+    },
+  ];
+
+  const [result] = await metadataCollection.aggregate(pipeline).toArray();
+
+  const totalCount = result.totalCount[0]?.count || 0;
+  const ownedCount = result.ownedCount[0]?.count || 0;
+
+  return {
+    paginatedResults: result.paginatedResults,
+    total: totalCount,
+    facets: {
+      byGeneration: result.generationCounts || [],
+      byType: result.typeCounts || [],
+      ownedCount,
+      totalCount,
+    },
+  };
+}
+
+/**
+ * Helper: Get precomputed static filter counts from database
+ * Used as fallback when dynamic facets are too slow or dataset is too large
+ */
+async function getStaticFilterCounts(db: Db) {
+  const countsCollection = db.collection('filter_counts');
+  const counts = await countsCollection.findOne({
+    _id: 'global_counts',
+  });
+  return counts || null;
+}

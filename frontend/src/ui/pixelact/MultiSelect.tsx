@@ -8,6 +8,7 @@ type MultiSelectProps = {
   onChange: (selected: string[]) => void;
   placeholder?: string;
   className?: string;
+  counts?: Record<string, number>;
 };
 
 export function MultiSelect({
@@ -16,6 +17,7 @@ export function MultiSelect({
   onChange,
   placeholder = 'All types',
   className,
+  counts,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,40 +74,77 @@ export function MultiSelect({
           }}
           role="listbox"
         >
-          {options.map((type) => (
-            <label
-              key={type}
-              className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none"
-              onMouseEnter={(e) => {
+          {/* Clear all option */}
+          <button
+            type="button"
+            onClick={() => {
+              if (selected.length > 0) {
+                onChange([]);
+              }
+            }}
+            disabled={selected.length === 0}
+            className="w-full flex items-center px-3 py-2 text-sm border-y-3 border-dashed border-ring/0 outline-none"
+            style={{
+              cursor: selected.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: selected.length === 0 ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (selected.length > 0) {
                 e.currentTarget.style.backgroundColor = 'var(--accent)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '';
-              }}
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '';
+            }}
+          >
+            <span
+              className="pixel-font font-bold"
+              style={{color: 'var(--foreground)'}}
             >
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(type)}
-                  onChange={() => toggleOption(type)}
-                  className="appearance-none w-4 h-4 border rounded-sm"
-                  style={{
-                    borderColor: 'var(--border)',
-                    backgroundColor: 'var(--input)',
-                  }}
-                />
-                <span
-                  className="capitalize pixel-font"
-                  style={{color: 'var(--foreground)'}}
-                >
-                  {type}
-                </span>
-              </div>
-              {selected.includes(type) && (
-                <CheckIcon className="size-4 opacity-70" />
-              )}
-            </label>
-          ))}
+              Clear all types
+            </span>
+          </button>
+
+          {options.map((type) => {
+            const count = counts?.[type];
+            const displayText =
+              count !== undefined ? `${type} (${count})` : type;
+
+            return (
+              <label
+                key={type}
+                className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--accent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '';
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(type)}
+                    onChange={() => toggleOption(type)}
+                    className="appearance-none w-4 h-4 border rounded-sm"
+                    style={{
+                      borderColor: 'var(--border)',
+                      backgroundColor: 'var(--input)',
+                    }}
+                  />
+                  <span
+                    className="capitalize pixel-font"
+                    style={{color: 'var(--foreground)'}}
+                  >
+                    {displayText}
+                  </span>
+                </div>
+                {selected.includes(type) && (
+                  <CheckIcon className="size-4 opacity-70" />
+                )}
+              </label>
+            );
+          })}
         </div>
       )}
     </div>

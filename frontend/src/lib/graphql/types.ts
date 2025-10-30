@@ -34,17 +34,26 @@ export interface PokedexPokemon {
   isOwned?: boolean;
 }
 
+export interface FilterFacets {
+  byGeneration: Array<{generation: string; count: number}>;
+  byType: Array<{type: string; count: number}>;
+  isDynamic: boolean;
+  ownedCount: number;
+  totalCount: number;
+}
+
 export interface PokedexData {
   pokedex: {
     pokemon: PokedexPokemon[];
     total: number;
+    facets?: FilterFacets | null;
   };
 }
 
 export interface PokedexVariables {
   search?: string;
   generation?: string;
-  type?: string;
+  types?: string[];
   sortBy?: string;
   sortOrder?: string;
   limit?: number;
