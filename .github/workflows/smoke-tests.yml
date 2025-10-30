@@ -1,4 +1,4 @@
-name: Smoke Tests
+name: CI Pipeline
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [main, develop]
 
 jobs:
-  smoke-test:
-    timeout-minutes: 10
+  quality-checks:
+    timeout-minutes: 15
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -20,9 +20,24 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Vitest unit tests
-        run: npm test
+      - name: Check Prettier formatting
+        run: |
+          cd frontend && npm run format:check
+          cd ../backend && npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Run frontend unit tests
+        run: npm run test:run
         working-directory: ./frontend
+
+      - name: Run backend unit tests
+        run: npm run test:run
+        working-directory: ./backend
 
       - name: Install Playwright Browsers
         run: npx playwright install chromium
@@ -35,6 +50,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: smoke-test-results
+          name: test-results
           path: test-results/
           retention-days: 7
