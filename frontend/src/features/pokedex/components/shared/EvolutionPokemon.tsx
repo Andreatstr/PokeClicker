@@ -17,7 +17,7 @@ export function EvolutionPokemon({
   showArrow,
   isOwned,
 }: EvolutionPokemonProps) {
-  const {data, loading} = usePokemonById(id);
+  const {pokemon, loading} = usePokemonById(id);
   const [cachedSprite, setCachedSprite] = useState<HTMLImageElement | null>(
     null
   );
@@ -25,7 +25,7 @@ export function EvolutionPokemon({
   // Preload evolution sprite
   useEffect(() => {
     const preloadSprite = async () => {
-      if (isOwned && data?.pokemonById) {
+      if (isOwned && pokemon) {
         try {
           const sprite = await pokemonSpriteCache.getPokemonSprite(id);
           setCachedSprite(sprite);
@@ -36,9 +36,9 @@ export function EvolutionPokemon({
     };
 
     preloadSprite();
-  }, [id, isOwned, data?.pokemonById]);
+  }, [id, isOwned, pokemon]);
 
-  if (loading || !data?.pokemonById) {
+  if (loading || !pokemon) {
     return (
       <div className="evolutionItem flex items-center gap-1 md:gap-2">
         <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
@@ -51,7 +51,7 @@ export function EvolutionPokemon({
     );
   }
 
-  const evo = data.pokemonById;
+  const evo = pokemon;
 
   return (
     <div className="evolutionItem flex items-center gap-1 md:gap-2">
