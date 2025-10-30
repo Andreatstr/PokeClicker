@@ -1,12 +1,13 @@
+import React from 'react';
 import {useState} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
+import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
 
 // Constants
 const SPRITE_WIDTH = 68;
 const SPRITE_HEIGHT = 72;
 const MOVE_SPEED = 120;
-const TILE_SIZE = 512;
 
 interface PokemonSpawn {
   spawnId: string;
@@ -30,23 +31,33 @@ interface TiledMapViewProps {
   onResetToHome: () => void;
 }
 
-export function TiledMapView({
-  camera,
-  screenPos,
-  spritePos,
-  wildPokemon,
-  nearbyPokemon,
-  user,
-  viewportSize,
-  isDarkMode = false,
-  onStartBattle,
-  onResetToHome,
-}: TiledMapViewProps) {
-  const {visibleTiles, visiblePokemon, isLoading} = useTileRenderer(
+export function TiledMapView(props: TiledMapViewProps) {
+  const {
     camera,
+    screenPos,
+    spritePos,
+    wildPokemon,
+    nearbyPokemon,
+    user,
     viewportSize,
-    wildPokemon
-  );
+    isDarkMode = false,
+    onStartBattle,
+    onResetToHome,
+  } = props;
+
+  const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} =
+    useTileRenderer(camera, viewportSize, wildPokemon);
+
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  useCanvasRenderer({
+    containerRef,
+    visibleTiles,
+    tileCacheRef,
+    viewportSize,
+    tileSize: 512,
+    backgroundColor: isDarkMode ? '#0b1220' : '#e6f0eb',
+  });
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
     return user &&
@@ -59,30 +70,7 @@ export function TiledMapView({
   return (
     <>
       {/* Map Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {visibleTiles.map((tile) => {
-          const key = `${tile.x}_${tile.y}`;
-          return (
-            <div
-              key={key}
-              className="absolute transition-none"
-              style={{
-                left: `${tile.screenX}px`,
-                top: `${tile.screenY}px`,
-                width: `${TILE_SIZE}px`,
-                height: `${TILE_SIZE}px`,
-                backgroundImage: tile.loaded ? `url('${tile.src}')` : 'none',
-                backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: '0 0',
-                imageRendering: 'pixelated',
-                opacity: tile.loaded ? 1 : 0.3,
-                backgroundColor: tile.loaded ? 'transparent' : '#1a2a1a',
-              }}
-            />
-          );
-        })}
-
+      <div ref={containerRef} className="absolute inset-0 overflow-hidden">
         {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
           <img
@@ -91,7 +79,7 @@ export function TiledMapView({
             alt={visiblePoke.pokemon.name}
             className="absolute transition-none"
             style={{
-              left: `${visiblePoke.screenX - 24}px`, // Pre-calculated screen coordinates
+              left: `${visiblePoke.screenX - 24}px`,
               top: `${visiblePoke.screenY - 24}px`,
               width: '48px',
               height: '48px',

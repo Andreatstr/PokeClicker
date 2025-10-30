@@ -2,15 +2,15 @@ import { Page, Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
 
 export class NavbarPage extends BasePage {
-  readonly clickerTab: Locator;
   readonly pokedexTab: Locator;
+  readonly clickerTab: Locator;
   readonly themeToggle: Locator;
   readonly mobileMenuButton: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.clickerTab = page.getByRole("button", { name: /clicker/i });
     this.pokedexTab = page.getByRole("button", { name: /pokedex/i });
+    this.clickerTab = page.getByRole("button", { name: /clicker/i });
     this.themeToggle = page
       .locator("button")
       .filter({ has: page.locator("svg") })
@@ -41,14 +41,14 @@ export class NavbarPage extends BasePage {
     }
   }
 
-  async navigateToClicker() {
-    await this.openMobileMenuIfNeeded();
-    await this.clickerTab.click();
-  }
-
   async navigateToPokedex() {
     await this.openMobileMenuIfNeeded();
     await this.pokedexTab.click();
+  }
+
+  async navigateToClicker() {
+    await this.openMobileMenuIfNeeded();
+    await this.clickerTab.click();
   }
 
   async toggleTheme() {
@@ -75,6 +75,13 @@ export class NavbarPage extends BasePage {
     await this.themeToggle.click();
   }
 
+  async isOnPokedex(): Promise<boolean> {
+    return await this.page
+      .getByPlaceholder(/search/i)
+      .isVisible()
+      .catch(() => false);
+  }
+
   async isOnClicker(): Promise<boolean> {
     const rareCandyVisible = await this.page
       .getByText("Rare Candy")
@@ -85,12 +92,5 @@ export class NavbarPage extends BasePage {
       .isVisible()
       .catch(() => false);
     return rareCandyVisible || charizardVisible;
-  }
-
-  async isOnPokedex(): Promise<boolean> {
-    return await this.page
-      .getByPlaceholder(/search/i)
-      .isVisible()
-      .catch(() => false);
   }
 }

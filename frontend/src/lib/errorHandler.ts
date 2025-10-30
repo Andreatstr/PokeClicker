@@ -115,10 +115,7 @@ export function classifyError(error: unknown): ErrorType {
     return ErrorType.PERMISSION;
   }
 
-  if (
-    errorMessage.includes('invalid') ||
-    errorMessage.includes('validation')
-  ) {
+  if (errorMessage.includes('invalid') || errorMessage.includes('validation')) {
     return ErrorType.VALIDATION;
   }
 

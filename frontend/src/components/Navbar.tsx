@@ -3,9 +3,9 @@ import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
 interface NavbarProps {
-  currentPage: 'clicker' | 'pokedex' | 'login' | 'map' | 'profile';
+  currentPage: 'pokedex' | 'clicker' | 'login' | 'map' | 'profile';
   onPageChange: (
-    page: 'clicker' | 'pokedex' | 'login' | 'map' | 'profile'
+    page: 'pokedex' | 'clicker' | 'login' | 'map' | 'profile'
   ) => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
@@ -58,15 +58,15 @@ export function Navbar({
           <div className="hidden lg:flex items-center gap-4">
             <Button
               className="text-xs md:text-sm"
-              onClick={() => onPageChange('clicker')}
-            >
-              Clicker
-            </Button>
-            <Button
-              className="text-xs md:text-sm"
               onClick={() => onPageChange('pokedex')}
             >
               Pokedex
+            </Button>
+            <Button
+              className="text-xs md:text-sm"
+              onClick={() => onPageChange('clicker')}
+            >
+              Clicker
             </Button>
             <Button
               className="text-xs md:text-sm"
@@ -125,15 +125,15 @@ export function Navbar({
             <div className="flex flex-col gap-2">
               <Button
                 className="w-full text-sm"
-                onClick={() => onPageChange('clicker')}
-              >
-                Clicker
-              </Button>
-              <Button
-                className="w-full text-sm"
                 onClick={() => onPageChange('pokedex')}
               >
                 Pokedex
+              </Button>
+              <Button
+                className="w-full text-sm"
+                onClick={() => onPageChange('clicker')}
+              >
+                Clicker
               </Button>
               <Button
                 className="w-full text-sm"

@@ -21,8 +21,7 @@
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
     "test:integration": "vitest run --reporter=verbose src/__tests__",
     "split-tiles": "npx tsx scripts/split-tiles.ts",
-    "analyze": "vite build && start dist/stats.html",
-    "prepare": "husky"
+    "analyze": "vite build && start dist/stats.html"
   },
   "dependencies": {
     "@apollo/client": "^3.14.0",

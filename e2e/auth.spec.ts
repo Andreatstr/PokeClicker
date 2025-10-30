@@ -7,7 +7,7 @@ test.describe("Authentication", () => {
   test.beforeEach(async ({ page }) => {
     login = new LoginPage(page);
     await login.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForSelector('text=Log in');
   });
 
   test("should display login screen", async () => {

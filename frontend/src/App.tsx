@@ -15,11 +15,11 @@ import {
 } from '@/hooks';
 
 // Lazy load heavy components
-const PokeClicker = lazy(() =>
-  import('@features/clicker').then((module) => ({default: module.PokeClicker}))
-);
 const LoginScreen = lazy(() =>
   import('@features/auth').then((module) => ({default: module.LoginScreen}))
+);
+const PokeClicker = lazy(() =>
+  import('@features/clicker').then((module) => ({default: module.PokeClicker}))
 );
 const PokemonDetailModal = lazy(() =>
   import('@features/pokedex').then((module) => ({
@@ -64,6 +64,17 @@ function App() {
 
   const renderPage = () => {
     switch (currentPage) {
+      case 'pokedex':
+        return (
+          <>
+            <PokedexPage
+              isDarkMode={isDarkMode}
+              onPokemonClick={handlePokemonClick}
+            />
+            <CandyCounterOverlay isDarkMode={isDarkMode} />
+          </>
+        );
+
       case 'clicker':
         return (
           <section className="py-8">

@@ -11,10 +11,16 @@ export function UnauthenticatedMessage() {
         border: '4px solid var(--border)',
       }}
     >
-      <h2 className="pixel-font text-2xl mb-4" style={{color: 'var(--foreground)'}}>
+      <h2
+        className="pixel-font text-2xl mb-4"
+        style={{color: 'var(--foreground)'}}
+      >
         Please Log In
       </h2>
-      <p className="pixel-font text-sm mb-4" style={{color: 'var(--foreground)'}}>
+      <p
+        className="pixel-font text-sm mb-4"
+        style={{color: 'var(--foreground)'}}
+      >
         You need to log in to play the clicker game and save your progress.
       </p>
     </div>
