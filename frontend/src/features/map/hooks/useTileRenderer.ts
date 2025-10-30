@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
+import {TILE_SIZE} from '@/config/gameConfig';
 
 // Tile configuration
-const TILE_SIZE = 512; // Size of each tile in pixels (larger tiles = fewer requests)
 const CACHE_SIZE = 50; // Reduced cache size since we have fewer total tiles
 
 // Map dimensions
