@@ -1,4 +1,12 @@
-import {describe, it, expect, beforeEach, beforeAll, vi, afterEach} from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  vi,
+  afterEach,
+} from 'vitest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
