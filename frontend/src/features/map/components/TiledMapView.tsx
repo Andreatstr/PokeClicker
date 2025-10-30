@@ -1,6 +1,8 @@
+import React from 'react';
 import {useState} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
+import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
 
 // Constants
 const SPRITE_WIDTH = 68;
@@ -30,23 +32,36 @@ interface TiledMapViewProps {
   onResetToHome: () => void;
 }
 
-export function TiledMapView({
-  camera,
-  screenPos,
-  spritePos,
-  wildPokemon,
-  nearbyPokemon,
-  user,
-  viewportSize,
-  isDarkMode = false,
-  onStartBattle,
-  onResetToHome,
-}: TiledMapViewProps) {
-  const {visibleTiles, visiblePokemon, isLoading} = useTileRenderer(
+export function TiledMapView(props: TiledMapViewProps){
+  const {
+    camera,
+    screenPos,
+    spritePos,
+    wildPokemon,
+    nearbyPokemon,
+    user,
+    viewportSize,
+    isDarkMode = false,
+    onStartBattle,
+    onResetToHome,
+  } = props;
+
+  const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} = useTileRenderer(
     camera,
     viewportSize,
     wildPokemon
   );
+
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  useCanvasRenderer({
+    containerRef,
+    visibleTiles,
+    tileCacheRef,
+    viewportSize,
+    tileSize: 512,
+    backgroundColor: isDarkMode ? '#0b1220' : '#e6f0eb',
+  });
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
     return user &&
@@ -59,8 +74,8 @@ export function TiledMapView({
   return (
     <>
       {/* Map Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {visibleTiles.map((tile) => {
+      <div ref={containerRef} className="absolute inset-0 overflow-hidden">
+        {/* {visibleTiles.map((tile) => {
           const key = `${tile.x}_${tile.y}`;
           return (
             <div
@@ -81,7 +96,7 @@ export function TiledMapView({
               }}
             />
           );
-        })}
+        })} */}
 
         {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (

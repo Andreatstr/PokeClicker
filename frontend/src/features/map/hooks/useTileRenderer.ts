@@ -53,7 +53,7 @@ export function useTileRenderer(
   camera: {x: number; y: number},
   viewportSize: {width: number; height: number},
   wildPokemon: PokemonSpawn[] = []
-): TileRendererState {
+): TileRendererState & { tileCacheRef: React.RefObject<TileCache> } {
   const [visibleTiles, setVisibleTiles] = useState<VisibleTile[]>([]);
   const [visiblePokemon, setVisiblePokemon] = useState<VisiblePokemon[]>([]);
   const [isLoading] = useState(false);
@@ -207,5 +207,6 @@ export function useTileRenderer(
     visibleTiles,
     visiblePokemon,
     isLoading,
+    tileCacheRef: cacheRef,
   };
 }
