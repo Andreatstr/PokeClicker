@@ -21,6 +21,18 @@ img {
   -moz-user-select: none;
 }
 
+html {
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -30,6 +42,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  overflow-x: hidden;
 }
 
 #root {
@@ -43,9 +56,6 @@ body {
   }
   a:hover {
     color: #4b5563;
-  }
-  button {
-    background-color: #d8d6d2;
   }
 }
 
@@ -183,12 +193,19 @@ body {
 }
 
 @layer base {
-  * {
-    @apply outline-ring/50;
-  }
   body {
     @apply text-foreground;
     background-color: var(--background);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 

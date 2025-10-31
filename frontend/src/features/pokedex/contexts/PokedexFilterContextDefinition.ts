@@ -21,8 +21,8 @@ export interface PokedexFilterContextValue {
   setSortBy: (value: 'id' | 'name' | 'type') => void;
   sortOrder: 'asc' | 'desc';
   setSortOrder: (value: 'asc' | 'desc') => void;
-  selectedOwnedOnly: boolean;
-  setSelectedOwnedOnly: (value: boolean) => void;
+  selectedOwnedOnly: 'all' | 'owned' | 'unowned';
+  setSelectedOwnedOnly: (value: 'all' | 'owned' | 'unowned') => void;
   handleClearFilters: () => void;
 
   // Pagination state
@@ -40,8 +40,8 @@ export interface PokedexFilterContextValue {
   setTempSortBy: (value: 'id' | 'name' | 'type') => void;
   tempSortOrder: 'asc' | 'desc';
   setTempSortOrder: (value: 'asc' | 'desc') => void;
-  tempOwnedOnly: boolean;
-  setTempOwnedOnly: (value: boolean) => void;
+  tempOwnedOnly: 'all' | 'owned' | 'unowned';
+  setTempOwnedOnly: (value: 'all' | 'owned' | 'unowned') => void;
 }
 
 export const PokedexFilterContext =

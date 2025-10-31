@@ -24,7 +24,6 @@ interface FiltersAndCountProps {
 
 export function FiltersAndCount({
   loading,
-  displayedPokemon,
   totalPokemon,
   isMobile,
   ownedPokemonIds,
@@ -38,6 +37,7 @@ export function FiltersAndCount({
     tempSortBy,
     tempSortOrder,
     tempOwnedOnly,
+    paginationPage,
     setSelectedRegion,
     setSelectedTypes,
     setSortBy,
@@ -51,6 +51,11 @@ export function FiltersAndCount({
     setTempOwnedOnly,
   } = usePokedexFilterContext();
   const ownedCount = (ownedPokemonIds ?? []).length;
+
+  // Calculate display range for pagination
+  const ITEMS_PER_PAGE = 20;
+  const startIndex = (paginationPage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(paginationPage * ITEMS_PER_PAGE, totalPokemon);
 
   // Convert facets to lookup maps
   const generationCountMap = facets?.byGeneration
@@ -219,12 +224,11 @@ export function FiltersAndCount({
                   </Label>
 
                   <Select
-                    value={tempOwnedOnly ? 'owned' : 'all'}
-                    onValueChange={(v) => {
-                      const isOwned = v === 'owned';
-                      // prevent enabling "owned" when user has none
-                      if (!isOwned || ownedCount > 0) {
-                        setTempOwnedOnly(isOwned);
+                    value={tempOwnedOnly}
+                    onValueChange={(v: 'all' | 'owned' | 'unowned') => {
+                      // prevent enabling "owned" or "unowned" when user has none
+                      if (v === 'all' || ownedCount > 0) {
+                        setTempOwnedOnly(v);
                       }
                     }}
                   >
@@ -244,6 +248,12 @@ export function FiltersAndCount({
                             ? `(${ownedCount} total)`
                             : ''}
                       </SelectItem>
+                      <SelectItem value="unowned" disabled={ownedCount === 0}>
+                        Unowned only{' '}
+                        {showCounts && facets
+                          ? `(${facets.totalCount - facets.ownedCount}/${facets.totalCount})`
+                          : ''}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -259,13 +269,13 @@ export function FiltersAndCount({
                     setTempTypes([]);
                     setTempSortBy('id');
                     setTempSortOrder('asc');
-                    setTempOwnedOnly(false);
+                    setTempOwnedOnly('all');
 
                     setSelectedRegion(null);
                     setSelectedTypes([]);
                     setSortBy('id');
                     setSortOrder('asc');
-                    setSelectedOwnedOnly(false);
+                    setSelectedOwnedOnly('all');
                     setShowMobileFilters(false);
                   }}
                 >
@@ -302,7 +312,9 @@ export function FiltersAndCount({
         <p className="text-sm pixel-font" style={{color: 'var(--foreground)'}}>
           {loading
             ? 'Loading...'
-            : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
+            : totalPokemon > 0
+              ? `Showing ${startIndex}-${endIndex} of ${totalPokemon} Pokémon`
+              : 'No Pokémon found'}
         </p>
       )}
     </section>

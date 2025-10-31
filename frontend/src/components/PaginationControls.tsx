@@ -72,7 +72,7 @@ export function PaginationControls({
           <span>Previous</span>
         </button>
         <span className="pixel-font text-sm whitespace-nowrap">
-          Page {currentPage} of {totalPages}
+          {currentPage} of {totalPages}
         </span>
         <button
           onClick={handleNext}

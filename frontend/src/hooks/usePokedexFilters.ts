@@ -13,7 +13,9 @@ export function usePokedexFilters(): PokedexFilterContextValue {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [selectedOwnedOnly, setSelectedOwnedOnly] = useState(false);
+  const [selectedOwnedOnly, setSelectedOwnedOnly] = useState<
+    'all' | 'owned' | 'unowned'
+  >('all');
   const [paginationPage, setPaginationPage] = useState(1);
 
   // Mobile temporary filter states
@@ -22,7 +24,9 @@ export function usePokedexFilters(): PokedexFilterContextValue {
   const [tempTypes, setTempTypes] = useState(selectedTypes);
   const [tempSortBy, setTempSortBy] = useState(sortBy);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
-  const [tempOwnedOnly, setTempOwnedOnly] = useState(false);
+  const [tempOwnedOnly, setTempOwnedOnly] = useState<
+    'all' | 'owned' | 'unowned'
+  >('all');
 
   // Debounce search term
   useEffect(() => {
@@ -43,8 +47,8 @@ export function usePokedexFilters(): PokedexFilterContextValue {
     setSelectedTypes([]);
     setSortBy('id');
     setSortOrder('asc');
-    setSelectedOwnedOnly(false);
-    setTempOwnedOnly(false);
+    setSelectedOwnedOnly('all');
+    setTempOwnedOnly('all');
   };
 
   const handleClearSearch = () => {

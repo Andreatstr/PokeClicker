@@ -98,7 +98,7 @@ function SelectContent({
   return (
     <ShadcnSelectContent
       className={cn(
-        'relative rounded-none border-none shadow-(--pixel-box-shadow) mt-2 select-none',
+        'relative rounded-none border-none shadow-(--pixel-box-shadow) mt-2 select-none max-h-[240px] overflow-y-auto scrollbar-hide',
         inputVariants({font}),
         className
       )}

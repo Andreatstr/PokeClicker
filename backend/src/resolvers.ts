@@ -394,8 +394,11 @@ export const resolvers = {
       const sort: Record<string, 1 | -1> = {};
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
+      } else if (sortBy === 'type') {
+        // Sort by first type, then by ID as secondary
+        sort.types = sortOrder === 'asc' ? 1 : -1;
+        sort.id = 1; // Always ascending ID as secondary sort
       } else {
-        // Remove type sorting as it's inconsistent for dual-type Pokemon
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
 
