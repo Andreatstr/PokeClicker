@@ -64,8 +64,8 @@ export class PokedexPage extends BasePage {
     this.pokemonCards = page.locator('ul[style*="grid-template-columns"] > li, ul.flex > li');
     this.nextPageButton = page.getByRole("button", { name: /next/i });
     this.previousPageButton = page.getByRole("button", { name: /previous/i });
-    this.countText = page.getByText(/showing \d+ of \d+ pokémon/i);
-    this.noResultsText = page.getByText(/no pokemon found/i);
+    this.countText = page.getByText(/showing \d+-\d+ of \d+ pokémon/i);
+    this.noResultsText = page.getByText(/no pokémon found/i);
   }
 
   async search(term: string) {
@@ -86,7 +86,8 @@ export class PokedexPage extends BasePage {
   async selectType(type: string) {
     await this.typeSelect.click();
     await this.page.waitForTimeout(300);
-    await this.page.getByText(type, { exact: true }).click();
+    // Click on the label containing the type name (works with our checkbox structure)
+    await this.page.locator(`label:has-text("${type}")`).first().click();
     // Click outside to close the dropdown
     await this.page.locator("body").click({ position: { x: 0, y: 0 } });
   }
@@ -130,7 +131,8 @@ export class PokedexPage extends BasePage {
   async selectMobileType(type: string) {
     await this.mobileTypeSelect.click();
     await this.page.waitForTimeout(300);
-    await this.mobileFilterModal.getByText(type, { exact: true }).click();
+    // Click on the label containing the type name (works with our checkbox structure)
+    await this.mobileFilterModal.locator(`label:has-text("${type}")`).first().click();
   }
 
   async selectMobileSortBy(sortBy: "id" | "name" | "type") {
