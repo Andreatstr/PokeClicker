@@ -18,7 +18,7 @@ export const POKEDEX_QUERY = gql`
   query Pokedex(
     $search: String
     $generation: String
-    $type: String
+    $types: [String!]
     $sortBy: String
     $sortOrder: String
     $limit: Int
@@ -29,7 +29,7 @@ export const POKEDEX_QUERY = gql`
     pokedex(
       search: $search
       generation: $generation
-      type: $type
+      types: $types
       sortBy: $sortBy
       sortOrder: $sortOrder
       limit: $limit
@@ -53,6 +53,19 @@ export const POKEDEX_QUERY = gql`
         isOwned
       }
       total
+      facets {
+        byGeneration {
+          generation
+          count
+        }
+        byType {
+          type
+          count
+        }
+        isDynamic
+        ownedCount
+        totalCount
+      }
     }
   }
 `;

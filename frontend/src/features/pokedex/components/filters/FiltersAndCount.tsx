@@ -11,6 +11,7 @@ import {
 import type {PokedexPokemon} from '@features/pokedex';
 import {usePokedexFilterContext} from '../../contexts/usePokedexFilterContext';
 import {POKEMON_TYPES, POKEMON_REGIONS} from '../../utils/constants';
+import type {FilterFacets} from '@/lib/graphql';
 
 interface FiltersAndCountProps {
   loading: boolean;
@@ -18,6 +19,7 @@ interface FiltersAndCountProps {
   totalPokemon: number;
   isMobile: boolean;
   ownedPokemonIds: number[];
+  facets?: FilterFacets | null;
 }
 
 export function FiltersAndCount({
@@ -26,6 +28,7 @@ export function FiltersAndCount({
   totalPokemon,
   isMobile,
   ownedPokemonIds,
+  facets,
 }: FiltersAndCountProps) {
   // Get all filter state and handlers from context
   const {
@@ -48,6 +51,28 @@ export function FiltersAndCount({
     setTempOwnedOnly,
   } = usePokedexFilterContext();
   const ownedCount = (ownedPokemonIds ?? []).length;
+
+  // Convert facets to lookup maps
+  const generationCountMap = facets?.byGeneration
+    ? Object.fromEntries(
+        facets.byGeneration.map((f: {generation: string; count: number}) => [
+          f.generation,
+          f.count,
+        ])
+      )
+    : {};
+
+  const typeCountMap = facets?.byType
+    ? Object.fromEntries(
+        facets.byType.map((f: {type: string; count: number}) => [
+          f.type,
+          f.count,
+        ])
+      )
+    : {};
+
+  const showCounts = facets !== null && facets !== undefined;
+
   return (
     <section className="mb-6">
       {showMobileFilters && (
@@ -94,18 +119,28 @@ export function FiltersAndCount({
                     Region
                   </Label>
                   <Select
-                    value={tempRegion ?? ''}
-                    onValueChange={setTempRegion}
+                    value={tempRegion ?? 'all'}
+                    onValueChange={(v) => {
+                      setTempRegion(v === 'all' ? null : v);
+                    }}
                   >
                     <SelectTrigger className="w-full text-sm">
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
-                      {POKEMON_REGIONS.map((region) => (
-                        <SelectItem key={region.value} value={region.value}>
-                          {region.label}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="all">All regions</SelectItem>
+                      {POKEMON_REGIONS.map((region) => {
+                        const count = generationCountMap[region.value];
+                        const label =
+                          count !== undefined
+                            ? `${region.label.split(' ')[0]} (${count})`
+                            : region.label.split(' ')[0];
+                        return (
+                          <SelectItem key={region.value} value={region.value}>
+                            {label}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -123,6 +158,7 @@ export function FiltersAndCount({
                     selected={tempTypes}
                     onChange={setTempTypes}
                     className="w-full"
+                    counts={showCounts ? typeCountMap : undefined}
                   />
                 </div>
 
@@ -202,7 +238,11 @@ export function FiltersAndCount({
                       <SelectItem value="all">All Pokémon</SelectItem>
                       <SelectItem value="owned" disabled={ownedCount === 0}>
                         Owned only{' '}
-                        {ownedCount > 0 ? `(${ownedCount} total)` : ''}
+                        {showCounts && facets
+                          ? `(${facets.ownedCount}/${facets.totalCount})`
+                          : ownedCount > 0
+                            ? `(${ownedCount} total)`
+                            : ''}
                       </SelectItem>
                     </SelectContent>
                   </Select>

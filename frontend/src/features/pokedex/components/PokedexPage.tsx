@@ -1,4 +1,4 @@
-import {useEffect, Suspense, lazy, useCallback} from 'react';
+import {useEffect, Suspense, lazy, useCallback, useState} from 'react';
 import {useAuth} from '@features/auth';
 import {
   usePokedexQuery,
@@ -72,13 +72,57 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   const {loading, error, data} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
     generation: selectedRegion || undefined,
-    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    types: selectedTypes.length > 0 ? selectedTypes : undefined,
     sortBy,
     sortOrder,
     limit: ITEMS_PER_PAGE,
     offset: (paginationPage - 1) * ITEMS_PER_PAGE,
     ownedOnly: selectedOwnedOnly,
   });
+
+  // Separate query for dynamic filter counts when mobile modal is open
+  // Uses temp values so counts update as user changes filters
+  const {showMobileFilters, tempRegion, tempTypes, tempOwnedOnly} = filterState;
+
+  const {data: tempFacetsData} = usePokedexQuery(
+    {
+      search: debouncedSearchTerm || undefined,
+      generation: tempRegion || undefined,
+      types: tempTypes.length > 0 ? tempTypes : undefined,
+      sortBy,
+      sortOrder,
+      limit: 1, // Only need facets, not actual Pokemon data
+      offset: 0,
+      ownedOnly: tempOwnedOnly,
+    },
+    {
+      skip: !showMobileFilters, // Only run when modal is open
+    }
+  );
+
+  // Keep track of last valid facets to prevent flashing during transitions
+  // When modal closes, keep using temp facets until main query updates
+  const [cachedFacets, setCachedFacets] = useState<
+    | {
+        byGeneration: Array<{generation: string; count: number}>;
+        byType: Array<{type: string; count: number}>;
+        isDynamic: boolean;
+        ownedCount: number;
+        totalCount: number;
+      }
+    | null
+    | undefined
+  >(null);
+
+  useEffect(() => {
+    // Update cached facets when we have valid data
+    if (showMobileFilters && tempFacetsData?.pokedex.facets) {
+      setCachedFacets(tempFacetsData.pokedex.facets);
+    } else if (!showMobileFilters && data?.pokedex.facets && !loading) {
+      // Only update when main query is done loading with new filters
+      setCachedFacets(data.pokedex.facets);
+    }
+  }, [showMobileFilters, tempFacetsData, data, loading]);
 
   // Close mobile filters when switching to desktop view
   useEffect(() => {
@@ -133,6 +177,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           totalPokemon={totalPokemon}
           isMobile={isMobile}
           ownedPokemonIds={user?.owned_pokemon_ids ?? []}
+          facets={cachedFacets ?? null}
         />
       </Suspense>
 
@@ -147,11 +192,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           }
         >
           <PokemonGrid
-            displayedPokemon={
-              selectedOwnedOnly
-                ? displayedPokemon.filter((p) => p.isOwned)
-                : displayedPokemon
-            }
+            displayedPokemon={displayedPokemon}
             handlePokemonClick={onPokemonClick}
             isDarkMode={isDarkMode}
             ITEMS_PER_PAGE={ITEMS_PER_PAGE}

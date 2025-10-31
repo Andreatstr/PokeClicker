@@ -14,7 +14,7 @@ export const typeDefs = `#graphql
     pokedex(
       search: String
       generation: String
-      type: String
+      types: [String!]
       sortBy: String
       sortOrder: String
       limit: Int
@@ -123,5 +123,24 @@ export const typeDefs = `#graphql
   type PokedexResponse {
     pokemon: [PokedexPokemon!]!
     total: Int!
+    facets: FilterFacets
+  }
+
+  type FilterFacets {
+    byGeneration: [GenerationFacet!]!
+    byType: [TypeFacet!]!
+    isDynamic: Boolean!
+    ownedCount: Int!
+    totalCount: Int!
+  }
+
+  type GenerationFacet {
+    generation: String!
+    count: Int!
+  }
+
+  type TypeFacet {
+    type: String!
+    count: Int!
   }
 `;
