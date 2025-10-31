@@ -116,7 +116,7 @@ export function MultiSelect({
             {/* Scrollable content */}
             <div
               ref={contentRef}
-              className="max-h-[240px] overflow-y-auto scrollbar-hide"
+              className="max-h-[240px] overflow-y-auto scrollbar-hide overscroll-contain"
             >
               {/* Clear all option */}
               <button

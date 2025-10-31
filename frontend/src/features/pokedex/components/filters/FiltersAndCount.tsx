@@ -24,7 +24,6 @@ interface FiltersAndCountProps {
 
 export function FiltersAndCount({
   loading,
-  displayedPokemon,
   totalPokemon,
   isMobile,
   ownedPokemonIds,
@@ -38,6 +37,7 @@ export function FiltersAndCount({
     tempSortBy,
     tempSortOrder,
     tempOwnedOnly,
+    paginationPage,
     setSelectedRegion,
     setSelectedTypes,
     setSortBy,
@@ -51,6 +51,11 @@ export function FiltersAndCount({
     setTempOwnedOnly,
   } = usePokedexFilterContext();
   const ownedCount = (ownedPokemonIds ?? []).length;
+
+  // Calculate display range for pagination
+  const ITEMS_PER_PAGE = 20;
+  const startIndex = (paginationPage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(paginationPage * ITEMS_PER_PAGE, totalPokemon);
 
   // Convert facets to lookup maps
   const generationCountMap = facets?.byGeneration
@@ -302,7 +307,9 @@ export function FiltersAndCount({
         <p className="text-sm pixel-font" style={{color: 'var(--foreground)'}}>
           {loading
             ? 'Loading...'
-            : `Showing ${displayedPokemon.length} of ${totalPokemon} Pokémon`}
+            : totalPokemon > 0
+              ? `Showing ${startIndex}-${endIndex} of ${totalPokemon} Pokémon`
+              : 'No Pokémon found'}
         </p>
       )}
     </section>
