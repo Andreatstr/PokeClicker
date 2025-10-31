@@ -116,20 +116,6 @@ export function TiledMapView(props: TiledMapViewProps) {
           zIndex: 10,
         }}
       />
-      {/* Hidden preload image for LCP - ensures character sprite loads early while maintaining CSS animation */}
-      <img
-        src={`${import.meta.env.BASE_URL}AshKetchumSprite.webp`}
-        alt=""
-        style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-        fetchPriority="high"
-        aria-hidden="true"
-      />
 
       {/* Welcome CTA */}
       {!nearbyPokemon && showWelcomeCTA && (
