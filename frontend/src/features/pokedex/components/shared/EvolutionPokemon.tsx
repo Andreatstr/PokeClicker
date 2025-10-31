@@ -66,6 +66,7 @@ export function EvolutionPokemon({
             alt={evo.name}
             className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
             loading="lazy"
+            decoding="async"
             style={{imageRendering: 'pixelated'}}
           />
         ) : (

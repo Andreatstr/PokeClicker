@@ -74,6 +74,7 @@ export function BattleResult({
             src={opponentPokemon.sprite}
             alt={opponentPokemon.name}
             className="w-16 h-16 md:w-20 md:h-20 image-pixelated"
+            decoding="async"
             style={{imageRendering: 'pixelated'}}
           />
         </div>
@@ -96,6 +97,8 @@ export function BattleResult({
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
                 alt="Rare Candy"
                 className="w-5 h-5 md:w-6 md:h-6"
+                loading="lazy"
+                decoding="async"
                 style={{imageRendering: 'pixelated'}}
               />
               <span

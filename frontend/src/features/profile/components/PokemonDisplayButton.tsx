@@ -7,6 +7,7 @@ interface PokemonDisplayButtonProps {
   title: string;
   emptyTitle: string;
   isDarkMode?: boolean;
+  isFirstRender?: boolean;
 }
 
 export function PokemonDisplayButton({
@@ -16,6 +17,7 @@ export function PokemonDisplayButton({
   title,
   emptyTitle,
   isDarkMode = false,
+  isFirstRender = false,
 }: PokemonDisplayButtonProps) {
   if (pokemon) {
     return (
@@ -32,6 +34,10 @@ export function PokemonDisplayButton({
           src={pokemon.sprite}
           alt={pokemon.name}
           className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
+          width={80}
+          height={80}
+          fetchPriority={isFirstRender ? 'high' : 'auto'}
+          decoding="async"
           style={{imageRendering: 'pixelated'}}
         />
         <p className="text-sm sm:text-base capitalize font-bold text-left flex-1">
@@ -56,7 +62,11 @@ export function PokemonDisplayButton({
     >
       <div
         className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-4xl sm:text-5xl flex-shrink-0"
-        style={{color: isDarkMode ? '#666' : '#999'}}
+        style={{
+          color: isDarkMode ? '#666' : '#999',
+          minWidth: '80px',
+          minHeight: '80px',
+        }}
       >
         ?
       </div>

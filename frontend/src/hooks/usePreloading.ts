@@ -34,6 +34,23 @@ export function usePreloading(currentPage: PageType) {
       }
     };
 
-    initializePreloading();
+    // Use requestIdleCallback for non-critical preloading to avoid blocking the main thread
+    // This prevents preloading from competing with first paint and improves TBT
+    const ric = (
+      window as Window & {
+        requestIdleCallback?: (cb: () => void) => number;
+      }
+    ).requestIdleCallback;
+
+    if (typeof ric === 'function') {
+      ric(() => {
+        initializePreloading();
+      });
+    } else {
+      // Fallback to setTimeout if requestIdleCallback is not available
+      setTimeout(() => {
+        initializePreloading();
+      }, 0);
+    }
   }, [currentPage]);
 }

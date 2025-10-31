@@ -78,6 +78,7 @@ export function TiledMapView(props: TiledMapViewProps) {
             src={visiblePoke.pokemon.sprite}
             alt={visiblePoke.pokemon.name}
             className="absolute transition-none"
+            fetchPriority="high"
             style={{
               left: `${visiblePoke.screenX - 24}px`,
               top: `${visiblePoke.screenY - 24}px`,
@@ -164,6 +165,7 @@ export function TiledMapView(props: TiledMapViewProps) {
               src={nearbyPokemon.pokemon.sprite}
               alt={nearbyPokemon.pokemon.name}
               className="w-6 h-6 md:w-8 md:h-8 image-pixelated flex-shrink-0"
+              fetchPriority="high"
               style={{imageRendering: 'pixelated'}}
             />
             <span className="pixel-font text-xs md:text-sm truncate">

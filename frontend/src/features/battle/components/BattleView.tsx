@@ -141,6 +141,8 @@ export function BattleView({
           src={getPlatformImage(opponentPokemon.types)}
           alt="Opponent platform"
           className="absolute w-32 h-16 md:w-40 md:h-20 md:mr-4 md:mt-4 object-contain"
+          loading="lazy"
+          decoding="async"
           style={{
             top: '20%',
             right: '8px',
@@ -152,6 +154,8 @@ export function BattleView({
           src={getPlatformImage(playerPokemon.types)}
           alt="Player platform"
           className="absolute w-48 h-24 md:w-60 md:h-30 object-contain"
+          loading="lazy"
+          decoding="async"
           style={{
             bottom: '-16px',
             left: '0px',
@@ -176,6 +180,7 @@ export function BattleView({
             src={opponentPokemon.sprite}
             alt={opponentPokemon.name}
             className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated -mr-8 md:mr-8"
+            decoding="async"
             style={{imageRendering: 'pixelated'}}
           />
         </div>
@@ -192,6 +197,7 @@ export function BattleView({
               src={playerPokemon.sprite}
               alt={playerPokemon.name}
               className="w-full h-full image-pixelated transition-transform group-hover:scale-110 group-active:scale-95"
+              decoding="async"
               style={{imageRendering: 'pixelated'}}
             />
           </div>
