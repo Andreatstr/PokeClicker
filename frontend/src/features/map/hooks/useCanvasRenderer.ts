@@ -102,11 +102,22 @@ export function useCanvasRenderer(params: {
           entry.image.complete &&
           entry.image.naturalWidth > 0
         ) {
-          ctx.drawImage(entry.image, t.screenX, t.screenY, tileSize, tileSize);
+          ctx.drawImage(
+            entry.image,
+            Math.floor(t.screenX),
+            Math.floor(t.screenY),
+            tileSize,
+            tileSize
+          );
           entry.lastUsed = Date.now();
         } else {
           ctx.fillStyle = '#0f1720';
-          ctx.fillRect(t.screenX, t.screenY, tileSize, tileSize);
+          ctx.fillRect(
+            Math.floor(t.screenX),
+            Math.floor(t.screenY),
+            tileSize,
+            tileSize
+          );
         }
       }
 
