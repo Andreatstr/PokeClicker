@@ -65,11 +65,13 @@ export function MultiSelect({
       }
     };
 
-    if (open && contentRef.current) {
+    const element = contentRef.current;
+    if (open && element) {
       checkScroll();
-      contentRef.current.addEventListener('scroll', checkScroll);
-      return () =>
-        contentRef.current?.removeEventListener('scroll', checkScroll);
+      element.addEventListener('scroll', checkScroll);
+      return () => {
+        element.removeEventListener('scroll', checkScroll);
+      };
     }
   }, [open]);
 
