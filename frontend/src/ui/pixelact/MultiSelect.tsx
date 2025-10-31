@@ -24,9 +24,13 @@ export function MultiSelect({
   const contentRef = useRef<HTMLDivElement>(null);
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+  const scrollIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      stopScrolling();
+      return;
+    }
 
     const handleClickOutside = (e: Event) => {
       if (
@@ -52,6 +56,7 @@ export function MultiSelect({
       document.removeEventListener('mouseup', handleClickOutside, true);
       document.removeEventListener('click', handleClickOutside, true);
       document.removeEventListener('pointerdown', handleClickOutside, true);
+      stopScrolling();
     };
   }, [open]);
 
@@ -80,6 +85,29 @@ export function MultiSelect({
       onChange(selected.filter((t) => t !== type));
     } else {
       onChange([...selected, type]);
+    }
+  };
+
+  const startScrolling = (direction: 'up' | 'down') => {
+    if (scrollIntervalRef.current !== null) {
+      clearInterval(scrollIntervalRef.current);
+    }
+
+    const scroll = () => {
+      if (contentRef.current) {
+        const scrollAmount = direction === 'up' ? -24 : 24;
+        contentRef.current.scrollTop += scrollAmount;
+      }
+    };
+
+    scroll(); // Immediate first scroll
+    scrollIntervalRef.current = window.setInterval(scroll, 16); // ~60fps
+  };
+
+  const stopScrolling = () => {
+    if (scrollIntervalRef.current !== null) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
     }
   };
 
@@ -196,16 +224,22 @@ export function MultiSelect({
             {/* Scroll indicators */}
             {canScrollUp && (
               <div
-                className="absolute top-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-none"
+                className="absolute top-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-auto z-10"
                 style={{backgroundColor: 'var(--popover)'}}
+                onMouseEnter={() => startScrolling('up')}
+                onMouseLeave={stopScrolling}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ChevronUpIcon className="size-4" />
               </div>
             )}
             {canScrollDown && (
               <div
-                className="absolute bottom-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-none"
+                className="absolute bottom-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-auto z-10"
                 style={{backgroundColor: 'var(--popover)'}}
+                onMouseEnter={() => startScrolling('down')}
+                onMouseLeave={stopScrolling}
+                onClick={(e) => e.stopPropagation()}
               >
                 <ChevronDownIcon className="size-4" />
               </div>
