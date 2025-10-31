@@ -50,6 +50,22 @@ export function LoginScreen({onNavigate}: Props) {
     reset({username: '', password: ''});
   }, [modalType, reset]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setModalType(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleCloseButtonKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      setModalType(null);
+    }
+  };
+
   async function submitAuth(data: FormValues) {
     try {
       const mutation = modalType === 'login' ? loginMutation : signupMutation;
@@ -103,19 +119,22 @@ export function LoginScreen({onNavigate}: Props) {
           className={`flex flex-col items-center justify-center gap-4 ${isMobile ? 'w-3/4' : 'w-full'}`}
         >
           <Button
-            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            tabIndex={0}
+            className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('login')}
           >
             Log in
           </Button>
           <Button
-            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            tabIndex={0}
+            className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('signup')}
           >
             Sign up
           </Button>
           <Button
-            className={`w-52 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
+            tabIndex={0}
+            className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => onNavigate('pokedex')}
           >
             Guest user
@@ -131,13 +150,22 @@ export function LoginScreen({onNavigate}: Props) {
               role="dialog"
             >
               <div
-                className="border-[4px] shadow-[8px_8px_0px_rgba(0,0,0,1)] p-6 w-full max-w-sm rounded-md text-left"
+                id="auth-modal"
+                className="border-[4px] shadow-[8px_8px_0px_rgba(0,0,0,1)] p-6 w-full max-w-sm rounded-md text-left relative"
                 style={{
                   backgroundColor: 'var(--card)',
                   borderColor: 'var(--border)',
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
+                <button
+                  onClick={() => setModalType(null)}
+                  onKeyDown={handleCloseButtonKey}
+                  className="absolute top-3 right-4 text-xl font-bold text-red-600 focus:outline-red"
+                  aria-label="Close modal"
+                >
+                  x
+                </button>
                 <h2
                   className="pixel-font text-xl mb-4"
                   style={{color: 'var(--foreground)'}}
@@ -215,6 +243,7 @@ export function LoginScreen({onNavigate}: Props) {
                   )}
 
                   <Button
+                    tabIndex={0}
                     type="submit"
                     className="text-sm py-2 w-full"
                     disabled={loading}
