@@ -62,12 +62,51 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   useEffect(() => {
     const computeViewport = () => {
       const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Check if mobile
+      const isMobileWidth = w < 768;
+
       // Prefer much taller aspect on small screens for more vertical space
       const pick = (
-        width: number,
+        baseWidth: number,
         ratio: '1:1' | '4:5' | '3:4' | '4:3' | '16:10' | '16:9'
       ) => {
-        const h =
+        let width = baseWidth;
+
+        // For desktop, apply responsive scaling
+        if (!isMobileWidth) {
+          // Account for GameBoy shell overhead (~200px for controls, labels, etc.)
+          const gameViewHeight =
+            ratio === '1:1'
+              ? baseWidth
+              : ratio === '4:5'
+                ? Math.round((baseWidth * 5) / 4)
+                : ratio === '3:4'
+                  ? Math.round((baseWidth * 4) / 3)
+                  : ratio === '4:3'
+                    ? Math.round((baseWidth * 3) / 4)
+                    : ratio === '16:10'
+                      ? Math.round((baseWidth * 10) / 16)
+                      : Math.round((baseWidth * 9) / 16);
+
+          // Use percentage-based overhead for proportional scaling
+          const availableHeight = h * 0.85; // Use 85% of browser height
+
+          // Calculate scale based on what percentage of available height the game view should take
+          const gameViewTargetHeight = availableHeight * 0.5; // Game view takes 50% of available height
+          const heightConstraintScale = gameViewTargetHeight / gameViewHeight;
+
+          // Apply width constraints
+          const widthFactor = Math.min(w / 800, 2);
+
+          // Use the more restrictive of height or width constraint
+          const scaleFactor = Math.min(heightConstraintScale, widthFactor);
+
+          width = Math.round(baseWidth * scaleFactor);
+        }
+
+        const height =
           ratio === '1:1'
             ? width
             : ratio === '4:5'
@@ -79,15 +118,19 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
                   : ratio === '16:10'
                     ? Math.round((width * 10) / 16)
                     : Math.round((width * 9) / 16);
-        return {width, height: h};
+        return {width, height};
       };
+
       if (w < 380) return pick(280, '1:1');
       if (w < 480) return pick(320, '4:5');
       if (w < 640) return pick(420, '3:4');
       if (w < 768) return pick(520, '4:3');
       if (w < 1024) return pick(640, '16:10');
       if (w < 1280) return pick(840, '16:10');
-      return pick(890, '16:9');
+      if (w < 1440) return pick(1080, '16:9');
+      if (w < 1920) return pick(1280, '16:9');
+      if (w < 2560) return pick(1200, '16:9');
+      return pick(Math.min(w * 0.6, 1400), '16:9');
     };
     const apply = () => setViewport(computeViewport());
     apply();
