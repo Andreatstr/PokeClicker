@@ -69,14 +69,18 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
     [setPaginationPage]
   );
 
+  // When filtering by "unowned", we need to fetch all Pokemon and filter on frontend
+  // Otherwise pagination won't work correctly (backend paginates, then frontend filters)
+  const needsFullFetch = selectedOwnedOnly === 'unowned';
+
   const {loading, error, data} = usePokedexQuery({
     search: debouncedSearchTerm || undefined,
     generation: selectedRegion || undefined,
     types: selectedTypes.length > 0 ? selectedTypes : undefined,
     sortBy,
     sortOrder,
-    limit: ITEMS_PER_PAGE,
-    offset: (paginationPage - 1) * ITEMS_PER_PAGE,
+    limit: needsFullFetch ? 10000 : ITEMS_PER_PAGE, // Fetch all if filtering unowned
+    offset: needsFullFetch ? 0 : (paginationPage - 1) * ITEMS_PER_PAGE,
     ownedOnly: selectedOwnedOnly === 'owned',
   });
 
@@ -132,15 +136,27 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   }, [isMobile, setShowMobileFilters]);
 
   const filteredPokemon = data?.pokedex.pokemon || [];
-  const totalPokemon = data?.pokedex.total || 0;
 
   // Apply frontend filtering for "unowned" option
-  const displayedPokemon =
+  const unownedFiltered =
     selectedOwnedOnly === 'unowned'
       ? filteredPokemon.filter(
           (pokemon) => !user?.owned_pokemon_ids.includes(pokemon.id)
         )
       : filteredPokemon;
+
+  // When filtering unowned, we need to paginate on frontend after filtering
+  const displayedPokemon = needsFullFetch
+    ? unownedFiltered.slice(
+        (paginationPage - 1) * ITEMS_PER_PAGE,
+        paginationPage * ITEMS_PER_PAGE
+      )
+    : unownedFiltered;
+
+  // Calculate total based on whether we're doing frontend filtering
+  const totalPokemon = needsFullFetch
+    ? unownedFiltered.length
+    : data?.pokedex.total || 0;
   const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
 
   if (error) {
