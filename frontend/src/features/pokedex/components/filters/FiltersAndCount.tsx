@@ -224,12 +224,11 @@ export function FiltersAndCount({
                   </Label>
 
                   <Select
-                    value={tempOwnedOnly ? 'owned' : 'all'}
-                    onValueChange={(v) => {
-                      const isOwned = v === 'owned';
-                      // prevent enabling "owned" when user has none
-                      if (!isOwned || ownedCount > 0) {
-                        setTempOwnedOnly(isOwned);
+                    value={tempOwnedOnly}
+                    onValueChange={(v: 'all' | 'owned' | 'unowned') => {
+                      // prevent enabling "owned" or "unowned" when user has none
+                      if (v === 'all' || ownedCount > 0) {
+                        setTempOwnedOnly(v);
                       }
                     }}
                   >
@@ -249,6 +248,12 @@ export function FiltersAndCount({
                             ? `(${ownedCount} total)`
                             : ''}
                       </SelectItem>
+                      <SelectItem value="unowned" disabled={ownedCount === 0}>
+                        Unowned only{' '}
+                        {showCounts && facets
+                          ? `(${facets.totalCount - facets.ownedCount}/${facets.totalCount})`
+                          : ''}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -264,13 +269,13 @@ export function FiltersAndCount({
                     setTempTypes([]);
                     setTempSortBy('id');
                     setTempSortOrder('asc');
-                    setTempOwnedOnly(false);
+                    setTempOwnedOnly('all');
 
                     setSelectedRegion(null);
                     setSelectedTypes([]);
                     setSortBy('id');
                     setSortOrder('asc');
-                    setSelectedOwnedOnly(false);
+                    setSelectedOwnedOnly('all');
                     setShowMobileFilters(false);
                   }}
                 >

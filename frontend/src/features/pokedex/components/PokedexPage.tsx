@@ -77,12 +77,12 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
     sortOrder,
     limit: ITEMS_PER_PAGE,
     offset: (paginationPage - 1) * ITEMS_PER_PAGE,
-    ownedOnly: selectedOwnedOnly,
+    ownedOnly: selectedOwnedOnly === 'owned',
   });
 
   // Separate query for dynamic filter counts when mobile modal is open
   // Uses temp values so counts update as user changes filters
-  const {showMobileFilters, tempRegion, tempTypes, tempOwnedOnly} = filterState;
+  const {showMobileFilters, tempRegion, tempTypes} = filterState;
 
   const {data: tempFacetsData} = usePokedexQuery(
     {
@@ -93,7 +93,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
       sortOrder,
       limit: 1, // Only need facets, not actual Pokemon data
       offset: 0,
-      ownedOnly: tempOwnedOnly,
+      ownedOnly: false, // Always false to get accurate total counts for facets
     },
     {
       skip: !showMobileFilters, // Only run when modal is open
@@ -134,7 +134,13 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   const filteredPokemon = data?.pokedex.pokemon || [];
   const totalPokemon = data?.pokedex.total || 0;
 
-  const displayedPokemon = filteredPokemon;
+  // Apply frontend filtering for "unowned" option
+  const displayedPokemon =
+    selectedOwnedOnly === 'unowned'
+      ? filteredPokemon.filter(
+          (pokemon) => !user?.owned_pokemon_ids.includes(pokemon.id)
+        )
+      : filteredPokemon;
   const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
 
   if (error) {
