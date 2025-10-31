@@ -125,6 +125,7 @@ export const PokemonCard = memo(function PokemonCard({
           alt={isOwned ? pokemon.name : 'Unknown Pokémon'}
           className="w-full h-full object-contain origin-center"
           loading="lazy"
+          decoding="async"
           style={{
             imageRendering: 'pixelated',
             filter: isOwned ? 'none' : 'brightness(0)',

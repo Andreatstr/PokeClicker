@@ -57,6 +57,8 @@ export function FavoritePokemonSelector({
                       src={pokemon.sprite}
                       alt={pokemon.name}
                       className="w-full h-16 sm:h-20 object-contain mx-auto"
+                      loading="lazy"
+                      decoding="async"
                       style={{imageRendering: 'pixelated'}}
                     />
                     <p className="text-xs sm:text-sm mt-2 capitalize text-center truncate">

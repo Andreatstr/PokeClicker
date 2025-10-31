@@ -78,6 +78,7 @@ export function TiledMapView(props: TiledMapViewProps) {
             src={visiblePoke.pokemon.sprite}
             alt={visiblePoke.pokemon.name}
             className="absolute transition-none"
+            fetchPriority="high"
             style={{
               left: `${visiblePoke.screenX - 24}px`,
               top: `${visiblePoke.screenY - 24}px`,
@@ -114,6 +115,20 @@ export function TiledMapView(props: TiledMapViewProps) {
           transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear`,
           zIndex: 10,
         }}
+      />
+      {/* Hidden preload image for LCP - ensures character sprite loads early while maintaining CSS animation */}
+      <img
+        src={`${import.meta.env.BASE_URL}AshKetchumSprite.webp`}
+        alt=""
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
+        fetchPriority="high"
+        aria-hidden="true"
       />
 
       {/* Welcome CTA */}
@@ -164,6 +179,7 @@ export function TiledMapView(props: TiledMapViewProps) {
               src={nearbyPokemon.pokemon.sprite}
               alt={nearbyPokemon.pokemon.name}
               className="w-6 h-6 md:w-8 md:h-8 image-pixelated flex-shrink-0"
+              fetchPriority="high"
               style={{imageRendering: 'pixelated'}}
             />
             <span className="pixel-font text-xs md:text-sm truncate">

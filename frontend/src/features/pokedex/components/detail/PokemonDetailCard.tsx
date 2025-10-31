@@ -225,6 +225,7 @@ export function PokemonDetailCard({
             alt={isOwned ? pokemon.name : 'Unknown Pokémon'}
             className="w-full h-full object-contain origin-center"
             loading="lazy"
+            decoding="async"
             style={{
               imageRendering: 'pixelated',
               filter: isOwned ? 'none' : 'brightness(0)',
@@ -264,6 +265,8 @@ export function PokemonDetailCard({
                     src={`${import.meta.env.BASE_URL}candy.webp`}
                     alt="Candy"
                     className="w-6 h-6"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               )}

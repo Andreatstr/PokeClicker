@@ -132,7 +132,7 @@ export function ProfileDashboard({
           </div>
         </div>
 
-        {/* Favorite Pokemon Section */}
+        {/* Favorite Pokemon Section - Likely LCP candidate */}
         <div
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
@@ -149,6 +149,7 @@ export function ProfileDashboard({
                 : 'Click to select favorite'
             }
             isDarkMode={isDarkMode}
+            isFirstRender={true}
           />
         </div>
 

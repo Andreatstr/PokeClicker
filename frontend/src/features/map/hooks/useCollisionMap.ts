@@ -13,35 +13,94 @@ interface CollisionMapState {
 export function useCollisionMap(): CollisionMapState {
   const collisionPixelsRef = useRef<Uint8ClampedArray | null>(null);
   const [collisionMapLoaded, setCollisionMapLoaded] = useState(false);
+  const loadStartedRef = useRef(false);
 
-  // Load collision map
+  // Defer collision map loading until user interaction to avoid blocking initial render
   useEffect(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = MAP_WIDTH;
-    canvas.height = MAP_HEIGHT;
-    const ctx = canvas.getContext('2d');
+    const startLoading = () => {
+      if (loadStartedRef.current) return;
+      loadStartedRef.current = true;
 
-    if (!ctx) {
-      logger.error('[useCollisionMap] 2D context not available');
-      return;
-    }
+      const canvas = document.createElement('canvas');
+      canvas.width = MAP_WIDTH;
+      canvas.height = MAP_HEIGHT;
+      const ctx = canvas.getContext('2d');
 
-    const img = new Image();
-    img.src = `${import.meta.env.BASE_URL}map-collision.webp`;
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        ctx.drawImage(img, 0, 0, MAP_WIDTH, MAP_HEIGHT);
-        const imageData = ctx.getImageData(0, 0, MAP_WIDTH, MAP_HEIGHT);
-        collisionPixelsRef.current = imageData.data;
-        setCollisionMapLoaded(true);
-        logger.info('[useCollisionMap] collision map loaded & cached');
-      } catch (err) {
-        logger.logError(err, 'useCollisionMap.getImageData');
+      if (!ctx) {
+        logger.error('[useCollisionMap] 2D context not available');
+        return;
       }
+
+      const img = new Image();
+      img.src = `${import.meta.env.BASE_URL}map-collision.webp`;
+      img.crossOrigin = 'anonymous';
+      img.onload = async () => {
+        try {
+          // Try off-main-thread decoding when available
+          let bitmap: ImageBitmap | null = null;
+          try {
+            bitmap = await createImageBitmap(img);
+          } catch {
+            bitmap = null;
+          }
+
+          if (bitmap) {
+            ctx.drawImage(bitmap, 0, 0, MAP_WIDTH, MAP_HEIGHT);
+          } else {
+            ctx.drawImage(img, 0, 0, MAP_WIDTH, MAP_HEIGHT);
+          }
+
+          // Defer expensive pixel extraction to idle time to avoid blocking main thread
+          const ric = (
+            window as Window & {
+              requestIdleCallback?: (cb: () => void) => number;
+            }
+          ).requestIdleCallback;
+
+          const doExtract = () => {
+            try {
+              const imageData = ctx.getImageData(0, 0, MAP_WIDTH, MAP_HEIGHT);
+              collisionPixelsRef.current = imageData.data;
+              setCollisionMapLoaded(true);
+              logger.info('[useCollisionMap] collision map loaded & cached');
+            } catch (err) {
+              logger.logError(err, 'useCollisionMap.getImageData');
+            }
+          };
+
+          if (typeof ric === 'function') {
+            ric(() => {
+              // Process in idle time to avoid blocking main thread
+              doExtract();
+            });
+          } else {
+            // Fallback: defer by one frame
+            setTimeout(doExtract, 16);
+          }
+        } catch (err) {
+          logger.logError(err, 'useCollisionMap.decode');
+        }
+      };
+      img.onerror = () => {
+        logger.error('[useCollisionMap] Failed to load collision map');
+      };
     };
-    img.onerror = () => {
-      logger.error('[useCollisionMap] Failed to load collision map');
+
+    // Start loading on any user interaction (map is only needed when user moves)
+    window.addEventListener('mousedown', startLoading, {once: true});
+    window.addEventListener('touchstart', startLoading, {once: true});
+    window.addEventListener('keydown', startLoading, {once: true});
+
+    // Fallback: start loading after 3 seconds if user doesn't interact
+    const timeoutId = setTimeout(() => {
+      startLoading();
+    }, 3000);
+
+    return () => {
+      window.removeEventListener('mousedown', startLoading);
+      window.removeEventListener('touchstart', startLoading);
+      window.removeEventListener('keydown', startLoading);
+      clearTimeout(timeoutId);
     };
   }, []);
 

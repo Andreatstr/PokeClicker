@@ -127,6 +127,8 @@ export function PokemonGrid({
                             pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'
                           }
                           className="w-16 h-16 pixelated"
+                          loading="lazy"
+                          decoding="async"
                           style={{
                             imageRendering: 'pixelated',
                             filter: pokemon.isOwned ? 'none' : 'brightness(0)',
