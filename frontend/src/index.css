@@ -57,9 +57,6 @@ body {
   a:hover {
     color: #4b5563;
   }
-  button {
-    background-color: #d8d6d2;
-  }
 }
 
 @theme inline {
@@ -196,9 +193,6 @@ body {
 }
 
 @layer base {
-  * {
-    @apply outline-ring/50;
-  }
   body {
     @apply text-foreground;
     background-color: var(--background);
