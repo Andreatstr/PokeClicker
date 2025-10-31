@@ -21,6 +21,11 @@ export function useCollisionMap(): CollisionMapState {
       if (loadStartedRef.current) return;
       loadStartedRef.current = true;
 
+      // Remove event listeners to prevent leaks
+      window.removeEventListener('mousedown', startLoading);
+      window.removeEventListener('touchstart', startLoading);
+      window.removeEventListener('keydown', startLoading);
+
       const canvas = document.createElement('canvas');
       canvas.width = MAP_WIDTH;
       canvas.height = MAP_HEIGHT;
@@ -53,7 +58,10 @@ export function useCollisionMap(): CollisionMapState {
           // Defer expensive pixel extraction to idle time to avoid blocking main thread
           const ric = (
             window as Window & {
-              requestIdleCallback?: (cb: () => void) => number;
+              requestIdleCallback?: (
+                callback: (deadline?: IdleDeadline) => void,
+                options?: {timeout?: number}
+              ) => number;
             }
           ).requestIdleCallback;
 
