@@ -1,5 +1,5 @@
 import {useState, useRef, useEffect} from 'react';
-import {CheckIcon, ChevronDownIcon} from 'lucide-react';
+import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from 'lucide-react';
 import {cn} from '@lib/utils';
 
 type MultiSelectProps = {
@@ -21,19 +21,56 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    if (!open) return;
+
+    const handleClickOutside = (e: Event) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node)
       ) {
+        // Immediately prevent the event from doing anything
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         setOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+    // Use capture phase and add listeners for all relevant events
+    document.addEventListener('mousedown', handleClickOutside, true);
+    document.addEventListener('mouseup', handleClickOutside, true);
+    document.addEventListener('click', handleClickOutside, true);
+    document.addEventListener('pointerdown', handleClickOutside, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+      document.removeEventListener('mouseup', handleClickOutside, true);
+      document.removeEventListener('click', handleClickOutside, true);
+      document.removeEventListener('pointerdown', handleClickOutside, true);
+    };
+  }, [open]);
+
+  // Check scroll position to show/hide scroll indicators
+  useEffect(() => {
+    const checkScroll = () => {
+      if (contentRef.current) {
+        const {scrollTop, scrollHeight, clientHeight} = contentRef.current;
+        setCanScrollUp(scrollTop > 0);
+        setCanScrollDown(scrollTop + clientHeight < scrollHeight - 1);
+      }
+    };
+
+    if (open && contentRef.current) {
+      checkScroll();
+      contentRef.current.addEventListener('scroll', checkScroll);
+      return () => contentRef.current?.removeEventListener('scroll', checkScroll);
+    }
+  }, [open]);
 
   const toggleOption = (type: string) => {
     if (selected.includes(type)) {
@@ -67,14 +104,20 @@ export function MultiSelect({
 
       {open && (
         <div
-          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)] max-h-[160px] overflow-y-auto"
+          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)]"
           style={{
             backgroundColor: 'var(--popover)',
             color: 'var(--popover-foreground)',
           }}
           role="listbox"
         >
-          {/* Clear all option */}
+          <div className="relative">
+            {/* Scrollable content */}
+            <div
+              ref={contentRef}
+              className="max-h-[240px] overflow-y-auto scrollbar-hide"
+            >
+            {/* Clear all option */}
           <button
             type="button"
             onClick={() => {
@@ -145,6 +188,20 @@ export function MultiSelect({
               </label>
             );
           })}
+            </div>
+
+            {/* Scroll indicators */}
+            {canScrollUp && (
+              <div className="absolute top-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-none" style={{backgroundColor: 'var(--popover)'}}>
+                <ChevronUpIcon className="size-4" />
+              </div>
+            )}
+            {canScrollDown && (
+              <div className="absolute bottom-0 left-0 right-0 flex cursor-default items-center justify-center py-1 pointer-events-none" style={{backgroundColor: 'var(--popover)'}}>
+                <ChevronDownIcon className="size-4" />
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

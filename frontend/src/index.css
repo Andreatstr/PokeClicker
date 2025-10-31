@@ -201,6 +201,16 @@ html::-webkit-scrollbar {
   }
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @keyframes float-up {
   0% {
     transform: translateY(0) scale(1);
