@@ -94,6 +94,31 @@ Spillmekanikken gir en naturlig motivasjon for brukere til å utforske Pokédex 
 
 This ensures consistent code quality across all commits and prevents broken code from entering the repository.
 
+## AI-assistert utvikling
+
+Dette prosjektet ble utviklet med omfattende bruk av AI-assistanse gjennom Claude Code. Utviklingsprosessen fulgte en samarbeidende tilnærming der:
+
+- **Kodegenerering**: Claude Code skrev mesteparten av kodebasen, inkludert React-komponenter, GraphQL-resolvere, databaselogikk og testinfrastruktur
+- **Menneskelig tilsyn**: Utviklingsteamet tok alle arkitekturvalg og designbeslutninger, og ga retning og krav for hver funksjon
+- **Aktiv kodegjennomgang**: All AI-generert kode ble gjennomgått gjennom:
+  - Manuell inspeksjon av funksjonalitet og logikk
+  - Aktive tilbakemeldingssesjoner for å fange opp feil og forbedre implementeringen
+  - Iterativ forbedring basert på testing og bruk i praksis
+- **Kvalitetskontroll**: Teamet overvåket utviklingsprosessen for å sikre:
+  - Koden følger prosjektstandarder og beste praksis
+  - Sikkerhetshensyn blir håndtert på riktig måte
+  - Ytelsesoptimaliseringer er korrekt implementert
+  - Edge cases og feilhåndtering er dekket
+
+**Utviklingsprosess:**
+1. Teamet definerer krav og design-tilnærming
+2. Claude Code implementerer funksjoner basert på spesifikasjoner
+3. Teamet gjennomgår generert kode og gir tilbakemelding
+4. Iterativ forbedring til kravene er oppfylt
+5. Manuell testing og validering av funksjonalitet
+
+Denne tilnærmingen gir rask utvikling samtidig som kodekvaliteten blir opprettholdt gjennom menneskelig tilsyn og beslutningstaking. AI-en håndterte implementeringsdetaljer mens teamet fokuserte på arkitektur, designmønstre og brukeropplevelse.
+
 ## Bærekraftig utvikling (Del3 - Fullført)
 
 ### Issue #69: Code Splitting og Lazy Loading
