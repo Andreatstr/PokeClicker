@@ -165,6 +165,16 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
   const [battleAttackFunction, setBattleAttackFunction] = useState<
     (() => void) | null
   >(null);
+  const battleAttackFunctionRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    battleAttackFunctionRef.current = battleAttackFunction;
+  }, [battleAttackFunction]);
+
+  const setBattleAttackFunctionWrapper = useCallback((fn: (() => void) | null) => {
+    // Wrap in arrow function because setState interprets functions as updaters
+    setBattleAttackFunction(() => fn);
+  }, []);
 
   // Start battle handler
   const startBattle = useCallback(
@@ -249,6 +259,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       setBattleOpponent(null);
       setPlayerPokemon(null);
       setBattleSpawnId(null);
+      setBattleAttackFunction(null);
     },
     [
       battleOpponent,
@@ -261,21 +272,74 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     ]
   );
 
-  // A/B Button handlers
   const handleAButtonClick = useCallback(() => {
-    if (pokemon.nearbyPokemon) {
+    if (inBattle && battleAttackFunction) {
+      battleAttackFunction();
+    } else if (pokemon.nearbyPokemon) {
       startBattle(pokemon.nearbyPokemon.pokemon, pokemon.nearbyPokemon.spawnId);
+    } else {
+      movement.handleJoystickDirectionChange('left');
     }
-  }, [pokemon.nearbyPokemon, startBattle]);
+  }, [inBattle, battleAttackFunction, pokemon.nearbyPokemon, startBattle, movement]);
 
   const handleBButtonClick = useCallback(() => {
-    if (inBattle && battleAttackFunction) {
-      // In battle mode, trigger attack
-      battleAttackFunction();
-    } else {
-      // Normal mode, cancel action or show menu
+    if (inBattle && battleAttackFunctionRef.current) {
+      battleAttackFunctionRef.current();
     }
-  }, [inBattle, battleAttackFunction]);
+  }, [inBattle]);
+
+  useEffect(() => {
+    const pressedKeys = new Set<string>();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      
+      if (key === 'a') {
+        if (inBattle || pokemon.nearbyPokemon) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          if (!pressedKeys.has(key)) {
+            pressedKeys.add(key);
+            handleAButtonClick();
+          }
+        }
+      } else if (key === 'b') {
+        if (inBattle) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          if (!pressedKeys.has(key)) {
+            pressedKeys.add(key);
+            handleBButtonClick();
+          }
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key === 'a' || key === 'b') {
+        pressedKeys.delete(key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, {capture: true, passive: false});
+    window.addEventListener('keyup', handleKeyUp, {capture: true});
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, {capture: true});
+      window.removeEventListener('keyup', handleKeyUp, {capture: true});
+    };
+  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, handleBButtonClick]);
 
   return (
     <GameBoy
@@ -299,7 +363,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
             opponentPokemon={battleOpponent}
             onBattleComplete={handleBattleComplete}
             isDarkMode={isDarkMode}
-            onAttackFunctionReady={setBattleAttackFunction}
+            onAttackFunctionReady={setBattleAttackFunctionWrapper}
           />
         ) : (
           <TiledMapView
