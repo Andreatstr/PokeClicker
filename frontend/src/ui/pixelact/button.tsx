@@ -41,23 +41,6 @@ const Button = React.forwardRef<
   React.ComponentRef<typeof ShadcnButton>,
   PixelButtonProps
 >(({className, variant, size, onClick, bgColor, style, ...props}, ref) => {
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Immediately blur to prevent focus
-    e.currentTarget.blur();
-
-    if (onClick) {
-      onClick(e);
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLButtonElement>) => {
-    // Force blur on touch end for mobile
-    e.currentTarget.blur();
-    if (document.activeElement === e.currentTarget) {
-      (document.activeElement as HTMLElement).blur();
-    }
-  };
-
   // Function to darken a hex color
   const darkenColor = (color: string, percent: number = 30): string => {
     // Remove # if present
@@ -95,9 +78,7 @@ const Button = React.forwardRef<
         className
       )}
       style={buttonStyle}
-      onClick={handleClick}
-      onTouchEnd={handleTouchEnd}
-      tabIndex={-1}
+      onClick={onClick}
       ref={ref}
       {...props}
     />

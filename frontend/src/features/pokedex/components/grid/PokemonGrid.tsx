@@ -84,14 +84,31 @@ export function PokemonGrid({
                       />
                     }
                   >
-                    <PokemonCard
-                      pokemon={selectedMobilePokemon}
-                      onClick={(poke) =>
-                        handlePokemonClick(poke, displayedPokemon)
+                    <div
+                      data-onboarding={
+                        paginationPage === 1 &&
+                        displayedPokemon[0]?.id === selectedMobilePokemon.id
+                          ? 'pokemon-card'
+                          : paginationPage === 1 &&
+                              !ownedPokemonIds.includes(
+                                selectedMobilePokemon.id
+                              ) &&
+                              displayedPokemon.findIndex(
+                                (p) => p.id === selectedMobilePokemon.id
+                              ) > 0
+                            ? 'pokemon-card-locked'
+                            : undefined
                       }
-                      isDarkMode={isDarkMode}
-                      ownedPokemonIds={ownedPokemonIds}
-                    />
+                    >
+                      <PokemonCard
+                        pokemon={selectedMobilePokemon}
+                        onClick={(poke) =>
+                          handlePokemonClick(poke, displayedPokemon)
+                        }
+                        isDarkMode={isDarkMode}
+                        ownedPokemonIds={ownedPokemonIds}
+                      />
+                    </div>
                   </Suspense>
                 )}
               </div>
@@ -166,24 +183,47 @@ export function PokemonGrid({
                   justifyContent: 'center',
                 }}
               >
-                {displayedPokemon.map((pokemon, index) => (
-                  <li
-                    key={pokemon.id}
-                    className="animate-fade-in"
-                    style={{
-                      animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms`,
-                    }}
-                  >
-                    <PokemonCard
-                      pokemon={pokemon}
-                      onClick={(poke) =>
-                        handlePokemonClick(poke, displayedPokemon)
-                      }
-                      isDarkMode={isDarkMode}
-                      ownedPokemonIds={ownedPokemonIds}
-                    />
-                  </li>
-                ))}
+                {displayedPokemon.map((pokemon, index) => {
+                  const isOwned = ownedPokemonIds.includes(pokemon.id);
+                  const isFirstCard = index === 0 && paginationPage === 1;
+
+                  // Find first unowned Pokemon for locked card tutorial (on page 1, index 1-5)
+                  const isFirstLockedCard =
+                    paginationPage === 1 &&
+                    index > 0 &&
+                    index <= 5 &&
+                    !isOwned &&
+                    displayedPokemon
+                      .slice(0, index)
+                      .every((p) => ownedPokemonIds.includes(p.id));
+
+                  let onboardingId: string | undefined;
+                  if (isFirstCard) {
+                    onboardingId = 'pokemon-card';
+                  } else if (isFirstLockedCard) {
+                    onboardingId = 'pokemon-card-locked';
+                  }
+
+                  return (
+                    <li
+                      key={pokemon.id}
+                      className="animate-fade-in"
+                      style={{
+                        animationDelay: `${(index % ITEMS_PER_PAGE) * 50}ms`,
+                      }}
+                      data-onboarding={onboardingId}
+                    >
+                      <PokemonCard
+                        pokemon={pokemon}
+                        onClick={(poke) =>
+                          handlePokemonClick(poke, displayedPokemon)
+                        }
+                        isDarkMode={isDarkMode}
+                        ownedPokemonIds={ownedPokemonIds}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
 
               {/* Desktop Pagination Controls */}
