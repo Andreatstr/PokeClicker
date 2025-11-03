@@ -41,7 +41,6 @@ const Button = React.forwardRef<
   React.ComponentRef<typeof ShadcnButton>,
   PixelButtonProps
 >(({className, variant, size, onClick, bgColor, style, ...props}, ref) => {
-
   // Function to darken a hex color
   const darkenColor = (color: string, percent: number = 30): string => {
     // Remove # if present

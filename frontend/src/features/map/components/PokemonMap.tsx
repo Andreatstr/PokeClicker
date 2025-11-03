@@ -171,10 +171,13 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     battleAttackFunctionRef.current = battleAttackFunction;
   }, [battleAttackFunction]);
 
-  const setBattleAttackFunctionWrapper = useCallback((fn: (() => void) | null) => {
-    // Wrap in arrow function because setState interprets functions as updaters
-    setBattleAttackFunction(() => fn);
-  }, []);
+  const setBattleAttackFunctionWrapper = useCallback(
+    (fn: (() => void) | null) => {
+      // Wrap in arrow function because setState interprets functions as updaters
+      setBattleAttackFunction(() => fn);
+    },
+    []
+  );
 
   // Start battle handler
   const startBattle = useCallback(
@@ -280,7 +283,13 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     } else {
       movement.handleJoystickDirectionChange('left');
     }
-  }, [inBattle, battleAttackFunction, pokemon.nearbyPokemon, startBattle, movement]);
+  }, [
+    inBattle,
+    battleAttackFunction,
+    pokemon.nearbyPokemon,
+    startBattle,
+    movement,
+  ]);
 
   const handleBButtonClick = useCallback(() => {
     if (inBattle && battleAttackFunctionRef.current) {
@@ -302,7 +311,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       }
 
       const key = e.key.toLowerCase();
-      
+
       if (key === 'a') {
         if (inBattle || pokemon.nearbyPokemon) {
           e.preventDefault();
@@ -333,7 +342,10 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown, {capture: true, passive: false});
+    window.addEventListener('keydown', handleKeyDown, {
+      capture: true,
+      passive: false,
+    });
     window.addEventListener('keyup', handleKeyUp, {capture: true});
     return () => {
       window.removeEventListener('keydown', handleKeyDown, {capture: true});
