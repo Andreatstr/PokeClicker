@@ -39,6 +39,11 @@ const PokedexPage = lazy(() =>
 const PokemonMap = lazy(() =>
   import('@features/map').then((module) => ({default: module.PokemonMap}))
 );
+const LeaderboardPage = lazy(() =>
+  import('@features/leaderboard').then((module) => ({
+    default: module.LeaderboardPage,
+  }))
+);
 
 function App() {
   const {isDarkMode, toggleTheme} = useTheme();
@@ -105,6 +110,22 @@ function App() {
             />
             <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
+        );
+
+      case 'leaderboard':
+        return (
+          <section className="py-8">
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading leaderboard..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
+              <LeaderboardPage isDarkMode={isDarkMode} />
+            </Suspense>
+          </section>
         );
 
       case 'clicker':

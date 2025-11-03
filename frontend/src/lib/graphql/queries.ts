@@ -192,3 +192,30 @@ export const HEALTH_QUERY = gql`
     }
   }
 `;
+
+// ============================================================================
+// LEADERBOARD
+// ============================================================================
+export const GET_LEADERBOARD = gql`
+  query GetLeaderboard($input: LeaderboardInput!) {
+    getLeaderboard(input: $input) {
+      candyLeague {
+        position
+        username
+        score
+        userId
+        showInLeaderboard
+      }
+      pokemonLeague {
+        position
+        username
+        score
+        userId
+        showInLeaderboard
+      }
+      totalPlayers
+      userCandyRank
+      userPokemonRank
+    }
+  }
+`;

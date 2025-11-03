@@ -2,7 +2,13 @@ import {useEffect} from 'react';
 import {logger} from '@/lib/logger';
 import {preloadService} from '@/lib/preloadService';
 
-type PageType = 'clicker' | 'pokedex' | 'map' | 'login' | 'profile';
+type PageType =
+  | 'clicker'
+  | 'leaderboard'
+  | 'pokedex'
+  | 'map'
+  | 'login'
+  | 'profile';
 
 /**
  * Custom hook for preloading assets based on current page
@@ -14,6 +20,9 @@ export function usePreloading(currentPage: PageType) {
         switch (currentPage) {
           case 'pokedex':
             await preloadService.preloadForPokedex();
+            break;
+          case 'leaderboard':
+            await preloadService.preloadForLeaderboard();
             break;
           case 'clicker':
             await preloadService.preloadForClicker();

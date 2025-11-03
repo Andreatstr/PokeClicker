@@ -14,6 +14,7 @@ export {
   POKEMON_BY_IDS,
   POKEMON_UPGRADE_QUERY,
   HEALTH_QUERY,
+  GET_LEADERBOARD,
 } from './queries';
 
 // Mutations
