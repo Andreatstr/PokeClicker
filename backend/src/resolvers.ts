@@ -566,74 +566,60 @@ export const resolvers = {
     },
 
     getLeaderboard: async (
-      _: unknown,
-      {input}: {input: {limit?: number; offset?: number}},
-      {db, userId}: {db: Db; userId?: string | ObjectId}
+      _,
+      {input}: {input?: {limit?: number; offset?: number}}
     ) => {
-      const {limit = 50, offset = 0} = input;
+      const {limit = 50, offset = 0} = input || {};
 
-      // Get users who opted in to leaderboard
-      const visibleUsers = await db
-        .collection('users')
-        .find({showInLeaderboard: true})
-        .toArray();
+      try {
+        const db = getDatabase();
+        const users = await db
+          .collection('users')
+          .find({
+            showInLeaderboard: {$ne: false},
+          })
+          .toArray();
 
-      // Calculate candy league
-      const candyLeague = visibleUsers
-        .sort((a, b) => b.rare_candy - a.rare_candy)
-        .slice(offset, offset + limit)
-        .map((user, index) => ({
-          position: offset + index + 1,
-          username: user.username,
-          score: user.rare_candy,
-          userId: user._id,
-          showInLeaderboard: user.showInLeaderboard,
-        }));
+        const candyLeague = users
+          .sort((a, b) => (b.rare_candy || 0) - (a.rare_candy || 0))
+          .slice(offset, offset + limit)
+          .map((user, index) => ({
+            position: offset + index + 1,
+            username: user.username,
+            score: user.rare_candy || 0,
+            userId: user._id.toString(),
+            showInLeaderboard: user.showInLeaderboard !== false,
+          }));
 
-      // Calculate pokemon league
-      const pokemonLeague = visibleUsers
-        .sort(
-          (a, b) =>
-            (b.owned_pokemon_ids?.length || 0) -
-            (a.owned_pokemon_ids?.length || 0)
-        )
-        .slice(offset, offset + limit)
-        .map((user, index) => ({
-          position: offset + index + 1,
-          username: user.username,
-          score: user.owned_pokemon_ids?.length || 0,
-          userId: user._id,
-          showInLeaderboard: user.showInLeaderboard,
-        }));
+        const pokemonLeague = users
+          .sort(
+            (a, b) =>
+              (b.owned_pokemon_ids?.length || 0) -
+              (a.owned_pokemon_ids?.length || 0)
+          )
+          .slice(offset, offset + limit)
+          .map((user, index) => ({
+            position: offset + index + 1,
+            username: user.username,
+            score: user.owned_pokemon_ids?.length || 0,
+            userId: user._id.toString(),
+            showInLeaderboard: user.showInLeaderboard !== false,
+          }));
 
-      // Get current user ranks if logged in
-      let userCandyRank = null;
-      let userPokemonRank = null;
+        const userCandyRank = null;
+        const userPokemonRank = null;
 
-      if (userId) {
-        const currentUser = await db.collection('users').findOne({
-          _id: typeof userId === 'string' ? new ObjectId(userId) : userId,
-        });
-        if (currentUser) {
-          userCandyRank =
-            visibleUsers.filter((u) => u.rare_candy > currentUser.rare_candy)
-              .length + 1;
-          userPokemonRank =
-            visibleUsers.filter(
-              (u) =>
-                (u.owned_pokemon_ids?.length || 0) >
-                (currentUser.owned_pokemon_ids?.length || 0)
-            ).length + 1;
-        }
+        return {
+          candyLeague,
+          pokemonLeague,
+          totalPlayers: users.length,
+          userCandyRank,
+          userPokemonRank,
+        };
+      } catch (error) {
+        console.error('Leaderboard error:', error);
+        throw new Error('Failed to load leaderboard data');
       }
-
-      return {
-        candyLeague,
-        pokemonLeague,
-        totalPlayers: visibleUsers.length,
-        userCandyRank,
-        userPokemonRank,
-      };
     },
   },
 
