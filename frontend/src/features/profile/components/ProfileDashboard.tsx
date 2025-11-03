@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
+import {useOnboarding} from '@/hooks';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
 import {PokemonDisplayButton} from './PokemonDisplayButton';
@@ -17,6 +18,7 @@ export function ProfileDashboard({
   onNavigate,
 }: ProfileDashboardProps) {
   const {user} = useAuth();
+  const {restartTutorial} = useOnboarding();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [showSelectedSelector, setShowSelectedSelector] = useState(false);
@@ -131,56 +133,97 @@ export function ProfileDashboard({
             </div>
           </div>
         </div>
-
-        {/* Battle Pokemon Section - previously Favorite */}
-        <div
-          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
-          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-        >
-          <div className="flex-1">
+        {/* Pokemon Selection Sections */}
+        <div data-onboarding="pokemon-selection">
+          {/* Battle Pokemon Section (renamed from Favorite) */}
+          <div
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          >
             <h2 className="text-lg sm:text-xl font-bold">BATTLE POKEMON</h2>
-            <p className="text-xs opacity-70 mt-1">
-              This Pokemon is used in battles in the World
-            </p>
+            <PokemonDisplayButton
+              pokemon={favoritePokemonData?.pokemonById}
+              onClick={() => setShowFavoriteSelector(true)}
+              disabled={user.owned_pokemon_ids.length === 0}
+              title="Click to change battle Pokemon"
+              emptyTitle={
+                user.owned_pokemon_ids.length === 0
+                  ? 'Catch a Pokemon first!'
+                  : 'Click to select battle Pokemon'
+              }
+              isDarkMode={isDarkMode}
+              isFirstRender={true}
+            />
           </div>
-          <PokemonDisplayButton
-            pokemon={favoritePokemonData?.pokemonById}
-            onClick={() => setShowFavoriteSelector(true)}
-            disabled={user.owned_pokemon_ids.length === 0}
-            title="Click to change battle Pokemon"
-            emptyTitle={
-              user.owned_pokemon_ids.length === 0
-                ? 'Catch a Pokemon first!'
-                : 'Click to select battle Pokemon'
-            }
-            isDarkMode={isDarkMode}
-            isFirstRender={true}
-          />
+
+          {/* Clicker Pokemon Section */}
+          <div
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          >
+            <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
+            <PokemonDisplayButton
+              pokemon={selectedPokemonData?.pokemonById}
+              onClick={() => setShowSelectedSelector(true)}
+              disabled={user.owned_pokemon_ids.length === 0}
+              title="Click to change clicker Pokemon"
+              emptyTitle={
+                user.owned_pokemon_ids.length === 0
+                  ? 'Catch a Pokemon first!'
+                  : 'Click to select clicker Pokemon'
+              }
+              isDarkMode={isDarkMode}
+            />
+          </div>
         </div>
 
-        {/* Clicker Pokemon Section */}
+        {/* Tutorial Section */}
         <div
-          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
         >
-          <div className="flex-1">
-            <h2 className="text-lg sm:text-xl font-bold">CLICKER POKEMON</h2>
-            <p className="text-xs opacity-70 mt-1">
-              This Pokemon appears in the Clicker game
-            </p>
-          </div>
-          <PokemonDisplayButton
-            pokemon={selectedPokemonData?.pokemonById}
-            onClick={() => setShowSelectedSelector(true)}
-            disabled={user.owned_pokemon_ids.length === 0}
-            title="Click to change clicker Pokemon"
-            emptyTitle={
-              user.owned_pokemon_ids.length === 0
-                ? 'Catch a Pokemon first!'
-                : 'Click to select clicker Pokemon'
-            }
-            isDarkMode={isDarkMode}
-          />
+          <h2 className="text-lg sm:text-xl mb-2">TUTORIAL</h2>
+          <p className="text-xs sm:text-sm mb-3 opacity-70">
+            Need help? Restart the interactive tutorial to learn how to use all
+            features.
+          </p>
+          <button
+            onClick={() => {
+              // Scroll to top instantly (not smooth) for immediate positioning
+              window.scrollTo({top: 0, behavior: 'instant'});
+              // Navigate to pokedex
+              if (onNavigate) {
+                onNavigate('pokedex');
+              }
+              // Longer delay to ensure page fully renders and elements are positioned
+              setTimeout(() => {
+                restartTutorial();
+              }, 500);
+            }}
+            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all text-sm"
+            style={{
+              borderColor: isDarkMode ? '#333333' : 'black',
+              backgroundColor: '#10b981',
+              color: 'white',
+              boxShadow: isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '6px 6px 0px rgba(51,51,51,1)'
+                : '6px 6px 0px rgba(0,0,0,1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+            }}
+          >
+            RESTART TUTORIAL
+          </button>
         </div>
 
         {/* Action Buttons */}

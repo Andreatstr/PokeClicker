@@ -43,8 +43,8 @@ const mockAuth = {
   isAuthenticated: false,
 };
 
-vi.mock('@features/auth', async () => {
-  const actual = await vi.importActual('@features/auth');
+vi.mock('@features/auth/hooks/useAuth', async () => {
+  const actual = await vi.importActual('@features/auth/hooks/useAuth');
   return {
     ...actual,
     useAuth: () => mockAuth,
@@ -263,13 +263,58 @@ describe('LoginScreen component', () => {
     expect(screen.getByLabelText('Password:')).toBeInTheDocument();
   });
 
-  it('should navigate to pokedex when guest user is clicked', async () => {
+  it('logs in with guest credentials and navigates to pokedex', async () => {
     const user = userEvent.setup();
+    const mockUser = {
+      _id: '1',
+      username: 'guest',
+      rare_candy: 0,
+      created_at: new Date().toISOString(),
+      stats: {
+        hp: 1,
+        attack: 1,
+        defense: 1,
+        spAttack: 1,
+        spDefense: 1,
+        speed: 1,
+        clickPower: 1,
+        passiveIncome: 1,
+      },
+      owned_pokemon_ids: [1],
+      favorite_pokemon_id: null,
+      selected_pokemon_id: 1,
+    };
+
+    mockLoginMutation.mockImplementationOnce(async () => ({
+      data: {
+        login: {
+          token: 'test-token',
+          user: mockUser,
+        },
+      },
+    }));
+
     render(<LoginScreen onNavigate={mockOnNavigate} />);
 
-    await user.click(screen.getByText('Guest user'));
+    const guestButton = screen.getByText('Guest user');
+    await user.click(guestButton);
 
-    expect(mockOnNavigate).toHaveBeenCalledWith('pokedex');
+    await waitFor(
+      () => {
+        expect(mockLoginMutation).toHaveBeenCalledWith({
+          variables: {username: 'guest', password: '123456'},
+        });
+      },
+      {timeout: 3000}
+    );
+
+    await waitFor(
+      () => {
+        expect(mockLogin).toHaveBeenCalledWith('test-token', mockUser);
+        expect(mockOnNavigate).toHaveBeenCalledWith('pokedex');
+      },
+      {timeout: 3000}
+    );
   });
 
   it('should show loading state during authentication', async () => {
