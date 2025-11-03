@@ -132,21 +132,26 @@ export function ProfileDashboard({
           </div>
         </div>
 
-        {/* Favorite Pokemon Section - Likely LCP candidate */}
+        {/* Battle Pokemon Section - previously Favorite */}
         <div
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
         >
-          <h2 className="text-lg sm:text-xl font-bold">FAVORITE</h2>
+          <div className="flex-1">
+            <h2 className="text-lg sm:text-xl font-bold">BATTLE POKEMON</h2>
+            <p className="text-xs opacity-70 mt-1">
+              This Pokemon is used in battles in the World
+            </p>
+          </div>
           <PokemonDisplayButton
             pokemon={favoritePokemonData?.pokemonById}
             onClick={() => setShowFavoriteSelector(true)}
             disabled={user.owned_pokemon_ids.length === 0}
-            title="Click to change favorite"
+            title="Click to change battle Pokemon"
             emptyTitle={
               user.owned_pokemon_ids.length === 0
                 ? 'Catch a Pokemon first!'
-                : 'Click to select favorite'
+                : 'Click to select battle Pokemon'
             }
             isDarkMode={isDarkMode}
             isFirstRender={true}
@@ -158,7 +163,12 @@ export function ProfileDashboard({
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
         >
-          <h2 className="text-lg sm:text-xl font-bold">CLICKER</h2>
+          <div className="flex-1">
+            <h2 className="text-lg sm:text-xl font-bold">CLICKER POKEMON</h2>
+            <p className="text-xs opacity-70 mt-1">
+              This Pokemon appears in the Clicker game
+            </p>
+          </div>
           <PokemonDisplayButton
             pokemon={selectedPokemonData?.pokemonById}
             onClick={() => setShowSelectedSelector(true)}
