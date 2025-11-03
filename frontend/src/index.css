@@ -319,8 +319,6 @@ div.battle-background {
   background-color: transparent !important;
   position: relative;
   overflow: hidden;
-  /* DEBUG: Add border to see the container */
-  border: 3px solid yellow;
 }
 
 .battle-background::before {

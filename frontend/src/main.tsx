@@ -6,13 +6,16 @@ import App from './App.tsx';
 import {apolloClient} from '@lib/apolloClient';
 import {AuthProvider} from '@features/auth';
 import {ErrorProvider} from '@/contexts/ErrorContext';
+import {OnboardingProvider} from '@/contexts/OnboardingContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorProvider>
       <AuthProvider>
         <ApolloProvider client={apolloClient}>
-          <App />
+          <OnboardingProvider>
+            <App />
+          </OnboardingProvider>
         </ApolloProvider>
       </AuthProvider>
     </ErrorProvider>

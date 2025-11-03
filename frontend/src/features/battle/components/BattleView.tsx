@@ -53,23 +53,26 @@ export function BattleView({
     },
   });
 
-  // Keep attack function ref up to date
+  // Keep attack function ref up to date so the wrapper always calls the latest version
   const attackFunctionRef = useRef(handleAttackClick);
   attackFunctionRef.current = handleAttackClick;
 
-  // Expose attack function to parent component (only once on mount)
+  // Create stable wrapper function that won't change between renders
+  const attackWrapperRef = useRef<(() => void) | null>(null);
+  if (!attackWrapperRef.current) {
+    attackWrapperRef.current = () => {
+      if (attackFunctionRef.current) {
+        attackFunctionRef.current();
+      }
+    };
+  }
+
+  // Expose attack function to parent component on mount
   useEffect(() => {
-    if (onAttackFunctionReady) {
-      // Create a stable wrapper that calls the latest attack function
-      onAttackFunctionReady(() => {
-        if (attackFunctionRef.current) {
-          attackFunctionRef.current();
-        }
-      });
+    if (onAttackFunctionReady && attackWrapperRef.current) {
+      onAttackFunctionReady(attackWrapperRef.current);
     }
-    // Only run once on mount to avoid setState during render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onAttackFunctionReady]);
 
   // Calculate rare candy reward (must match PokemonMap.tsx multiplier)
   const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
@@ -252,7 +255,7 @@ export function BattleView({
           {/* Buttons with visual charge progress - stacked vertically on mobile, horizontal on desktop */}
           <div className="flex gap-1 md:gap-3">
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
@@ -266,6 +269,7 @@ export function BattleView({
                 if (isCharged) triggerSpecialAttack();
               }}
               disabled={!isCharged}
+              tabIndex={0}
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -286,7 +290,7 @@ export function BattleView({
               </span>
             </button>
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
@@ -300,6 +304,7 @@ export function BattleView({
                 if (isCharged) triggerShield();
               }}
               disabled={!isCharged}
+              tabIndex={0}
             >
               {/* Charge progress bar with glow effect */}
               <div

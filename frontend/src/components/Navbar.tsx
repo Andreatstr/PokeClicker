@@ -35,6 +35,7 @@ export function Navbar({
       style={{backgroundColor: 'var(--background)'}}
     >
       <div
+        data-onboarding="navbar"
         className="w-full h-16 sm:h-16 md:h-20 px-2 sm:px-4 py-3 sm:py-3 md:py-4"
         style={{
           backgroundColor: 'var(--card)',
@@ -73,12 +74,14 @@ export function Navbar({
               Pokedex
             </Button>
             <Button
+              data-onboarding="clicker-nav"
               className="text-xs md:text-sm"
               onClick={() => onPageChange('clicker')}
             >
               Clicker
             </Button>
             <Button
+              data-onboarding="world-nav"
               className="text-xs md:text-sm"
               onClick={() => onPageChange('map')}
             >
@@ -95,6 +98,7 @@ export function Navbar({
 
             {isAuthenticated ? (
               <Button
+                data-onboarding="profile-button"
                 className="text-xs md:text-sm"
                 onClick={() => onPageChange('profile')}
                 title={`Logged in as ${user?.username}`}
@@ -103,7 +107,11 @@ export function Navbar({
                 Profile
               </Button>
             ) : (
-              <Button className="p-2" onClick={() => onPageChange('login')}>
+              <Button
+                data-onboarding="profile-button"
+                className="p-2"
+                onClick={() => onPageChange('login')}
+              >
                 <UserIcon className="w-4 h-4" />
               </Button>
             )}
@@ -140,12 +148,14 @@ export function Navbar({
                 Pokedex
               </Button>
               <Button
+                data-onboarding="clicker-nav"
                 className="w-full text-sm"
                 onClick={() => onPageChange('clicker')}
               >
                 Clicker
               </Button>
               <Button
+                data-onboarding="world-nav"
                 className="w-full text-sm"
                 onClick={() => onPageChange('map')}
               >
@@ -174,6 +184,7 @@ export function Navbar({
 
               {isAuthenticated ? (
                 <Button
+                  data-onboarding="profile-button"
                   className="w-full text-sm flex items-center justify-center gap-2"
                   onClick={() => onPageChange('profile')}
                   title={`Logged in as ${user?.username}`}
@@ -183,6 +194,7 @@ export function Navbar({
                 </Button>
               ) : (
                 <Button
+                  data-onboarding="profile-button"
                   className="w-full text-sm flex items-center justify-center gap-2"
                   onClick={() => onPageChange('login')}
                 >

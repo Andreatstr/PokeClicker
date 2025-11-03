@@ -172,7 +172,7 @@ export function TiledMapView(props: TiledMapViewProps) {
               {nearbyPokemon.pokemon.name} nearby!
             </span>
             <button
-              className={`ml-auto text-white px-2 py-1 md:px-3 md:py-1.5 pixel-font text-xs md:text-sm border-2 rounded ${
+              className={`ml-auto text-white px-2 py-1 md:px-3 md:py-1.5 pixel-font text-xs md:text-sm border-2 rounded focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-red-700 hover:bg-red-800 border-gray-600'
                   : 'bg-red-600 hover:bg-red-700 border-black'
@@ -180,6 +180,7 @@ export function TiledMapView(props: TiledMapViewProps) {
               onClick={() =>
                 onStartBattle(nearbyPokemon.pokemon, nearbyPokemon.spawnId)
               }
+              tabIndex={0}
             >
               Battle!
             </button>

@@ -89,6 +89,21 @@ export function LoginScreen({onNavigate}: Props) {
     }
   }
 
+  async function loginAsGuest() {
+    try {
+      const result = await loginMutation({
+        variables: {username: 'guest', password: '123456'},
+      });
+      const authData = (result.data as LoginData | undefined)?.login;
+      if (authData?.token && authData?.user) {
+        await authLogin(authData.token, authData.user);
+        onNavigate('pokedex');
+      }
+    } catch (err) {
+      logger.logError(err, 'GuestLogin');
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-cover bg-center flex items-center justify-center">
       {/* Video Background */}
@@ -135,7 +150,8 @@ export function LoginScreen({onNavigate}: Props) {
           <Button
             tabIndex={0}
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
-            onClick={() => onNavigate('pokedex')}
+            onClick={loginAsGuest}
+            disabled={loading}
           >
             Guest user
           </Button>
