@@ -23,6 +23,7 @@ export const typeDefs = `#graphql
       ownedOnly: Boolean
     ): PokedexResponse!
     pokemonUpgrade(pokemonId: Int!): PokemonUpgrade
+    getLeaderboard(input: LeaderboardInput): LeaderboardResponse!
   }
 
   type HealthCheck {
@@ -69,6 +70,7 @@ export const typeDefs = `#graphql
     setFavoritePokemon(pokemonId: Int): User!
     setSelectedPokemon(pokemonId: Int): User!
     upgradePokemon(pokemonId: Int!): PokemonUpgrade!
+    updateLeaderboardPreference(showInLeaderboard: Boolean!): User!
   }
 
   type PokemonUpgrade {
@@ -142,5 +144,26 @@ export const typeDefs = `#graphql
   type TypeFacet {
     type: String!
     count: Int!
+  }
+
+  type LeaderboardEntry {
+    position: Int!
+    username: String!
+    score: Int!
+    userId: ID!
+    showInLeaderboard: Boolean!
+  }
+
+  type LeaderboardResponse {
+    candyLeague: [LeaderboardEntry!]!
+    pokemonLeague: [LeaderboardEntry!]!
+    totalPlayers: Int!
+    userCandyRank: Int
+    userPokemonRank: Int
+  }
+
+  input LeaderboardInput {
+    limit: Int = 50
+    offset: Int = 0
   }
 `;

@@ -564,7 +564,79 @@ export const resolvers = {
         cost,
       };
     },
+
+    getLeaderboard: async (
+      _: unknown,
+      {input}: {input: {limit?: number; offset?: number}},
+      {db, userId}: {db: Db; userId?: string | ObjectId}
+    ) => {
+      const {limit = 50, offset = 0} = input;
+
+      // Get users who opted in to leaderboard
+      const visibleUsers = await db
+        .collection('users')
+        .find({showInLeaderboard: true})
+        .toArray();
+
+      // Calculate candy league
+      const candyLeague = visibleUsers
+        .sort((a, b) => b.rare_candy - a.rare_candy)
+        .slice(offset, offset + limit)
+        .map((user, index) => ({
+          position: offset + index + 1,
+          username: user.username,
+          score: user.rare_candy,
+          userId: user._id,
+          showInLeaderboard: user.showInLeaderboard,
+        }));
+
+      // Calculate pokemon league
+      const pokemonLeague = visibleUsers
+        .sort(
+          (a, b) =>
+            (b.owned_pokemon_ids?.length || 0) -
+            (a.owned_pokemon_ids?.length || 0)
+        )
+        .slice(offset, offset + limit)
+        .map((user, index) => ({
+          position: offset + index + 1,
+          username: user.username,
+          score: user.owned_pokemon_ids?.length || 0,
+          userId: user._id,
+          showInLeaderboard: user.showInLeaderboard,
+        }));
+
+      // Get current user ranks if logged in
+      let userCandyRank = null;
+      let userPokemonRank = null;
+
+      if (userId) {
+        const currentUser = await db.collection('users').findOne({
+          _id: typeof userId === 'string' ? new ObjectId(userId) : userId,
+        });
+        if (currentUser) {
+          userCandyRank =
+            visibleUsers.filter((u) => u.rare_candy > currentUser.rare_candy)
+              .length + 1;
+          userPokemonRank =
+            visibleUsers.filter(
+              (u) =>
+                (u.owned_pokemon_ids?.length || 0) >
+                (currentUser.owned_pokemon_ids?.length || 0)
+            ).length + 1;
+        }
+      }
+
+      return {
+        candyLeague,
+        pokemonLeague,
+        totalPlayers: visibleUsers.length,
+        userCandyRank,
+        userPokemonRank,
+      };
+    },
   },
+
   Mutation: {
     ...authMutations,
 
