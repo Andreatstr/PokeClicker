@@ -8,3 +8,4 @@ export {usePokemonModal} from './usePokemonModal';
 export {useModal} from './useModal';
 export {useEscapeKey} from './useEscapeKey';
 export {useFocusReturn} from './useFocusReturn';
+export {useOnboarding} from '@/contexts/useOnboarding';

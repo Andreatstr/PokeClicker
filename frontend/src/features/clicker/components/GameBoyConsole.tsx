@@ -26,6 +26,7 @@ export function GameBoyConsole({
 }: GameBoyConsoleProps) {
   return (
     <Card
+      data-onboarding="clicker-area"
       className="border-4 p-8 w-full max-w-md lg:max-w-lg"
       style={{
         backgroundColor: isDarkMode ? '#6a6a6a' : '#9FA0A0',
