@@ -11,7 +11,7 @@ export class NavbarPage extends BasePage {
     super(page);
     // Be specific to avoid matching the new logo button with aria-label containing "Pokedex"
     this.pokedexTab = page.getByRole("button", { name: /^pokedex$/i });
-    this.clickerTab = page.getByRole("button", { name: /clicker/i });
+    this.clickerTab = page.getByRole("button", { name: /^clicker$/i });
     this.themeToggle = page
       .locator("button")
       .filter({ has: page.locator("svg") })
