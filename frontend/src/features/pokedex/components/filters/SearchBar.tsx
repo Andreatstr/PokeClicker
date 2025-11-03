@@ -17,6 +17,7 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
   return (
     <section className="mb-6 mt-6 sm:mt-4 max-w-4xl mx-auto">
       <form
+        data-onboarding="search-bar"
         className="p-4"
         style={{
           backgroundColor: 'var(--primary)',
@@ -82,6 +83,7 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
             )}
           </div>
           <Button
+            data-onboarding="filters-button"
             className="w-full sm:w-auto text-sm"
             aria-haspopup="dialog"
             aria-expanded={showMobileFilters}

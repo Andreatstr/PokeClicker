@@ -234,14 +234,19 @@ export function PokemonDetailCard({
         </figure>
 
         {/* Stats Section */}
-        <PokemonStatsDisplay
-          stats={pokemon.stats!}
-          upgradeLevel={upgradeLevel}
-        />
+        <div data-onboarding="pokemon-stats" className="w-full">
+          <PokemonStatsDisplay
+            stats={pokemon.stats!}
+            upgradeLevel={upgradeLevel}
+          />
+        </div>
 
         {/* Upgrade Button */}
         {isOwned && upgrade && (
-          <div className="w-full mb-2 md:mb-3">
+          <div
+            data-onboarding="pokemon-upgrade"
+            className="w-full mb-2 md:mb-3"
+          >
             <Button
               onClick={handleUpgrade}
               disabled={upgrading || !!(user && user.rare_candy < upgrade.cost)}
@@ -293,12 +298,14 @@ export function PokemonDetailCard({
       </aside>
 
       {/* Evolution Section */}
-      <PokemonEvolutionSection
-        evolutionIds={evolutionIds}
-        ownedPokemonIds={ownedPokemonIds}
-        onSelectPokemon={onSelectPokemon}
-        isDarkMode={isDarkMode}
-      />
+      <div data-onboarding="pokemon-evolution">
+        <PokemonEvolutionSection
+          evolutionIds={evolutionIds}
+          ownedPokemonIds={ownedPokemonIds}
+          onSelectPokemon={onSelectPokemon}
+          isDarkMode={isDarkMode}
+        />
+      </div>
     </div>
   );
 }

@@ -79,6 +79,7 @@ export function GameBoy({
 
             {/* Screen - contains the game viewport */}
             <div
+              data-onboarding="map-canvas"
               className="mx-auto"
               style={{
                 width: '100%',
@@ -102,7 +103,10 @@ export function GameBoy({
           </div>
 
           {/* Interactive Controls */}
-          <div className="flex items-center w-full px-1 mb-2 md:mb-1">
+          <div
+            data-onboarding="movement-controls"
+            className="flex items-center w-full px-1 mb-2 md:mb-1"
+          >
             {/* Joystick - more to the left */}
             <div className="flex-[0.8] flex justify-center">
               <Joystick

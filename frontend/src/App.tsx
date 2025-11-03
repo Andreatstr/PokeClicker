@@ -4,14 +4,16 @@ import {
   LoadingSpinner,
   CandyCounterOverlay,
   BackgroundMusic,
+  ErrorDisplay,
+  OnboardingOverlay,
 } from '@/components';
-import {ErrorDisplay} from '@/components/ErrorDisplay';
 import {
   useTheme,
   usePageNavigation,
   useScrollLock,
   usePreloading,
   usePokemonModal,
+  useOnboarding,
 } from '@/hooks';
 
 // Lazy load heavy components
@@ -51,8 +53,38 @@ function App() {
     handlePurchase,
   } = usePokemonModal();
 
+  const {step, isActive, nextStep, previousStep, skipTutorial} =
+    useOnboarding();
+
   useScrollLock(currentPage === 'map');
   usePreloading(currentPage);
+
+  // Function to programmatically open the first Pokemon modal for tutorial
+  const handleOpenFirstPokemon = () => {
+    const tryClick = () => {
+      const container = document.querySelector(
+        '[data-onboarding="pokemon-card"]'
+      );
+      const clickable = container?.querySelector<HTMLElement>(
+        '[role="button"], aside[role="button"]'
+      );
+      if (clickable) {
+        clickable.click();
+        return true;
+      }
+      return false;
+    };
+    if (tryClick()) return;
+
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = setInterval(() => {
+      attempts += 1;
+      if (tryClick() || attempts >= maxAttempts) {
+        clearInterval(interval);
+      }
+    }, 300);
+  };
 
   const getMainClassName = () => {
     const baseClasses = 'min-h-screen pt-0';
@@ -184,6 +216,27 @@ function App() {
       <div className="relative">
         <BackgroundMusic isDarkMode={isDarkMode} />
       </div>
+
+      {/* Onboarding Tutorial Overlay */}
+      {isActive && currentPage !== 'login' && (
+        <OnboardingOverlay
+          step={step}
+          onNext={() => {
+            if (step === 19) {
+              // Last step (index 19 = 20th step)
+              skipTutorial();
+            } else {
+              nextStep();
+            }
+          }}
+          onPrevious={previousStep}
+          onSkip={skipTutorial}
+          onNavigate={setCurrentPage}
+          onOpenFirstPokemon={handleOpenFirstPokemon}
+          onClosePokemonModal={handleCloseModal}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </>
   );
 }
