@@ -47,8 +47,18 @@ export function Navbar({
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center">
             <h1
-              className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0"
+              className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
               style={{color: 'var(--foreground)'}}
+              onClick={() => onPageChange('pokedex')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onPageChange('pokedex');
+                }
+              }}
+              aria-label="Return to Pokedex home"
             >
               PokeClicker
             </h1>
