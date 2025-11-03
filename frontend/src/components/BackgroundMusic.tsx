@@ -168,6 +168,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       <audio ref={audioRef} preload="metadata" />
       {isMinimized ? (
         <div
+          data-onboarding="music-player"
           className="fixed bottom-4 left-4 w-12 h-12 lg:w-auto lg:h-auto flex items-center justify-center p-2 lg:p-3 border-4 border-gray-300 dark:border-gray-600 rounded lg:rounded z-50"
           style={{
             backgroundColor: 'var(--card)',
@@ -197,6 +198,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         </div>
       ) : (
         <div
+          data-onboarding="music-player"
           className="fixed bottom-4 left-4 lg:bottom-4 lg:left-4 flex items-center gap-2 p-3 border-4 border-gray-300 dark:border-gray-600 rounded z-50"
           style={{
             backgroundColor: 'var(--card)',
