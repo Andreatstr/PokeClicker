@@ -100,17 +100,17 @@ export function useBattle({
   }, [playerPokemon, opponentPokemon]);
 
   const handleAttackClick = useCallback(() => {
-    if (battleState.result !== 'ongoing' || !battleState.isActive) return;
-
     const damage = calculateClickDamage();
 
     setBattleState((prev) => {
-      // Check if battle is still ongoing
-      if (prev.result !== 'ongoing') return prev;
+      // Only block if battle has ended, allow attacks during countdown
+      if (prev.result !== 'ongoing') {
+        return prev;
+      }
 
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
-      const newCharge = Math.min(100, prev.chargeProgress + 2); // +2% per click
+      const newCharge = Math.min(100, prev.chargeProgress + 2);
 
       return {
         ...prev,
@@ -122,7 +122,7 @@ export function useBattle({
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
-  }, [battleState.result, battleState.isActive, calculateClickDamage]);
+  }, [calculateClickDamage]);
 
   // Charge over time passively
   useEffect(() => {
