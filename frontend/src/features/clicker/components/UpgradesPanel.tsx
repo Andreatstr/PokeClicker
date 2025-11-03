@@ -33,6 +33,7 @@ export function UpgradesPanel({
 }: UpgradesPanelProps) {
   return (
     <Card
+      data-onboarding="upgrade-panel"
       className="border-4 p-6"
       style={{
         background: isDarkMode

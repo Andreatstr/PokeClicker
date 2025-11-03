@@ -15,6 +15,7 @@ export function CandyCounterOverlay({
   return (
     <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
       <div
+        data-onboarding="candy-counter"
         className="flex items-center gap-2 px-3 py-2 border-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] pixel-font font-bold text-sm"
         style={{
           backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',

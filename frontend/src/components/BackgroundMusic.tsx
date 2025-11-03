@@ -166,7 +166,6 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
     <>
       {/* Persisted audio element to prevent resets on toggle */}
       <audio ref={audioRef} preload="metadata" />
-
       {isMinimized ? (
         <div
           className="fixed bottom-4 left-4 w-12 h-12 lg:w-auto lg:h-auto flex items-center justify-center p-2 lg:p-3 border-4 border-gray-300 dark:border-gray-600 rounded lg:rounded z-50"
