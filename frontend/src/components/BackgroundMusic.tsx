@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {logger} from '@/lib/logger';
 
 interface BackgroundMusicProps {
@@ -70,6 +70,14 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
     }
   }, [volume]);
 
+  const nextTrack = useCallback(() => {
+    setCurrentIndex((idx) => (idx + 1) % tracks.length);
+  }, [tracks.length]);
+
+  const prevTrack = useCallback(() => {
+    setCurrentIndex((idx) => (idx - 1 + tracks.length) % tracks.length);
+  }, [tracks.length]);
+
   // Attach event listeners once
   useEffect(() => {
     const audio = audioRef.current;
@@ -90,7 +98,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [nextTrack]);
 
   // Update audio source when currentIndex changes
   useEffect(() => {
@@ -101,8 +109,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
     const wasPlaying = !audio.paused;
     audio.src = src;
     audio.load();
-    audio.volume = volume;
-    const shouldPlay = shouldAutoplayRef.current || wasPlaying || isPlaying;
+    const shouldPlay = shouldAutoplayRef.current || wasPlaying;
     if (shouldPlay) {
       // reset flag for one-shot autoplay
       shouldAutoplayRef.current = false;
@@ -111,7 +118,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         .then(() => logger.info(`Playing: ${src}`))
         .catch((err) => logger.logError(err, 'PlayingAudio'));
     }
-  }, [currentIndex]);
+  }, [currentIndex, tracks]);
 
   // No-op on minimize/expand; keep a single audio element mounted
 
@@ -142,14 +149,6 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         logger.logError(error, 'PlayingAudio');
       }
     }
-  };
-
-  const nextTrack = () => {
-    setCurrentIndex((idx) => (idx + 1) % tracks.length);
-  };
-
-  const prevTrack = () => {
-    setCurrentIndex((idx) => (idx - 1 + tracks.length) % tracks.length);
   };
 
   const increaseVolume = () => {
