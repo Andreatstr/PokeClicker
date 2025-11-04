@@ -117,6 +117,7 @@ export function BattleView({
     <div
       className="relative w-full h-full flex flex-col cursor-pointer"
       style={{
+        pointerEvents: !isActive ? 'none' : 'auto',
         background: isDarkMode
           ? `
           linear-gradient(0deg, #064e3b 0%, #065f46 20%, #047857 40%, #065f46 60%, #064e3b 80%, #022c22 100%),

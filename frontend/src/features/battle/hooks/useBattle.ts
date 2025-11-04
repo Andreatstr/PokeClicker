@@ -104,7 +104,7 @@ export function useBattle({
 
     setBattleState((prev) => {
       // Only block if battle has ended, allow attacks during countdown
-      if (prev.result !== 'ongoing') {
+      if (prev.result !== 'ongoing' || !prev.isActive) {
         return prev;
       }
 
