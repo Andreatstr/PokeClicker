@@ -19,7 +19,7 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
   const [canRefresh, setCanRefresh] = useState(true);
   const [refreshTimer, setRefreshTimer] = useState(0);
 
-  const {user} = useAuth();
+  const {user, updateUser} = useAuth();
   const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const {data, loading, error, refetch} = useQuery(GET_LEADERBOARD, {
@@ -38,7 +38,9 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
   const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
     onCompleted: (data) => {
       if (data?.updateLeaderboardPreference) {
-        setChecked(data.updateLeaderboardPreference.showInLeaderboard);
+        // Update the AuthContext user state and localStorage
+        updateUser(data.updateLeaderboardPreference);
+        // Refetch leaderboard to reflect changes
         refetch();
       }
     },
@@ -49,9 +51,16 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
   });
 
   useEffect(() => {
-    if (user && checked === null) {
-      setChecked(user.showInLeaderboard !== false);
+    if (user) {
+      // Always sync checkbox with user preference
+      const userPreference = user.showInLeaderboard !== false;
+      if (checked !== userPreference) {
+        setChecked(userPreference);
+      }
     }
+  }, [user?.showInLeaderboard]);
+
+  useEffect(() => {
     if (!canRefresh && refreshTimer > 0) {
       const timer = setInterval(() => {
         setRefreshTimer((prev) => prev - 1);
@@ -61,8 +70,7 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
     } else if (refreshTimer === 0) {
       setCanRefresh(true);
     }
-    // refetch();
-  }, [user, checked, refreshTimer, canRefresh]);
+  }, [refreshTimer, canRefresh]);
 
   const handleCheckedChange = async (state: CheckedState) => {
     if (!user) return;

@@ -23,7 +23,7 @@ export function ProfileDashboard({
   isDarkMode = false,
   onNavigate,
 }: ProfileDashboardProps) {
-  const {user} = useAuth();
+  const {user, updateUser} = useAuth();
   const {restartTutorial} = useOnboarding();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
@@ -32,17 +32,10 @@ export function ProfileDashboard({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
-    update(cache, {data}) {
+    onCompleted: (data) => {
       if (data?.updateLeaderboardPreference) {
-        const updatedUser = data.updateLeaderboardPreference;
-        cache.modify({
-          id: cache.identify({__typename: 'User', id: updatedUser.id}),
-          fields: {
-            showInLeaderboard() {
-              return updatedUser.showInLeaderboard;
-            },
-          },
-        });
+        // Update the AuthContext user state and localStorage
+        updateUser(data.updateLeaderboardPreference);
       }
     },
     onError(error) {
@@ -66,10 +59,12 @@ export function ProfileDashboard({
   );
 
   useEffect(() => {
-    if (user && checked === null) {
-      setChecked(user.showInLeaderboard !== false);
+    if (user) {
+      // Always sync with user preference when it changes
+      const userPreference = user.showInLeaderboard !== false;
+      setChecked(userPreference);
     }
-  }, [user, checked]);
+  }, [user?.showInLeaderboard]);
 
   if (!user) {
     return null;
