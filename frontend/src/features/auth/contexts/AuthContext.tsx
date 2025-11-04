@@ -45,6 +45,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
         setToken(savedToken);
         setUser(parsedUser);
+
+        // Always trigger onboarding for guest user on page reload
+        if (parsedUser.username.toLowerCase() === 'guest') {
+          localStorage.removeItem('onboarding_completed');
+        }
       } catch (e) {
         logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
@@ -58,6 +63,12 @@ export function AuthProvider({children}: {children: ReactNode}) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+
+    // Always trigger onboarding for guest user
+    if (newUser.username.toLowerCase() === 'guest') {
+      localStorage.removeItem('onboarding_completed');
+    }
+
     await apolloClient.resetStore();
   };
 
