@@ -60,10 +60,9 @@ export function ProfileDashboard({
 
   useEffect(() => {
     if (user) {
-      // Always sync with user preference when it changes
-      const userPreference = user.showInRanks !== false;
-      setChecked(userPreference);
+      setChecked(user.showInRanks !== false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.showInRanks]);
 
   if (!user) {

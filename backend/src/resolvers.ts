@@ -568,52 +568,117 @@ export const resolvers = {
 
     getRanks: async (
       _: unknown,
-      {input}: {input?: {limit?: number; offset?: number}}
+      {input}: {input?: {limit?: number; offset?: number}},
+      context: AuthContext
     ) => {
       const {limit = 50, offset = 0} = input || {};
 
       try {
         const db = getDatabase();
-        const users = await db
-          .collection('users')
-          .find({
-            showInRanks: {$ne: false},
-          })
+        const usersCollection = db.collection('users');
+
+        // Use MongoDB aggregation for efficient server-side sorting and pagination
+        const candyLeague = await usersCollection
+          .aggregate([
+            {$match: {showInRanks: {$ne: false}}},
+            {$sort: {rare_candy: -1}},
+            {$skip: offset},
+            {$limit: limit},
+            {
+              $project: {
+                username: 1,
+                score: {$ifNull: ['$rare_candy', 0]},
+                userId: {$toString: '$_id'},
+                showInRanks: {$ifNull: ['$showInRanks', true]},
+              },
+            },
+          ])
           .toArray();
 
-        const candyLeague = users
-          .sort((a, b) => (b.rare_candy || 0) - (a.rare_candy || 0))
-          .slice(offset, offset + limit)
-          .map((user, index) => ({
-            position: offset + index + 1,
-            username: user.username,
-            score: user.rare_candy || 0,
-            userId: user._id.toString(),
-            showInRanks: user.showInRanks !== false,
-          }));
+        // Add position numbers
+        const candyLeagueWithPosition = candyLeague.map((user, index) => ({
+          position: offset + index + 1,
+          username: user.username,
+          score: user.score,
+          userId: user.userId,
+          showInRanks: user.showInRanks,
+        }));
 
-        const pokemonLeague = users
-          .sort(
-            (a, b) =>
-              (b.owned_pokemon_ids?.length || 0) -
-              (a.owned_pokemon_ids?.length || 0)
-          )
-          .slice(offset, offset + limit)
-          .map((user, index) => ({
-            position: offset + index + 1,
-            username: user.username,
-            score: user.owned_pokemon_ids?.length || 0,
-            userId: user._id.toString(),
-            showInRanks: user.showInRanks !== false,
-          }));
+        const pokemonLeague = await usersCollection
+          .aggregate([
+            {$match: {showInRanks: {$ne: false}}},
+            {
+              $addFields: {
+                pokemonCount: {
+                  $size: {$ifNull: ['$owned_pokemon_ids', []]},
+                },
+              },
+            },
+            {$sort: {pokemonCount: -1}},
+            {$skip: offset},
+            {$limit: limit},
+            {
+              $project: {
+                username: 1,
+                score: '$pokemonCount',
+                userId: {$toString: '$_id'},
+                showInRanks: {$ifNull: ['$showInRanks', true]},
+              },
+            },
+          ])
+          .toArray();
 
-        const userCandyRank = null;
-        const userPokemonRank = null;
+        // Add position numbers
+        const pokemonLeagueWithPosition = pokemonLeague.map((user, index) => ({
+          position: offset + index + 1,
+          username: user.username,
+          score: user.score,
+          userId: user.userId,
+          showInRanks: user.showInRanks,
+        }));
+
+        // Get total count of players who are visible in ranks
+        const totalPlayers = await usersCollection.countDocuments({
+          showInRanks: {$ne: false},
+        });
+
+        // Calculate user's rank if authenticated
+        let userCandyRank = null;
+        let userPokemonRank = null;
+
+        if (context.user?.id) {
+          const currentUser = await usersCollection.findOne({
+            _id: new ObjectId(context.user.id),
+          });
+
+          if (currentUser && currentUser.showInRanks !== false) {
+            // Calculate candy rank (count users with more candy)
+            const usersWithMoreCandy = await usersCollection.countDocuments({
+              showInRanks: {$ne: false},
+              rare_candy: {$gt: currentUser.rare_candy || 0},
+            });
+            userCandyRank = usersWithMoreCandy + 1;
+
+            // Calculate pokemon rank (count users with more pokemon)
+            const currentUserPokemonCount =
+              currentUser.owned_pokemon_ids?.length || 0;
+            const usersWithMorePokemon = await usersCollection.countDocuments({
+              showInRanks: {$ne: false},
+              $expr: {
+                $gt: [
+                  {$size: {$ifNull: ['$owned_pokemon_ids', []]}},
+                  currentUserPokemonCount,
+                ],
+              },
+            });
+            userPokemonRank = usersWithMorePokemon + 1;
+          }
+        }
 
         return {
-          candyLeague,
-          pokemonLeague,
-          totalPlayers: users.length,
+          candyLeague: candyLeagueWithPosition,
+          pokemonLeague: pokemonLeagueWithPosition,
+          totalPlayers,
           userCandyRank,
           userPokemonRank,
         };

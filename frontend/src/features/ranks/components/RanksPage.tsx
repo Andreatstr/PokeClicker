@@ -7,6 +7,11 @@ import {Checkbox, Button} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 import type {CheckedState} from '@radix-ui/react-checkbox';
 
+// Constants for ranks configuration
+const INITIAL_RANKS_LIMIT = 10;
+const POLL_INTERVAL_MS = 60_000; // 60 seconds
+const REFRESH_COOLDOWN_SECONDS = 10;
+
 interface RanksPageProps {
   isDarkMode: boolean;
 }
@@ -15,23 +20,32 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
   const [activeLeague, setActiveLeague] = useState<'candy' | 'pokemon'>(
     'candy'
   );
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(INITIAL_RANKS_LIMIT);
   const [canRefresh, setCanRefresh] = useState(true);
   const [refreshTimer, setRefreshTimer] = useState(0);
 
   const {user, updateUser} = useAuth();
   const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const {data, loading, error, refetch} = useQuery(GET_RANKS, {
+  const {data, loading, error, refetch, stopPolling} = useQuery(GET_RANKS, {
     variables: {input: {limit}},
-    pollInterval: 60000, // Update every minute
+    pollInterval: POLL_INTERVAL_MS,
   });
+
+  // Cleanup: Stop polling when component unmounts
+  useEffect(() => {
+    return () => {
+      if (stopPolling) {
+        stopPolling();
+      }
+    };
+  }, [stopPolling]);
 
   const handleRefresh = () => {
     if (canRefresh) {
       refetch();
       setCanRefresh(false);
-      setRefreshTimer(10);
+      setRefreshTimer(REFRESH_COOLDOWN_SECONDS);
     }
   };
 
@@ -52,12 +66,9 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
 
   useEffect(() => {
     if (user) {
-      // Always sync checkbox with user preference
-      const userPreference = user.showInRanks !== false;
-      if (checked !== userPreference) {
-        setChecked(userPreference);
-      }
+      setChecked(user.showInRanks !== false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.showInRanks]);
 
   useEffect(() => {
@@ -83,7 +94,6 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
       await updatePreference({
         variables: {showInRanks: newValue},
       });
-      // refetch();
     } catch (error) {
       console.error('Failed to update ranks preference:', error);
       setChecked(user?.showInRanks !== false);
@@ -196,7 +206,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
           <div className="mt-4 text-center">
             <Button
               variant="default"
-              onClick={() => setLimit((prev) => prev + 10)}
+              onClick={() => setLimit((prev) => prev + INITIAL_RANKS_LIMIT)}
               className="text-xs sm:text-sm"
             >
               Load More
