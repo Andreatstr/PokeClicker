@@ -72,13 +72,6 @@ export function Navbar({
             <Button
               data-onboarding="clicker-nav"
               className="text-xs md:text-sm"
-              onClick={() => onPageChange('leaderboard')}
-            >
-              Leaderboard
-            </Button>
-            <Button
-              data-onboarding="clicker-nav"
-              className="text-xs md:text-sm"
               onClick={() => onPageChange('clicker')}
             >
               Clicker
@@ -89,6 +82,12 @@ export function Navbar({
               onClick={() => onPageChange('map')}
             >
               World
+            </Button>
+            <Button
+              className="text-xs md:text-sm"
+              onClick={() => onPageChange('leaderboard')}
+            >
+              Leaderboard
             </Button>
 
             <Button onClick={onToggleTheme} className="p-2">
@@ -153,13 +152,6 @@ export function Navbar({
               <Button
                 data-onboarding="clicker-nav"
                 className="w-full text-sm"
-                onClick={() => onPageChange('leaderboard')}
-              >
-                Leaderboard
-              </Button>
-              <Button
-                data-onboarding="clicker-nav"
-                className="w-full text-sm"
                 onClick={() => onPageChange('clicker')}
               >
                 Clicker
@@ -170,6 +162,12 @@ export function Navbar({
                 onClick={() => onPageChange('map')}
               >
                 World
+              </Button>
+              <Button
+                className="w-full text-sm"
+                onClick={() => onPageChange('leaderboard')}
+              >
+                Leaderboard
               </Button>
             </div>
 

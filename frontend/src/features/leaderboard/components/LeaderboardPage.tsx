@@ -101,44 +101,20 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
 
   return (
     <div className="flex flex-col items-center container mx-auto p-4">
-      {/* Header and controls */}
-      <div className="flex flex-col items-center mb-6 gap-4">
-        <h1
-          className="text-xl sm:text-2xl font-bold pixel-font text-center"
-          style={{color: 'var(--foreground)'}}
-        >
-          Global Leaderboard
-        </h1>
+      {/* Header */}
+      <h1
+        className="text-xl sm:text-2xl font-bold pixel-font text-center mb-6"
+        style={{color: 'var(--foreground)'}}
+      >
+        Global Leaderboard
+      </h1>
 
-        {user && checked !== null && (
-          <div className="flex flex-row items-center gap-4 ">
-            <Checkbox
-              id="show-in-leaderboard"
-              checked={checked}
-              onCheckedChange={handleCheckedChange}
-              disabled={isUpdating}
-            />
-            <label
-              htmlFor="show-in-leaderboard"
-              className="text-xs sm:text-sm"
-              style={{color: 'var(--foreground)'}}
-            >
-              {isUpdating ? 'Updating...' : 'Show me in leaderboard'}
-            </label>
-
-            <Button
-              variant="default"
-              onClick={handleRefresh}
-              disabled={!canRefresh}
-              className="text-xs sm:text-sm"
-            >
-              {canRefresh ? 'Refresh' : `Wait ${refreshTimer}s`}
-            </Button>
-          </div>
-        )}
-        <div>
-          {/* League toggle buttons */}
-          <div className="flex gap-2 sm:gap-4">
+      {/* Leaderboard Table */}
+      <div className="w-full">
+        {/* Controls row - aligned with table edges */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 w-full">
+          {/* Left side: League toggle buttons */}
+          <div className="flex gap-2">
             <Button
               className={`text-xs sm:text-sm ${
                 activeLeague === 'candy'
@@ -162,11 +138,37 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
               Pokemon League
             </Button>
           </div>
-        </div>
-      </div>
 
-      {/* Leaderboard Table */}
-      <div className="w-full">
+          {/* Right side: Checkbox + Refresh button */}
+          {user && checked !== null && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="show-in-leaderboard"
+                  checked={checked}
+                  onCheckedChange={handleCheckedChange}
+                  disabled={isUpdating}
+                />
+                <label
+                  htmlFor="show-in-leaderboard"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                  style={{color: 'var(--foreground)'}}
+                >
+                  Show me
+                </label>
+              </div>
+
+              <Button
+                variant="default"
+                onClick={handleRefresh}
+                disabled={!canRefresh}
+                className="text-xs sm:text-sm"
+              >
+                {canRefresh ? 'Refresh' : `Wait ${refreshTimer}s`}
+              </Button>
+            </div>
+          )}
+        </div>
         <LeaderboardTable
           entries={
             activeLeague === 'candy'

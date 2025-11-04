@@ -1,4 +1,5 @@
 import {useAuth} from '@features/auth/hooks/useAuth';
+import {formatNumber} from '@/lib/formatNumber';
 
 interface LeaderboardEntry {
   position: number;
@@ -25,30 +26,33 @@ export function LeaderboardTable({
 
   return (
     <div
-      className={`rounded-lg shadow ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+      className={`rounded-lg shadow overflow-x-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
     >
-      <table className="w-full">
+      <table className="w-full min-w-full table-fixed">
         <thead>
           <tr
             className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
           >
             <th
-              className="p-2 sm:p-3 text-left text-xs sm:text-sm"
+              className="px-1 py-2 sm:p-3 text-left text-xs sm:text-sm w-12 sm:w-20"
               style={{color: 'var(--foreground)'}}
             >
               Rank
             </th>
             <th
-              className="p-2 sm:p-3 text-left text-xs sm:text-sm"
+              className="px-1 py-2 sm:p-3 text-left text-xs sm:text-sm"
               style={{color: 'var(--foreground)'}}
             >
               Player
             </th>
             <th
-              className="p-2 sm:p-3 text-right text-xs sm:text-sm"
+              className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-20 sm:w-32"
               style={{color: 'var(--foreground)'}}
             >
-              {scoreLabel}
+              <span className="hidden sm:inline">{scoreLabel}</span>
+              <span className="sm:hidden">
+                {scoreLabel === 'Rare Candy' ? 'Candy' : 'Pokemon'}
+              </span>
             </th>
           </tr>
         </thead>
@@ -65,13 +69,13 @@ export function LeaderboardTable({
               }`}
             >
               <td
-                className="p-2 sm:p-3 text-xs sm:text-sm"
+                className="px-1 py-2 sm:p-3 text-xs sm:text-sm w-12 sm:w-20"
                 style={{color: 'var(--foreground)'}}
               >
                 #{entry.position}
               </td>
               <td
-                className="p-2 sm:p-3 text-xs sm:text-sm"
+                className="px-1 py-2 sm:p-3 text-xs sm:text-sm break-all overflow-hidden"
                 style={{color: 'var(--foreground)'}}
               >
                 <span className={user?._id === entry.userId ? 'font-bold' : ''}>
@@ -79,10 +83,10 @@ export function LeaderboardTable({
                 </span>
               </td>
               <td
-                className="p-2 sm:p-3 text-right text-xs sm:text-sm"
+                className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-20 sm:w-32 whitespace-nowrap"
                 style={{color: 'var(--foreground)'}}
               >
-                {entry.score.toLocaleString()}
+                {formatNumber(entry.score)}
               </td>
             </tr>
           ))}

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useOnboarding} from '@/hooks';
 import {useMutation} from '@apollo/client';
@@ -28,7 +28,7 @@ export function ProfileDashboard({
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [showSelectedSelector, setShowSelectedSelector] = useState(false);
-  const [checked, setChecked] = useState<boolean>(false);
+  const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
@@ -64,6 +64,12 @@ export function ProfileDashboard({
   const {data: selectedPokemonData} = usePokemonBasic(
     user?.selected_pokemon_id
   );
+
+  useEffect(() => {
+    if (user && checked === null) {
+      setChecked(user.showInLeaderboard !== false);
+    }
+  }, [user, checked]);
 
   if (!user) {
     return null;
@@ -101,7 +107,7 @@ export function ProfileDashboard({
       });
     } catch (error) {
       console.error('Failed to update leaderboard preference:', error);
-      setChecked(user?.showInLeaderboard ?? false);
+      setChecked(user?.showInLeaderboard !== false);
     } finally {
       setIsUpdating(false);
     }
@@ -146,29 +152,31 @@ export function ProfileDashboard({
           </div>
         </div>
 
-        <div
-          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
-          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg sm:text-xl font-bold">
-              LEADERBOARD VISIBILITY
-            </h2>
-            <Checkbox
-              id="profile-show-in-leaderboard"
-              checked={checked}
-              onCheckedChange={handleCheckedChange}
-              disabled={isUpdating}
-            />
-            <label
-              htmlFor="profile-show-in-leaderboard"
-              className="text-sm"
-              style={{color: 'var(--foreground)'}}
-            >
-              Show me in leaderboard
-            </label>
+        {checked !== null && (
+          <div
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg sm:text-xl font-bold">
+                LEADERBOARD VISIBILITY
+              </h2>
+              <Checkbox
+                id="profile-show-in-leaderboard"
+                checked={checked}
+                onCheckedChange={handleCheckedChange}
+                disabled={isUpdating}
+              />
+              <label
+                htmlFor="profile-show-in-leaderboard"
+                className="text-sm"
+                style={{color: 'var(--foreground)'}}
+              >
+                Show me in leaderboard
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Game Statistics Section */}
         <div
