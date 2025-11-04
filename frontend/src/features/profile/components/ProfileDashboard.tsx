@@ -147,32 +147,6 @@ export function ProfileDashboard({
           </div>
         </div>
 
-        {checked !== null && (
-          <div
-            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
-            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-          >
-            <h2 className="text-lg sm:text-xl font-bold mb-3">
-              RANKS VISIBILITY
-            </h2>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="profile-show-in-ranks"
-                checked={checked}
-                onCheckedChange={handleCheckedChange}
-                disabled={isUpdating}
-              />
-              <label
-                htmlFor="profile-show-in-ranks"
-                className="text-sm"
-                style={{color: 'var(--foreground)'}}
-              >
-                Show me in ranks
-              </label>
-            </div>
-          </div>
-        )}
-
         {/* Game Statistics Section */}
         <div
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
@@ -206,6 +180,32 @@ export function ProfileDashboard({
             </div>
           </div>
         </div>
+
+        {checked !== null && (
+          <div
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
+            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          >
+            <h2 className="text-lg sm:text-xl font-bold mb-3">
+              RANKS VISIBILITY
+            </h2>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="profile-show-in-ranks"
+                checked={checked}
+                onCheckedChange={handleCheckedChange}
+                disabled={isUpdating}
+              />
+              <label
+                htmlFor="profile-show-in-ranks"
+                className="text-sm"
+                style={{color: 'var(--foreground)'}}
+              >
+                Show me in ranks
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* Pokemon Selection Sections */}
         <div data-onboarding="pokemon-selection">
