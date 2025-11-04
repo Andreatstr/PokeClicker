@@ -161,7 +161,7 @@ export interface AuthResponse {
     owned_pokemon_ids: number[];
     favorite_pokemon_id: number | null;
     selected_pokemon_id: number | null;
-    showInLeaderboard?: boolean;
+    showInRanks?: boolean;
   };
 }
 
@@ -200,7 +200,7 @@ export interface User {
   owned_pokemon_ids: number[];
   favorite_pokemon_id: number | null;
   selected_pokemon_id: number | null;
-  showInLeaderboard?: boolean;
+  showInRanks?: boolean;
 }
 
 export interface UpdateRareCandyData {

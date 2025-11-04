@@ -73,7 +73,7 @@ const authMutations = {
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
       stats: DEFAULT_USER_STATS.stats,
       owned_pokemon_ids: [1], // DEFAULT_USER_STATS.owned_pokemon_ids ?? [],
-      showInLeaderboard: true,
+      showInRanks: true,
     };
 
     try {
@@ -566,7 +566,7 @@ export const resolvers = {
       };
     },
 
-    getLeaderboard: async (
+    getRanks: async (
       _: unknown,
       {input}: {input?: {limit?: number; offset?: number}}
     ) => {
@@ -577,7 +577,7 @@ export const resolvers = {
         const users = await db
           .collection('users')
           .find({
-            showInLeaderboard: {$ne: false},
+            showInRanks: {$ne: false},
           })
           .toArray();
 
@@ -589,7 +589,7 @@ export const resolvers = {
             username: user.username,
             score: user.rare_candy || 0,
             userId: user._id.toString(),
-            showInLeaderboard: user.showInLeaderboard !== false,
+            showInRanks: user.showInRanks !== false,
           }));
 
         const pokemonLeague = users
@@ -604,7 +604,7 @@ export const resolvers = {
             username: user.username,
             score: user.owned_pokemon_ids?.length || 0,
             userId: user._id.toString(),
-            showInLeaderboard: user.showInLeaderboard !== false,
+            showInRanks: user.showInRanks !== false,
           }));
 
         const userCandyRank = null;
@@ -618,8 +618,8 @@ export const resolvers = {
           userPokemonRank,
         };
       } catch (error) {
-        console.error('Leaderboard error:', error);
-        throw new Error('Failed to load leaderboard data');
+        console.error('Ranks error:', error);
+        throw new Error('Failed to load ranks data');
       }
     },
   },
@@ -1077,9 +1077,9 @@ export const resolvers = {
         user: sanitizeUserForClient(updatedUserDoc),
       };
     },
-    updateLeaderboardPreference: async (
+    updateRanksPreference: async (
       _: unknown,
-      {showInLeaderboard}: {showInLeaderboard: boolean},
+      {showInRanks}: {showInRanks: boolean},
       context: AuthContext
     ) => {
       if (!context.user) {
@@ -1092,7 +1092,7 @@ export const resolvers = {
           .collection('users')
           .findOneAndUpdate(
             {_id: new ObjectId(context.user.id)},
-            {$set: {showInLeaderboard}},
+            {$set: {showInRanks}},
             {returnDocument: 'after'}
           );
 
@@ -1109,11 +1109,11 @@ export const resolvers = {
           owned_pokemon_ids: result.owned_pokemon_ids,
           favorite_pokemon_id: result.favorite_pokemon_id,
           selected_pokemon_id: result.selected_pokemon_id,
-          showInLeaderboard: result.showInLeaderboard,
+          showInRanks: result.showInRanks,
         };
       } catch (error) {
-        console.error('Failed to update leaderboard preference:', error);
-        throw new Error('Failed to update leaderboard preference');
+        console.error('Failed to update ranks preference:', error);
+        throw new Error('Failed to update ranks preference');
       }
     },
   },

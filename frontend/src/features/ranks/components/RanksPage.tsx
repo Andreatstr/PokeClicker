@@ -1,17 +1,17 @@
 import {useEffect, useState} from 'react';
 import {useQuery, useMutation} from '@apollo/client';
-import {GET_LEADERBOARD, UPDATE_LEADERBOARD_PREFERENCE} from '@/lib/graphql';
-import {LeaderboardTable} from './LeaderboardTable';
+import {GET_RANKS, UPDATE_RANKS_PREFERENCE} from '@/lib/graphql';
+import {RanksTable} from './RanksTable';
 import {LoadingSpinner} from '@/components';
 import {Checkbox, Button} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 import type {CheckedState} from '@radix-ui/react-checkbox';
 
-interface LeaderboardPageProps {
+interface RanksPageProps {
   isDarkMode: boolean;
 }
 
-export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
+export function RanksPage({isDarkMode}: RanksPageProps) {
   const [activeLeague, setActiveLeague] = useState<'candy' | 'pokemon'>(
     'candy'
   );
@@ -22,7 +22,7 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
   const {user, updateUser} = useAuth();
   const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const {data, loading, error, refetch} = useQuery(GET_LEADERBOARD, {
+  const {data, loading, error, refetch} = useQuery(GET_RANKS, {
     variables: {input: {limit}},
     pollInterval: 60000, // Update every minute
   });
@@ -35,30 +35,30 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
     }
   };
 
-  const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
+  const [updatePreference] = useMutation(UPDATE_RANKS_PREFERENCE, {
     onCompleted: (data) => {
-      if (data?.updateLeaderboardPreference) {
+      if (data?.updateRanksPreference) {
         // Update the AuthContext user state and localStorage
-        updateUser(data.updateLeaderboardPreference);
-        // Refetch leaderboard to reflect changes
+        updateUser(data.updateRanksPreference);
+        // Refetch ranks to reflect changes
         refetch();
       }
     },
     onError(error) {
-      console.error('Failed to update leaderboard preference:', error);
-      setChecked(user?.showInLeaderboard !== false);
+      console.error('Failed to update ranks preference:', error);
+      setChecked(user?.showInRanks !== false);
     },
   });
 
   useEffect(() => {
     if (user) {
       // Always sync checkbox with user preference
-      const userPreference = user.showInLeaderboard !== false;
+      const userPreference = user.showInRanks !== false;
       if (checked !== userPreference) {
         setChecked(userPreference);
       }
     }
-  }, [user?.showInLeaderboard]);
+  }, [user?.showInRanks]);
 
   useEffect(() => {
     if (!canRefresh && refreshTimer > 0) {
@@ -81,12 +81,12 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
 
     try {
       await updatePreference({
-        variables: {showInLeaderboard: newValue},
+        variables: {showInRanks: newValue},
       });
       // refetch();
     } catch (error) {
-      console.error('Failed to update leaderboard preference:', error);
-      setChecked(user?.showInLeaderboard !== false);
+      console.error('Failed to update ranks preference:', error);
+      setChecked(user?.showInRanks !== false);
     } finally {
       setIsUpdating(false);
     }
@@ -94,16 +94,13 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
 
   if (loading)
     return (
-      <LoadingSpinner
-        message="Loading leaderboard..."
-        isDarkMode={isDarkMode}
-      />
+      <LoadingSpinner message="Loading ranks..." isDarkMode={isDarkMode} />
     );
 
   if (error)
     return (
       <div className="text-center text-red-500">
-        Error loading leaderboard: {error.message}
+        Error loading ranks: {error.message}
       </div>
     );
 
@@ -114,10 +111,10 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
         className="text-xl sm:text-2xl font-bold pixel-font text-center mb-6"
         style={{color: 'var(--foreground)'}}
       >
-        Global Leaderboard
+        Global Ranks
       </h1>
 
-      {/* Leaderboard Table */}
+      {/* Ranks Table */}
       <div className="w-full">
         {/* Controls row - aligned with table edges */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-2 mb-4 w-full">
@@ -152,13 +149,13 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
             <div className="flex justify-center md:justify-end items-center gap-2 md:gap-3">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="show-in-leaderboard"
+                  id="show-in-ranks"
                   checked={checked}
                   onCheckedChange={handleCheckedChange}
                   disabled={isUpdating}
                 />
                 <label
-                  htmlFor="show-in-leaderboard"
+                  htmlFor="show-in-ranks"
                   className="text-xs sm:text-sm whitespace-nowrap"
                   style={{color: 'var(--foreground)'}}
                 >
@@ -177,22 +174,22 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
             </div>
           )}
         </div>
-        <LeaderboardTable
+        <RanksTable
           entries={
             activeLeague === 'candy'
-              ? data.getLeaderboard.candyLeague
-              : data.getLeaderboard.pokemonLeague
+              ? data.getRanks.candyLeague
+              : data.getRanks.pokemonLeague
           }
           userRank={
             activeLeague === 'candy'
-              ? data.getLeaderboard.userCandyRank
-              : data.getLeaderboard.userPokemonRank
+              ? data.getRanks.userCandyRank
+              : data.getRanks.userPokemonRank
           }
           scoreLabel={activeLeague === 'candy' ? 'Rare Candy' : 'Pokemon Count'}
           isDarkMode={isDarkMode}
         />
 
-        {limit < data.getLeaderboard.totalPlayers && (
+        {limit < data.getRanks.totalPlayers && (
           <div className="mt-4 text-center">
             <Button
               variant="default"

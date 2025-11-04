@@ -108,11 +108,11 @@ class GameAssetsCache {
     });
   }
 
-  async preloadLeaderboardAssets(): Promise<void> {
+  async preloadRanksAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
-    const leaderboardAssets = [urls.rareCandyIcon, urls.candyImage];
+    const ranksAssets = [urls.rareCandyIcon, urls.candyImage];
 
-    await imageCache.preloadImages(leaderboardAssets);
+    await imageCache.preloadImages(ranksAssets);
 
     ['rareCandyIcon', 'candyImage'].forEach((asset) => {
       this.preloadedAssets.add(asset);

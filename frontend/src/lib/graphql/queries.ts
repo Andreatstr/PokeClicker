@@ -177,7 +177,7 @@ export const ME_QUERY = gql`
       owned_pokemon_ids
       favorite_pokemon_id
       selected_pokemon_id
-      showInLeaderboard
+      showInRanks
     }
   }
 `;
@@ -197,22 +197,22 @@ export const HEALTH_QUERY = gql`
 // ============================================================================
 // LEADERBOARD
 // ============================================================================
-export const GET_LEADERBOARD = gql`
-  query GetLeaderboard($input: LeaderboardInput!) {
-    getLeaderboard(input: $input) {
+export const GET_RANKS = gql`
+  query GetRanks($input: RanksInput!) {
+    getRanks(input: $input) {
       candyLeague {
         position
         username
         score
         userId
-        showInLeaderboard
+        showInRanks
       }
       pokemonLeague {
         position
         username
         score
         userId
-        showInLeaderboard
+        showInRanks
       }
       totalPlayers
       userCandyRank

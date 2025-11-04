@@ -150,9 +150,9 @@ export const SET_SELECTED_POKEMON_MUTATION = gql`
   }
 `;
 
-export const UPDATE_LEADERBOARD_PREFERENCE = gql`
-  mutation UpdateLeaderboardPreference($showInLeaderboard: Boolean!) {
-    updateLeaderboardPreference(showInLeaderboard: $showInLeaderboard) {
+export const UPDATE_RANKS_PREFERENCE = gql`
+  mutation UpdateRanksPreference($showInRanks: Boolean!) {
+    updateRanksPreference(showInRanks: $showInRanks) {
       ...UserFields
     }
   }

@@ -9,13 +9,13 @@ import {usePokemonBasic} from '../hooks/usePokemonBasic';
 import {useProfileHandlers} from '../hooks/useProfileHandlers';
 import {formatTrainerSince} from '../utils/formatDate';
 import {Checkbox} from '@ui/pixelact';
-import {UPDATE_LEADERBOARD_PREFERENCE} from '@/lib/graphql';
+import {UPDATE_RANKS_PREFERENCE} from '@/lib/graphql';
 import type {CheckedState} from '@radix-ui/react-checkbox';
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
   onNavigate?: (
-    page: 'clicker' | 'leaderboard' | 'pokedex' | 'login' | 'profile'
+    page: 'clicker' | 'ranks' | 'pokedex' | 'login' | 'profile'
   ) => void;
 }
 
@@ -31,15 +31,15 @@ export function ProfileDashboard({
   const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
+  const [updatePreference] = useMutation(UPDATE_RANKS_PREFERENCE, {
     onCompleted: (data) => {
-      if (data?.updateLeaderboardPreference) {
+      if (data?.updateRanksPreference) {
         // Update the AuthContext user state and localStorage
-        updateUser(data.updateLeaderboardPreference);
+        updateUser(data.updateRanksPreference);
       }
     },
     onError(error) {
-      console.error('Failed to update leaderboard preference:', error);
+      console.error('Failed to update ranks preference:', error);
     },
   });
 
@@ -61,10 +61,10 @@ export function ProfileDashboard({
   useEffect(() => {
     if (user) {
       // Always sync with user preference when it changes
-      const userPreference = user.showInLeaderboard !== false;
+      const userPreference = user.showInRanks !== false;
       setChecked(userPreference);
     }
-  }, [user?.showInLeaderboard]);
+  }, [user?.showInRanks]);
 
   if (!user) {
     return null;
@@ -98,11 +98,11 @@ export function ProfileDashboard({
 
     try {
       await updatePreference({
-        variables: {showInLeaderboard: newValue},
+        variables: {showInRanks: newValue},
       });
     } catch (error) {
-      console.error('Failed to update leaderboard preference:', error);
-      setChecked(user?.showInLeaderboard !== false);
+      console.error('Failed to update ranks preference:', error);
+      setChecked(user?.showInRanks !== false);
     } finally {
       setIsUpdating(false);
     }
@@ -149,25 +149,25 @@ export function ProfileDashboard({
 
         {checked !== null && (
           <div
-            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
           >
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg sm:text-xl font-bold">
-                LEADERBOARD VISIBILITY
-              </h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-3">
+              RANKS VISIBILITY
+            </h2>
+            <div className="flex items-center gap-2">
               <Checkbox
-                id="profile-show-in-leaderboard"
+                id="profile-show-in-ranks"
                 checked={checked}
                 onCheckedChange={handleCheckedChange}
                 disabled={isUpdating}
               />
               <label
-                htmlFor="profile-show-in-leaderboard"
+                htmlFor="profile-show-in-ranks"
                 className="text-sm"
                 style={{color: 'var(--foreground)'}}
               >
-                Show me in leaderboard
+                Show me in ranks
               </label>
             </div>
           </div>

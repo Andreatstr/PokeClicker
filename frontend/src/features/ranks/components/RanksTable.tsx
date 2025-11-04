@@ -1,27 +1,27 @@
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {formatNumber} from '@/lib/formatNumber';
 
-interface LeaderboardEntry {
+interface RanksEntry {
   position: number;
   username: string;
   score: number;
   userId: string;
-  showInLeaderboard: boolean;
+  showInRanks: boolean;
 }
 
-interface LeaderboardTableProps {
-  entries: LeaderboardEntry[];
+interface RanksTableProps {
+  entries: RanksEntry[];
   userRank: number | null;
   scoreLabel: string;
   isDarkMode: boolean;
 }
 
-export function LeaderboardTable({
+export function RanksTable({
   entries,
   userRank,
   scoreLabel,
   isDarkMode,
-}: LeaderboardTableProps) {
+}: RanksTableProps) {
   const {user} = useAuth();
 
   return (

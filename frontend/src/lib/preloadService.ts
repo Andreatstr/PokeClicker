@@ -8,7 +8,7 @@ interface PreloadOptions {
   preloadCommonTypes?: boolean;
   preloadGameAssets?: boolean;
   preloadMapAssets?: boolean;
-  preloadLeaderboardAssets?: boolean;
+  preloadRanksAssets?: boolean;
   pokemonRange?: {start: number; end: number};
   specificTypes?: string[];
 }
@@ -77,10 +77,10 @@ class PreloadService {
         });
       }
 
-      // Preload leaderboard assets
-      if (options.preloadLeaderboardAssets) {
+      // Preload ranks assets
+      if (options.preloadRanksAssets) {
         tasks.push(async () => {
-          await gameAssetsCache.preloadLeaderboardAssets();
+          await gameAssetsCache.preloadRanksAssets();
           this.updateProgress(90);
         });
       }
@@ -125,7 +125,7 @@ class PreloadService {
       preloadCommonTypes: true,
       preloadGameAssets: false,
       preloadMapAssets: false,
-      preloadLeaderboardAssets: false,
+      preloadRanksAssets: false,
     });
   }
 
@@ -135,7 +135,7 @@ class PreloadService {
       preloadCommonTypes: false,
       preloadGameAssets: true,
       preloadMapAssets: false,
-      preloadLeaderboardAssets: false,
+      preloadRanksAssets: false,
     });
   }
 
@@ -145,17 +145,17 @@ class PreloadService {
       preloadCommonTypes: false,
       preloadGameAssets: false,
       preloadMapAssets: true,
-      preloadLeaderboardAssets: false,
+      preloadRanksAssets: false,
     });
   }
 
-  async preloadForLeaderboard(): Promise<void> {
+  async preloadForRanks(): Promise<void> {
     await this.preloadAll({
       preloadCommonPokemon: false,
       preloadCommonTypes: false,
       preloadGameAssets: false,
       preloadMapAssets: false,
-      preloadLeaderboardAssets: true,
+      preloadRanksAssets: true,
     });
   }
 
