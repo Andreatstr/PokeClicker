@@ -291,12 +291,6 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     movement,
   ]);
 
-  const handleBButtonClick = useCallback(() => {
-    if (inBattle && battleAttackFunctionRef.current) {
-      battleAttackFunctionRef.current();
-    }
-  }, [inBattle]);
-
   useEffect(() => {
     const pressedKeys = new Set<string>();
 
@@ -312,25 +306,26 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
 
       const key = e.key.toLowerCase();
 
-      if (key === 'a') {
-        if (inBattle || pokemon.nearbyPokemon) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          if (!pressedKeys.has(key)) {
-            pressedKeys.add(key);
-            handleAButtonClick();
-          }
+      // Start battle with B button
+      if (!inBattle && key === 'b') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (pokemon.nearbyPokemon && !pressedKeys.has(key)) {
+          pressedKeys.add(key);
+          startBattle(
+            pokemon.nearbyPokemon.pokemon,
+            pokemon.nearbyPokemon.spawnId
+          );
         }
-      } else if (key === 'b') {
-        if (inBattle) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          if (!pressedKeys.has(key)) {
-            pressedKeys.add(key);
-            handleBButtonClick();
-          }
+      }
+
+      // Attack with A and B buttons
+      if (inBattle && (key === 'a' || key === 'b')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pressedKeys.has(key)) {
+          pressedKeys.add(key);
+          handleAButtonClick();
         }
       }
     };
@@ -351,7 +346,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       window.removeEventListener('keydown', handleKeyDown, {capture: true});
       window.removeEventListener('keyup', handleKeyUp, {capture: true});
     };
-  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, handleBButtonClick]);
+  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, startBattle]);
 
   return (
     <GameBoy
@@ -359,7 +354,7 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       onDirectionStart={movement.handleJoystickDirectionStart}
       onDirectionStop={movement.handleJoystickDirectionStop}
       onAButtonClick={handleAButtonClick}
-      onBButtonClick={handleBButtonClick}
+      onBButtonClick={handleAButtonClick}
       isAuthenticated={isAuthenticated}
       nearbyPokemon={pokemon.nearbyPokemon}
       viewport={viewport}
