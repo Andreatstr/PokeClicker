@@ -46,12 +46,12 @@ export function LeaderboardTable({
               Player
             </th>
             <th
-              className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-20 sm:w-32"
+              className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-16 sm:w-32"
               style={{color: 'var(--foreground)'}}
             >
               <span className="hidden sm:inline">{scoreLabel}</span>
-              <span className="sm:hidden">
-                {scoreLabel === 'Rare Candy' ? 'Candy' : 'Pokemon'}
+              <span className="sm:hidden text-[10px]">
+                {scoreLabel === 'Rare Candy' ? 'Candy' : 'Pkmn'}
               </span>
             </th>
           </tr>
@@ -83,7 +83,7 @@ export function LeaderboardTable({
                 </span>
               </td>
               <td
-                className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-20 sm:w-32 whitespace-nowrap"
+                className="px-1 py-2 sm:p-3 text-right text-xs sm:text-sm w-16 sm:w-32 whitespace-nowrap"
                 style={{color: 'var(--foreground)'}}
               >
                 {formatNumber(entry.score)}

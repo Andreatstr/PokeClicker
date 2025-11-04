@@ -112,11 +112,11 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
       {/* Leaderboard Table */}
       <div className="w-full">
         {/* Controls row - aligned with table edges */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 w-full">
-          {/* Left side: League toggle buttons */}
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-2 mb-4 w-full">
+          {/* League toggle buttons */}
+          <div className="flex justify-center md:justify-start gap-2">
             <Button
-              className={`text-xs sm:text-sm ${
+              className={`flex-1 md:flex-none text-xs sm:text-sm ${
                 activeLeague === 'candy'
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -127,7 +127,7 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
               Candy League
             </Button>
             <Button
-              className={`text-xs sm:text-sm ${
+              className={`flex-1 md:flex-none text-xs sm:text-sm ${
                 activeLeague === 'pokemon'
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -139,9 +139,9 @@ export function LeaderboardPage({isDarkMode}: LeaderboardPageProps) {
             </Button>
           </div>
 
-          {/* Right side: Checkbox + Refresh button */}
+          {/* Checkbox + Refresh button */}
           {user && checked !== null && (
-            <div className="flex items-center gap-3">
+            <div className="flex justify-center md:justify-end items-center gap-2 md:gap-3">
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="show-in-leaderboard"
