@@ -32,13 +32,22 @@ export function LeaderboardTable({
           <tr
             className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
           >
-            <th className="p-3 text-left" style={{color: 'var(--foreground)'}}>
+            <th
+              className="p-2 sm:p-3 text-left text-xs sm:text-sm"
+              style={{color: 'var(--foreground)'}}
+            >
               Rank
             </th>
-            <th className="p-3 text-left" style={{color: 'var(--foreground)'}}>
+            <th
+              className="p-2 sm:p-3 text-left text-xs sm:text-sm"
+              style={{color: 'var(--foreground)'}}
+            >
               Player
             </th>
-            <th className="p-3 text-right" style={{color: 'var(--foreground)'}}>
+            <th
+              className="p-2 sm:p-3 text-right text-xs sm:text-sm"
+              style={{color: 'var(--foreground)'}}
+            >
               {scoreLabel}
             </th>
           </tr>
@@ -51,20 +60,26 @@ export function LeaderboardTable({
                 user?._id === entry.userId
                   ? isDarkMode
                     ? 'bg-blue-900'
-                    : 'bg-blue-50'
+                    : 'bg-blue-300'
                   : ''
               }`}
             >
-              <td className="p-3" style={{color: 'var(--foreground)'}}>
+              <td
+                className="p-2 sm:p-3 text-xs sm:text-sm"
+                style={{color: 'var(--foreground)'}}
+              >
                 #{entry.position}
               </td>
-              <td className="p-3" style={{color: 'var(--foreground)'}}>
+              <td
+                className="p-2 sm:p-3 text-xs sm:text-sm"
+                style={{color: 'var(--foreground)'}}
+              >
                 <span className={user?._id === entry.userId ? 'font-bold' : ''}>
                   {entry.username}
                 </span>
               </td>
               <td
-                className="p-3 text-right"
+                className="p-2 sm:p-3 text-right text-xs sm:text-sm"
                 style={{color: 'var(--foreground)'}}
               >
                 {entry.score.toLocaleString()}
@@ -76,7 +91,7 @@ export function LeaderboardTable({
 
       {userRank && (
         <div
-          className={`p-3 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+          className={`p-2 sm:p-3 border-t text-xs sm:text-sm ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
         >
           <span className="pixel-font" style={{color: 'var(--foreground)'}}>
             Your Rank: #{userRank}
