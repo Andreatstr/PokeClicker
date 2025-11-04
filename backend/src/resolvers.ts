@@ -577,107 +577,213 @@ export const resolvers = {
         const db = getDatabase();
         const usersCollection = db.collection('users');
 
-        // Use MongoDB aggregation for efficient server-side sorting and pagination
-        const candyLeague = await usersCollection
+        // Use $facet to run all queries in parallel for optimal performance
+        // This reduces 6 separate queries down to 1 aggregation pipeline
+        const result = await usersCollection
           .aggregate([
+            // First, match only users who are visible in ranks
             {$match: {showInRanks: {$ne: false}}},
-            {$sort: {rare_candy: -1}},
-            {$skip: offset},
-            {$limit: limit},
+
+            // Run multiple pipelines in parallel using $facet
             {
-              $project: {
-                username: 1,
-                score: {$ifNull: ['$rare_candy', 0]},
-                userId: {$toString: '$_id'},
-                showInRanks: {$ifNull: ['$showInRanks', true]},
+              $facet: {
+                // Pipeline 1: Candy League with proper ranking
+                candyLeague: [
+                  // Add fields for sorting and ranking
+                  {
+                    $addFields: {
+                      candyScore: {$ifNull: ['$rare_candy', 0]},
+                    },
+                  },
+                  // Sort by candy (desc), then by _id for consistency with ties
+                  {$sort: {candyScore: -1, _id: 1}},
+                  // Calculate rank using $setWindowFields (handles ties properly)
+                  {
+                    $setWindowFields: {
+                      sortBy: {candyScore: -1, _id: 1},
+                      output: {
+                        rank: {$rank: {}}, // Standard ranking (1, 2, 2, 4)
+                      },
+                    },
+                  },
+                  // Apply pagination after ranking
+                  {$skip: offset},
+                  {$limit: limit},
+                  // Project final shape
+                  {
+                    $project: {
+                      position: '$rank',
+                      username: 1,
+                      score: '$candyScore',
+                      userId: {$toString: '$_id'},
+                      showInRanks: {$ifNull: ['$showInRanks', true]},
+                    },
+                  },
+                ],
+
+                // Pipeline 2: Pokemon League with proper ranking
+                pokemonLeague: [
+                  // Calculate pokemon count
+                  {
+                    $addFields: {
+                      pokemonCount: {
+                        $size: {$ifNull: ['$owned_pokemon_ids', []]},
+                      },
+                    },
+                  },
+                  // Sort by pokemon count (desc), then by _id for consistency
+                  {$sort: {pokemonCount: -1, _id: 1}},
+                  // Calculate rank using $setWindowFields (handles ties properly)
+                  {
+                    $setWindowFields: {
+                      sortBy: {pokemonCount: -1, _id: 1},
+                      output: {
+                        rank: {$rank: {}}, // Standard ranking (1, 2, 2, 4)
+                      },
+                    },
+                  },
+                  // Apply pagination after ranking
+                  {$skip: offset},
+                  {$limit: limit},
+                  // Project final shape
+                  {
+                    $project: {
+                      position: '$rank',
+                      username: 1,
+                      score: '$pokemonCount',
+                      userId: {$toString: '$_id'},
+                      showInRanks: {$ifNull: ['$showInRanks', true]},
+                    },
+                  },
+                ],
+
+                // Pipeline 3: Total player count
+                totalPlayers: [{$count: 'count'}],
+
+                // Pipeline 4: Current user ranks (if authenticated)
+                ...(context.user?.id
+                  ? {
+                      currentUserRanks: [
+                        // Match only the current user
+                        {$match: {_id: new ObjectId(context.user.id)}},
+                        // Add computed fields
+                        {
+                          $addFields: {
+                            candyScore: {$ifNull: ['$rare_candy', 0]},
+                            pokemonCount: {
+                              $size: {$ifNull: ['$owned_pokemon_ids', []]},
+                            },
+                          },
+                        },
+                        // Lookup to calculate ranks by counting users with better scores
+                        {
+                          $lookup: {
+                            from: 'users',
+                            let: {
+                              userCandy: '$candyScore',
+                              userPokemon: '$pokemonCount',
+                            },
+                            pipeline: [
+                              {$match: {showInRanks: {$ne: false}}},
+                              {
+                                $addFields: {
+                                  hasBetterCandy: {
+                                    $gt: [
+                                      {$ifNull: ['$rare_candy', 0]},
+                                      '$$userCandy',
+                                    ],
+                                  },
+                                  hasBetterPokemon: {
+                                    $gt: [
+                                      {
+                                        $size: {
+                                          $ifNull: ['$owned_pokemon_ids', []],
+                                        },
+                                      },
+                                      '$$userPokemon',
+                                    ],
+                                  },
+                                },
+                              },
+                              {
+                                $group: {
+                                  _id: null,
+                                  betterCandyCount: {
+                                    $sum: {$cond: ['$hasBetterCandy', 1, 0]},
+                                  },
+                                  betterPokemonCount: {
+                                    $sum: {$cond: ['$hasBetterPokemon', 1, 0]},
+                                  },
+                                },
+                              },
+                            ],
+                            as: 'rankData',
+                          },
+                        },
+                        {
+                          $project: {
+                            candyRank: {
+                              $add: [
+                                {
+                                  $ifNull: [
+                                    {
+                                      $arrayElemAt: [
+                                        '$rankData.betterCandyCount',
+                                        0,
+                                      ],
+                                    },
+                                    0,
+                                  ],
+                                },
+                                1,
+                              ],
+                            },
+                            pokemonRank: {
+                              $add: [
+                                {
+                                  $ifNull: [
+                                    {
+                                      $arrayElemAt: [
+                                        '$rankData.betterPokemonCount',
+                                        0,
+                                      ],
+                                    },
+                                    0,
+                                  ],
+                                },
+                                1,
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    }
+                  : {}),
               },
             },
           ])
           .toArray();
 
-        // Add position numbers
-        const candyLeagueWithPosition = candyLeague.map((user, index) => ({
-          position: offset + index + 1,
-          username: user.username,
-          score: user.score,
-          userId: user.userId,
-          showInRanks: user.showInRanks,
-        }));
+        // Extract results from facet
+        const facetResult = result[0];
 
-        const pokemonLeague = await usersCollection
-          .aggregate([
-            {$match: {showInRanks: {$ne: false}}},
-            {
-              $addFields: {
-                pokemonCount: {
-                  $size: {$ifNull: ['$owned_pokemon_ids', []]},
-                },
-              },
-            },
-            {$sort: {pokemonCount: -1}},
-            {$skip: offset},
-            {$limit: limit},
-            {
-              $project: {
-                username: 1,
-                score: '$pokemonCount',
-                userId: {$toString: '$_id'},
-                showInRanks: {$ifNull: ['$showInRanks', true]},
-              },
-            },
-          ])
-          .toArray();
+        const candyLeague = facetResult.candyLeague || [];
+        const pokemonLeague = facetResult.pokemonLeague || [];
+        const totalPlayers = facetResult.totalPlayers?.[0]?.count || 0;
 
-        // Add position numbers
-        const pokemonLeagueWithPosition = pokemonLeague.map((user, index) => ({
-          position: offset + index + 1,
-          username: user.username,
-          score: user.score,
-          userId: user.userId,
-          showInRanks: user.showInRanks,
-        }));
-
-        // Get total count of players who are visible in ranks
-        const totalPlayers = await usersCollection.countDocuments({
-          showInRanks: {$ne: false},
-        });
-
-        // Calculate user's rank if authenticated
+        // Extract user ranks if authenticated
         let userCandyRank = null;
         let userPokemonRank = null;
 
-        if (context.user?.id) {
-          const currentUser = await usersCollection.findOne({
-            _id: new ObjectId(context.user.id),
-          });
-
-          if (currentUser && currentUser.showInRanks !== false) {
-            // Calculate candy rank (count users with more candy)
-            const usersWithMoreCandy = await usersCollection.countDocuments({
-              showInRanks: {$ne: false},
-              rare_candy: {$gt: currentUser.rare_candy || 0},
-            });
-            userCandyRank = usersWithMoreCandy + 1;
-
-            // Calculate pokemon rank (count users with more pokemon)
-            const currentUserPokemonCount =
-              currentUser.owned_pokemon_ids?.length || 0;
-            const usersWithMorePokemon = await usersCollection.countDocuments({
-              showInRanks: {$ne: false},
-              $expr: {
-                $gt: [
-                  {$size: {$ifNull: ['$owned_pokemon_ids', []]}},
-                  currentUserPokemonCount,
-                ],
-              },
-            });
-            userPokemonRank = usersWithMorePokemon + 1;
-          }
+        if (context.user?.id && facetResult.currentUserRanks?.length > 0) {
+          const userRanks = facetResult.currentUserRanks[0];
+          userCandyRank = userRanks.candyRank || null;
+          userPokemonRank = userRanks.pokemonRank || null;
         }
 
         return {
-          candyLeague: candyLeagueWithPosition,
-          pokemonLeague: pokemonLeagueWithPosition,
+          candyLeague,
+          pokemonLeague,
           totalPlayers,
           userCandyRank,
           userPokemonRank,

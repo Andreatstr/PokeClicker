@@ -29,7 +29,7 @@ export async function initializeSchema(db: Db): Promise<void> {
     );
     console.log('Created index on owned_pokemon_ids');
 
-    // Create index on showInRanks for leaderboard queries
+    // Create index on showInRanks for ranks queries
     await usersCollection.createIndex(
       {showInRanks: 1},
       {name: 'show_in_ranks_index'}
