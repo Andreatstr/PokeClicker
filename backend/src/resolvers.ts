@@ -73,6 +73,7 @@ const authMutations = {
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
       stats: DEFAULT_USER_STATS.stats,
       owned_pokemon_ids: [1], // DEFAULT_USER_STATS.owned_pokemon_ids ?? [],
+      showInLeaderboard: true,
     };
 
     try {
@@ -566,7 +567,7 @@ export const resolvers = {
     },
 
     getLeaderboard: async (
-      _,
+      _: unknown,
       {input}: {input?: {limit?: number; offset?: number}}
     ) => {
       const {limit = 50, offset = 0} = input || {};
@@ -1075,6 +1076,45 @@ export const resolvers = {
         cost: newCost,
         user: sanitizeUserForClient(updatedUserDoc),
       };
+    },
+    updateLeaderboardPreference: async (
+      _: unknown,
+      {showInLeaderboard}: {showInLeaderboard: boolean},
+      context: AuthContext
+    ) => {
+      if (!context.user) {
+        throw new Error('Not authenticated');
+      }
+      const db = getDatabase();
+
+      try {
+        const result = await db
+          .collection('users')
+          .findOneAndUpdate(
+            {_id: new ObjectId(context.user.id)},
+            {$set: {showInLeaderboard}},
+            {returnDocument: 'after'}
+          );
+
+        if (!result) {
+          throw new Error('Failed to update user preferences');
+        }
+
+        return {
+          _id: result._id.toString(),
+          username: result.username,
+          rare_candy: result.rare_candy,
+          stats: result.stats,
+          created_at: result.created_at,
+          owned_pokemon_ids: result.owned_pokemon_ids,
+          favorite_pokemon_id: result.favorite_pokemon_id,
+          selected_pokemon_id: result.selected_pokemon_id,
+          showInLeaderboard: result.showInLeaderboard,
+        };
+      } catch (error) {
+        console.error('Failed to update leaderboard preference:', error);
+        throw new Error('Failed to update leaderboard preference');
+      }
     },
   },
 };

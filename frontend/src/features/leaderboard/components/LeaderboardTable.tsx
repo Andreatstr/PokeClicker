@@ -1,4 +1,4 @@
-import {useAuth} from '@features/auth';
+import {useAuth} from '@features/auth/hooks/useAuth';
 
 interface LeaderboardEntry {
   position: number;

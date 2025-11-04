@@ -177,6 +177,7 @@ export const ME_QUERY = gql`
       owned_pokemon_ids
       favorite_pokemon_id
       selected_pokemon_id
+      showInLeaderboard
     }
   }
 `;

@@ -149,3 +149,12 @@ export const SET_SELECTED_POKEMON_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_LEADERBOARD_PREFERENCE = gql`
+  mutation UpdateLeaderboardPreference($showInLeaderboard: Boolean!) {
+    updateLeaderboardPreference(showInLeaderboard: $showInLeaderboard) {
+      ...UserFields
+    }
+  }
+  ${USER_FRAGMENT}
+`;

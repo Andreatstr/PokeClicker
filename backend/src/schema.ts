@@ -40,6 +40,7 @@ export const typeDefs = `#graphql
     owned_pokemon_ids: [Int!]!
     favorite_pokemon_id: Int
     selected_pokemon_id: Int
+    showInLeaderboard: Boolean
   }
 
 	type UserStats {

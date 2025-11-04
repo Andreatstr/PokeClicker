@@ -1,16 +1,22 @@
 import {useState} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useOnboarding} from '@/hooks';
+import {useMutation} from '@apollo/client';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
 import {PokemonDisplayButton} from './PokemonDisplayButton';
 import {usePokemonBasic} from '../hooks/usePokemonBasic';
 import {useProfileHandlers} from '../hooks/useProfileHandlers';
 import {formatTrainerSince} from '../utils/formatDate';
+import {Checkbox} from '@ui/pixelact';
+import {UPDATE_LEADERBOARD_PREFERENCE} from '@/lib/graphql';
+import type {CheckedState} from '@radix-ui/react-checkbox';
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
-  onNavigate?: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void;
+  onNavigate?: (
+    page: 'clicker' | 'leaderboard' | 'pokedex' | 'login' | 'profile'
+  ) => void;
 }
 
 export function ProfileDashboard({
@@ -22,6 +28,27 @@ export function ProfileDashboard({
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [showSelectedSelector, setShowSelectedSelector] = useState(false);
+  const [checked, setChecked] = useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [updatePreference] = useMutation(UPDATE_LEADERBOARD_PREFERENCE, {
+    update(cache, {data}) {
+      if (data?.updateLeaderboardPreference) {
+        const updatedUser = data.updateLeaderboardPreference;
+        cache.modify({
+          id: cache.identify({__typename: 'User', id: updatedUser.id}),
+          fields: {
+            showInLeaderboard() {
+              return updatedUser.showInLeaderboard;
+            },
+          },
+        });
+      }
+    },
+    onError(error) {
+      console.error('Failed to update leaderboard preference:', error);
+    },
+  });
 
   const {
     handleLogout,
@@ -61,6 +88,25 @@ export function ProfileDashboard({
     }
   };
 
+  const handleCheckedChange = async (state: CheckedState) => {
+    if (!user) return;
+
+    const newValue = state === true;
+    setChecked(newValue);
+    setIsUpdating(true);
+
+    try {
+      await updatePreference({
+        variables: {showInLeaderboard: newValue},
+      });
+    } catch (error) {
+      console.error('Failed to update leaderboard preference:', error);
+      setChecked(user?.showInLeaderboard ?? false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-4 px-4 sm:py-8 sm:px-6">
       <div
@@ -97,6 +143,30 @@ export function ProfileDashboard({
               <strong>TRAINER SINCE:</strong>{' '}
               {formatTrainerSince(user.created_at)}
             </p>
+          </div>
+        </div>
+
+        <div
+          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg sm:text-xl font-bold">
+              LEADERBOARD VISIBILITY
+            </h2>
+            <Checkbox
+              id="profile-show-in-leaderboard"
+              checked={checked}
+              onCheckedChange={handleCheckedChange}
+              disabled={isUpdating}
+            />
+            <label
+              htmlFor="profile-show-in-leaderboard"
+              className="text-sm"
+              style={{color: 'var(--foreground)'}}
+            >
+              Show me in leaderboard
+            </label>
           </div>
         </div>
 
