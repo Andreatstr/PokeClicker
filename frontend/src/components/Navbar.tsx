@@ -78,6 +78,7 @@ export function Navbar({
               World
             </Button>
             <Button
+              data-onboarding="ranks-nav"
               className="text-xs md:text-sm"
               onClick={() => onPageChange('ranks')}
             >
@@ -157,6 +158,7 @@ export function Navbar({
                 World
               </Button>
               <Button
+                data-onboarding="ranks-nav"
                 className="w-full text-sm"
                 onClick={() => onPageChange('ranks')}
               >

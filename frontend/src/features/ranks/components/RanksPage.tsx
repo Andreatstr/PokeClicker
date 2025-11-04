@@ -119,7 +119,10 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
         {/* Controls row - aligned with table edges */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-2 mb-4 w-full">
           {/* League toggle buttons */}
-          <div className="flex justify-center md:justify-start gap-2">
+          <div
+            data-onboarding="league-buttons"
+            className="flex justify-center md:justify-start gap-2"
+          >
             <Button
               className={`flex-1 md:flex-none text-xs sm:text-sm ${
                 activeLeague === 'candy'
