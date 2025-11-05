@@ -46,8 +46,8 @@ De bygde filene vil være i `dist/`-mappen.
 
 ```bash
 cd backend
-npm install
-npm run build
+pnpm install
+pnpm run build
 cd ..
 ```
 
@@ -114,13 +114,13 @@ For utvikling/testing:
 
 ```bash
 cd ~/project2-backend
-npm start
+pnpm start
 ```
 
 For produksjon (med PM2):
 
 ```bash
-npm install -g pm2
+pnpm install -g pm2
 cd ~/project2-backend
 pm2 start dist/index.js --name project2-backend
 pm2 save
