@@ -113,7 +113,7 @@ export function RanksTable({
 
       {userRank && (
         <div
-          className={`p-2 sm:p-3 border-t text-xs sm:text-sm ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+          className={`p-2 sm:p-3 border-t text-xs sm:text-sm ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${isDarkMode ? 'bg-blue-900' : 'bg-blue-300'}`}
         >
           <span className="pixel-font" style={{color: 'var(--foreground)'}}>
             Your Rank: #{userRank}
