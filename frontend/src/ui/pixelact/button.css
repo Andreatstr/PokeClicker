@@ -1,6 +1,7 @@
 .pixel__button {
   position: relative;
   box-shadow: var(--pixel-box-shadow);
+  box-sizing: border-box; /* Ensure borders are included in dimensions */
 
   &::after {
     content: '';
@@ -9,6 +10,7 @@
     right: 0;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
   }
 
   &:active {
