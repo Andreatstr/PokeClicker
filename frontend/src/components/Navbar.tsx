@@ -68,34 +68,38 @@ export function Navbar({
           {/* Desktop Navigation */}
           <div className="hidden xl:flex items-center gap-4">
             <Button
-              className="text-xs md:text-sm"
+              className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               onClick={() => onPageChange('pokedex')}
             >
               Pokedex
             </Button>
             <Button
               data-onboarding="clicker-nav"
-              className="text-xs md:text-sm"
+              className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               onClick={() => onPageChange('clicker')}
             >
               Clicker
             </Button>
             <Button
               data-onboarding="world-nav"
-              className="text-xs md:text-sm"
+              className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               onClick={() => onPageChange('map')}
             >
               World
             </Button>
             <Button
               data-onboarding="ranks-nav"
-              className="text-xs md:text-sm"
+              className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               onClick={() => onPageChange('ranks')}
             >
               Ranks
             </Button>
 
-            <Button onClick={onToggleTheme} className="p-2">
+            <Button
+              onClick={onToggleTheme}
+              className="min-w-[44px] min-h-[44px] p-2"
+              aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            >
               {isDarkMode ? (
                 <SunIcon className="w-4 h-4" />
               ) : (
@@ -106,17 +110,19 @@ export function Navbar({
             {isAuthenticated ? (
               <Button
                 data-onboarding="profile-button"
-                className="p-2"
+                className="min-w-[44px] min-h-[44px] p-2"
                 onClick={() => onPageChange('profile')}
                 title={`Logged in as ${user?.username}`}
+                aria-label={`Profile for ${user?.username}`}
               >
                 <UserIcon className="w-4 h-4" />
               </Button>
             ) : (
               <Button
                 data-onboarding="profile-button"
-                className="p-2"
+                className="min-w-[44px] min-h-[44px] p-2"
                 onClick={() => onPageChange('login')}
+                aria-label="Login"
               >
                 <UserIcon className="w-4 h-4" />
               </Button>
@@ -125,7 +131,12 @@ export function Navbar({
 
           {/* Mobile Menu Button */}
           <div className="xl:hidden">
-            <Button onClick={toggleMobileMenu} className="px-3 py-4">
+            <Button
+              onClick={toggleMobileMenu}
+              className="min-w-[44px] min-h-[44px] px-3 py-4"
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
+            >
               <MenuIcon className="w-5 h-5" />
             </Button>
           </div>
@@ -148,28 +159,28 @@ export function Navbar({
             {/* Navigation Links */}
             <div className="flex flex-col gap-2">
               <Button
-                className="w-full text-sm"
+                className="w-full text-sm min-h-[44px]"
                 onClick={() => onPageChange('pokedex')}
               >
                 Pokedex
               </Button>
               <Button
                 data-onboarding="clicker-nav"
-                className="w-full text-sm"
+                className="w-full text-sm min-h-[44px]"
                 onClick={() => onPageChange('clicker')}
               >
                 Clicker
               </Button>
               <Button
                 data-onboarding="world-nav"
-                className="w-full text-sm"
+                className="w-full text-sm min-h-[44px]"
                 onClick={() => onPageChange('map')}
               >
                 World
               </Button>
               <Button
                 data-onboarding="ranks-nav"
-                className="w-full text-sm"
+                className="w-full text-sm min-h-[44px]"
                 onClick={() => onPageChange('ranks')}
               >
                 Ranks
@@ -179,8 +190,9 @@ export function Navbar({
             {/* Controls Row - Dark/Light Mode, Music, Profile */}
             <div className="flex flex-col gap-2 pt-2 border-t border-gray-300 dark:border-gray-600">
               <Button
-                className="w-full text-sm flex items-center justify-center gap-2"
+                className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                 onClick={onToggleTheme}
+                aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
               >
                 {isDarkMode ? (
                   <>
@@ -198,9 +210,10 @@ export function Navbar({
               {isAuthenticated ? (
                 <Button
                   data-onboarding="profile-button"
-                  className="w-full text-sm flex items-center justify-center gap-2"
+                  className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                   onClick={() => onPageChange('profile')}
                   title={`Logged in as ${user?.username}`}
+                  aria-label={`Profile for ${user?.username}`}
                 >
                   <UserIcon className="w-4 h-4" />
                   Profile
@@ -208,8 +221,9 @@ export function Navbar({
               ) : (
                 <Button
                   data-onboarding="profile-button"
-                  className="w-full text-sm flex items-center justify-center gap-2"
+                  className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                   onClick={() => onPageChange('login')}
+                  aria-label="Login"
                 >
                   <UserIcon className="w-4 h-4" />
                   Login

@@ -55,13 +55,11 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
-              <div
+              <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer"
-                role="button"
-                tabIndex={0}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                type="button"
                 aria-label="Clear search"
-                onKeyDown={(e) => e.key === 'Enter' && handleClearSearch()}
               >
                 <CloseIcon
                   className="w-5 h-5"
@@ -79,12 +77,12 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
                       : '#4b5563';
                   }}
                 />
-              </div>
+              </button>
             )}
           </div>
           <Button
             data-onboarding="filters-button"
-            className="w-full sm:w-auto text-sm"
+            className="w-full sm:w-auto text-sm min-h-[44px]"
             aria-haspopup="dialog"
             aria-expanded={showMobileFilters}
             aria-controls="mobile-filter-dialog"
