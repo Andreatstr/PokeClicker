@@ -3,6 +3,15 @@
   box-shadow: var(--pixel-box-shadow);
   box-sizing: border-box; /* Ensure borders are included in dimensions */
 
+  /* Extend clickable area to include the box-shadow border */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--box-shadow-width));
+    z-index: -1;
+    /* This makes the entire box-shadow area clickable */
+  }
+
   &::after {
     content: '';
     position: absolute;
@@ -11,6 +20,7 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+    pointer-events: none; /* Allow clicks to pass through to the button */
   }
 
   &:active {
