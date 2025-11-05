@@ -98,7 +98,7 @@ importers:
         version: 8.46.2(eslint@9.38.0(jiti@2.6.1))(typescript@5.9.3)
       vitest:
         specifier: ^4.0.5
-        version: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+        version: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
 
   frontend:
     dependencies:
@@ -147,9 +147,6 @@ importers:
       react-hook-form:
         specifier: ^7.65.0
         version: 7.65.0(react@19.2.0)
-      sharp:
-        specifier: ^0.34.4
-        version: 0.34.4
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
@@ -223,9 +220,15 @@ importers:
       rollup-plugin-visualizer:
         specifier: ^6.0.5
         version: 6.0.5(rollup@4.52.5)
+      sharp:
+        specifier: ^0.34.4
+        version: 0.34.4
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.16
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
@@ -237,7 +240,7 @@ importers:
         version: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
       vitest:
         specifier: ^4.0.1
-        version: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+        version: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
 
 packages:
 
@@ -5170,7 +5173,7 @@ snapshots:
       magicast: 0.3.5
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+      vitest: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -5187,7 +5190,7 @@ snapshots:
       magicast: 0.3.5
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+      vitest: 4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -7151,7 +7154,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1):
+  vitest@4.0.5(@types/node@24.9.2)(jiti@2.6.1)(jsdom@27.0.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1):
     dependencies:
       '@vitest/expect': 4.0.5
       '@vitest/mocker': 4.0.5(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1))
