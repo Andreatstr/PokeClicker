@@ -1,4 +1,4 @@
-import {Suspense, lazy} from 'react';
+import {Suspense, lazy, useState, useEffect} from 'react';
 import {
   Navbar,
   LoadingSpinner,
@@ -56,8 +56,22 @@ function App() {
   const {step, isActive, nextStep, previousStep, skipTutorial} =
     useOnboarding();
 
-  useScrollLock(currentPage === 'map');
+  // Track if map is in fullscreen mode
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+
+  useScrollLock(false); // Disable scroll lock to allow scrolling on mobile
   usePreloading(currentPage);
+
+  // Override body background when in fullscreen
+  useEffect(() => {
+    if (isMapFullscreen) {
+      document.body.style.backgroundColor = '#9FA0A0';
+      document.documentElement.style.backgroundColor = '#9FA0A0';
+    } else {
+      document.body.style.backgroundColor = '';
+      document.documentElement.style.backgroundColor = '';
+    }
+  }, [isMapFullscreen]);
 
   // Function to programmatically open the first Pokemon modal for tutorial
   const handleOpenFirstPokemon = () => {
@@ -88,8 +102,8 @@ function App() {
 
   const getMainClassName = () => {
     const baseClasses = 'min-h-screen pt-0';
-    const mapClasses =
-      'px-2 sm:px-4 md:px-6 lg:px-8 pb-0 h-screen flex flex-col';
+    // Allow scrolling on mobile for map page
+    const mapClasses = 'px-2 sm:px-4 md:px-6 lg:px-8 pb-4 overflow-y-auto';
     const defaultClasses = 'px-4 sm:px-6 md:px-8 pb-8';
     return `${baseClasses} ${currentPage === 'map' ? mapClasses : defaultClasses}`;
   };
@@ -144,8 +158,11 @@ function App() {
 
       case 'map':
         return (
-          <section className="py-8 md:py-0">
-            <PokemonMap isDarkMode={isDarkMode} />
+          <section className="py-2 md:py-0">
+            <PokemonMap
+              isDarkMode={isDarkMode}
+              onFullscreenChange={setIsMapFullscreen}
+            />
           </section>
         );
 
@@ -165,12 +182,15 @@ function App() {
   return (
     <>
       <ErrorDisplay />
-      <Navbar
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        isDarkMode={isDarkMode}
-        onToggleTheme={toggleTheme}
-      />
+      {/* Hide navbar when map is in fullscreen */}
+      {!isMapFullscreen && (
+        <Navbar
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          isDarkMode={isDarkMode}
+          onToggleTheme={toggleTheme}
+        />
+      )}
       {currentPage === 'login' ? (
         <Suspense
           fallback={
@@ -186,7 +206,11 @@ function App() {
         <>
           <main
             className={getMainClassName()}
-            style={{backgroundColor: 'var(--background)'}}
+            style={{
+              backgroundColor: isMapFullscreen
+                ? '#9FA0A0'
+                : 'var(--background)',
+            }}
           >
             {renderPage()}
           </main>
@@ -213,12 +237,16 @@ function App() {
           )}
         </>
       )}
+      {/* Keep music player visible and playing in fullscreen */}
       <div className="relative">
-        <BackgroundMusic isDarkMode={isDarkMode} />
+        <BackgroundMusic
+          isDarkMode={isDarkMode}
+          showControls={!isMapFullscreen}
+        />
       </div>
 
-      {/* Onboarding Tutorial Overlay */}
-      {isActive && currentPage !== 'login' && (
+      {/* Onboarding Tutorial Overlay - hide when in fullscreen */}
+      {isActive && currentPage !== 'login' && !isMapFullscreen && (
         <OnboardingOverlay
           step={step}
           onNext={() => {

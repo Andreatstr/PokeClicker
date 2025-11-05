@@ -13,6 +13,9 @@ const ANIMATION_FRAMES = 4; // Number of frames per direction
 // Map dimensions
 const MAP_WIDTH = 10560;
 const MAP_HEIGHT = 6080;
+// Spawn tweak: move initial spawn slightly down to avoid getting stuck on mobile
+// Use a multiple of TILE_SIZE to align to the grid
+const SPAWN_Y_OFFSET = 240; // 10 tiles down
 
 // Sprite sheet layout: 4 rows (down, left, right, up) x 3 columns (animation frames)
 type Direction = 'down' | 'left' | 'right' | 'up';
@@ -28,6 +31,8 @@ const PLAYER_POSITION_KEY = 'playerPosition';
 
 interface CollisionChecker {
   isPositionWalkable: (x: number, y: number) => boolean;
+  // Provided by useCollisionMap; optional in type to keep compatibility
+  collisionMapLoaded?: boolean;
 }
 
 interface MovementState {
@@ -65,11 +70,20 @@ export function useMapMovement(
     ? `${PLAYER_POSITION_KEY}_${user._id}`
     : PLAYER_POSITION_KEY;
 
+  // Helper for default/home position (centered, but nudged down by SPAWN_Y_OFFSET)
+  const getHomePosition = () => {
+    const y = Math.min(
+      MAP_HEIGHT - SPRITE_HEIGHT / 2,
+      Math.max(SPRITE_HEIGHT / 2, MAP_HEIGHT / 2 + SPAWN_Y_OFFSET)
+    );
+    return {x: MAP_WIDTH / 2, y};
+  };
+
   // Character position in world coordinates - restore from user-specific localStorage
   const [worldPosition, setWorldPosition] = useState(() => {
     if (!user?._id) {
       // Not logged in - use default center
-      return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
+      return getHomePosition();
     }
 
     const saved = localStorage.getItem(userPositionKey);
@@ -85,9 +99,9 @@ export function useMapMovement(
       }
     }
 
-    // First time for this user - start at center
+    // First time for this user - start near center (nudged down)
     logger.info(`[MapMovement] New user ${user._id}, starting at map center`);
-    return {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
+    return getHomePosition();
   });
   const [direction, setDirection] = useState<Direction>('down');
   const [isMoving, setIsMoving] = useState(false);
@@ -105,6 +119,90 @@ export function useMapMovement(
     }
   }, [worldPosition, userPositionKey, user?._id]);
 
+  // Find nearest walkable point to a target (simple radial search)
+  const findNearestWalkable = useCallback(
+    (targetX: number, targetY: number) => {
+      // If map not loaded, assume current is ok (we'll re-validate later)
+      if (!collisionChecker.collisionMapLoaded) {
+        return {x: targetX, y: targetY};
+      }
+
+      const clamp = (x: number, min: number, max: number) =>
+        Math.max(min, Math.min(max, x));
+
+      const startX = clamp(
+        targetX,
+        SPRITE_WIDTH / 2,
+        MAP_WIDTH - SPRITE_WIDTH / 2
+      );
+      const startY = clamp(
+        targetY,
+        SPRITE_HEIGHT / 2,
+        MAP_HEIGHT - SPRITE_HEIGHT / 2
+      );
+
+      // Direct hit
+      if (collisionChecker.isPositionWalkable(startX, startY)) {
+        return {x: startX, y: startY};
+      }
+
+      // Search outwards on a grid in TILE_SIZE steps along square rings
+      const MAX_RADIUS = 2400; // px (~100 tiles)
+      const STEP = TILE_SIZE; // px
+
+      for (let r = STEP; r <= MAX_RADIUS; r += STEP) {
+        // Top and bottom edges
+        for (let dx = -r; dx <= r; dx += STEP) {
+          const tx = clamp(
+            startX + dx,
+            SPRITE_WIDTH / 2,
+            MAP_WIDTH - SPRITE_WIDTH / 2
+          );
+          const tyTop = clamp(
+            startY - r,
+            SPRITE_HEIGHT / 2,
+            MAP_HEIGHT - SPRITE_HEIGHT / 2
+          );
+          const tyBottom = clamp(
+            startY + r,
+            SPRITE_HEIGHT / 2,
+            MAP_HEIGHT - SPRITE_HEIGHT / 2
+          );
+          if (collisionChecker.isPositionWalkable(tx, tyTop))
+            return {x: tx, y: tyTop};
+          if (collisionChecker.isPositionWalkable(tx, tyBottom))
+            return {x: tx, y: tyBottom};
+        }
+        // Left and right edges (skip corners; already checked)
+        for (let dy = -r + STEP; dy <= r - STEP; dy += STEP) {
+          const ty = clamp(
+            startY + dy,
+            SPRITE_HEIGHT / 2,
+            MAP_HEIGHT - SPRITE_HEIGHT / 2
+          );
+          const txLeft = clamp(
+            startX - r,
+            SPRITE_WIDTH / 2,
+            MAP_WIDTH - SPRITE_WIDTH / 2
+          );
+          const txRight = clamp(
+            startX + r,
+            SPRITE_WIDTH / 2,
+            MAP_WIDTH - SPRITE_WIDTH / 2
+          );
+          if (collisionChecker.isPositionWalkable(txLeft, ty))
+            return {x: txLeft, y: ty};
+          if (collisionChecker.isPositionWalkable(txRight, ty))
+            return {x: txRight, y: ty};
+        }
+      }
+
+      // Fallback to target if nothing found (should be very rare)
+      return {x: startX, y: startY};
+    },
+    [collisionChecker]
+  );
+
   // Reset position when user changes (login/logout)
   useEffect(() => {
     if (user?._id) {
@@ -118,18 +216,32 @@ export function useMapMovement(
           setWorldPosition(restored);
         } catch (e) {
           logger.logError(e, 'RestorePlayerPosition');
-          logger.info(`[MapMovement] Failed to restore, resetting to center`);
-          setWorldPosition({x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2});
+          logger.info(`[MapMovement] Failed to restore, resetting to home`);
+          setWorldPosition(getHomePosition());
         }
       } else {
-        // New user - start at center
+        // New user - start near center (nudged down)
         logger.info(
-          `[MapMovement] No saved position for user ${user._id}, starting at center`
+          `[MapMovement] No saved position for user ${user._id}, starting at home`
         );
-        setWorldPosition({x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2});
+        setWorldPosition(getHomePosition());
       }
     }
   }, [user?._id, userPositionKey]);
+
+  // Once the collision map is loaded, validate current position and snap to nearest walkable
+  useEffect(() => {
+    if (!collisionChecker.collisionMapLoaded) return;
+    setWorldPosition((prev: typeof worldPosition) => {
+      if (collisionChecker.isPositionWalkable(prev.x, prev.y)) return prev;
+      const fixed = findNearestWalkable(prev.x, prev.y);
+      logger.info(
+        `[MapMovement] Adjusted spawn to nearest walkable: (${fixed.x}, ${fixed.y})`
+      );
+      return fixed;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collisionChecker.collisionMapLoaded]);
 
   // Handle sprite animation when moving
   useEffect(() => {
@@ -459,11 +571,12 @@ export function useMapMovement(
 
   // Reset to home position
   const resetToHome = useCallback(() => {
-    const homePosition = {x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2};
-    setWorldPosition(homePosition);
+    const homePosition = getHomePosition();
+    const legalHome = findNearestWalkable(homePosition.x, homePosition.y);
+    setWorldPosition(legalHome);
     setIsMoving(false);
     keysPressed.current.clear();
-  }, []);
+  }, [findNearestWalkable]);
 
   return {
     // State

@@ -150,7 +150,7 @@ export function TiledMapView(props: TiledMapViewProps) {
       {/* Battle Prompt */}
       {nearbyPokemon && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 z-30 w-[94%] max-w-[640px]"
+          className="absolute left-1/2 -translate-x-1/2 bottom-16 md:bottom-20 z-30 w-[94%] max-w-[640px]"
           role="dialog"
           aria-live="polite"
         >
@@ -188,20 +188,7 @@ export function TiledMapView(props: TiledMapViewProps) {
         </div>
       )}
 
-      {/* Home Button */}
-      <div className="absolute bottom-2 left-2 md:top-2 md:bottom-auto z-20">
-        <button
-          onClick={onResetToHome}
-          className="flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors"
-          title="Return to home position"
-        >
-          <span className="pixel-font text-xs font-bold text-white">
-            🏠 Home
-          </span>
-        </button>
-      </div>
-
-      {/* Rare Candy Counter */}
+      {/* Rare Candy Counter - always top right */}
       <div className="absolute top-2 right-2 z-20">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)]">
           <img
@@ -214,6 +201,19 @@ export function TiledMapView(props: TiledMapViewProps) {
             {Math.floor(user?.rare_candy ?? 0)}
           </span>
         </div>
+      </div>
+
+      {/* Home Button - always bottom left */}
+      <div className="absolute bottom-2 left-2 z-20">
+        <button
+          onClick={onResetToHome}
+          className="flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors"
+          title="Return to home position"
+        >
+          <span className="pixel-font text-xs font-bold text-white">
+            🏠 Home
+          </span>
+        </button>
       </div>
     </>
   );

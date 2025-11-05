@@ -4,6 +4,10 @@ import {logger} from '@/lib/logger';
 // Map dimensions
 const MAP_WIDTH = 10560;
 const MAP_HEIGHT = 6080;
+// Downscale factor to make collision map feasible on mobile (memory)
+const COLLISION_SCALE = 4; // 1 pixel here represents 4x4 world pixels
+const SCALED_WIDTH = Math.floor(MAP_WIDTH / COLLISION_SCALE);
+const SCALED_HEIGHT = Math.floor(MAP_HEIGHT / COLLISION_SCALE);
 
 interface CollisionMapState {
   collisionMapLoaded: boolean;
@@ -15,100 +19,79 @@ export function useCollisionMap(): CollisionMapState {
   const [collisionMapLoaded, setCollisionMapLoaded] = useState(false);
   const loadStartedRef = useRef(false);
 
-  // Defer collision map loading until user interaction to avoid blocking initial render
+  // Load collision map immediately on mount (no user interaction delay)
   useEffect(() => {
-    const startLoading = () => {
-      if (loadStartedRef.current) return;
-      loadStartedRef.current = true;
+    if (loadStartedRef.current) return;
+    loadStartedRef.current = true;
 
-      // Remove event listeners to prevent leaks
-      window.removeEventListener('mousedown', startLoading);
-      window.removeEventListener('touchstart', startLoading);
-      window.removeEventListener('keydown', startLoading);
+    const canvas = document.createElement('canvas');
+    canvas.width = SCALED_WIDTH;
+    canvas.height = SCALED_HEIGHT;
+    const ctx = canvas.getContext('2d');
 
-      const canvas = document.createElement('canvas');
-      canvas.width = MAP_WIDTH;
-      canvas.height = MAP_HEIGHT;
-      const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      logger.error('[useCollisionMap] 2D context not available');
+      return;
+    }
 
-      if (!ctx) {
-        logger.error('[useCollisionMap] 2D context not available');
-        return;
-      }
-
-      const img = new Image();
-      img.src = `${import.meta.env.BASE_URL}map-collision.webp`;
-      img.crossOrigin = 'anonymous';
-      img.onload = async () => {
+    const img = new Image();
+    img.src = `${import.meta.env.BASE_URL}map-collision.webp`;
+    img.crossOrigin = 'anonymous';
+    img.onload = async () => {
+      try {
+        // Try off-main-thread decoding when available
+        let bitmap: ImageBitmap | null = null;
         try {
-          // Try off-main-thread decoding when available
-          let bitmap: ImageBitmap | null = null;
-          try {
-            bitmap = await createImageBitmap(img);
-          } catch {
-            bitmap = null;
-          }
-
-          if (bitmap) {
-            ctx.drawImage(bitmap, 0, 0, MAP_WIDTH, MAP_HEIGHT);
-          } else {
-            ctx.drawImage(img, 0, 0, MAP_WIDTH, MAP_HEIGHT);
-          }
-
-          // Defer expensive pixel extraction to idle time to avoid blocking main thread
-          const ric = (
-            window as Window & {
-              requestIdleCallback?: (
-                callback: (deadline?: IdleDeadline) => void,
-                options?: {timeout?: number}
-              ) => number;
-            }
-          ).requestIdleCallback;
-
-          const doExtract = () => {
-            try {
-              const imageData = ctx.getImageData(0, 0, MAP_WIDTH, MAP_HEIGHT);
-              collisionPixelsRef.current = imageData.data;
-              setCollisionMapLoaded(true);
-              logger.info('[useCollisionMap] collision map loaded & cached');
-            } catch (err) {
-              logger.logError(err, 'useCollisionMap.getImageData');
-            }
-          };
-
-          if (typeof ric === 'function') {
-            ric(() => {
-              // Process in idle time to avoid blocking main thread
-              doExtract();
-            });
-          } else {
-            // Fallback: defer by one frame
-            setTimeout(doExtract, 16);
-          }
-        } catch (err) {
-          logger.logError(err, 'useCollisionMap.decode');
+          bitmap = await createImageBitmap(img);
+        } catch {
+          bitmap = null;
         }
-      };
-      img.onerror = () => {
-        logger.error('[useCollisionMap] Failed to load collision map');
-      };
+
+        // Use nearest-neighbor to preserve crisp binary map when downscaling
+        (ctx as CanvasRenderingContext2D).imageSmoothingEnabled = false;
+        if (bitmap) {
+          ctx.drawImage(bitmap, 0, 0, SCALED_WIDTH, SCALED_HEIGHT);
+        } else {
+          ctx.drawImage(img, 0, 0, SCALED_WIDTH, SCALED_HEIGHT);
+        }
+
+        // Defer pixel extraction to idle time to avoid blocking main thread
+        const ric = (
+          window as Window & {
+            requestIdleCallback?: (
+              callback: (deadline?: IdleDeadline) => void,
+              options?: {timeout?: number}
+            ) => number;
+          }
+        ).requestIdleCallback;
+
+        const doExtract = () => {
+          try {
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              SCALED_WIDTH,
+              SCALED_HEIGHT
+            );
+            collisionPixelsRef.current = imageData.data;
+            setCollisionMapLoaded(true);
+            logger.info('[useCollisionMap] collision map loaded & cached');
+          } catch (err) {
+            logger.logError(err, 'useCollisionMap.getImageData');
+          }
+        };
+
+        if (typeof ric === 'function') {
+          ric(() => doExtract());
+        } else {
+          setTimeout(doExtract, 16);
+        }
+      } catch (err) {
+        logger.logError(err, 'useCollisionMap.decode');
+      }
     };
-
-    // Start loading on any user interaction (map is only needed when user moves)
-    window.addEventListener('mousedown', startLoading, {once: true});
-    window.addEventListener('touchstart', startLoading, {once: true});
-    window.addEventListener('keydown', startLoading, {once: true});
-
-    // Fallback: start loading after 3 seconds if user doesn't interact
-    const timeoutId = setTimeout(() => {
-      startLoading();
-    }, 3000);
-
-    return () => {
-      window.removeEventListener('mousedown', startLoading);
-      window.removeEventListener('touchstart', startLoading);
-      window.removeEventListener('keydown', startLoading);
-      clearTimeout(timeoutId);
+    img.onerror = () => {
+      logger.error('[useCollisionMap] Failed to load collision map');
     };
   }, []);
 
@@ -123,17 +106,28 @@ export function useCollisionMap(): CollisionMapState {
       const checkX = Math.floor(Math.max(0, Math.min(x, MAP_WIDTH - 1)));
       const checkY = Math.floor(Math.max(0, Math.min(y, MAP_HEIGHT - 1)));
 
+      // Map to scaled collision map coordinates
+      const sx = Math.floor(checkX / COLLISION_SCALE);
+      const sy = Math.floor(checkY / COLLISION_SCALE);
+
       const pixels = collisionPixelsRef.current;
-      const idx = (checkY * MAP_WIDTH + checkX) * 4;
 
-      if (idx < 0 || idx + 2 >= pixels.length) return true;
-
-      const r = pixels[idx];
-      const g = pixels[idx + 1];
-      const b = pixels[idx + 2];
-
-      const brightness = (r + g + b) / 3;
-      return brightness > 200;
+      // Sample a small 3x3 neighborhood to tolerate boundaries after scaling
+      const threshold = 190; // Slightly lower due to scaling artifacts
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = Math.max(0, Math.min(SCALED_WIDTH - 1, sx + dx));
+          const ny = Math.max(0, Math.min(SCALED_HEIGHT - 1, sy + dy));
+          const idx = (ny * SCALED_WIDTH + nx) * 4;
+          if (idx < 0 || idx + 2 >= pixels.length) continue;
+          const r = pixels[idx];
+          const g = pixels[idx + 1];
+          const b = pixels[idx + 2];
+          const brightness = (r + g + b) / 3;
+          if (brightness > threshold) return true;
+        }
+      }
+      return false;
     },
     [collisionMapLoaded]
   );

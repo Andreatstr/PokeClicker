@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Card} from '@ui/pixelact';
 import {Joystick} from './Joystick';
 import {GameBoyButtons} from './GameBoyButtons';
+import {useMobileDetection} from '@/hooks';
 
 interface GameBoyProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ interface GameBoyProps {
   isAuthenticated: boolean;
   nearbyPokemon: {pokemon: {name: string}} | null;
   viewport: {width: number; height: number};
+  onToggleFullscreen?: () => void;
+  isFullscreen?: boolean;
 }
 
 export function GameBoy({
@@ -27,45 +30,112 @@ export function GameBoy({
   isAuthenticated,
   nearbyPokemon,
   viewport,
+  onToggleFullscreen,
+  isFullscreen: isFullscreenProp,
 }: GameBoyProps) {
-  // Detect mobile device
-  const [isMobile, setIsMobile] = useState(false);
+  // Unified mobile detection
+  const isMobile = useMobileDetection(768);
+  const [isFullscreenInternal, setIsFullscreenInternal] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Use prop if provided, otherwise use internal state
+  const isFullscreen = isFullscreenProp ?? isFullscreenInternal;
 
   useEffect(() => {
-    const checkMobile = () => {
-      // Prioritize screen width for responsive testing
-      // Only check user agent if width suggests mobile
-      const isMobileDevice =
-        window.innerWidth < 768 &&
-        (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        ) ||
-          'ontouchstart' in window);
-      setIsMobile(isMobileDevice);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // useMobileDetection handles resize – no work needed here
   }, []);
 
+  // Handle fullscreen changes (only if not using prop)
+  useEffect(() => {
+    if (onToggleFullscreen) return; // Skip if parent is handling fullscreen
+
+    const handleFullscreenChange = () => {
+      setIsFullscreenInternal(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [onToggleFullscreen]);
+
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
+    <div
+      ref={containerRef}
+      className={`flex flex-col lg:flex-row gap-6 items-start justify-center ${
+        isFullscreen
+          ? 'fixed inset-0 w-full h-full items-center justify-center bg-[#9FA0A0] z-[9999] p-0 m-0'
+          : ''
+      }`}
+      style={
+        isFullscreen
+          ? {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 9999,
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              paddingLeft: 'env(safe-area-inset-left)',
+              paddingRight: 'env(safe-area-inset-right)',
+            }
+          : undefined
+      }
+    >
       {/* GameBoy Console Shell */}
       <Card
-        className="bg-[#9FA0A0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-4 md:p-3 mx-auto"
-        style={{
-          width: isMobile
-            ? '100%'
-            : `${Math.min(viewport.width + 120, window.innerWidth * 0.9)}px`,
-          maxWidth: isMobile ? '384px' : 'none',
-        }}
+        className={`bg-[#9FA0A0] ${
+          isFullscreen
+            ? 'w-full h-full flex flex-col border-0 shadow-none'
+            : 'p-4 md:p-3 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mx-auto'
+        }`}
+        style={
+          isFullscreen
+            ? {
+                width: '100%',
+                height: '100%',
+                maxWidth: 'none',
+                margin: 0,
+                padding: '12px',
+              }
+            : {
+                width: isMobile
+                  ? '100%'
+                  : `${Math.min(viewport.width + 120, window.innerWidth * 0.9)}px`,
+                maxWidth: isMobile ? '384px' : 'none',
+              }
+        }
       >
-        <div className="flex flex-col items-center">
+        <div
+          className={`flex flex-col items-center ${isFullscreen ? 'flex-1 justify-center' : ''}`}
+        >
           {/* Screen Bezel */}
-          <div className="bg-[#3E3E52] rounded-md p-3 mb-3 md:p-2 md:mb-1.5 w-full shadow-inner border-2 border-[#2a2a3e]">
-            {/* Screen Label */}
-            <div className="flex items-center justify-between mb-1 md:mb-0.5 px-1">
+          <div
+            className={`bg-[#3E3E52] rounded-md shadow-inner border-2 border-[#2a2a3e] ${
+              isFullscreen
+                ? isMobile
+                  ? 'flex flex-col p-2 mb-2 w-full'
+                  : 'flex flex-col p-2 mb-2 w-[calc(100%-1rem)] mx-2'
+                : 'w-full p-3 mb-3 md:p-2 md:mb-1.5'
+            }`}
+            style={
+              isFullscreen
+                ? {
+                    height: isMobile ? 'min(60vh, calc(100vh - 280px))' : '75%',
+                  }
+                : undefined
+            }
+          >
+            {/* Screen Label - hide in fullscreen on mobile */}
+            <div
+              className={`flex items-center justify-between px-1 ${
+                isFullscreen ? 'hidden' : 'mb-1 md:mb-0.5'
+              }`}
+            >
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-red-600 border border-black"></div>
                 <span className="text-[6px] pixel-font text-gray-300 tracking-wider">
@@ -80,35 +150,54 @@ export function GameBoy({
             {/* Screen - contains the game viewport */}
             <div
               data-onboarding="map-canvas"
-              className="mx-auto"
-              style={{
-                width: '100%',
-                maxWidth: `${viewport.width}px`,
-                aspectRatio: `${viewport.width} / ${viewport.height}`,
-              }}
+              className={`mx-auto ${isFullscreen ? 'flex-1 w-full' : ''}`}
+              style={
+                isFullscreen
+                  ? {width: '100%', height: '100%'}
+                  : {
+                      width: '100%',
+                      maxWidth: `${viewport.width}px`,
+                      aspectRatio: `${viewport.width} / ${viewport.height}`,
+                    }
+              }
             >
               {/* Game Viewport Container - this is where the game content goes */}
               {children}
             </div>
           </div>
 
-          {/* Nintendo GAME BOY text */}
-          <div className="mb-3 md:mb-1 text-center">
+          {/* Pretendo PLAY BOY text */}
+          <div
+            className={
+              isFullscreen ? 'mb-2 text-center' : 'mb-3 md:mb-1 text-center'
+            }
+          >
             <p className="pixel-font text-[10px] text-[#2a2a3e] tracking-wider mb-0.5">
-              Nintendo
+              Pretendo
             </p>
             <p className="pixel-font text-[8px] text-[#2a2a3e] font-bold tracking-widest italic">
-              GAME BOY<span className="text-[6px]">™</span>
+              PLAY BOY<span className="text-[6px]">™</span>
             </p>
           </div>
 
           {/* Interactive Controls */}
           <div
             data-onboarding="movement-controls"
-            className="flex items-center w-full px-1 mb-2 md:mb-1"
+            className={`flex items-center w-full ${
+              isFullscreen
+                ? 'mb-4 justify-center gap-8 px-8'
+                : 'mb-2 md:mb-1 px-1'
+            }`}
+            style={isFullscreen ? {transform: 'scale(1.5)'} : {}}
           >
-            {/* Joystick - more to the left */}
-            <div className="flex-[0.8] flex justify-center">
+            {/* Joystick */}
+            <div
+              className={
+                isFullscreen
+                  ? 'flex-shrink-0'
+                  : 'flex-[0.8] flex justify-center'
+              }
+            >
               <Joystick
                 onDirectionChange={onDirectionChange}
                 onDirectionStart={onDirectionStart}
@@ -117,11 +206,17 @@ export function GameBoy({
               />
             </div>
 
-            {/* Center spacer */}
-            <div className="flex-[0.4]"></div>
+            {/* Center spacer - only in normal mode */}
+            {!isFullscreen && <div className="flex-[0.4]"></div>}
 
-            {/* A, B Buttons - right side */}
-            <div className="flex-[0.8] flex justify-center">
+            {/* A, B Buttons */}
+            <div
+              className={
+                isFullscreen
+                  ? 'flex-shrink-0'
+                  : 'flex-[0.8] flex justify-center'
+              }
+            >
               <GameBoyButtons
                 onAButtonClick={onAButtonClick}
                 onBButtonClick={onBButtonClick}
@@ -131,14 +226,16 @@ export function GameBoy({
             </div>
           </div>
 
-          {/* Start/Select Buttons */}
-          <div className="flex gap-3 items-center mb-1 md:mb-0.5">
-            <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
-            <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
-          </div>
-
           {/* Speaker Holes */}
-          <div className="flex gap-1 mt-2 md:mt-1">
+          <div
+            className={
+              isFullscreen
+                ? isMobile
+                  ? 'flex gap-1 mt-4 mb-8'
+                  : 'flex gap-1 mt-2'
+                : 'flex gap-1 mt-2 md:mt-1'
+            }
+          >
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex flex-col gap-1">
                 {[...Array(3)].map((_, j) => (
