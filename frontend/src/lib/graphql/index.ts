@@ -14,6 +14,7 @@ export {
   POKEMON_BY_IDS,
   POKEMON_UPGRADE_QUERY,
   HEALTH_QUERY,
+  GET_RANKS,
 } from './queries';
 
 // Mutations
@@ -28,6 +29,7 @@ export {
   DELETE_USER_MUTATION,
   SET_FAVORITE_POKEMON_MUTATION,
   SET_SELECTED_POKEMON_MUTATION,
+  UPDATE_RANKS_PREFERENCE,
 } from './mutations';
 
 // Types

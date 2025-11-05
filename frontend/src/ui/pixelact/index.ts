@@ -7,6 +7,7 @@ export {Label} from './label';
 export {Avatar} from './avatar';
 export {MultiSelect} from './MultiSelect';
 export {UnlockButton} from './UnlockButton';
+export {Checkbox} from './checkbox';
 
 // Menu components
 export {

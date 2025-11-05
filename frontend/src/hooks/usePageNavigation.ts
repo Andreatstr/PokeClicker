@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-type PageType = 'pokedex' | 'clicker' | 'map' | 'login' | 'profile';
+type PageType = 'pokedex' | 'ranks' | 'clicker' | 'map' | 'login' | 'profile';
 
 /**
  * Custom hook for page navigation with localStorage persistence
@@ -14,6 +14,7 @@ export function usePageNavigation() {
     // If authenticated, restore last page or default to pokedex
     const savedPage = localStorage.getItem('currentPage') as
       | 'pokedex'
+      | 'ranks'
       | 'clicker'
       | 'profile'
       | null;

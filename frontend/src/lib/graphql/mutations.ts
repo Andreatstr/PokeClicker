@@ -149,3 +149,12 @@ export const SET_SELECTED_POKEMON_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_RANKS_PREFERENCE = gql`
+  ${USER_FRAGMENT}
+  mutation UpdateRanksPreference($showInRanks: Boolean!) {
+    updateRanksPreference(showInRanks: $showInRanks) {
+      ...UserFields
+    }
+  }
+`;

@@ -3,9 +3,9 @@ import {Button, UserIcon, SunIcon, MoonIcon, MenuIcon} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
 
 interface NavbarProps {
-  currentPage: 'pokedex' | 'clicker' | 'login' | 'map' | 'profile';
+  currentPage: 'pokedex' | 'ranks' | 'clicker' | 'login' | 'map' | 'profile';
   onPageChange: (
-    page: 'pokedex' | 'clicker' | 'login' | 'map' | 'profile'
+    page: 'pokedex' | 'ranks' | 'clicker' | 'login' | 'map' | 'profile'
   ) => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
@@ -66,7 +66,7 @@ export function Navbar({
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden xl:flex items-center gap-4">
             <Button
               className="text-xs md:text-sm"
               onClick={() => onPageChange('pokedex')}
@@ -87,6 +87,13 @@ export function Navbar({
             >
               World
             </Button>
+            <Button
+              data-onboarding="ranks-nav"
+              className="text-xs md:text-sm"
+              onClick={() => onPageChange('ranks')}
+            >
+              Ranks
+            </Button>
 
             <Button onClick={onToggleTheme} className="p-2">
               {isDarkMode ? (
@@ -99,12 +106,11 @@ export function Navbar({
             {isAuthenticated ? (
               <Button
                 data-onboarding="profile-button"
-                className="text-xs md:text-sm"
+                className="p-2"
                 onClick={() => onPageChange('profile')}
                 title={`Logged in as ${user?.username}`}
               >
-                <UserIcon className="w-4 h-4 mr-2" />
-                Profile
+                <UserIcon className="w-4 h-4" />
               </Button>
             ) : (
               <Button
@@ -118,7 +124,7 @@ export function Navbar({
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden">
+          <div className="xl:hidden">
             <Button onClick={toggleMobileMenu} className="px-3 py-4">
               <MenuIcon className="w-5 h-5" />
             </Button>
@@ -129,7 +135,7 @@ export function Navbar({
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden mt-4 p-4"
+          className="xl:hidden mt-4 p-4"
           style={{
             backgroundColor: 'var(--card)',
             border: '4px solid var(--border)',
@@ -160,6 +166,13 @@ export function Navbar({
                 onClick={() => onPageChange('map')}
               >
                 World
+              </Button>
+              <Button
+                data-onboarding="ranks-nav"
+                className="w-full text-sm"
+                onClick={() => onPageChange('ranks')}
+              >
+                Ranks
               </Button>
             </div>
 

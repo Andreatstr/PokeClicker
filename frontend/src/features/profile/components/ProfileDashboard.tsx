@@ -1,27 +1,47 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useOnboarding} from '@/hooks';
+import {useMutation} from '@apollo/client';
 import {ConfirmDialog} from './ConfirmDialog';
 import {FavoritePokemonSelector} from './FavoritePokemonSelector';
 import {PokemonDisplayButton} from './PokemonDisplayButton';
 import {usePokemonBasic} from '../hooks/usePokemonBasic';
 import {useProfileHandlers} from '../hooks/useProfileHandlers';
 import {formatTrainerSince} from '../utils/formatDate';
+import {Checkbox} from '@ui/pixelact';
+import {UPDATE_RANKS_PREFERENCE} from '@/lib/graphql';
+import type {CheckedState} from '@radix-ui/react-checkbox';
 
 interface ProfileDashboardProps {
   isDarkMode?: boolean;
-  onNavigate?: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void;
+  onNavigate?: (
+    page: 'clicker' | 'ranks' | 'pokedex' | 'login' | 'profile'
+  ) => void;
 }
 
 export function ProfileDashboard({
   isDarkMode = false,
   onNavigate,
 }: ProfileDashboardProps) {
-  const {user} = useAuth();
+  const {user, updateUser} = useAuth();
   const {restartTutorial} = useOnboarding();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showFavoriteSelector, setShowFavoriteSelector] = useState(false);
   const [showSelectedSelector, setShowSelectedSelector] = useState(false);
+  const [checked, setChecked] = useState<boolean | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [updatePreference] = useMutation(UPDATE_RANKS_PREFERENCE, {
+    onCompleted: (data) => {
+      if (data?.updateRanksPreference) {
+        // Update the AuthContext user state and localStorage
+        updateUser(data.updateRanksPreference);
+      }
+    },
+    onError(error) {
+      console.error('Failed to update ranks preference:', error);
+    },
+  });
 
   const {
     handleLogout,
@@ -37,6 +57,13 @@ export function ProfileDashboard({
   const {data: selectedPokemonData} = usePokemonBasic(
     user?.selected_pokemon_id
   );
+
+  useEffect(() => {
+    if (user) {
+      setChecked(user.showInRanks !== false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.showInRanks]);
 
   if (!user) {
     return null;
@@ -58,6 +85,25 @@ export function ProfileDashboard({
     const success = await handleSetSelected(pokemonId);
     if (success) {
       setShowSelectedSelector(false);
+    }
+  };
+
+  const handleCheckedChange = async (state: CheckedState) => {
+    if (!user) return;
+
+    const newValue = state === true;
+    setChecked(newValue);
+    setIsUpdating(true);
+
+    try {
+      await updatePreference({
+        variables: {showInRanks: newValue},
+      });
+    } catch (error) {
+      console.error('Failed to update ranks preference:', error);
+      setChecked(user?.showInRanks !== false);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -133,6 +179,32 @@ export function ProfileDashboard({
             </div>
           </div>
         </div>
+
+        {checked !== null && (
+          <div
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
+            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          >
+            <h2 className="text-lg sm:text-xl font-bold mb-3">
+              RANKS VISIBILITY
+            </h2>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="profile-show-in-ranks"
+                checked={checked}
+                onCheckedChange={handleCheckedChange}
+                disabled={isUpdating}
+              />
+              <label
+                htmlFor="profile-show-in-ranks"
+                className="text-sm"
+                style={{color: 'var(--foreground)'}}
+              >
+                Show me in ranks
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* Pokemon Selection Sections */}
         <div data-onboarding="pokemon-selection">
