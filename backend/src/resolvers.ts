@@ -600,7 +600,7 @@ export const resolvers = {
                   // Calculate rank using $setWindowFields (handles ties properly)
                   {
                     $setWindowFields: {
-                      sortBy: {candyScore: -1, _id: 1},
+                      sortBy: {candyScore: -1},
                       output: {
                         rank: {$rank: {}}, // Standard ranking (1, 2, 2, 4)
                       },
@@ -636,7 +636,7 @@ export const resolvers = {
                   // Calculate rank using $setWindowFields (handles ties properly)
                   {
                     $setWindowFields: {
-                      sortBy: {pokemonCount: -1, _id: 1},
+                      sortBy: {pokemonCount: -1},
                       output: {
                         rank: {$rank: {}}, // Standard ranking (1, 2, 2, 4)
                       },
