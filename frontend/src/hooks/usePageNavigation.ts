@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {isTokenExpired} from '@/lib/jwt';
 
 type PageType = 'pokedex' | 'ranks' | 'clicker' | 'map' | 'login' | 'profile';
 
@@ -9,9 +10,13 @@ type PageType = 'pokedex' | 'ranks' | 'clicker' | 'map' | 'login' | 'profile';
 export function usePageNavigation() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
     const hasAuth = localStorage.getItem('authToken');
-    if (!hasAuth) return 'login';
 
-    // If authenticated, restore last page or default to pokedex
+    // Check if token exists and is not expired
+    if (!hasAuth || isTokenExpired(hasAuth)) {
+      return 'login';
+    }
+
+    // If authenticated with valid token, restore last page or default to pokedex
     const savedPage = localStorage.getItem('currentPage') as
       | 'pokedex'
       | 'ranks'
