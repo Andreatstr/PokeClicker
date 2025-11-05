@@ -1,0 +1,16 @@
+.checkbox-extended-touch {
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox-extended-touch::before {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  right: -16px;
+  bottom: -16px;
+  cursor: pointer;
+  /* This extends the clickable area by 16px in all directions */
+  /* 16px checkbox + 32px padding = 48px total touch target */
+}

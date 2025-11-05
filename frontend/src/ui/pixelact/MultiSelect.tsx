@@ -120,7 +120,7 @@ export function MultiSelect({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)]'
+          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px]'
         )}
         style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
       >
@@ -157,7 +157,7 @@ export function MultiSelect({
                   }
                 }}
                 disabled={selected.length === 0}
-                className="w-full flex items-center px-3 py-2 text-sm border-y-3 border-dashed border-ring/0 outline-none"
+                className="w-full flex items-center px-3 py-2 text-sm border-y-3 border-dashed border-ring/0 outline-none min-h-[44px]"
                 style={{
                   cursor: selected.length === 0 ? 'not-allowed' : 'pointer',
                   opacity: selected.length === 0 ? 0.5 : 1,
@@ -187,7 +187,7 @@ export function MultiSelect({
                 return (
                   <label
                     key={type}
-                    className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none"
+                    className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring outline-none min-h-[44px]"
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'var(--accent)';
                     }}

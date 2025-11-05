@@ -160,21 +160,23 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
           {/* Checkbox + Refresh button */}
           {user && checked !== null && (
             <div className="flex justify-center md:justify-end items-center gap-2 md:gap-3">
-              <div className="flex items-center gap-2">
+              <label
+                htmlFor="show-in-ranks"
+                className="flex items-center gap-2 cursor-pointer relative min-h-12 px-4"
+              >
                 <Checkbox
                   id="show-in-ranks"
                   checked={checked}
                   onCheckedChange={handleCheckedChange}
                   disabled={isUpdating}
                 />
-                <label
-                  htmlFor="show-in-ranks"
+                <span
                   className="text-xs sm:text-sm whitespace-nowrap"
                   style={{color: 'var(--foreground)'}}
                 >
                   Show me
-                </label>
-              </div>
+                </span>
+              </label>
 
               <Button
                 variant="default"
