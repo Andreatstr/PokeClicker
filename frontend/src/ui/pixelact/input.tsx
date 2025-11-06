@@ -13,7 +13,8 @@ const Input = React.forwardRef<HTMLInputElement, PixelInputProps>(
     return (
       <input
         className={cn(
-          'pixel__input pixel-font max-w-full outline-none p-2 text-foreground shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin disabled:opacity-40',
+          'pixel__input pixel-font max-w-full p-2 text-foreground shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin disabled:opacity-40',
+          'outline-none focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]',
           disabled && 'disabled:opacity-40 disabled:cursor-not-allowed',
           className
         )}

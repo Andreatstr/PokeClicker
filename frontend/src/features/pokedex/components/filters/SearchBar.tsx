@@ -1,4 +1,4 @@
-import {Button, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
+import {Button, Input, Label, SearchIcon, CloseIcon} from '@ui/pixelact';
 import {usePokedexFilterContext} from '../../contexts/usePokedexFilterContext';
 
 interface SearchBarProps {
@@ -40,11 +40,11 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
                 color: isDarkMode ? 'var(--muted-foreground)' : '#6b7280',
               }}
             />
-            <input
+            <Input
               id="pokemon-search"
               type="search"
               placeholder="search"
-              className={`w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none pixel-font max-w-full outline-none p-2 shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin ${
+              className={`w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none pixel-font max-w-full shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin ${
                 isDarkMode ? 'placeholder-white' : 'placeholder-black'
               }`}
               style={{
@@ -57,7 +57,7 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
             {searchTerm && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                 type="button"
                 aria-label="Clear search"
               >
