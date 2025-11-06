@@ -79,7 +79,7 @@ export function FiltersAndCount({
   const showCounts = facets !== null && facets !== undefined;
 
   return (
-    <section className="mb-6">
+    <section id="filters-and-count" className="mb-6">
       {showMobileFilters && (
         <div
           className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
@@ -130,7 +130,7 @@ export function FiltersAndCount({
                       setTempRegion(v === 'all' ? null : v);
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
@@ -154,7 +154,7 @@ export function FiltersAndCount({
                 {/* TYPE */}
                 <div>
                   <Label
-                    className="text-xs font-bold"
+                    className="text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                     style={{color: 'var(--foreground)'}}
                   >
                     Type
@@ -163,7 +163,7 @@ export function FiltersAndCount({
                     options={[...POKEMON_TYPES]}
                     selected={tempTypes}
                     onChange={setTempTypes}
-                    className="w-full"
+                    className="w-full focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                     counts={showCounts ? typeCountMap : undefined}
                   />
                 </div>
@@ -182,7 +182,7 @@ export function FiltersAndCount({
                       setTempSortBy(v as 'id' | 'name' | 'type')
                     }
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
                       <SelectValue placeholder="ID" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,7 +205,7 @@ export function FiltersAndCount({
                     value={tempSortOrder}
                     onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
                       <SelectValue placeholder="Asc" />
                     </SelectTrigger>
                     <SelectContent>
@@ -234,7 +234,7 @@ export function FiltersAndCount({
                     }}
                   >
                     <SelectTrigger
-                      className="w-full text-sm mt-1"
+                      className="w-full text-sm mt-1 focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                       aria-label="Owned filter"
                     >
                       <SelectValue placeholder="All" />
