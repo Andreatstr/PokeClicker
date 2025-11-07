@@ -108,8 +108,11 @@ export function ProfileDashboard({
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-4 px-4 sm:py-8 sm:px-6">
-      <div
+    <main
+      className="max-w-4xl mx-auto py-4 px-4 sm:py-8 sm:px-6"
+      aria-labelledby="profile-title"
+    >
+      <article
         className="border-4 p-4 sm:p-6 pixel-font"
         style={{
           borderColor: isDarkMode ? '#333333' : 'black',
@@ -119,7 +122,10 @@ export function ProfileDashboard({
             : '8px 8px 0px rgba(0,0,0,1)',
         }}
       >
-        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+        <h1
+          id="profile-title"
+          className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6"
+        >
           TRAINER PROFILE
         </h1>
 
@@ -135,21 +141,29 @@ export function ProfileDashboard({
           >
             TRAINER INFO
           </h2>
-          <div className="space-y-2 text-sm sm:text-base">
-            <p className="break-words">
-              <strong>NAME:</strong> {user.username}
-            </p>
-            <p>
-              <strong>RARE CANDY:</strong> {user.rare_candy}
-            </p>
-            <p>
-              <strong>POKEMON OWNED:</strong> {user.owned_pokemon_ids.length}
-            </p>
-            <p>
-              <strong>TRAINER SINCE:</strong>{' '}
+          <dl className="space-y-2 text-sm sm:text-base">
+            <dt className="inline break-words">
+              <strong>NAME:</strong>
+            </dt>
+            <dd className="inline ml-2 break-words">{user.username}</dd>
+
+            <dt className="inline">
+              <strong>RARE CANDY:</strong>
+            </dt>
+            <dd className="inline ml-2">{user.rare_candy}</dd>
+
+            <dt className="inline">
+              <strong>POKEMON OWNED:</strong>
+            </dt>
+            <dd className="inline ml-2">{user.owned_pokemon_ids.length}</dd>
+
+            <dt className="inline">
+              <strong>TRAINER SINCE:</strong>
+            </dt>
+            <dd className="inline ml-2">
               {formatTrainerSince(user.created_at)}
-            </p>
-          </div>
+            </dd>
+          </dl>
         </section>
 
         {/* Game Statistics Section */}
@@ -164,32 +178,25 @@ export function ProfileDashboard({
           >
             TRAINER STATS
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">HP</span>
-              <span className="font-bold">{user.stats.hp}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">ATTACK</span>
-              <span className="font-bold">{user.stats.attack}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">DEFENSE</span>
-              <span className="font-bold">{user.stats.defense}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">SP. ATK</span>
-              <span className="font-bold">{user.stats.spAttack}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">SP. DEF</span>
-              <span className="font-bold">{user.stats.spDefense}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs opacity-70">SPEED</span>
-              <span className="font-bold">{user.stats.speed}</span>
-            </div>
-          </div>
+          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
+            <dt className="text-xs opacity-70">HP</dt>
+            <dd className="font-bold">{user.stats.hp}</dd>
+
+            <dt className="text-xs opacity-70">ATTACK</dt>
+            <dd className="font-bold">{user.stats.attack}</dd>
+
+            <dt className="text-xs opacity-70">DEFENSE</dt>
+            <dd className="font-bold">{user.stats.defense}</dd>
+
+            <dt className="text-xs opacity-70">SP. ATK</dt>
+            <dd className="font-bold">{user.stats.spAttack}</dd>
+
+            <dt className="text-xs opacity-70">SP. DEF</dt>
+            <dd className="font-bold">{user.stats.spDefense}</dd>
+
+            <dt className="text-xs opacity-70">SPEED</dt>
+            <dd className="font-bold">{user.stats.speed}</dd>
+          </dl>
         </section>
 
         {checked !== null && (
@@ -204,33 +211,34 @@ export function ProfileDashboard({
             >
               RANKS VISIBILITY
             </h2>
-            <div className="flex items-center gap-2">
+            <label
+              htmlFor="profile-show-in-ranks"
+              className="flex items-center gap-2 text-sm"
+              style={{color: 'var(--foreground)'}}
+            >
               <Checkbox
                 id="profile-show-in-ranks"
                 checked={checked}
                 onCheckedChange={handleCheckedChange}
                 disabled={isUpdating}
               />
-              <label
-                htmlFor="profile-show-in-ranks"
-                className="text-sm"
-                style={{color: 'var(--foreground)'}}
-              >
-                Show me in ranks
-              </label>
-            </div>
+              Show me in ranks
+            </label>
           </section>
         )}
 
         {/* Pokemon Selection Sections */}
-        <div data-onboarding="pokemon-selection">
+        <section
+          data-onboarding="pokemon-selection"
+          aria-label="Pokemon selection options"
+        >
           {/* Battle Pokemon Section (renamed from Favorite) */}
           <section
             className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
             aria-labelledby="battle-pokemon-heading"
           >
-            <div className="flex-1">
+            <header className="flex-1">
               <h2
                 id="battle-pokemon-heading"
                 className="text-lg sm:text-xl font-bold"
@@ -240,7 +248,7 @@ export function ProfileDashboard({
               <p className="text-xs opacity-70 mt-1">
                 This Pokemon is used in battles in the World
               </p>
-            </div>
+            </header>
             <PokemonDisplayButton
               pokemon={favoritePokemonData?.pokemonById}
               onClick={() => setShowFavoriteSelector(true)}
@@ -262,7 +270,7 @@ export function ProfileDashboard({
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
             aria-labelledby="clicker-pokemon-heading"
           >
-            <div className="flex-1">
+            <header className="flex-1">
               <h2
                 id="clicker-pokemon-heading"
                 className="text-lg sm:text-xl font-bold"
@@ -272,7 +280,7 @@ export function ProfileDashboard({
               <p className="text-xs opacity-70 mt-1">
                 This Pokemon appears in the Clicker game
               </p>
-            </div>
+            </header>
             <PokemonDisplayButton
               pokemon={selectedPokemonData?.pokemonById}
               onClick={() => setShowSelectedSelector(true)}
@@ -286,7 +294,7 @@ export function ProfileDashboard({
               isDarkMode={isDarkMode}
             />
           </section>
-        </div>
+        </section>
 
         {/* Tutorial Section */}
         <section
@@ -339,7 +347,10 @@ export function ProfileDashboard({
         </section>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <footer
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+          aria-label="Account actions"
+        >
           <button
             onClick={handleLogout}
             className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
@@ -399,8 +410,8 @@ export function ProfileDashboard({
           >
             {deleting ? 'DELETING...' : 'DELETE ACCOUNT'}
           </button>
-        </div>
-      </div>
+        </footer>
+      </article>
 
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
@@ -428,6 +439,6 @@ export function ProfileDashboard({
         ownedPokemonIds={user.owned_pokemon_ids}
         isDarkMode={isDarkMode}
       />
-    </div>
+    </main>
   );
 }

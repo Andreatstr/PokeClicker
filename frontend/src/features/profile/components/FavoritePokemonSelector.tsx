@@ -24,7 +24,7 @@ export function FavoritePokemonSelector({
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogBody>
-        <div
+        <section
           className="pixel-font p-4 sm:p-6 max-w-2xl mx-auto max-h-[80vh] overflow-auto"
           style={{
             backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
@@ -33,10 +33,16 @@ export function FavoritePokemonSelector({
               ? '8px 8px 0px rgba(51,51,51,1)'
               : '8px 8px 0px rgba(0,0,0,1)',
           }}
+          aria-labelledby="pokemon-selector-heading"
         >
-          <h2 className="text-lg sm:text-xl font-bold mb-4">
-            SELECT FAVORITE POKEMON
-          </h2>
+          <header>
+            <h2
+              id="pokemon-selector-heading"
+              className="text-lg sm:text-xl font-bold mb-4"
+            >
+              SELECT FAVORITE POKEMON
+            </h2>
+          </header>
 
           {loading ? (
             <p className="text-center py-8">Loading Pokemon...</p>
@@ -92,7 +98,7 @@ export function FavoritePokemonSelector({
           >
             CANCEL
           </button>
-        </div>
+        </section>
       </DialogBody>
     </Dialog>
   );

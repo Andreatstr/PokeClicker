@@ -40,7 +40,7 @@ export function ConfirmDialog({
         }}
       >
         <DialogBody>
-          <div
+          <article
             className="pixel-font p-4 sm:p-6 max-w-md mx-auto"
             style={{
               backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
@@ -50,9 +50,11 @@ export function ConfirmDialog({
                 : '8px 8px 0px rgba(0,0,0,1)',
             }}
           >
-            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
-              {title}
-            </h2>
+            <header>
+              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                {title}
+              </h2>
+            </header>
             <p
               className="mb-4 sm:mb-6 text-sm sm:text-base"
               style={{color: isDarkMode ? '#e5e5e5' : '#000'}}
@@ -60,7 +62,7 @@ export function ConfirmDialog({
               {message}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <footer className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={onClose}
                 className="flex-1 px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
@@ -117,8 +119,8 @@ export function ConfirmDialog({
               >
                 {confirmText}
               </button>
-            </div>
-          </div>
+            </footer>
+          </article>
         </DialogBody>
       </FocusTrap>
     </Dialog>
