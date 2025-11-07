@@ -219,19 +219,17 @@ export function GameBoyConsole({
           </div>
         </div>
 
-        {/* Start/Select Buttons */}
+        {/* Start/Select Buttons (visual only) */}
         <div className="flex gap-4 items-center mb-2">
-          <Button
-            size="sm"
-            className="w-10 h-3 rounded-full shadow-md p-0"
+          <div
+            className="w-10 h-3 rounded-full shadow-md border-2"
             style={{
               backgroundColor: '#4a4a5e',
               borderColor: '#2a2a3e',
             }}
           />
-          <Button
-            size="sm"
-            className="w-10 h-3 rounded-full shadow-md p-0"
+          <div
+            className="w-10 h-3 rounded-full shadow-md border-2"
             style={{
               backgroundColor: '#4a4a5e',
               borderColor: '#2a2a3e',
