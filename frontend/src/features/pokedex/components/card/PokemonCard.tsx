@@ -178,7 +178,7 @@ export const PokemonCard = memo(function PokemonCard({
           ) : (
             <>
               {/* Info Grid */}
-              <div className="flex gap-2 text-[9px]">
+              <dl className="flex gap-2 text-[9px]">
                 <div
                   className="flex-1 rounded px-2 py-1"
                   style={{
@@ -190,15 +190,15 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <div
+                  <dt
                     className="font-bold text-[8px] uppercase tracking-wide"
                     style={{color: 'var(--muted-foreground)'}}
                   >
                     Height
-                  </div>
-                  <div className="font-bold text-[11px] tabular-nums">
+                  </dt>
+                  <dd className="font-bold text-[11px] tabular-nums">
                     {pokemon.height ?? '—'}
-                  </div>
+                  </dd>
                 </div>
                 <div
                   className="flex-1 rounded px-2 py-1"
@@ -211,17 +211,17 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <div
+                  <dt
                     className="font-bold text-[8px] uppercase tracking-wide"
                     style={{color: 'var(--muted-foreground)'}}
                   >
                     Weight
-                  </div>
-                  <div className="font-bold text-[11px] tabular-nums">
+                  </dt>
+                  <dd className="font-bold text-[11px] tabular-nums">
                     {pokemon.weight ?? '—'}
-                  </div>
+                  </dd>
                 </div>
-              </div>
+              </dl>
 
               {/* Abilities */}
               {pokemon.abilities && pokemon.abilities.length > 0 && (
