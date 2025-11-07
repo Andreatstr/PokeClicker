@@ -11,9 +11,11 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
     style="background-color: var(--card); border: 4px solid var(--border); box-shadow: 8px 8px 0px 0px rgba(55,65,81,1);"
   >
     <div
+      aria-label="Navigation container"
       class="flex items-center justify-between h-full"
+      role="group"
     >
-      <div
+      <section
         class="flex items-center"
       >
         <h1
@@ -25,7 +27,7 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
         >
           PokeClicker
         </h1>
-      </div>
+      </section>
       <nav
         aria-label="Main navigation"
         class="hidden xl:flex items-center gap-4"
@@ -102,7 +104,8 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
           </svg>
         </button>
       </nav>
-      <div
+      <section
+        aria-label="Mobile menu control"
         class="xl:hidden"
       >
         <button
@@ -125,7 +128,7 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
             />
           </svg>
         </button>
-      </div>
+      </section>
     </div>
   </div>
 </header>
@@ -142,9 +145,11 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
     style="background-color: var(--card); border: 4px solid var(--border); box-shadow: 8px 8px 0px 0px rgba(187,183,178,1);"
   >
     <div
+      aria-label="Navigation container"
       class="flex items-center justify-between h-full"
+      role="group"
     >
-      <div
+      <section
         class="flex items-center"
       >
         <h1
@@ -156,7 +161,7 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
         >
           PokeClicker
         </h1>
-      </div>
+      </section>
       <nav
         aria-label="Main navigation"
         class="hidden xl:flex items-center gap-4"
@@ -233,7 +238,8 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
           </svg>
         </button>
       </nav>
-      <div
+      <section
+        aria-label="Mobile menu control"
         class="xl:hidden"
       >
         <button
@@ -256,7 +262,7 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
             />
           </svg>
         </button>
-      </div>
+      </section>
     </div>
   </div>
 </header>
