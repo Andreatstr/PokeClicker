@@ -167,7 +167,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       {/* Persisted audio element to prevent resets on toggle */}
       <audio ref={audioRef} preload="metadata" />
       {isMinimized ? (
-        <div
+        <aside
           data-onboarding="music-player"
           className="fixed bottom-4 left-4 w-12 h-12 lg:w-auto lg:h-auto flex items-center justify-center p-2 lg:p-3 border-4 border-gray-300 dark:border-gray-600 rounded lg:rounded z-50"
           style={{
@@ -177,6 +177,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
               ? '8px 8px 0px 0px rgba(55,65,81,1)'
               : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
+          aria-label="Music player (minimized)"
         >
           <button
             onClick={toggleMinimize}
@@ -195,9 +196,9 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
               />
             </svg>
           </button>
-        </div>
+        </aside>
       ) : (
-        <div
+        <aside
           data-onboarding="music-player"
           className="fixed bottom-4 left-4 lg:bottom-4 lg:left-4 flex items-center gap-2 p-3 border-4 border-gray-300 dark:border-gray-600 rounded z-50"
           style={{
@@ -207,6 +208,8 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
               ? '8px 8px 0px 0px rgba(55,65,81,1)'
               : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
+          role="region"
+          aria-label="Music player controls"
         >
           <button
             onClick={prevTrack}
@@ -304,10 +307,18 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
             </svg>
           </button>
 
-          <div className="w-12 h-2 bg-foreground/20 relative rounded">
+          <div
+            className="w-12 h-2 bg-foreground/20 relative rounded"
+            role="progressbar"
+            aria-valuenow={Math.round(volume * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Volume: ${Math.round(volume * 100)}%`}
+          >
             <div
               className="absolute top-0 left-0 h-full bg-foreground transition-all"
               style={{width: `${volume * 100}%`}}
+              aria-hidden="true"
             />
           </div>
 
@@ -325,7 +336,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
               <path fill="currentColor" d="M4 11h16v2H4z" />
             </svg>
           </button>
-        </div>
+        </aside>
       )}
     </>
   );
