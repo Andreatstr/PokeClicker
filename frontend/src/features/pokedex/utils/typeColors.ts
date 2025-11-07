@@ -81,8 +81,11 @@ export function getContrastColor(bgColor: string): string {
   const luminance =
     0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 
+  const contrastWithWhite = (1 + 0.05) / (luminance + 0.05);
+  const contrastWithBlack = (luminance + 0.05) / (0 + 0.05);
+
   // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
-  return luminance > 0.5 ? 'text-black' : 'text-white';
+  return contrastWithWhite >= contrastWithBlack ? 'text-white' : 'text-black';
 }
 
 export function getStatBarColors() {
