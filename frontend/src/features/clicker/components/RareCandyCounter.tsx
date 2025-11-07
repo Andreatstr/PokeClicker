@@ -26,10 +26,11 @@ export function RareCandyCounter({
       <div
         className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
         style={{backgroundColor: isDarkMode ? '#fbbf24' : '#fde047'}}
+        aria-hidden="true"
       ></div>
-      <div className="relative flex items-center justify-between">
+      <dl className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div
+          <figure
             className="border-2 p-2 rounded-md shadow-md"
             style={{
               backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
@@ -42,17 +43,17 @@ export function RareCandyCounter({
               className="w-8 h-8"
               style={{imageRendering: 'pixelated'}}
             />
-          </div>
-          <span
+          </figure>
+          <dt
             className="pixel-font text-base font-bold"
             style={{
               color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
             }}
           >
             Rare Candy
-          </span>
+          </dt>
         </div>
-        <div
+        <dd
           className="border-2 px-4 py-2 shadow-md"
           style={{
             backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
@@ -64,11 +65,12 @@ export function RareCandyCounter({
             style={{
               color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
             }}
+            aria-label={`${formatNumber(Math.floor(candyCount))} Rare Candy`}
           >
             {formatNumber(Math.floor(candyCount))}
           </span>
-        </div>
-      </div>
+        </dd>
+      </dl>
     </Card>
   );
 }
