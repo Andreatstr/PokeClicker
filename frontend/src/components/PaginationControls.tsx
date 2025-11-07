@@ -35,7 +35,10 @@ export function PaginationControls({
   if (isMobile) {
     // Mobile view: Arrows only with page info
     return (
-      <div className="flex items-center justify-center gap-4 py-4">
+      <nav
+        className="flex items-center justify-center gap-4 py-4"
+        aria-label="Pagination navigation"
+      >
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
@@ -44,7 +47,11 @@ export function PaginationControls({
         >
           <ArrowLeftIcon className="w-6 h-6" />
         </button>
-        <span className="text-sm font-bold">
+        <span
+          className="text-sm font-bold"
+          aria-current="page"
+          aria-label={`Page ${currentPage} of ${totalPages}`}
+        >
           {currentPage} / {totalPages}
         </span>
         <button
@@ -55,14 +62,17 @@ export function PaginationControls({
         >
           <ArrowRightIcon className="w-6 h-6" />
         </button>
-      </div>
+      </nav>
     );
   }
 
   // Desktop view: Previous, Page info, Next
   return (
     <footer className="flex flex-col items-center gap-4 mt-8">
-      <div className="flex items-center gap-4">
+      <nav
+        className="flex items-center gap-4"
+        aria-label="Pagination navigation"
+      >
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
@@ -72,7 +82,11 @@ export function PaginationControls({
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Previous</span>
         </button>
-        <span className="pixel-font text-sm whitespace-nowrap">
+        <span
+          className="pixel-font text-sm whitespace-nowrap"
+          aria-current="page"
+          aria-label={`Page ${currentPage} of ${totalPages}`}
+        >
           {currentPage} of {totalPages}
         </span>
         <button
@@ -84,7 +98,7 @@ export function PaginationControls({
           <span>Next</span>
           <ArrowRightIcon className="w-5 h-5" />
         </button>
-      </div>
+      </nav>
     </footer>
   );
 }
