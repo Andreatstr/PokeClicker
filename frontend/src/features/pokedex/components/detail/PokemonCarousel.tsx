@@ -41,6 +41,21 @@ export function PokemonCarousel({
 }: PokemonCarouselProps) {
   const initialIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
 
+  // Debug: Log the initial index to verify it's correct
+  useEffect(() => {
+    logger.info(
+      `🎯 Carousel initializing with Pokemon ${currentPokemon.name} (ID: ${currentPokemon.id}) at index ${initialIndex} out of ${allPokemon.length}`,
+      'PokemonCarousel'
+    );
+    logger.info(
+      `Pokemon list: ${allPokemon
+        .slice(Math.max(0, initialIndex - 2), initialIndex + 3)
+        .map((p) => `${p.name}(${p.id})`)
+        .join(', ')}`,
+      'PokemonCarousel'
+    );
+  }, [currentPokemon.id, currentPokemon.name, initialIndex, allPokemon]);
+
   // Create stable ID list to prevent unnecessary preload triggers
   const pokemonIdList = useMemo(
     () => allPokemon.map((p) => p.id).join(','),
@@ -75,15 +90,11 @@ export function PokemonCarousel({
   }, [pokemonIdList, initialIndex, allPokemon]);
 
   return (
-    <Carousel className="relative" initialIndex={initialIndex}>
-      <CarouselSyncEffect
-        currentPokemon={currentPokemon}
-        allPokemon={allPokemon}
-      />
-      {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
-      <CarouselPrevious className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
-      <CarouselNext className="hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
-
+    <Carousel
+      key={`carousel-${currentPokemon.id}`}
+      className="relative"
+      initialIndex={initialIndex}
+    >
       <CarouselContent>
         {allPokemon.map((poke, index) => (
           <CarouselItem key={poke.id}>
@@ -102,6 +113,11 @@ export function PokemonCarousel({
           </CarouselItem>
         ))}
       </CarouselContent>
+
+      {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
+      {/* These buttons come LAST in tab order, after all modal content */}
+      <CarouselPrevious className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      <CarouselNext className="hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
     </Carousel>
   );
 }
@@ -137,6 +153,16 @@ function LazyPokemonCard({
   const renderWindow = 1;
   const shouldRender = Math.abs(currentIndex - index) <= renderWindow;
 
+  // Debug logging
+  useEffect(() => {
+    if (shouldRender) {
+      logger.info(
+        `📦 Rendering LazyPokemonCard for ${pokemon.name} (ID: ${pokemon.id}) at index ${index} (currentIndex: ${currentIndex})`,
+        'LazyPokemonCard'
+      );
+    }
+  }, [shouldRender, pokemon.name, pokemon.id, index, currentIndex]);
+
   if (!shouldRender) {
     return (
       <div
@@ -161,24 +187,4 @@ function LazyPokemonCard({
       ownedPokemonIds={ownedPokemonIds}
     />
   );
-}
-
-// Helper component to sync carousel index when currentPokemon changes
-function CarouselSyncEffect({
-  currentPokemon,
-  allPokemon,
-}: {
-  currentPokemon: PokedexPokemon;
-  allPokemon: PokedexPokemon[];
-}) {
-  const {setCurrentIndex} = useCarousel();
-
-  useEffect(() => {
-    const newIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
-    if (newIndex !== -1) {
-      setCurrentIndex(newIndex);
-    }
-  }, [currentPokemon.id, allPokemon, setCurrentIndex]);
-
-  return null;
 }

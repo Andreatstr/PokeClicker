@@ -59,6 +59,7 @@ export function EvolutionPokemon({
         className="evolutionButton bg-transparent border-none p-0 cursor-pointer relative"
         onClick={() => onSelectPokemon?.(evo.id)}
         title={isOwned ? `View ${evo.name}` : 'Unknown Pokémon'}
+        tabIndex={0}
       >
         {isOwned ? (
           <img

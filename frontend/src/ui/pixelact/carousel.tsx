@@ -35,8 +35,18 @@ export function Carousel({
   initialIndex = 0,
   ...props
 }: CarouselProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(initialIndex);
+  // Use a function initializer to ensure initial state is set correctly
+  const [currentIndex, setCurrentIndex] = React.useState(() => initialIndex);
   const [itemsCount, setItemsCount] = React.useState(0);
+  const prevInitialIndexRef = React.useRef(initialIndex);
+
+  // Update currentIndex when initialIndex changes (e.g., when modal opens with different Pokemon)
+  React.useEffect(() => {
+    if (prevInitialIndexRef.current !== initialIndex) {
+      setCurrentIndex(initialIndex);
+      prevInitialIndexRef.current = initialIndex;
+    }
+  }, [initialIndex]);
 
   const canScrollPrev = currentIndex > 0;
   const canScrollNext = currentIndex < itemsCount - 1;
@@ -49,21 +59,8 @@ export function Carousel({
     setCurrentIndex((prev) => Math.min(itemsCount - 1, prev + 1));
   }, [itemsCount]);
 
-  // Add keyboard navigation
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        scrollPrev();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        scrollNext();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scrollPrev, scrollNext]);
+  // Keyboard navigation is handled by the carousel buttons themselves
+  // We don't want global arrow key listeners that interfere with focus management
 
   const value = React.useMemo(
     () => ({
