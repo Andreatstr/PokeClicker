@@ -15,6 +15,7 @@ interface GameBoyProps {
   isAuthenticated: boolean;
   nearbyPokemon: {pokemon: {name: string}} | null;
   viewport: {width: number; height: number};
+  isMapLoading?: boolean;
 }
 
 export function GameBoy({
@@ -27,6 +28,7 @@ export function GameBoy({
   isAuthenticated,
   nearbyPokemon,
   viewport,
+  isMapLoading = false,
 }: GameBoyProps) {
   // Detect mobile device
   const [isMobile, setIsMobile] = useState(false);
@@ -78,18 +80,37 @@ export function GameBoy({
             </div>
 
             {/* Screen - contains the game viewport */}
-            <div
+            <section
               data-onboarding="map-canvas"
-              className="mx-auto"
+              className="mx-auto relative w-full overflow-hidden"
               style={{
-                width: '100%',
                 maxWidth: `${viewport.width}px`,
                 aspectRatio: `${viewport.width} / ${viewport.height}`,
+                height: `${viewport.height}px`,
               }}
             >
               {/* Game Viewport Container - this is where the game content goes */}
               {children}
-            </div>
+
+              {/* Loading Overlay */}
+              {isMapLoading && (
+                <aside
+                  className="absolute inset-0 bg-[#0f380f] flex items-center justify-center"
+                  style={{zIndex: 9999}}
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <article className="text-center pixel-font">
+                    <h2 className="text-[#9bbc0f] text-base mb-2 animate-pulse">
+                      LOADING MAP...
+                    </h2>
+                    <p className="text-[#8bac0f] text-xs">
+                      Please wait while the world loads
+                    </p>
+                  </article>
+                </aside>
+              )}
+            </section>
           </div>
 
           {/* Nintendo GAME BOY text */}

@@ -45,7 +45,7 @@ export function UpgradesPanel({
           : '8px 8px 0px 0px rgba(187,183,178,1)',
       }}
     >
-      <div
+      <header
         className="border-2 p-3 mb-4 shadow-inner"
         style={{
           background: isDarkMode
@@ -60,15 +60,15 @@ export function UpgradesPanel({
         >
           POKEMON UPGRADES
         </h2>
-      </div>
-      <div className="flex flex-col gap-3">
+      </header>
+      <section className="flex flex-col gap-3">
         {stats &&
           (['clickPower', 'passiveIncome'] as const).map((key) => {
             const value = stats[key] || 1;
             const cost = getUpgradeCost(key, value);
             const descriptionData = getStatDescription(key, stats);
             return (
-              <div
+              <article
                 key={key}
                 className="border-2 p-3 shadow-md hover:shadow-lg transition-shadow"
                 style={{
@@ -78,8 +78,8 @@ export function UpgradesPanel({
                   borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                 }}
               >
-                <div className="flex items-center justify-between gap-4 mb-1">
-                  <div className="flex items-center gap-3 flex-1">
+                <header className="flex items-center justify-between gap-4 mb-1">
+                  <dl className="flex items-center gap-3 flex-1">
                     <div
                       className="w-2 h-8 border"
                       style={{
@@ -93,9 +93,10 @@ export function UpgradesPanel({
                               : '#22c55e',
                         borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                       }}
+                      aria-hidden="true"
                     ></div>
                     <div className="flex flex-col">
-                      <span
+                      <dt
                         className="pixel-font text-xs"
                         style={{
                           color: isDarkMode
@@ -106,8 +107,8 @@ export function UpgradesPanel({
                         {key === 'clickPower'
                           ? 'Click Power'
                           : 'Passive Income'}
-                      </span>
-                      <span
+                      </dt>
+                      <dd
                         className="pixel-font text-lg font-bold"
                         style={{
                           color: isDarkMode
@@ -116,9 +117,9 @@ export function UpgradesPanel({
                         }}
                       >
                         LV {String(value)}
-                      </span>
+                      </dd>
                     </div>
-                  </div>
+                  </dl>
                   <Button
                     size="sm"
                     onClick={() => onUpgrade(key)}
@@ -135,14 +136,15 @@ export function UpgradesPanel({
                           : '#4ade80'
                     }
                     className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Upgrade"
                   >
                     <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
                       ↑ {formatNumber(cost)}
                     </span>
                   </Button>
-                </div>
-                <div className="ml-5 flex items-center gap-1">
-                  <span
+                </header>
+                <footer className="ml-5 flex items-center gap-1">
+                  <p
                     className="pixel-font text-xs"
                     style={{
                       color: isDarkMode
@@ -160,12 +162,12 @@ export function UpgradesPanel({
                     ) : (
                       descriptionData
                     )}
-                  </span>
-                </div>
-              </div>
+                  </p>
+                </footer>
+              </article>
             );
           })}
-      </div>
+      </section>
     </Card>
   );
 }

@@ -8,6 +8,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/*.visual.test.ts', // Exclude Playwright visual regression tests
+    ],
     typecheck: {
       include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     },

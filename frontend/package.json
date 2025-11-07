@@ -20,6 +20,9 @@
     "test:unit": "vitest run --reporter=verbose src/lib src/features/*/utils",
     "test:components": "vitest run --reporter=verbose src/components src/features/*/components",
     "test:integration": "vitest run --reporter=verbose src/__tests__",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
+    "test:visual:ui": "playwright test --ui",
     "split-tiles": "npx tsx scripts/split-tiles.ts",
     "analyze": "vite build && start dist/stats.html"
   },
@@ -46,6 +49,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

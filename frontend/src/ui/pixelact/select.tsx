@@ -126,6 +126,30 @@ function SelectItem({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const currentItem = e.currentTarget;
+      const parent = currentItem.parentElement;
+      if (!parent) return;
+
+      const items = Array.from(parent.querySelectorAll('[role="option"]'));
+      const currentIndex = items.indexOf(currentItem);
+      const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+      const nextItem = items[nextIndex] as HTMLElement | undefined;
+
+      if (nextItem) {
+        nextItem.focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.currentTarget.click();
+    }
+  };
+
   return (
     <ShadcnSelectItem
       className={cn(
@@ -145,6 +169,8 @@ function SelectItem({
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = '';
       }}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
       {...props}
     >
       {children}

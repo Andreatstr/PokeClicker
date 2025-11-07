@@ -79,9 +79,9 @@ export function FiltersAndCount({
   const showCounts = facets !== null && facets !== undefined;
 
   return (
-    <section className="mb-6">
+    <section id="filters-and-count" className="mb-6">
       {showMobileFilters && (
-        <div
+        <aside
           className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
@@ -89,16 +89,16 @@ export function FiltersAndCount({
           id="mobile-filter-dialog"
           onClick={() => setShowMobileFilters(false)}
         >
-          <div
-            className="w-full max-w-md p-4 rounded-md shadow-[var(--pixel-box-shadow)] max-h-[90vh] overflow-y-auto"
+          <article
+            className="w-full max-w-md p-4 rounded-md shadow-(--pixel-box-shadow) max-h-[90vh] overflow-y-auto"
             style={{backgroundColor: 'var(--card)'}}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
+            <section
               className="w-full p-4"
               style={{backgroundColor: 'var(--card)'}}
             >
-              <div className="flex justify-between items-center mb-4">
+              <header className="flex justify-between items-center mb-4">
                 <h2
                   id="filter-dialog-title"
                   className="pixel-font text-lg"
@@ -113,12 +113,16 @@ export function FiltersAndCount({
                 >
                   <span className="text-xl">×</span>
                 </button>
-              </div>
+              </header>
 
-              <div className="flex flex-col gap-4">
+              <form
+                className="flex flex-col gap-4"
+                onSubmit={(e) => e.preventDefault()}
+              >
                 {/* REGION */}
-                <div>
+                <div role="group" aria-labelledby="region-filter-label">
                   <Label
+                    id="region-filter-label"
                     className="text-xs font-bold"
                     style={{color: 'var(--foreground)'}}
                   >
@@ -130,7 +134,10 @@ export function FiltersAndCount({
                       setTempRegion(v === 'all' ? null : v);
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Region"
+                    >
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
@@ -152,9 +159,10 @@ export function FiltersAndCount({
                 </div>
 
                 {/* TYPE */}
-                <div>
+                <div role="group" aria-labelledby="type-filter-label">
                   <Label
-                    className="text-xs font-bold"
+                    id="type-filter-label"
+                    className="text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                     style={{color: 'var(--foreground)'}}
                   >
                     Type
@@ -163,14 +171,16 @@ export function FiltersAndCount({
                     options={[...POKEMON_TYPES]}
                     selected={tempTypes}
                     onChange={setTempTypes}
-                    className="w-full"
+                    className="w-full focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                    aria-label="Type"
                     counts={showCounts ? typeCountMap : undefined}
                   />
                 </div>
 
                 {/* SORT BY */}
-                <div>
+                <div role="group" aria-labelledby="sortby-filter-label">
                   <Label
+                    id="sortby-filter-label"
                     className="text-xs font-bold"
                     style={{color: 'var(--foreground)'}}
                   >
@@ -182,7 +192,10 @@ export function FiltersAndCount({
                       setTempSortBy(v as 'id' | 'name' | 'type')
                     }
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Sort by"
+                    >
                       <SelectValue placeholder="ID" />
                     </SelectTrigger>
                     <SelectContent>
@@ -194,8 +207,9 @@ export function FiltersAndCount({
                 </div>
 
                 {/* ORDER */}
-                <div>
+                <div role="group" aria-labelledby="order-filter-label">
                   <Label
+                    id="order-filter-label"
                     className="text-xs font-bold"
                     style={{color: 'var(--foreground)'}}
                   >
@@ -205,7 +219,10 @@ export function FiltersAndCount({
                     value={tempSortOrder}
                     onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Order"
+                    >
                       <SelectValue placeholder="Asc" />
                     </SelectTrigger>
                     <SelectContent>
@@ -216,8 +233,9 @@ export function FiltersAndCount({
                 </div>
 
                 {/* OWNED */}
-                <div>
+                <div role="group" aria-labelledby="owned-filter-label">
                   <Label
+                    id="owned-filter-label"
                     className="text-xs font-bold"
                     style={{color: 'var(--foreground)'}}
                   >
@@ -234,7 +252,7 @@ export function FiltersAndCount({
                     }}
                   >
                     <SelectTrigger
-                      className="w-full text-sm mt-1"
+                      className="w-full text-sm mt-1 focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
                       aria-label="Owned filter"
                     >
                       <SelectValue placeholder="All" />
@@ -258,10 +276,10 @@ export function FiltersAndCount({
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
+              </form>
 
               {/* Footer Buttons */}
-              <div className="flex justify-between mt-6 gap-2">
+              <footer className="flex justify-between mt-6 gap-2">
                 <Button
                   variant="default"
                   aria-label="Clear all filters"
@@ -306,10 +324,10 @@ export function FiltersAndCount({
                 >
                   Apply
                 </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+              </footer>
+            </section>
+          </article>
+        </aside>
       )}
 
       {!isMobile && (

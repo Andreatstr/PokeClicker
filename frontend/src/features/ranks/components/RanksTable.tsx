@@ -25,13 +25,13 @@ export function RanksTable({
   const {user} = useAuth();
 
   return (
-    <div
+    <section
       className={`rounded-lg shadow overflow-x-auto ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}
+      aria-labelledby="ranks-table-caption"
     >
       <table
         className="w-full min-w-full table-fixed"
         aria-label={`${scoreLabel} rankings table`}
-        role="table"
       >
         <caption className="sr-only">
           Player rankings sorted by {scoreLabel}.
@@ -112,14 +112,14 @@ export function RanksTable({
       </table>
 
       {userRank && (
-        <div
+        <footer
           className={`p-2 sm:p-3 border-t text-xs sm:text-sm ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} ${isDarkMode ? 'bg-blue-900' : 'bg-blue-300'}`}
         >
           <span className="pixel-font" style={{color: 'var(--foreground)'}}>
             Your Rank: #{userRank}
           </span>
-        </div>
+        </footer>
       )}
-    </div>
+    </section>
   );
 }
