@@ -39,6 +39,9 @@ export default defineConfig({
       'localhost',
       '127.0.0.1',
     ],
+    watch: {
+      ignored: ['**/playwright-report/**', '**/test-results/**'],
+    },
   },
   resolve: {
     alias: {
