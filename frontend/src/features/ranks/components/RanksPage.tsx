@@ -109,13 +109,17 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
 
   if (error)
     return (
-      <div className="text-center text-red-500">
+      <section
+        className="text-center text-red-500"
+        role="alert"
+        aria-live="assertive"
+      >
         Error loading ranks: {error.message}
-      </div>
+      </section>
     );
 
   return (
-    <div className="flex flex-col items-center container mx-auto p-4">
+    <main className="flex flex-col items-center container mx-auto p-4">
       {/* Header */}
       <h1
         className="text-xl sm:text-2xl font-bold pixel-font text-center mb-6"
@@ -125,13 +129,14 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
       </h1>
 
       {/* Ranks Table */}
-      <div className="w-full">
+      <section className="w-full" aria-label="Rankings table and controls">
         {/* Controls row - aligned with table edges */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-2 mb-4 w-full">
+        <header className="flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-2 mb-4 w-full">
           {/* League toggle buttons */}
-          <div
+          <nav
             data-onboarding="league-buttons"
             className="flex justify-center md:justify-start gap-2"
+            aria-label="League selection"
           >
             <Button
               className={`flex-1 md:flex-none text-xs sm:text-sm ${
@@ -156,11 +161,14 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
             >
               Pokemon League
             </Button>
-          </div>
+          </nav>
 
           {/* Checkbox + Refresh button */}
           {user && checked !== null && (
-            <div className="flex justify-center md:justify-end items-center gap-2 md:gap-3">
+            <aside
+              className="flex justify-center md:justify-end items-center gap-2 md:gap-3"
+              aria-label="Visibility and refresh controls"
+            >
               <label
                 htmlFor="show-in-ranks"
                 className="flex items-center gap-2 cursor-pointer relative min-h-12 px-4"
@@ -188,9 +196,9 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
               >
                 {canRefresh ? 'Refresh' : `Wait ${refreshTimer}s`}
               </Button>
-            </div>
+            </aside>
           )}
-        </div>
+        </header>
         <RanksTable
           entries={
             activeLeague === 'candy'
@@ -207,7 +215,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
         />
 
         {limit < data.getRanks.totalPlayers && (
-          <div className="mt-4 text-center">
+          <footer className="mt-4 text-center">
             <Button
               variant="default"
               aria-label="Load more"
@@ -216,9 +224,9 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
             >
               Load More
             </Button>
-          </div>
+          </footer>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
