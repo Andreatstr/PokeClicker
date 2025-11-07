@@ -428,7 +428,7 @@ export function OnboardingOverlay({
         aria-describedby="onboarding-description"
       >
         {/* Step indicator */}
-        <div className="flex justify-between items-center mb-2">
+        <header className="flex justify-between items-center mb-2">
           <span
             className="text-xs"
             style={{color: isDarkMode ? '#9ca3af' : '#6b7280'}}
@@ -443,7 +443,7 @@ export function OnboardingOverlay({
           >
             Skip
           </button>
-        </div>
+        </header>
 
         <h3
           id="onboarding-title"
@@ -460,7 +460,7 @@ export function OnboardingOverlay({
           {currentStep.description}
         </p>
 
-        <div className="flex gap-2">
+        <footer className="flex gap-2">
           {step > 0 && (
             <Button
               size="sm"
@@ -517,7 +517,7 @@ export function OnboardingOverlay({
           >
             {step === STEPS.length - 1 ? 'Finish' : 'Next'}
           </Button>
-        </div>
+        </footer>
 
         {/* Animated Arrow pointing to element */}
         <div

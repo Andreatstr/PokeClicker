@@ -45,8 +45,12 @@ export function Navbar({
             : '8px 8px 0px 0px rgba(187,183,178,1)',
         }}
       >
-        <div className="flex items-center justify-between h-full">
-          <div className="flex items-center">
+        <div
+          className="flex items-center justify-between h-full"
+          role="group"
+          aria-label="Navigation container"
+        >
+          <section className="flex items-center">
             <h1
               className="text-sm sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-bold pixel-font whitespace-nowrap flex-shrink-[2] min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
               style={{color: 'var(--foreground)'}}
@@ -63,7 +67,7 @@ export function Navbar({
             >
               PokeClicker
             </h1>
-          </div>
+          </section>
 
           {/* Desktop Navigation */}
           <nav
@@ -137,7 +141,7 @@ export function Navbar({
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="xl:hidden">
+          <section className="xl:hidden" aria-label="Mobile menu control">
             <Button
               onClick={toggleMobileMenu}
               className="min-w-[44px] min-h-[44px] px-3 py-4"
@@ -146,7 +150,7 @@ export function Navbar({
             >
               <MenuIcon className="w-5 h-5" />
             </Button>
-          </div>
+          </section>
         </div>
       </div>
 
@@ -163,9 +167,16 @@ export function Navbar({
               : '8px 8px 0px 0px rgba(187,183,178,1)',
           }}
         >
-          <div className="flex flex-col gap-3">
+          <div
+            className="flex flex-col gap-3"
+            role="group"
+            aria-label="Mobile menu items"
+          >
             {/* Navigation Links */}
-            <div className="flex flex-col gap-2">
+            <section
+              className="flex flex-col gap-2"
+              aria-label="Page navigation links"
+            >
               <Button
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Pokedex"
@@ -197,10 +208,13 @@ export function Navbar({
               >
                 Ranks
               </Button>
-            </div>
+            </section>
 
             {/* Controls Row - Dark/Light Mode, Music, Profile */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+            <section
+              className="flex flex-col gap-2 pt-2 border-t border-gray-300 dark:border-gray-600"
+              aria-label="Settings and profile"
+            >
               <Button
                 className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                 onClick={onToggleTheme}
@@ -241,7 +255,7 @@ export function Navbar({
                   Login
                 </Button>
               )}
-            </div>
+            </section>
           </div>
         </nav>
       )}
