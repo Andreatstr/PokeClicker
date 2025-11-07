@@ -128,11 +128,11 @@ export function UpgradesPanel({
                     bgColor={
                       key === 'clickPower'
                         ? isDarkMode
-                          ? '#ea580c' // Orange for click power
-                          : '#fb923c'
+                          ? '#bf2727ff' // Orange for click power
+                          : '#ff6767ff'
                         : isDarkMode
-                          ? '#16a34a' // Green for passive income
-                          : '#4ade80'
+                          ? '#0b7633ff' // Green for passive income
+                          : '#2cda6bff'
                     }
                     className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Upgrade"

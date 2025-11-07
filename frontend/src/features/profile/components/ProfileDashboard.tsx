@@ -284,7 +284,7 @@ export function ProfileDashboard({
             className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all text-sm"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
-              backgroundColor: '#10b981',
+              backgroundColor: '#10845dff',
               color: 'white',
               boxShadow: isDarkMode
                 ? '4px 4px 0px rgba(51,51,51,1)'
@@ -315,7 +315,7 @@ export function ProfileDashboard({
             aria-label="Log out"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
-              backgroundColor: '#3b82f6',
+              backgroundColor: '#336fcfff',
               color: 'white',
               boxShadow: isDarkMode
                 ? '4px 4px 0px rgba(51,51,51,1)'
@@ -344,7 +344,7 @@ export function ProfileDashboard({
             aria-label="Delete account"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
-              backgroundColor: deleting ? '#9ca3af' : '#ef4444',
+              backgroundColor: deleting ? '#9ca3af' : '#d13a3aff',
               color: 'white',
               boxShadow: isDarkMode
                 ? '4px 4px 0px rgba(51,51,51,1)'
