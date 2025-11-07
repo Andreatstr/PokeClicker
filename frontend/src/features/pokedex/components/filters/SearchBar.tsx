@@ -44,6 +44,7 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
               id="pokemon-search"
               type="search"
               placeholder="search"
+              aria-label="Search"
               className={`w-full border-0 text-xl pl-12 pr-12 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none pixel-font max-w-full shadow-(--pixel-box-shadow) placeholder:text-sm md:placeholder:text-base box-shadow-margin ${
                 isDarkMode ? 'placeholder-white' : 'placeholder-black'
               }`}

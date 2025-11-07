@@ -173,6 +173,7 @@ export const PokemonCard = memo(function PokemonCard({
               pokemonName={pokemon.name}
               size="small"
               isDarkMode={isDarkMode}
+              aria-label={`Unlock ${pokemon.name}`}
             />
           ) : (
             <>

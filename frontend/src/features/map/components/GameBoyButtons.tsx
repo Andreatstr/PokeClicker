@@ -21,6 +21,7 @@ export function GameBoyButtons({
           disabled={!isAuthenticated}
           bgColor="#8B3A62"
           className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
+          aria-label="B button"
           style={
             {
               borderColor: '#2a2a3e',
@@ -38,6 +39,7 @@ export function GameBoyButtons({
           disabled={!isAuthenticated}
           bgColor="#8B3A62"
           className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
+          aria-label="A button"
           style={
             {
               borderColor: '#2a2a3e',

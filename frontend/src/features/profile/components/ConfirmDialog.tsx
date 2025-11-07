@@ -64,6 +64,7 @@ export function ConfirmDialog({
               <button
                 onClick={onClose}
                 className="flex-1 px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+                aria-label="Cancel"
                 style={{
                   borderColor: isDarkMode ? '#333333' : 'black',
                   backgroundColor: isDarkMode ? '#2a2a2a' : '#d4d4d4',
@@ -92,6 +93,7 @@ export function ConfirmDialog({
                 ref={confirmButtonRef}
                 onClick={onConfirm}
                 className="flex-1 px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+                aria-label="Confirm"
                 style={{
                   borderColor: isDarkMode ? '#333333' : 'black',
                   backgroundColor: '#ef4444',

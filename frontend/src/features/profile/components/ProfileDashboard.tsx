@@ -271,6 +271,7 @@ export function ProfileDashboard({
             features.
           </p>
           <button
+            aria-label="Restart tutorial"
             onClick={() => {
               window.scrollTo({top: 0, behavior: 'instant'});
               if (onNavigate) {
@@ -311,6 +312,7 @@ export function ProfileDashboard({
           <button
             onClick={handleLogout}
             className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
+            aria-label="Log out"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: '#3b82f6',
@@ -339,6 +341,7 @@ export function ProfileDashboard({
             onClick={() => setDeleteDialogOpen(true)}
             disabled={deleting}
             className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
+            aria-label="Delete account"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: deleting ? '#9ca3af' : '#ef4444',

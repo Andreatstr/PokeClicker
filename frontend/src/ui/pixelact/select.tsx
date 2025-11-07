@@ -68,7 +68,7 @@ function SelectTrigger({
       <ShadcnSelectTrigger
         {...props}
         className={cn(
-          'rounded-none ring-0 w-full border-0 select-none min-h-[44px]', // 'rounded-none ring-0 w-full border-0 select-none min-h-[44px] outline-none focus-visible:ring focus-visible:ring-3 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2',
+          'rounded-none ring-0 w-full border-0 select-none min-h-[44px]',
           className
         )}
         style={{

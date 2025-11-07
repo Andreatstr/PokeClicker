@@ -140,6 +140,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                   ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500'
                   : 'bg-blue-500 hover:bg-blue-400 text-white border-blue-400'
               }`}
+              aria-label="OK"
             >
               OK
             </button>
@@ -177,6 +178,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                   ? 'bg-red-700 hover:bg-red-800 border-gray-600'
                   : 'bg-red-600 hover:bg-red-700 border-black'
               }`}
+              aria-label="Battle"
               onClick={() =>
                 onStartBattle(nearbyPokemon.pokemon, nearbyPokemon.spawnId)
               }
@@ -194,6 +196,7 @@ export function TiledMapView(props: TiledMapViewProps) {
           onClick={onResetToHome}
           className="flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors"
           title="Return to home position"
+          aria-label="Teleport home"
         >
           <span className="pixel-font text-xs font-bold text-white">
             🏠 Home

@@ -191,6 +191,7 @@ export function PokemonDetailCard({
         <button
           className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
           onClick={onClose}
+          aria-label="Exit"
         >
           X
         </button>
@@ -252,6 +253,7 @@ export function PokemonDetailCard({
               disabled={upgrading || !!(user && user.rare_candy < upgrade.cost)}
               className="w-full pixel-font text-xs md:text-sm font-bold py-6 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               bgColor={isDarkMode ? '#3b82f6' : '#60a5fa'}
+              aria-label="Upgrade pokemon"
               style={{
                 color: 'white',
                 borderColor: 'black',

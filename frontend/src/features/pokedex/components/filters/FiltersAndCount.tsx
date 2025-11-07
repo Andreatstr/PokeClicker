@@ -130,7 +130,10 @@ export function FiltersAndCount({
                       setTempRegion(v === 'all' ? null : v);
                     }}
                   >
-                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Region"
+                    >
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
                     <SelectContent>
@@ -164,6 +167,7 @@ export function FiltersAndCount({
                     selected={tempTypes}
                     onChange={setTempTypes}
                     className="w-full focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                    aria-label="Type"
                     counts={showCounts ? typeCountMap : undefined}
                   />
                 </div>
@@ -182,7 +186,10 @@ export function FiltersAndCount({
                       setTempSortBy(v as 'id' | 'name' | 'type')
                     }
                   >
-                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Sort by"
+                    >
                       <SelectValue placeholder="ID" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,7 +212,10 @@ export function FiltersAndCount({
                     value={tempSortOrder}
                     onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
                   >
-                    <SelectTrigger className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]">
+                    <SelectTrigger
+                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      aria-label="Order"
+                    >
                       <SelectValue placeholder="Asc" />
                     </SelectTrigger>
                     <SelectContent>

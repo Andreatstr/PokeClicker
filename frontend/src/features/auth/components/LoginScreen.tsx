@@ -137,6 +137,7 @@ export function LoginScreen({onNavigate}: Props) {
             tabIndex={0}
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('login')}
+            aria-label="Log in"
           >
             Log in
           </Button>
@@ -144,6 +145,7 @@ export function LoginScreen({onNavigate}: Props) {
             tabIndex={0}
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('signup')}
+            aria-label="Sign up"
           >
             Sign up
           </Button>
@@ -152,6 +154,7 @@ export function LoginScreen({onNavigate}: Props) {
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={loginAsGuest}
             disabled={loading}
+            aria-label="Guest user"
           >
             Guest user
           </Button>
@@ -211,6 +214,7 @@ export function LoginScreen({onNavigate}: Props) {
                       disabled={loading}
                       type="text"
                       className="mt-1 w-full px-3 py-2 border border-black text-sm"
+                      aria-label="Username"
                       style={{
                         backgroundColor: 'var(--input)',
                         color: 'var(--foreground)',
@@ -239,6 +243,7 @@ export function LoginScreen({onNavigate}: Props) {
                       disabled={loading}
                       type="password"
                       className="mt-1 w-full px-3 py-2 border border-black text-sm"
+                      aria-label="Password"
                       style={{
                         backgroundColor: 'var(--input)',
                         color: 'var(--foreground)',
@@ -262,6 +267,7 @@ export function LoginScreen({onNavigate}: Props) {
                     tabIndex={0}
                     type="submit"
                     className="text-sm py-2 w-full"
+                    aria-label={`${modalType === 'login' ? 'Log in' : 'Sign up'}`}
                     disabled={loading}
                   >
                     {loading
@@ -276,6 +282,7 @@ export function LoginScreen({onNavigate}: Props) {
                   <button
                     type="button"
                     className="text-xs text-blue-700 underline mt-2"
+                    aria-label={`${modalType === 'login' ? "Don't have a user? Sign up here" : 'Already have an account? Log in here'}`}
                     onClick={() =>
                       setModalType(modalType === 'login' ? 'signup' : 'login')
                     }
