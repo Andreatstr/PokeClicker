@@ -133,16 +133,16 @@ export const PokemonCard = memo(function PokemonCard({
         />
       </figure>
 
-      <div
+      <article
         className="bg-black/20 p-2 rounded-md w-full flex-1 flex flex-col overflow-hidden"
         style={{textShadow: '1px 1px 0 var(--background)'}}
       >
         <div className="infoGrid flex flex-col gap-1.5 text-[10px] flex-1">
           {/* Pokemon Name */}
-          <div className="flex items-center justify-between min-h-[20px]">
-            <strong className="font-bold text-sm capitalize truncate">
+          <header className="flex items-center justify-between min-h-[20px]">
+            <h3 className="font-bold text-sm capitalize truncate">
               {isOwned ? pokemon.name : '???'}
-            </strong>
+            </h3>
             {isOwned && (
               <span
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
@@ -162,7 +162,7 @@ export const PokemonCard = memo(function PokemonCard({
                 #{pokemon.pokedexNumber}
               </span>
             )}
-          </div>
+          </header>
 
           {/* Purchase Button or Info Grid */}
           {!isOwned ? (
@@ -224,11 +224,11 @@ export const PokemonCard = memo(function PokemonCard({
 
               {/* Abilities */}
               {pokemon.abilities && pokemon.abilities.length > 0 && (
-                <div className="text-[9px]">
-                  <strong className="font-bold text-[8px]">Abilities</strong>
-                  <div className="flex flex-wrap gap-0.5 mt-0.5">
+                <section className="text-[9px]">
+                  <h4 className="font-bold text-[8px]">Abilities</h4>
+                  <ul className="flex flex-wrap gap-0.5 mt-0.5 list-none p-0 m-0">
                     {pokemon.abilities.map((ability) => (
-                      <span
+                      <li
                         key={ability}
                         className="px-1.5 py-0.5 rounded text-[7.5px] whitespace-nowrap leading-tight"
                         style={{
@@ -241,10 +241,10 @@ export const PokemonCard = memo(function PokemonCard({
                         }}
                       >
                         {ability}
-                      </span>
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ul>
+                </section>
               )}
             </>
           )}
@@ -260,7 +260,7 @@ export const PokemonCard = memo(function PokemonCard({
             </div>
           )}
         </div>
-      </div>
+      </article>
     </aside>
   );
 });

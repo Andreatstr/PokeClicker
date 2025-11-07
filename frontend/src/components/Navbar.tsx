@@ -66,7 +66,10 @@ export function Navbar({
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden xl:flex items-center gap-4">
+          <nav
+            className="hidden xl:flex items-center gap-4"
+            aria-label="Main navigation"
+          >
             <Button
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               onClick={() => onPageChange('pokedex')}
@@ -127,7 +130,7 @@ export function Navbar({
                 <UserIcon className="w-4 h-4" />
               </Button>
             )}
-          </div>
+          </nav>
 
           {/* Mobile Menu Button */}
           <div className="xl:hidden">
@@ -145,8 +148,9 @@ export function Navbar({
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div
+        <nav
           className="xl:hidden mt-4 p-4"
+          aria-label="Mobile navigation"
           style={{
             backgroundColor: 'var(--card)',
             border: '4px solid var(--border)',
@@ -231,7 +235,7 @@ export function Navbar({
               )}
             </div>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );
