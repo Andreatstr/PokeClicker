@@ -20,20 +20,24 @@ export function PokemonTypeBadges({
       : 'text-[10px] md:text-xs px-2 py-1';
 
   return (
-    <div className="flex flex-wrap gap-1 md:gap-2">
+    <ul
+      className="flex flex-wrap gap-1 md:gap-2 list-none p-0 m-0"
+      role="list"
+      aria-label="Pokemon types"
+    >
       {types.map((type) => {
         const typeColors = getTypeColors(type, isDarkMode);
         const textColor = getContrastColor(typeColors.badge);
         return (
-          <span
+          <li
             key={type}
             className={`${typeColors.badge} ${textColor} ${sizeClasses} font-bold uppercase border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]`}
             style={{textShadow: 'none'}}
           >
             {type}
-          </span>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
