@@ -40,8 +40,11 @@ export function BattleResult({
   }, []);
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center p-2 md:p-3">
-      <div
+    <section
+      className="relative w-full h-full flex flex-col items-center justify-center p-2 md:p-3"
+      aria-labelledby="battle-result-title"
+    >
+      <article
         className={`text-center space-y-2 md:space-y-3 p-2 md:p-4 border-4 rounded-lg shadow-2xl w-full max-w-[90%] ${
           isVictory
             ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
@@ -49,8 +52,9 @@ export function BattleResult({
         }`}
       >
         {/* Result Title */}
-        <div>
+        <header>
           <h2
+            id="battle-result-title"
             className={`pixel-font text-lg md:text-xl font-bold mb-0.5 md:mb-1 ${
               isVictory ? 'text-yellow-600' : 'text-red-600'
             }`}
@@ -66,10 +70,10 @@ export function BattleResult({
               ? `You defeated ${opponentPokemon.name}!`
               : `${opponentPokemon.name} defeated you...`}
           </p>
-        </div>
+        </header>
 
         {/* Opponent Pokemon */}
-        <div className="flex justify-center">
+        <figure className="flex justify-center">
           <img
             src={opponentPokemon.sprite}
             alt={opponentPokemon.name}
@@ -77,20 +81,24 @@ export function BattleResult({
             decoding="async"
             style={{imageRendering: 'pixelated'}}
           />
-        </div>
+        </figure>
 
         {/* Rewards (Victory only) */}
         {isVictory && (
-          <div
+          <section
             className={`space-y-1 md:space-y-2 p-2 md:p-3 border-2 rounded ${
               isDarkMode
                 ? 'border-gray-600 bg-gray-800/50'
                 : 'border-gray-300 bg-white/50'
             }`}
+            aria-labelledby="rewards-heading"
           >
-            <div className="pixel-font text-xs md:text-sm font-bold text-green-600">
+            <h3
+              id="rewards-heading"
+              className="pixel-font text-xs md:text-sm font-bold text-green-600"
+            >
               Rewards
-            </div>
+            </h3>
 
             <div className="flex items-center justify-center gap-1 md:gap-2">
               <img
@@ -119,17 +127,20 @@ export function BattleResult({
                 ? `You already own ${opponentPokemon.name}!`
                 : `${opponentPokemon.name} added to your collection!`}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Stats */}
-        <div
+        <dl
           className={`text-[9px] md:text-[10px] pixel-font ${
             isDarkMode ? 'text-gray-400' : 'text-gray-600'
           }`}
         >
-          <div>Attacks: {clickCount}</div>
-        </div>
+          <div>
+            <dt className="inline">Attacks: </dt>
+            <dd className="inline">{clickCount}</dd>
+          </div>
+        </dl>
 
         {/* Continue Button */}
         {showButton ? (
@@ -147,7 +158,7 @@ export function BattleResult({
             {countdown}
           </div>
         )}
-      </div>
-    </div>
+      </article>
+    </section>
   );
 }

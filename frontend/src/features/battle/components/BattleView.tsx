@@ -114,8 +114,9 @@ export function BattleView({
   }
 
   return (
-    <div
+    <main
       className="relative w-full h-full flex flex-col cursor-pointer"
+      aria-label="Battle arena"
       style={{
         background: isDarkMode
           ? `
@@ -138,7 +139,10 @@ export function BattleView({
       onClick={handleAttackClick}
     >
       {/* Oval platforms - positioned based on Pokemon locations */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      <div
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        aria-hidden="true"
+      >
         {/* Opponent platform - positioned under opponent Pokemon (moved lower on mobile) */}
         <img
           src={getPlatformImage(opponentPokemon.types)}
@@ -168,9 +172,20 @@ export function BattleView({
       </div>
 
       {/* Opponent Pokemon (top right) */}
-      <div className="flex-1 flex flex-col justify-start p-2 pt-4 md:p-4 md:pt-4">
-        <div className="flex justify-center items-center gap-2 md:gap-4 translate-y-8 md:translate-y-8 md:justify-end">
-          <div className="flex-1 max-w-[120px] md:max-w-xs -ml-8 mr-8 md:ml-0">
+      <section
+        className="flex-1 flex flex-col justify-start p-2 pt-4 md:p-4 md:pt-4"
+        aria-label={`Opponent: ${opponentPokemon.name}`}
+      >
+        <header
+          className="flex justify-center items-center gap-2 md:gap-4 translate-y-8 md:translate-y-8 md:justify-end"
+          role="group"
+          aria-label="Opponent Pokemon and health"
+        >
+          <aside
+            className="flex-1 max-w-[120px] md:max-w-xs -ml-8 mr-8 md:ml-0"
+            role="status"
+            aria-live="polite"
+          >
             <HealthBar
               current={opponentHP}
               max={opponentMaxHP}
@@ -178,21 +193,30 @@ export function BattleView({
               side="opponent"
               isDarkMode={isDarkMode}
             />
-          </div>
-          <img
-            src={opponentPokemon.sprite}
-            alt={opponentPokemon.name}
-            className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated -mr-8 md:mr-8"
-            decoding="async"
-            style={{imageRendering: 'pixelated'}}
-          />
-        </div>
-      </div>
+          </aside>
+          <figure className="-mr-8 md:mr-8">
+            <img
+              src={opponentPokemon.sprite}
+              alt={opponentPokemon.name}
+              className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated"
+              decoding="async"
+              style={{imageRendering: 'pixelated'}}
+            />
+          </figure>
+        </header>
+      </section>
 
       {/* Player Pokemon (bottom left) */}
-      <div className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6">
-        <div className="flex justify-start items-end gap-2 md:gap-4">
-          <div
+      <section
+        className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6"
+        aria-label={`Player: ${playerPokemon.name}`}
+      >
+        <footer
+          className="flex justify-start items-end gap-2 md:gap-4"
+          role="group"
+          aria-label="Player Pokemon and health"
+        >
+          <figure
             className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 flex-shrink-0 relative group ml-8 -mb-4 md:ml-4 md:-mb-6"
             aria-label={`Click to attack with ${playerPokemon.name}`}
           >
@@ -203,8 +227,12 @@ export function BattleView({
               decoding="async"
               style={{imageRendering: 'pixelated'}}
             />
-          </div>
-          <div className="flex-1 max-w-[120px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-0 md:ml-4">
+          </figure>
+          <aside
+            className="flex-1 max-w-[120px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-0 md:ml-4"
+            role="status"
+            aria-live="polite"
+          >
             <HealthBar
               current={playerHP}
               max={playerMaxHP}
@@ -212,14 +240,18 @@ export function BattleView({
               side="player"
               isDarkMode={isDarkMode}
             />
-          </div>
-        </div>
-      </div>
+          </aside>
+        </footer>
+      </section>
 
       {/* Attack instructions - centered in the middle */}
       {result === 'ongoing' && (
-        <div className="absolute top-11/20 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-          <div
+        <aside
+          className="absolute top-11/20 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none"
+          aria-live="polite"
+          role="status"
+        >
+          <p
             className={`pixel-font text-xs px-3 py-1 rounded ${
               isDarkMode
                 ? 'text-gray-300 bg-black/50'
@@ -228,32 +260,43 @@ export function BattleView({
           >
             <span className="md:hidden">Tap anywhere to attack!</span>
             <span className="hidden md:inline">Click anywhere to attack!</span>
-          </div>
-        </div>
+          </p>
+        </aside>
       )}
 
       {/* Get Ready Overlay */}
       {result === 'ongoing' && !isActive && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/50">
+        <aside
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/50"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <div
             className={`pixel-font text-center ${isDarkMode ? 'text-white' : 'text-white'}`}
           >
-            <div className="text-lg md:text-2xl mb-2">Get Ready!</div>
-            <div className="text-sm md:text-base opacity-90 mb-4">
+            <p className="text-lg md:text-2xl mb-2">Get Ready!</p>
+            <p className="text-sm md:text-base opacity-90 mb-4">
               Tap to attack, charge to unleash specials
-            </div>
-            <div className="text-3xl md:text-5xl font-bold">
+            </p>
+            <p className="text-3xl md:text-5xl font-bold">
               {readyCount > 0 ? readyCount : 'Go!'}
-            </div>
+            </p>
           </div>
-        </div>
+        </aside>
       )}
 
       {/* Charged Attacks UI - positioned to avoid Pokemon overlap */}
       {result === 'ongoing' && (
-        <div className="absolute bottom-1 right-1 md:bottom-4 md:right-4 z-20 flex flex-col md:flex-row gap-1 md:gap-3 items-end">
+        <section
+          className="absolute bottom-1 right-1 md:bottom-4 md:right-4 z-20 flex flex-col md:flex-row gap-1 md:gap-3 items-end"
+          aria-label="Special attacks"
+        >
           {/* Buttons with visual charge progress - stacked vertically on mobile, horizontal on desktop */}
-          <div className="flex gap-1 md:gap-3">
+          <nav
+            className="flex gap-1 md:gap-3"
+            aria-label="Battle special moves"
+          >
             <button
               className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
@@ -279,6 +322,11 @@ export function BattleView({
                     : 'bg-gradient-to-t from-purple-800 via-purple-500 to-purple-300'
                 } ${isCharged ? 'shadow-lg shadow-purple-500/50' : ''}`}
                 style={{height: `${chargeProgress}%`}}
+                role="progressbar"
+                aria-valuenow={chargeProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-hidden="true"
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
@@ -316,6 +364,11 @@ export function BattleView({
                     : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
                 } ${isCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
                 style={{height: `${chargeProgress}%`}}
+                role="progressbar"
+                aria-valuenow={chargeProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-hidden="true"
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
@@ -326,9 +379,9 @@ export function BattleView({
                 Shield
               </span>
             </button>
-          </div>
-        </div>
+          </nav>
+        </section>
       )}
-    </div>
+    </main>
   );
 }
