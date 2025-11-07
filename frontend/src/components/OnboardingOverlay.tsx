@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {Button} from '@ui/pixelact';
 
-type Page = 'pokedex' | 'clicker' | 'map' | 'profile';
+type Page = 'pokedex' | 'clicker' | 'map' | 'profile' | 'ranks';
 
 interface OnboardingStep {
   target: string;
@@ -14,22 +14,15 @@ interface OnboardingStep {
 }
 
 const STEPS: OnboardingStep[] = [
-  // Pokedex Page - Steps 0-9
+  // Pokedex Page - Steps 0-6
   {
     target: 'navbar',
     title: 'Welcome to PokeClicker!',
     description:
-      'Navigate between Pokedex, Clicker, World, and Profile. Use these tabs to explore every feature.',
+      'Navigate between Pokedex, Clicker, World, Ranks, and Profile. Use these tabs to explore every feature.',
     position: 'bottom',
     page: 'pokedex',
     highlight: true,
-  },
-  {
-    target: 'music-player',
-    title: 'Background Music',
-    description: 'Control background music here — play/pause and volume.',
-    position: 'top',
-    page: 'pokedex',
   },
   {
     target: 'candy-counter',
@@ -40,26 +33,10 @@ const STEPS: OnboardingStep[] = [
     highlight: true,
   },
   {
-    target: 'search-bar',
-    title: 'Search Pokemon',
-    description: 'Search by name or number. Try it after the tour.',
-    position: 'bottom',
-    page: 'pokedex',
-  },
-  {
-    target: 'filters-button',
-    title: 'Filter Pokemon',
-    description:
-      'Filter by type, ownership, and sorting. Adjust after the tour.',
-    position: 'bottom',
-    page: 'pokedex',
-    highlight: true,
-  },
-  {
     target: 'pokemon-card',
     title: 'Pokemon Cards',
     description:
-      'Your Pokemon live here. Opening a card shows stats and evolution.',
+      'Your Pokemon live here. Click a card to see stats and evolution.',
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -68,7 +45,7 @@ const STEPS: OnboardingStep[] = [
     target: 'pokemon-stats',
     title: 'Pokemon Stats',
     description:
-      'Stats and abilities live here — HP, Attack, Defense, Speed, more.',
+      'Stats and abilities live here: HP, Attack, Defense, Speed, and more.',
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -76,7 +53,7 @@ const STEPS: OnboardingStep[] = [
   {
     target: 'pokemon-upgrade',
     title: 'Upgrade Pokemon',
-    description: 'Spend Rare Candy to upgrade this Pokemon’s stats and power.',
+    description: "Spend Rare Candy to upgrade this Pokemon's stats and power.",
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -85,7 +62,7 @@ const STEPS: OnboardingStep[] = [
     target: 'pokemon-card-locked',
     title: 'Unlock New Pokemon',
     description:
-      "Locked cards mark Pokemon you don't own yet and how to unlock.",
+      "Locked cards show Pokemon you don't own yet and how to unlock them.",
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -93,12 +70,13 @@ const STEPS: OnboardingStep[] = [
   {
     target: 'pokemon-evolution',
     title: 'Evolution Chain',
-    description: 'See the evolution chain and jump between stages to explore.',
+    description:
+      'Click evolution stages to jump between them and explore the chain!',
     position: 'top',
     page: 'pokedex',
     highlight: true,
   },
-  // Transition to Clicker - Step 9
+  // Transition to Clicker - Step 7
   {
     target: 'clicker-nav',
     title: 'Now Visit the Clicker!',
@@ -107,11 +85,11 @@ const STEPS: OnboardingStep[] = [
     page: 'pokedex',
     highlight: true,
   },
-  // Clicker Page - Steps 10-12
+  // Clicker Page - Steps 8-9
   {
     target: 'clicker-area',
     title: 'Click to Earn Candy!',
-    description: 'Tap the screen or press A/B to earn candy (after the tour).',
+    description: 'Tap the screen or press A/B to earn candy after the tour.',
     position: 'top',
     page: 'clicker',
     highlight: true,
@@ -124,7 +102,7 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // Transition to World - Step 12
+  // Transition to World - Step 10
   {
     target: 'world-nav',
     title: 'Explore the World!',
@@ -133,56 +111,61 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // World/Map Page - Steps 13-15
+  // World/Map Page - Steps 11-12
   {
     target: 'movement-controls',
     title: 'Movement Controls',
-    description: 'Move with WASD/arrow keys or the joystick — try it after.',
+    description: 'Move with WASD/arrow keys or the joystick. Try it after!',
     position: 'top',
     page: 'map',
     highlight: true,
   },
   {
     target: 'map-canvas',
-    title: 'Find Wild Pokemon',
-    description: 'Wild Pokemon appear on the map as sprites as you explore.',
-    position: 'top',
-    page: 'map',
-  },
-  {
-    target: 'map-canvas',
-    title: 'Battle Pokemon',
-    description: 'Battle wild Pokemon to catch them and grow your team.',
+    title: 'Wild Pokemon & Battles',
+    description:
+      'Wild Pokemon appear as sprites on the map. Run into them to start a battle and catch them!',
     position: 'top',
     page: 'map',
     highlight: true,
   },
-  // Transition to Profile - Step 16
+  // Transition to Profile - Step 13
   {
     target: 'profile-button',
     title: 'Visit Your Profile!',
-    description: 'Finally, let’s peek at your Profile.',
+    description: "Let's check out your Profile next.",
     position: 'bottom',
     page: 'map',
     highlight: true,
   },
-  // Profile Page - Steps 17-18
+  // Profile Page - Step 14
   {
     target: 'pokemon-selection',
-    title: 'Switch Your Pokemon',
+    title: 'Choose Your Pokemon',
     description:
-      'Choose your favorite and your Clicker Pokemon here after the tour.',
+      'Pick your favorite Pokemon and your Clicker Pokemon. Your Clicker Pokemon appears on screen! Restart this tutorial anytime from here.',
     position: 'top',
     page: 'profile',
     highlight: true,
   },
+  // Transition to Ranks - Step 15
   {
-    target: 'pokemon-selection',
-    title: 'Selection Matters!',
-    description:
-      'Your Clicker Pokemon sets the on-screen sprite. You can restart this tutorial anytime from here.',
-    position: 'top',
+    target: 'ranks-nav',
+    title: 'Check the Ranks!',
+    description: "Finally, let's see how you rank against other trainers.",
+    position: 'bottom',
     page: 'profile',
+    highlight: true,
+  },
+  // Ranks Page - Step 16
+  {
+    target: 'league-buttons',
+    title: 'Global Rankings',
+    description:
+      'Compete in two leagues: Candy League for most Rare Candy and Pokemon League for most Pokemon caught. Climb the ranks!',
+    position: 'bottom',
+    page: 'ranks',
+    highlight: true,
   },
 ];
 

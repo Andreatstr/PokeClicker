@@ -39,6 +39,11 @@ const PokedexPage = lazy(() =>
 const PokemonMap = lazy(() =>
   import('@features/map').then((module) => ({default: module.PokemonMap}))
 );
+const RanksPage = lazy(() =>
+  import('@features/ranks').then((module) => ({
+    default: module.RanksPage,
+  }))
+);
 
 function App() {
   const {isDarkMode, toggleTheme} = useTheme();
@@ -119,6 +124,22 @@ function App() {
             />
             <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
+        );
+
+      case 'ranks':
+        return (
+          <section className="py-8">
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading ranks..."
+                  isDarkMode={isDarkMode}
+                />
+              }
+            >
+              <RanksPage isDarkMode={isDarkMode} />
+            </Suspense>
+          </section>
         );
 
       case 'clicker':

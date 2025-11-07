@@ -23,6 +23,7 @@ export const typeDefs = `#graphql
       ownedOnly: Boolean
     ): PokedexResponse!
     pokemonUpgrade(pokemonId: Int!): PokemonUpgrade
+    getRanks(input: RanksInput): RanksResponse!
   }
 
   type HealthCheck {
@@ -39,6 +40,7 @@ export const typeDefs = `#graphql
     owned_pokemon_ids: [Int!]!
     favorite_pokemon_id: Int
     selected_pokemon_id: Int
+    showInRanks: Boolean
   }
 
 	type UserStats {
@@ -69,6 +71,7 @@ export const typeDefs = `#graphql
     setFavoritePokemon(pokemonId: Int): User!
     setSelectedPokemon(pokemonId: Int): User!
     upgradePokemon(pokemonId: Int!): PokemonUpgrade!
+    updateRanksPreference(showInRanks: Boolean!): User!
   }
 
   type PokemonUpgrade {
@@ -142,5 +145,26 @@ export const typeDefs = `#graphql
   type TypeFacet {
     type: String!
     count: Int!
+  }
+
+  type RanksEntry {
+    position: Int!
+    username: String!
+    score: Int!
+    userId: ID!
+    showInRanks: Boolean!
+  }
+
+  type RanksResponse {
+    candyLeague: [RanksEntry!]!
+    pokemonLeague: [RanksEntry!]!
+    totalPlayers: Int!
+    userCandyRank: Int
+    userPokemonRank: Int
+  }
+
+  input RanksInput {
+    limit: Int = 50
+    offset: Int = 0
   }
 `;

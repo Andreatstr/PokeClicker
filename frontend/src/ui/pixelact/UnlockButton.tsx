@@ -26,7 +26,7 @@ export function UnlockButton({
   return (
     <button
       onClick={onClick}
-      className={`group w-full cursor-pointer ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 relative overflow-hidden ${
+      className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 relative overflow-hidden ${
         error
           ? 'bg-red-500 text-white animate-shake'
           : 'bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 text-black'

@@ -33,6 +33,7 @@ export interface UserStats {
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number;
   selected_pokemon_id?: number;
+  showInRanks?: boolean;
 }
 
 export interface UserDocument extends UserStats {
@@ -40,6 +41,7 @@ export interface UserDocument extends UserStats {
   username: string;
   password_hash: string;
   created_at: Date;
+  showInRanks?: boolean;
 }
 
 export interface AuthResponse {

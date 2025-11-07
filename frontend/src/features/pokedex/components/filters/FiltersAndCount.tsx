@@ -109,6 +109,7 @@ export function FiltersAndCount({
                 <button
                   onClick={() => setShowMobileFilters(false)}
                   aria-label="Close filter dialog"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center"
                 >
                   <span className="text-xl">×</span>
                 </button>
@@ -260,10 +261,11 @@ export function FiltersAndCount({
               </div>
 
               {/* Footer Buttons */}
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between mt-6 gap-2">
                 <Button
                   variant="default"
                   aria-label="Clear all filters"
+                  className="min-h-[44px]"
                   onClick={() => {
                     setTempRegion(null);
                     setTempTypes([]);
@@ -284,6 +286,7 @@ export function FiltersAndCount({
                 <Button
                   variant="default"
                   aria-label="Cancel filter changes"
+                  className="min-h-[44px]"
                   onClick={() => setShowMobileFilters(false)}
                 >
                   Cancel
@@ -291,6 +294,7 @@ export function FiltersAndCount({
                 <Button
                   variant="default"
                   aria-label="Apply selected filters"
+                  className="min-h-[44px]"
                   onClick={() => {
                     setSelectedRegion(tempRegion);
                     setSelectedTypes(tempTypes);

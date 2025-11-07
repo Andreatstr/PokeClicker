@@ -39,7 +39,7 @@ export function PaginationControls({
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12"
           aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-6 h-6" />
@@ -50,7 +50,7 @@ export function PaginationControls({
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12"
           aria-label="Next page"
         >
           <ArrowRightIcon className="w-6 h-6" />
@@ -66,7 +66,7 @@ export function PaginationControls({
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Previous</span>
@@ -77,7 +77,7 @@ export function PaginationControls({
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <span>Next</span>
           <ArrowRightIcon className="w-5 h-5" />

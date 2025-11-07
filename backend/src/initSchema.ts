@@ -29,6 +29,24 @@ export async function initializeSchema(db: Db): Promise<void> {
     );
     console.log('Created index on owned_pokemon_ids');
 
+    // Create index on showInRanks for ranks queries
+    await usersCollection.createIndex(
+      {showInRanks: 1},
+      {name: 'show_in_ranks_index'}
+    );
+    console.log('Created index on showInRanks');
+
+    // Migrate existing users to have showInRanks default value
+    const migrationResult = await usersCollection.updateMany(
+      {showInRanks: {$exists: false}},
+      {$set: {showInRanks: true}}
+    );
+    if (migrationResult.modifiedCount > 0) {
+      console.log(
+        `Migrated ${migrationResult.modifiedCount} existing users with showInRanks=true`
+      );
+    }
+
     // Ensure a default guest user exists for simple guest login
     const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
     const existingGuest = await usersCollection.findOne({username: 'guest'});

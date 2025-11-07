@@ -18,6 +18,7 @@ export interface User {
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number | null;
   selected_pokemon_id?: number | null;
+  showInRanks?: boolean;
 }
 
 interface AuthContextType {

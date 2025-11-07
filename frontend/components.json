@@ -18,5 +18,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@pixelact-ui": "https://www.pixelactui.com/r/{name}.json"
+  }
 }

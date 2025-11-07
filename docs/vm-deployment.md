@@ -144,7 +144,7 @@ sudo systemctl enable mongod
 PM2 er anbefalt av NTNU-guide for å kjøre Node.js i bakgrunnen:
 
 ```bash
-npm install -g pm2
+pnpm install -g pm2
 ```
 
 Verifiser installasjon:
@@ -169,8 +169,8 @@ Kjør setup-skriptet:
 
 Dette vil:
 
-- Installere avhengigheter (`npm install`)
-- Bygge TypeScript til JavaScript (`npm run build`)
+- Installere avhengigheter (`pnpm install`)
+- Bygge TypeScript til JavaScript (`pnpm run build`)
 - Opprette logger-mappe
 - Kopiere `.env.example` til `.env` hvis den ikke eksisterer
 
@@ -344,7 +344,7 @@ Vanlige problemer:
 1. **MongoDB kjører ikke**: `sudo systemctl start mongod`
 2. **Port allerede i bruk**: Drep prosessen som bruker porten
 3. **Mangler .env-fil**: Sørg for at `.env` eksisterer og er konfigurert
-4. **Bygging feilet**: Kjør `npm run build` manuelt for å se feil
+4. **Bygging feilet**: Kjør `pnpm run build` manuelt for å se feil
 
 ### Helsesjekk
 
@@ -460,8 +460,8 @@ Når du pusher endringer til repositoriet:
 cd ~/T26-Project-2
 git pull
 cd backend
-npm install  # Hvis avhengigheter endret
-npm run build
+pnpm install  # Hvis avhengigheter endret
+pnpm run build
 ./manage-backend.sh restart
 ```
 
