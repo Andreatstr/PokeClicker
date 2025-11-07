@@ -124,11 +124,17 @@ export function ProfileDashboard({
         </h1>
 
         {/* User Info Section */}
-        <div
+        <section
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          aria-labelledby="trainer-info-heading"
         >
-          <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER INFO</h2>
+          <h2
+            id="trainer-info-heading"
+            className="text-lg sm:text-xl mb-3 sm:mb-4"
+          >
+            TRAINER INFO
+          </h2>
           <div className="space-y-2 text-sm sm:text-base">
             <p className="break-words">
               <strong>NAME:</strong> {user.username}
@@ -144,14 +150,20 @@ export function ProfileDashboard({
               {formatTrainerSince(user.created_at)}
             </p>
           </div>
-        </div>
+        </section>
 
         {/* Game Statistics Section */}
-        <div
+        <section
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          aria-labelledby="trainer-stats-heading"
         >
-          <h2 className="text-lg sm:text-xl mb-3 sm:mb-4">TRAINER STATS</h2>
+          <h2
+            id="trainer-stats-heading"
+            className="text-lg sm:text-xl mb-3 sm:mb-4"
+          >
+            TRAINER STATS
+          </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
             <div className="flex flex-col">
               <span className="text-xs opacity-70">HP</span>
@@ -178,14 +190,18 @@ export function ProfileDashboard({
               <span className="font-bold">{user.stats.speed}</span>
             </div>
           </div>
-        </div>
+        </section>
 
         {checked !== null && (
-          <div
+          <section
             className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+            aria-labelledby="ranks-visibility-heading"
           >
-            <h2 className="text-lg sm:text-xl font-bold mb-3">
+            <h2
+              id="ranks-visibility-heading"
+              className="text-lg sm:text-xl font-bold mb-3"
+            >
               RANKS VISIBILITY
             </h2>
             <div className="flex items-center gap-2">
@@ -203,18 +219,24 @@ export function ProfileDashboard({
                 Show me in ranks
               </label>
             </div>
-          </div>
+          </section>
         )}
 
         {/* Pokemon Selection Sections */}
         <div data-onboarding="pokemon-selection">
           {/* Battle Pokemon Section (renamed from Favorite) */}
-          <div
+          <section
             className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+            aria-labelledby="battle-pokemon-heading"
           >
             <div className="flex-1">
-              <h2 className="text-lg sm:text-xl font-bold">BATTLE POKEMON</h2>
+              <h2
+                id="battle-pokemon-heading"
+                className="text-lg sm:text-xl font-bold"
+              >
+                BATTLE POKEMON
+              </h2>
               <p className="text-xs opacity-70 mt-1">
                 This Pokemon is used in battles in the World
               </p>
@@ -232,15 +254,21 @@ export function ProfileDashboard({
               isDarkMode={isDarkMode}
               isFirstRender={true}
             />
-          </div>
+          </section>
 
           {/* Clicker Pokemon Section */}
-          <div
+          <section
             className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+            aria-labelledby="clicker-pokemon-heading"
           >
             <div className="flex-1">
-              <h2 className="text-lg sm:text-xl font-bold">CLICKER POKEMON</h2>
+              <h2
+                id="clicker-pokemon-heading"
+                className="text-lg sm:text-xl font-bold"
+              >
+                CLICKER POKEMON
+              </h2>
               <p className="text-xs opacity-70 mt-1">
                 This Pokemon appears in the Clicker game
               </p>
@@ -257,15 +285,18 @@ export function ProfileDashboard({
               }
               isDarkMode={isDarkMode}
             />
-          </div>
+          </section>
         </div>
 
         {/* Tutorial Section */}
-        <div
+        <section
           className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
           style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+          aria-labelledby="tutorial-heading"
         >
-          <h2 className="text-lg sm:text-xl mb-2">TUTORIAL</h2>
+          <h2 id="tutorial-heading" className="text-lg sm:text-xl mb-2">
+            TUTORIAL
+          </h2>
           <p className="text-xs sm:text-sm mb-3 opacity-70">
             Need help? Restart the interactive tutorial to learn how to use all
             features.
@@ -305,7 +336,7 @@ export function ProfileDashboard({
           >
             RESTART TUTORIAL
           </button>
-        </div>
+        </section>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

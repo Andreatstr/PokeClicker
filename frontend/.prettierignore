@@ -13,3 +13,7 @@ node_modules/
 # Package files
 pnpm-lock.yaml
 package-lock.json
+
+# Playwright test results and reports
+test-results/
+playwright-report/
