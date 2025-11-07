@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
 import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
+import {formatNumber} from '@/lib/formatNumber';
 
 // Constants
 const SPRITE_WIDTH = 68;
@@ -214,7 +215,7 @@ export function TiledMapView(props: TiledMapViewProps) {
             style={{imageRendering: 'pixelated'}}
           />
           <span className="pixel-font text-base font-bold text-black">
-            {Math.floor(user?.rare_candy ?? 0)}
+            {formatNumber(Math.floor(user?.rare_candy ?? 0))}
           </span>
         </div>
       </div>
