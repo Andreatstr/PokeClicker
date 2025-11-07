@@ -136,6 +136,7 @@ export function BattleResult({
           <Button
             onClick={onContinue}
             className="w-full text-xs md:text-sm py-1.5 md:py-2"
+            aria-label={`${isVictory ? 'Continue' : 'Return to Map'}`}
           >
             {isVictory ? 'Continue' : 'Return to Map'}
           </Button>

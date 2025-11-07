@@ -187,6 +187,7 @@ export function GameBoyConsole({
                 disabled={!isAuthenticated}
                 bgColor="#8B3A62"
                 className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
+                aria-label="B button"
                 style={
                   {
                     borderColor: '#2a2a3e',
@@ -204,6 +205,7 @@ export function GameBoyConsole({
                 disabled={!isAuthenticated}
                 bgColor="#8B3A62"
                 className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
+                aria-label="A button"
                 style={
                   {
                     borderColor: '#2a2a3e',

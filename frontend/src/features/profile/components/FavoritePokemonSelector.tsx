@@ -48,6 +48,7 @@ export function FavoritePokemonSelector({
                     key={pokemon.id}
                     onClick={() => onSelect(pokemon.id)}
                     className="p-3 border-2 transition-all hover:scale-105"
+                    aria-label={`Select ${pokemon.id}`}
                     style={{
                       borderColor: isDarkMode ? '#333333' : 'black',
                       backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
@@ -79,6 +80,7 @@ export function FavoritePokemonSelector({
           <button
             onClick={onClose}
             className="mt-4 w-full px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+            aria-label="Cancel"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: isDarkMode ? '#2a2a2a' : '#d4d4d4',

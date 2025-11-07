@@ -462,7 +462,12 @@ export function OnboardingOverlay({
 
         <div className="flex gap-2">
           {step > 0 && (
-            <Button size="sm" variant="secondary" onClick={onPrevious}>
+            <Button
+              size="sm"
+              variant="secondary"
+              aria-label="Previous step"
+              onClick={onPrevious}
+            >
               Back
             </Button>
           )}
@@ -508,6 +513,7 @@ export function OnboardingOverlay({
               }
             }}
             className="flex-1"
+            aria-label={`${step === STEPS.length - 1 ? 'Finish' : 'Next'} step`}
           >
             {step === STEPS.length - 1 ? 'Finish' : 'Next'}
           </Button>

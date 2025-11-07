@@ -17,7 +17,11 @@ export default {
     'bg-pink-600',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        ring: '#0066ff',
+      },
+    },
   },
   plugins: [],
 };

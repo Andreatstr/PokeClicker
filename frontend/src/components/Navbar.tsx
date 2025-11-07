@@ -72,6 +72,7 @@ export function Navbar({
           >
             <Button
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
+              aria-label="Pokedex"
               onClick={() => onPageChange('pokedex')}
             >
               Pokedex
@@ -79,6 +80,7 @@ export function Navbar({
             <Button
               data-onboarding="clicker-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
+              aria-label="Clicker"
               onClick={() => onPageChange('clicker')}
             >
               Clicker
@@ -86,6 +88,7 @@ export function Navbar({
             <Button
               data-onboarding="world-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
+              aria-label="Map"
               onClick={() => onPageChange('map')}
             >
               World
@@ -93,6 +96,7 @@ export function Navbar({
             <Button
               data-onboarding="ranks-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
+              aria-label="Ranks"
               onClick={() => onPageChange('ranks')}
             >
               Ranks
@@ -164,6 +168,7 @@ export function Navbar({
             <div className="flex flex-col gap-2">
               <Button
                 className="w-full text-sm min-h-[44px]"
+                aria-label="Pokedex"
                 onClick={() => onPageChange('pokedex')}
               >
                 Pokedex
@@ -171,6 +176,7 @@ export function Navbar({
               <Button
                 data-onboarding="clicker-nav"
                 className="w-full text-sm min-h-[44px]"
+                aria-label="Clicker"
                 onClick={() => onPageChange('clicker')}
               >
                 Clicker
@@ -178,6 +184,7 @@ export function Navbar({
               <Button
                 data-onboarding="world-nav"
                 className="w-full text-sm min-h-[44px]"
+                aria-label="Map"
                 onClick={() => onPageChange('map')}
               >
                 World
@@ -185,6 +192,7 @@ export function Navbar({
               <Button
                 data-onboarding="ranks-nav"
                 className="w-full text-sm min-h-[44px]"
+                aria-label="Ranks"
                 onClick={() => onPageChange('ranks')}
               >
                 Ranks

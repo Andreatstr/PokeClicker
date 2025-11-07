@@ -139,6 +139,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
               }`}
+              aria-label="Candy league"
               disabled={activeLeague === 'candy'}
               onClick={() => setActiveLeague('candy')}
             >
@@ -180,6 +181,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
 
               <Button
                 variant="default"
+                aria-label="Refresh table"
                 onClick={handleRefresh}
                 disabled={!canRefresh}
                 className="text-xs sm:text-sm"
@@ -208,6 +210,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
           <div className="mt-4 text-center">
             <Button
               variant="default"
+              aria-label="Load more"
               onClick={() => setLimit((prev) => prev + INITIAL_RANKS_LIMIT)}
               className="text-xs sm:text-sm"
             >

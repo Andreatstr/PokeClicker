@@ -285,7 +285,9 @@ export function BattleView({
                   !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
                 }`}
               >
-                <span className="md:hidden">Sp.Att</span>
+                <span className="md:hidden" aria-label="Special attack">
+                  Sp.Att
+                </span>
                 <span className="hidden md:inline">Special Attack</span>
               </span>
             </button>
@@ -319,6 +321,7 @@ export function BattleView({
                 className={`relative z-10 font-bold transition-colors duration-300 ${
                   !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
                 }`}
+                aria-label="Shield"
               >
                 Shield
               </span>

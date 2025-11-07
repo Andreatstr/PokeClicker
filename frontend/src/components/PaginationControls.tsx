@@ -67,6 +67,7 @@ export function PaginationControls({
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
           className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Previous</span>
@@ -78,6 +79,7 @@ export function PaginationControls({
           onClick={handleNext}
           disabled={!hasNext || loading}
           className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          aria-label="Next page"
         >
           <span>Next</span>
           <ArrowRightIcon className="w-5 h-5" />
