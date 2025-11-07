@@ -333,16 +333,9 @@ export function PokemonMap({
       battleAttackFunction();
     } else if (pokemon.nearbyPokemon) {
       startBattle(pokemon.nearbyPokemon.pokemon, pokemon.nearbyPokemon.spawnId);
-    } else {
-      movement.handleJoystickDirectionChange('left');
     }
-  }, [
-    inBattle,
-    battleAttackFunction,
-    pokemon.nearbyPokemon,
-    startBattle,
-    movement,
-  ]);
+    // No action when neither in battle nor near Pokemon - prevents unwanted map movement
+  }, [inBattle, battleAttackFunction, pokemon.nearbyPokemon, startBattle]);
 
   // Detect mobile device (unified hook)
   const isMobile = useMobileDetection(768);
@@ -496,6 +489,7 @@ export function PokemonMap({
         viewport={viewport}
         onToggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
+        isMapLoading={!collisionMap.collisionMapLoaded}
       >
         {/* Map/Battle Viewport Container - this is the game view */}
         <div

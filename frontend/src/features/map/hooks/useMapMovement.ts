@@ -31,8 +31,7 @@ const PLAYER_POSITION_KEY = 'playerPosition';
 
 interface CollisionChecker {
   isPositionWalkable: (x: number, y: number) => boolean;
-  // Provided by useCollisionMap; optional in type to keep compatibility
-  collisionMapLoaded?: boolean;
+  collisionMapLoaded: boolean;
 }
 
 interface MovementState {
@@ -326,6 +325,11 @@ export function useMapMovement(
 
     if (isMoving) {
       movementIntervalRef.current = window.setInterval(() => {
+        // Block movement if collision map isn't loaded yet
+        if (!collisionChecker.collisionMapLoaded) {
+          return;
+        }
+
         const keys = Array.from(keysPressed.current);
         if (keys.length === 0) return; // Just return, don't call setIsMoving(false)
 
@@ -395,6 +399,11 @@ export function useMapMovement(
   // Handle key down
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Block movement if collision map isn't loaded yet
+      if (!collisionChecker.collisionMapLoaded) {
+        return;
+      }
+
       const validKeys = [
         'ArrowUp',
         'ArrowDown',
@@ -438,7 +447,7 @@ export function useMapMovement(
         }
       }
     },
-    [calculateNewPosition]
+    [calculateNewPosition, collisionChecker.collisionMapLoaded]
   );
 
   // Handle key up
@@ -480,6 +489,11 @@ export function useMapMovement(
   // Joystick direction handling
   const handleJoystickDirectionStart = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right') => {
+      // Block movement if collision map isn't loaded yet
+      if (!collisionChecker.collisionMapLoaded) {
+        return;
+      }
+
       const keyMap = {
         up: 'ArrowUp',
         down: 'ArrowDown',
@@ -502,11 +516,16 @@ export function useMapMovement(
         setIsMoving(true);
       }
     },
-    [calculateNewPosition]
+    [calculateNewPosition, collisionChecker.collisionMapLoaded]
   );
 
   const handleJoystickDirectionChange = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right' | null) => {
+      // Block movement if collision map isn't loaded yet
+      if (!collisionChecker.collisionMapLoaded) {
+        return;
+      }
+
       // Clear all current keys
       keysPressed.current.clear();
 
@@ -525,7 +544,7 @@ export function useMapMovement(
         setIsMoving(false);
       }
     },
-    []
+    [collisionChecker.collisionMapLoaded]
   );
 
   const handleJoystickDirectionStop = useCallback(() => {

@@ -120,7 +120,8 @@ export function MultiSelect({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px]'
+          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px] outline-none transition-all',
+          'focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]'
         )}
         style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
       >

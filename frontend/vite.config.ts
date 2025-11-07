@@ -39,6 +39,9 @@ export default defineConfig({
       '127.0.0.1',
       // Add any additional dev hosts here if needed
     ],
+    watch: {
+      ignored: ['**/playwright-report/**', '**/test-results/**'],
+    },
   },
   resolve: {
     alias: {

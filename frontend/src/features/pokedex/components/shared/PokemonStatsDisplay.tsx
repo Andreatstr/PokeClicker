@@ -35,16 +35,16 @@ export function PokemonStatsDisplay({
           <span></span>
         </div>
 
-        <div className="statsGrid grid grid-cols-[1fr,4fr] grid-rows-auto gap-1">
+        <dl className="statsGrid grid grid-cols-[1fr,4fr] grid-rows-auto gap-1">
           <div className="statsLabels col-start-1 row-start-1 flex flex-col justify-between font-bold text-[10px] md:text-xs">
-            <span>HP</span>
-            <span>Attack</span>
-            <span>Defense</span>
-            <span>Sp. Atk</span>
-            <span>Sp. Def</span>
-            <span>Speed</span>
+            <dt>HP</dt>
+            <dt>Attack</dt>
+            <dt>Defense</dt>
+            <dt>Sp. Atk</dt>
+            <dt>Sp. Def</dt>
+            <dt>Speed</dt>
           </div>
-          <div className="statsBars col-start-2 row-start-1 flex flex-col gap-1">
+          <dd className="statsBars col-start-2 row-start-1 flex flex-col gap-1">
             <StackedProgress
               baseValue={stats?.hp ?? 0}
               yourValue={upgradedStats.hp}
@@ -87,8 +87,8 @@ export function PokemonStatsDisplay({
               color={statColors.speed.color}
               upgradeColor={statColors.speed.upgradeColor}
             />
-          </div>
-        </div>
+          </dd>
+        </dl>
       </div>
     </section>
   );

@@ -18,6 +18,7 @@ interface GameBoyProps {
   viewport: {width: number; height: number};
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
+  isMapLoading?: boolean;
 }
 
 export function GameBoy({
@@ -32,6 +33,7 @@ export function GameBoy({
   viewport,
   onToggleFullscreen,
   isFullscreen: isFullscreenProp,
+  isMapLoading = false,
 }: GameBoyProps) {
   // Unified mobile detection
   const isMobile = useMobileDetection(768);
@@ -148,9 +150,9 @@ export function GameBoy({
             </div>
 
             {/* Screen - contains the game viewport */}
-            <div
+            <section
               data-onboarding="map-canvas"
-              className={`mx-auto ${isFullscreen ? 'flex-1 w-full' : ''}`}
+              className={`mx-auto relative overflow-hidden ${isFullscreen ? 'flex-1 w-full' : 'w-full'}`}
               style={
                 isFullscreen
                   ? {width: '100%', height: '100%'}
@@ -158,12 +160,32 @@ export function GameBoy({
                       width: '100%',
                       maxWidth: `${viewport.width}px`,
                       aspectRatio: `${viewport.width} / ${viewport.height}`,
+                      height: `${viewport.height}px`,
                     }
               }
             >
               {/* Game Viewport Container - this is where the game content goes */}
               {children}
-            </div>
+
+              {/* Loading Overlay */}
+              {isMapLoading && (
+                <aside
+                  className="absolute inset-0 bg-[#0f380f] flex items-center justify-center"
+                  style={{zIndex: 9999}}
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <article className="text-center pixel-font">
+                    <h2 className="text-[#9bbc0f] text-base mb-2 animate-pulse">
+                      LOADING MAP...
+                    </h2>
+                    <p className="text-[#8bac0f] text-xs">
+                      Please wait while the world loads
+                    </p>
+                  </article>
+                </aside>
+              )}
+            </section>
           </div>
 
           {/* Pretendo PLAY BOY text */}
