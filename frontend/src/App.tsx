@@ -260,10 +260,7 @@ function App() {
       )}
       {/* Keep music player visible and playing in fullscreen */}
       <div className="relative">
-        <BackgroundMusic
-          isDarkMode={isDarkMode}
-          showControls={!isMapFullscreen}
-        />
+        <BackgroundMusic isDarkMode={isDarkMode} />
       </div>
 
       {/* Onboarding Tutorial Overlay - hide when in fullscreen */}

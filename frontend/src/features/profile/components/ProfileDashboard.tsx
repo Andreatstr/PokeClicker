@@ -8,6 +8,7 @@ import {PokemonDisplayButton} from './PokemonDisplayButton';
 import {usePokemonBasic} from '../hooks/usePokemonBasic';
 import {useProfileHandlers} from '../hooks/useProfileHandlers';
 import {formatTrainerSince} from '../utils/formatDate';
+import {formatNumber} from '@/lib/formatNumber';
 import {Checkbox} from '@ui/pixelact';
 import {UPDATE_RANKS_PREFERENCE} from '@/lib/graphql';
 import type {CheckedState} from '@radix-ui/react-checkbox';
@@ -141,61 +142,38 @@ export function ProfileDashboard({
           >
             TRAINER INFO
           </h2>
-          <dl className="space-y-2 text-sm sm:text-base">
-            <dt className="inline break-words">
-              <strong>NAME:</strong>
-            </dt>
-            <dd className="inline ml-2 break-words">{user.username}</dd>
+          <dl className="text-sm sm:text-base flex flex-col gap-3">
+            <div>
+              <dt className="inline">
+                <strong>NAME:</strong>
+              </dt>
+              <dd className="inline ml-2">{user.username}</dd>
+            </div>
 
-            <dt className="inline">
-              <strong>RARE CANDY:</strong>
-            </dt>
-            <dd className="inline ml-2">{user.rare_candy}</dd>
+            <div>
+              <dt className="inline">
+                <strong>RARE CANDY:</strong>
+              </dt>
+              <dd className="inline ml-2">
+                {formatNumber(Math.floor(user.rare_candy))}
+              </dd>
+            </div>
 
-            <dt className="inline">
-              <strong>POKEMON OWNED:</strong>
-            </dt>
-            <dd className="inline ml-2">{user.owned_pokemon_ids.length}</dd>
+            <div>
+              <dt className="inline">
+                <strong>POKEMON OWNED:</strong>
+              </dt>
+              <dd className="inline ml-2">{user.owned_pokemon_ids.length}</dd>
+            </div>
 
-            <dt className="inline">
-              <strong>TRAINER SINCE:</strong>
-            </dt>
-            <dd className="inline ml-2">
-              {formatTrainerSince(user.created_at)}
-            </dd>
-          </dl>
-        </section>
-
-        {/* Game Statistics Section */}
-        <section
-          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
-          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-          aria-labelledby="trainer-stats-heading"
-        >
-          <h2
-            id="trainer-stats-heading"
-            className="text-lg sm:text-xl mb-3 sm:mb-4"
-          >
-            TRAINER STATS
-          </h2>
-          <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm sm:text-base">
-            <dt className="text-xs opacity-70">HP</dt>
-            <dd className="font-bold">{user.stats.hp}</dd>
-
-            <dt className="text-xs opacity-70">ATTACK</dt>
-            <dd className="font-bold">{user.stats.attack}</dd>
-
-            <dt className="text-xs opacity-70">DEFENSE</dt>
-            <dd className="font-bold">{user.stats.defense}</dd>
-
-            <dt className="text-xs opacity-70">SP. ATK</dt>
-            <dd className="font-bold">{user.stats.spAttack}</dd>
-
-            <dt className="text-xs opacity-70">SP. DEF</dt>
-            <dd className="font-bold">{user.stats.spDefense}</dd>
-
-            <dt className="text-xs opacity-70">SPEED</dt>
-            <dd className="font-bold">{user.stats.speed}</dd>
+            <div>
+              <dt className="inline">
+                <strong>TRAINER SINCE:</strong>
+              </dt>
+              <dd className="inline ml-2">
+                {formatTrainerSince(user.created_at)}
+              </dd>
+            </div>
           </dl>
         </section>
 
