@@ -152,7 +152,7 @@ export function TiledMapView(props: TiledMapViewProps) {
       {/* Battle Prompt */}
       {nearbyPokemon && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 z-30 w-[94%] max-w-[640px]"
+          className="absolute left-1/2 -translate-x-1/2 bottom-16 md:bottom-20 z-30 w-[94%] max-w-[640px]"
           role="dialog"
           aria-live="polite"
         >
@@ -175,14 +175,38 @@ export function TiledMapView(props: TiledMapViewProps) {
             </span>
             <button
               className={`ml-auto text-white px-2 py-1 md:px-3 md:py-1.5 pixel-font text-xs md:text-sm border-2 rounded focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
-                isDarkMode
-                  ? 'bg-red-700 hover:bg-red-800 border-gray-600'
-                  : 'bg-red-600 hover:bg-red-700 border-black'
+                isDarkMode ? 'border-gray-600' : 'border-black'
               }`}
+              style={{
+                backgroundColor: isDarkMode ? '#b91c1c' : '#dc2626',
+                boxShadow: isDarkMode
+                  ? '4px 4px 0px rgba(51,51,51,1)'
+                  : '4px 4px 0px rgba(0,0,0,1)',
+                transform: 'translate(0, 0)',
+                transition: 'all 0.15s ease-in-out',
+              }}
               aria-label="Battle"
               onClick={() =>
                 onStartBattle(nearbyPokemon.pokemon, nearbyPokemon.spawnId)
               }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '6px 6px 0px rgba(51,51,51,1)'
+                  : '6px 6px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor = isDarkMode
+                  ? '#991b1b'
+                  : '#b91c1c';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '4px 4px 0px rgba(51,51,51,1)'
+                  : '4px 4px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor = isDarkMode
+                  ? '#b91c1c'
+                  : '#dc2626';
+              }}
               tabIndex={0}
             >
               Battle!
@@ -190,20 +214,6 @@ export function TiledMapView(props: TiledMapViewProps) {
           </div>
         </div>
       )}
-
-      {/* Home Button */}
-      <div className="absolute bottom-2 left-2 md:top-2 md:bottom-auto z-20">
-        <button
-          onClick={onResetToHome}
-          className="flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors"
-          title="Return to home position"
-          aria-label="Teleport home"
-        >
-          <span className="pixel-font text-xs font-bold text-white">
-            🏠 Home
-          </span>
-        </button>
-      </div>
 
       {/* Rare Candy Counter */}
       <div className="absolute top-2 right-2 z-20">
@@ -218,6 +228,35 @@ export function TiledMapView(props: TiledMapViewProps) {
             {formatNumber(Math.floor(user?.rare_candy ?? 0))}
           </span>
         </div>
+      </div>
+
+      {/* Home Button - always bottom left */}
+      <div className="absolute bottom-2 left-2 z-20">
+        <button
+          onClick={onResetToHome}
+          className="flex items-center gap-1 border-2 border-black px-2 py-1"
+          title="Return to home position"
+          style={{
+            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+            boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+            transform: 'translate(0, 0)',
+            transition: 'all 0.15s ease-in-out',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translate(0, 0)';
+            e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+          }}
+        >
+          <span className="pixel-font text-xs font-bold text-white">
+            🏠 Home
+          </span>
+        </button>
       </div>
     </>
   );

@@ -95,13 +95,13 @@ export function MultiSelect({
 
     const scroll = () => {
       if (contentRef.current) {
-        const scrollAmount = direction === 'up' ? -24 : 24;
+        const scrollAmount = direction === 'up' ? -10 : 10;
         contentRef.current.scrollTop += scrollAmount;
       }
     };
 
     scroll(); // Immediate first scroll
-    scrollIntervalRef.current = window.setInterval(scroll, 16); // ~60fps
+    scrollIntervalRef.current = window.setInterval(scroll, 30); // Slower interval
   };
 
   const stopScrolling = () => {
@@ -120,7 +120,7 @@ export function MultiSelect({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px] outline-none transition-all',
+          'w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px] outline-none transition-all hover:opacity-80 transition-opacity',
           'focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]'
         )}
         style={{backgroundColor: 'var(--input)', color: 'var(--foreground)'}}
@@ -136,7 +136,7 @@ export function MultiSelect({
 
       {open && (
         <div
-          className="absolute z-10 left-0 right-0 top-full mt-1 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)]"
+          className="absolute z-10 left-0 right-0 top-full mt-3 w-full rounded-none border-none shadow-[var(--pixel-box-shadow)]"
           style={{
             backgroundColor: 'var(--popover)',
             color: 'var(--popover-foreground)',
@@ -147,7 +147,7 @@ export function MultiSelect({
             {/* Scrollable content */}
             <div
               ref={contentRef}
-              className="max-h-[240px] overflow-y-auto scrollbar-hide overscroll-contain"
+              className="max-h-[260px] overflow-y-auto scrollbar-hide overscroll-contain"
             >
               {/* Clear all option */}
               <button

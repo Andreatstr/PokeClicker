@@ -12,15 +12,64 @@ import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
 import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import type {PokedexPokemon} from '@features/pokedex';
+import {useMobileDetection} from '@/hooks';
+
+// Cross-browser fullscreen helpers with typed vendor prefixes
+type VendorDocument = Document & {
+  webkitFullscreenElement?: Element | null;
+  mozFullScreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+  mozCancelFullScreen?: () => Promise<void> | void;
+};
+
+type VendorElement = Element & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+  mozRequestFullScreen?: () => Promise<void> | void;
+};
+
+function isFullscreenActive(doc: Document): boolean {
+  const d = doc as VendorDocument;
+  return !!(
+    doc.fullscreenElement ||
+    d.webkitFullscreenElement ||
+    d.mozFullScreenElement
+  );
+}
+
+async function requestFullscreen(el: Element): Promise<void> {
+  const e = el as VendorElement;
+  if (el.requestFullscreen) {
+    await el.requestFullscreen();
+  } else if (e.webkitRequestFullscreen) {
+    await Promise.resolve(e.webkitRequestFullscreen());
+  } else if (e.mozRequestFullScreen) {
+    await Promise.resolve(e.mozRequestFullScreen());
+  }
+}
+
+async function exitFullscreen(doc: Document): Promise<void> {
+  const d = doc as VendorDocument;
+  if (doc.exitFullscreen) {
+    await doc.exitFullscreen();
+  } else if (d.webkitExitFullscreen) {
+    await Promise.resolve(d.webkitExitFullscreen());
+  } else if (d.mozCancelFullScreen) {
+    await Promise.resolve(d.mozCancelFullScreen());
+  }
+}
 
 // Default viewport dimensions (overridden responsively below). Use 16:9 to be wider/less tall.
 const DEFAULT_VIEWPORT = {width: 720, height: 405};
 
 interface PokemonMapProps {
   isDarkMode?: boolean;
+  onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
+export function PokemonMap({
+  isDarkMode = false,
+  onFullscreenChange,
+}: PokemonMapProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
 
   // Fetch user's favorite Pokemon for battles
@@ -41,6 +90,10 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     null
   );
   const [battleSpawnId, setBattleSpawnId] = useState<string | null>(null);
+
+  // Fullscreen state
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Responsive viewport for fitting GameBoy on mobile and web
   const [viewport, setViewport] = useState<{width: number; height: number}>(
@@ -284,11 +337,66 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
     // No action when neither in battle nor near Pokemon - prevents unwanted map movement
   }, [inBattle, battleAttackFunction, pokemon.nearbyPokemon, startBattle]);
 
-  const handleBButtonClick = useCallback(() => {
-    if (inBattle && battleAttackFunctionRef.current) {
-      battleAttackFunctionRef.current();
+  // Detect mobile device (unified hook)
+  const isMobile = useMobileDetection(768);
+
+  // Handle fullscreen changes (for desktop browsers that support it)
+  useEffect(() => {
+    if (isMobile) return; // Skip for mobile, we'll use CSS fullscreen
+
+    const handleFullscreenChange = () => {
+      setIsFullscreen(isFullscreenActive(document));
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener(
+        'webkitfullscreenchange',
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        'mozfullscreenchange',
+        handleFullscreenChange
+      );
+    };
+  }, [isMobile]);
+
+  // Notify parent when fullscreen state changes
+  useEffect(() => {
+    onFullscreenChange?.(isFullscreen);
+  }, [isFullscreen, onFullscreenChange]);
+
+  // Toggle fullscreen mode
+  const toggleFullscreen = useCallback(async () => {
+    // On mobile, use CSS-based fullscreen instead of Fullscreen API
+    if (isMobile) {
+      setIsFullscreen((prev) => !prev);
+      return;
     }
-  }, [inBattle]);
+
+    // Desktop: Try to use native Fullscreen API
+    try {
+      const element = containerRef.current;
+      if (!element) return;
+
+      const isCurrentlyFullscreen = isFullscreenActive(document);
+
+      if (!isCurrentlyFullscreen) {
+        // Request fullscreen with vendor prefixes
+        await requestFullscreen(element);
+      } else {
+        // Exit fullscreen with vendor prefixes
+        await exitFullscreen(document);
+      }
+    } catch (error) {
+      logger.logError(error, 'ToggleFullscreen');
+      // Fallback to CSS fullscreen if native API fails
+      setIsFullscreen((prev) => !prev);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const pressedKeys = new Set<string>();
@@ -305,25 +413,26 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
 
       const key = e.key.toLowerCase();
 
-      if (key === 'a') {
-        if (inBattle || pokemon.nearbyPokemon) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          if (!pressedKeys.has(key)) {
-            pressedKeys.add(key);
-            handleAButtonClick();
-          }
+      // Start battle with B button
+      if (!inBattle && key === 'b') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (pokemon.nearbyPokemon && !pressedKeys.has(key)) {
+          pressedKeys.add(key);
+          startBattle(
+            pokemon.nearbyPokemon.pokemon,
+            pokemon.nearbyPokemon.spawnId
+          );
         }
-      } else if (key === 'b') {
-        if (inBattle) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          if (!pressedKeys.has(key)) {
-            pressedKeys.add(key);
-            handleBButtonClick();
-          }
+      }
+
+      // Attack with A and B buttons
+      if (inBattle && (key === 'a' || key === 'b')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pressedKeys.has(key)) {
+          pressedKeys.add(key);
+          handleAButtonClick();
         }
       }
     };
@@ -344,50 +453,124 @@ export function PokemonMap({isDarkMode = false}: PokemonMapProps) {
       window.removeEventListener('keydown', handleKeyDown, {capture: true});
       window.removeEventListener('keyup', handleKeyUp, {capture: true});
     };
-  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, handleBButtonClick]);
+  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, startBattle]);
 
   return (
-    <GameBoy
-      onDirectionChange={movement.handleJoystickDirectionChange}
-      onDirectionStart={movement.handleJoystickDirectionStart}
-      onDirectionStop={movement.handleJoystickDirectionStop}
-      onAButtonClick={handleAButtonClick}
-      onBButtonClick={handleBButtonClick}
-      isAuthenticated={isAuthenticated}
-      nearbyPokemon={pokemon.nearbyPokemon}
-      viewport={viewport}
-      isMapLoading={!collisionMap.collisionMapLoaded}
+    <div
+      ref={containerRef}
+      style={
+        isFullscreen && isMobile
+          ? {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              zIndex: 9999,
+              overflow: 'hidden',
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              paddingLeft: 'env(safe-area-inset-left)',
+              paddingRight: 'env(safe-area-inset-right)',
+            }
+          : undefined
+      }
     >
-      {/* Map/Battle Viewport Container - this is the game view */}
-      <div
-        ref={viewportRef}
-        className="relative box-content border-4 border-black shadow-inner bg-black w-full h-full overflow-hidden"
+      <GameBoy
+        onDirectionChange={movement.handleJoystickDirectionChange}
+        onDirectionStart={movement.handleJoystickDirectionStart}
+        onDirectionStop={movement.handleJoystickDirectionStop}
+        onAButtonClick={handleAButtonClick}
+        onBButtonClick={handleAButtonClick}
+        isAuthenticated={isAuthenticated}
+        nearbyPokemon={pokemon.nearbyPokemon}
+        viewport={viewport}
+        onToggleFullscreen={toggleFullscreen}
+        isFullscreen={isFullscreen}
+        isMapLoading={!collisionMap.collisionMapLoaded}
       >
-        {inBattle && battleOpponent && playerPokemon ? (
-          <BattleView
-            playerPokemon={playerPokemon}
-            opponentPokemon={battleOpponent}
-            onBattleComplete={handleBattleComplete}
-            isDarkMode={isDarkMode}
-            onAttackFunctionReady={setBattleAttackFunctionWrapper}
-          />
-        ) : (
-          <TiledMapView
-            camera={movement.camera}
-            screenPos={movement.screenPos}
-            spritePos={movement.spritePos}
-            wildPokemon={pokemon.getVisiblePokemon(movement.camera, renderSize)}
-            nearbyPokemon={pokemon.nearbyPokemon}
-            worldPosition={movement.worldPosition}
-            user={user}
-            collisionMapLoaded={collisionMap.collisionMapLoaded}
-            viewportSize={renderSize}
-            isDarkMode={isDarkMode}
-            onStartBattle={startBattle}
-            onResetToHome={movement.resetToHome}
-          />
-        )}
-      </div>
-    </GameBoy>
+        {/* Map/Battle Viewport Container - this is the game view */}
+        <div
+          ref={viewportRef}
+          className={`relative shadow-inner bg-black overflow-hidden ${
+            isFullscreen
+              ? 'border-2 border-black w-full h-full'
+              : 'border-4 border-black w-full h-full box-content'
+          }`}
+        >
+          {/* Fullscreen/Exit Button - top left of viewport */}
+          <button
+            onClick={toggleFullscreen}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              toggleFullscreen();
+            }}
+            className="absolute top-2 left-2 z-50 flex items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
+            title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            style={{
+              WebkitTapHighlightColor: 'transparent',
+              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+              transform: 'translate(0, 0)',
+              transition: 'all 0.15s ease-in-out',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+            }}
+          >
+            <svg
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="w-4 h-4 text-white"
+            >
+              <path
+                d="M21 3h-8v2h4v2h2v4h2V3zm-4 4h-2v2h-2v2h2V9h2V7zm-8 8h2v-2H9v2H7v2h2v-2zm-4-2v4h2v2H5h6v2H3v-8h2z"
+                fill="currentColor"
+              />
+            </svg>
+            <span className="pixel-font text-xs font-bold text-white">
+              {isFullscreen ? 'EXIT' : 'FULL'}
+            </span>
+          </button>
+          {inBattle && battleOpponent && playerPokemon ? (
+            <BattleView
+              playerPokemon={playerPokemon}
+              opponentPokemon={battleOpponent}
+              onBattleComplete={handleBattleComplete}
+              isDarkMode={isDarkMode}
+              onAttackFunctionReady={setBattleAttackFunctionWrapper}
+            />
+          ) : (
+            <TiledMapView
+              camera={movement.camera}
+              screenPos={movement.screenPos}
+              spritePos={movement.spritePos}
+              wildPokemon={pokemon.getVisiblePokemon(
+                movement.camera,
+                renderSize
+              )}
+              nearbyPokemon={pokemon.nearbyPokemon}
+              worldPosition={movement.worldPosition}
+              user={user}
+              collisionMapLoaded={collisionMap.collisionMapLoaded}
+              viewportSize={renderSize}
+              isDarkMode={isDarkMode}
+              onStartBattle={startBattle}
+              onResetToHome={movement.resetToHome}
+            />
+          )}
+        </div>
+      </GameBoy>
+    </div>
   );
 }
