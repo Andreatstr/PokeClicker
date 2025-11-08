@@ -84,13 +84,17 @@ export const PokemonCard = memo(function PokemonCard({
     <aside
       className={`relative cursor-pointer border-4 p-4 w-full max-w-[280px] h-[440px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
-        hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}`}
-      style={{
-        borderColor: isDarkMode ? '#333333' : 'black',
-        boxShadow: isDarkMode
-          ? '4px 4px 0px rgba(51,51,51,1)'
-          : '4px 4px 0px rgba(0,0,0,1)',
-      }}
+        hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}
+        focus-visible:outline-none`}
+      style={
+        {
+          borderColor: isDarkMode ? '#333333' : 'black',
+          boxShadow: isDarkMode
+            ? '4px 4px 0px rgba(51,51,51,1)'
+            : '4px 4px 0px rgba(0,0,0,1)',
+          '--focus-ring-color': isDarkMode ? 'white' : '#0066ff',
+        } as React.CSSProperties & {'--focus-ring-color': string}
+      }
       onMouseEnter={(e) => {
         if (!isAnimating) {
           e.currentTarget.style.boxShadow = isDarkMode
@@ -107,6 +111,15 @@ export const PokemonCard = memo(function PokemonCard({
       }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onFocus={(e) => {
+        const focusColor = isDarkMode ? 'white' : '#0066ff';
+        e.currentTarget.style.boxShadow = `0 0 0 2px ${isDarkMode ? '#1a1a1a' : 'white'}, 0 0 0 6px ${focusColor}`;
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.boxShadow = isDarkMode
+          ? '4px 4px 0px rgba(51,51,51,1)'
+          : '4px 4px 0px rgba(0,0,0,1)';
+      }}
       tabIndex={0}
       aria-label={`View details for ${pokemon.name}`}
     >

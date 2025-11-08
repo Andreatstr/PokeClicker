@@ -23,14 +23,32 @@ export function UnlockButton({
   const priceTextSize = size === 'large' ? 'text-xs' : 'text-[10px]';
   const candySize = size === 'large' ? 'w-5 h-5' : 'w-4 h-4';
 
+  const focusRingColor = isDarkMode ? 'white' : '#0066ff';
+  const focusOffsetColor = isDarkMode ? '#1a1a1a' : 'white';
+
   return (
     <button
       onClick={onClick}
-      className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 relative overflow-hidden ${
+      className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:outline-none transition-all duration-150 relative overflow-hidden ${
         error
           ? 'bg-red-500 text-white animate-shake'
           : 'bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 text-black'
       }`}
+      style={
+        {
+          '--focus-ring-color': focusRingColor,
+          '--focus-offset-color': focusOffsetColor,
+        } as React.CSSProperties & {
+          '--focus-ring-color': string;
+          '--focus-offset-color': string;
+        }
+      }
+      onFocus={(e) => {
+        e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.boxShadow = '4px 4px 0px 0px rgba(0,0,0,1)';
+      }}
       aria-label={`Purchase ${pokemonName} for ${cost} rare candy`}
     >
       {!error && (
