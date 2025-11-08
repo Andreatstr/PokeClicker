@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
+import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
@@ -10,7 +11,7 @@ import {getPlatformImage} from '../utils/platformMapping';
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
   opponentPokemon: PokedexPokemon;
-  onBattleComplete: (result: 'victory' | 'defeat', clickCount: number) => void;
+  onBattleComplete: (result: 'victory' | 'defeat') => void;
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
 }
@@ -22,12 +23,14 @@ export function BattleView({
   isDarkMode = false,
   onAttackFunctionReady,
 }: BattleViewProps) {
-  const {user} = useAuth();
+  const {user, updateUser} = useAuth();
+  const {updateRareCandy} = useGameMutations();
   const [showResult, setShowResult] = useState(false);
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(
     null
   );
   const [finalClickCount, setFinalClickCount] = useState(0);
+  const [candyAwarded, setCandyAwarded] = useState(false);
 
   const {
     playerHP,
@@ -100,6 +103,21 @@ export function BattleView({
     return () => clearInterval(timer);
   }, [result, isActive, startBattle]);
 
+  // Auto-award candy when battle is won
+  useEffect(() => {
+    if (battleResult === 'victory' && rareCandyReward > 0 && !candyAwarded) {
+      // Award candy immediately
+      updateRareCandy(rareCandyReward, updateUser);
+      setCandyAwarded(true);
+    }
+  }, [
+    battleResult,
+    rareCandyReward,
+    candyAwarded,
+    updateRareCandy,
+    updateUser,
+  ]);
+
   if (showResult && battleResult) {
     return (
       <BattleResult
@@ -107,7 +125,7 @@ export function BattleView({
         opponentPokemon={opponentPokemon}
         clickCount={finalClickCount}
         rareCandyReward={rareCandyReward}
-        onContinue={() => onBattleComplete(battleResult, finalClickCount)}
+        onContinue={() => onBattleComplete(battleResult)}
         isDarkMode={isDarkMode}
       />
     );

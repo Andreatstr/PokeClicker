@@ -9,8 +9,6 @@ import {useMapMovement} from '../hooks/useMapMovement';
 import {usePokemonSpawning} from '../hooks/usePokemonSpawning';
 import {usePokemonById} from '@features/pokedex/hooks/usePokemonById';
 import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
-import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
-import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useMobileDetection} from '@/hooks';
 
@@ -70,7 +68,7 @@ export function PokemonMap({
   isDarkMode = false,
   onFullscreenChange,
 }: PokemonMapProps) {
-  const {user, isAuthenticated, updateUser} = useAuth();
+  const {user, isAuthenticated} = useAuth();
 
   // Fetch user's favorite Pokemon for battles
   const {pokemon: favoritePokemon, refreshStats} = usePokemonById(
@@ -79,7 +77,6 @@ export function PokemonMap({
 
   // Mutations for awarding battle rewards
   const [catchPokemon] = useCatchPokemon();
-  const {updateRareCandy} = useGameMutations();
 
   // Battle state
   const [inBattle, setInBattle] = useState(false);
@@ -284,19 +281,9 @@ export function PokemonMap({
 
   // Battle complete handler
   const handleBattleComplete = useCallback(
-    async (result: 'victory' | 'defeat', clickCount: number) => {
+    async (result: 'victory' | 'defeat') => {
       if (result === 'victory' && battleOpponent && battleSpawnId) {
         try {
-          // Calculate rare candy reward based on clicker power
-          // Reward = clickCount × candyPerClick × 10
-          const candyPerClick = user?.stats
-            ? calculateCandyPerClick(user.stats)
-            : 1;
-          const rareCandyReward = Math.floor(clickCount * candyPerClick * 10);
-
-          // Award rare candy
-          await updateRareCandy(rareCandyReward, updateUser);
-
           // Add Pokemon to collection if not already owned
           if (!battleOpponent.isOwned) {
             await catchPokemon({
@@ -317,15 +304,7 @@ export function PokemonMap({
       setBattleSpawnId(null);
       setBattleAttackFunction(null);
     },
-    [
-      battleOpponent,
-      battleSpawnId,
-      updateRareCandy,
-      updateUser,
-      catchPokemon,
-      pokemon,
-      user?.stats,
-    ]
+    [battleOpponent, battleSpawnId, catchPokemon, pokemon]
   );
 
   const handleAButtonClick = useCallback(() => {
