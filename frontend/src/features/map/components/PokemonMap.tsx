@@ -507,9 +507,25 @@ export function PokemonMap({
               e.preventDefault();
               toggleFullscreen();
             }}
-            className="absolute top-2 left-2 z-50 flex items-center gap-1 bg-blue-500/90 hover:bg-blue-600/90 active:bg-blue-700 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)] transition-colors touch-manipulation"
+            className="absolute top-2 left-2 z-50 flex items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            style={{WebkitTapHighlightColor: 'transparent'}}
+            style={{
+              WebkitTapHighlightColor: 'transparent',
+              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+              transform: 'translate(0, 0)',
+              transition: 'all 0.15s ease-in-out',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+            }}
           >
             <svg
               fill="none"
