@@ -29,9 +29,9 @@ export function RareCandyCounter({
         aria-hidden="true"
       ></div>
       <dl className="relative flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <figure
-            className="border-2 p-2 rounded-md shadow-md"
+        <dt className="flex items-center gap-3">
+          <span
+            className="border-2 p-2 rounded-md shadow-md inline-flex"
             style={{
               backgroundColor: isDarkMode ? 'var(--card)' : 'var(--card)',
               borderColor: isDarkMode ? '#374151' : '#bbb7b2',
@@ -39,20 +39,21 @@ export function RareCandyCounter({
           >
             <img
               src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
-              alt="Rare Candy"
+              alt=""
               className="w-8 h-8"
               style={{imageRendering: 'pixelated'}}
+              aria-hidden="true"
             />
-          </figure>
-          <dt
+          </span>
+          <span
             className="pixel-font text-base font-bold"
             style={{
               color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
             }}
           >
             Rare Candy
-          </dt>
-        </div>
+          </span>
+        </dt>
         <dd
           className="border-2 px-4 py-2 shadow-md"
           style={{

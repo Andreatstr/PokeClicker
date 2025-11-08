@@ -144,13 +144,13 @@ export function GameBoyConsole({
             className="pixel-font text-[10px] tracking-wider mb-0.5"
             style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
-            Nintendo
+            Pretendo
           </p>
           <p
             className="pixel-font text-[8px] font-bold tracking-widest italic"
             style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
-            GAME BOY<span className="text-[6px]">™</span>
+            PLAY BOY<span className="text-[6px]">™</span>
           </p>
         </div>
 
@@ -193,6 +193,7 @@ export function GameBoyConsole({
                   {
                     borderColor: '#2a2a3e',
                     '--custom-inner-border-color': '#2a2a3e',
+                    color: 'white',
                   } as React.CSSProperties
                 }
               >
@@ -212,6 +213,7 @@ export function GameBoyConsole({
                   {
                     borderColor: '#2a2a3e',
                     '--custom-inner-border-color': '#2a2a3e',
+                    color: 'white',
                   } as React.CSSProperties
                 }
               >

@@ -65,10 +65,10 @@ export function UnlockButton({
             className="flex items-center gap-1 px-2 py-1 rounded"
             style={{
               backgroundColor: isDarkMode
-                ? 'rgba(51, 51, 51, 0.2)'
-                : 'rgba(0, 0, 0, 0.2)',
+                ? 'rgba(122, 122, 122, 0.2)'
+                : 'rgba(122, 122, 122, 0.2)',
               border: isDarkMode
-                ? '1px solid rgba(51, 51, 51, 0.3)'
+                ? '1px solid rgba(79, 79, 79, 0.3)'
                 : '1px solid rgba(0, 0, 0, 0.3)',
             }}
           >

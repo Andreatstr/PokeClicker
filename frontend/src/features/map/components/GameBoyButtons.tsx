@@ -29,6 +29,7 @@ export function GameBoyButtons({
             {
               borderColor: '#2a2a3e',
               '--custom-inner-border-color': '#2a2a3e',
+              color: 'white',
             } as React.CSSProperties
           }
         >
@@ -48,6 +49,7 @@ export function GameBoyButtons({
             {
               borderColor: '#2a2a3e',
               '--custom-inner-border-color': '#2a2a3e',
+              color: 'white',
             } as React.CSSProperties
           }
         >

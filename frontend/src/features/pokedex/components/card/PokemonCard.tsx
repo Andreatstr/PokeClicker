@@ -152,9 +152,9 @@ export const PokemonCard = memo(function PokemonCard({
         <div className="infoGrid flex flex-col gap-1.5 text-[10px] flex-1">
           {/* Pokemon Name */}
           <header className="flex items-center justify-between min-h-[20px]">
-            <h3 className="font-bold text-sm capitalize truncate">
+            <h2 className="font-bold text-sm capitalize truncate">
               {isOwned ? pokemon.name : '???'}
-            </h3>
+            </h2>
             {isOwned && (
               <span
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
@@ -202,10 +202,7 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <dt
-                    className="font-bold text-[8px] uppercase tracking-wide"
-                    style={{color: 'var(--muted-foreground)'}}
-                  >
+                  <dt className="font-bold text-[8px] uppercase tracking-wide">
                     Height
                   </dt>
                   <dd className="font-bold text-[11px] tabular-nums">
@@ -223,10 +220,7 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <dt
-                    className="font-bold text-[8px] uppercase tracking-wide"
-                    style={{color: 'var(--muted-foreground)'}}
-                  >
+                  <dt className="font-bold text-[8px] uppercase tracking-wide">
                     Weight
                   </dt>
                   <dd className="font-bold text-[11px] tabular-nums">
@@ -238,7 +232,7 @@ export const PokemonCard = memo(function PokemonCard({
               {/* Abilities */}
               {pokemon.abilities && pokemon.abilities.length > 0 && (
                 <section className="text-[9px]">
-                  <h4 className="font-bold text-[8px]">Abilities</h4>
+                  <h3 className="font-bold text-[8px]">Abilities</h3>
                   <ul className="flex flex-wrap gap-0.5 mt-0.5 list-none p-0 m-0">
                     {pokemon.abilities.map((ability) => (
                       <li
