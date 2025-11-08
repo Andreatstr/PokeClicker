@@ -201,6 +201,15 @@ MongoDB handles filtering instead of client:
 
 ### Energy Savings
 
+**Dark Mode:**
+- Dark mode can reduce energy consumption on OLED and AMOLED displays
+- Energy savings depend on:
+  - Display technology (OLED displays show higher savings, LCD displays show minimal savings)
+  - Screen brightness settings
+  - Ratio of dark pixels on screen
+- Our dark mode implementation uses dark backgrounds with light text, maximizing dark pixel coverage
+- Users can toggle between light and dark mode based on preference and device type
+
 **Code Splitting Benefits**:
 - Less JavaScript to parse and execute
 - Reduced CPU usage
@@ -215,6 +224,13 @@ MongoDB handles filtering instead of client:
 - Renders only visible components
 - Reduced DOM manipulation
 - Lower CPU and memory usage
+
+**Other Efficiency Measures**:
+- Lazy loading for Pokemon images
+- Debounced search (reduces unnecessary API calls)
+- Efficient MongoDB indexes for fast queries
+- Sprite-based graphics (smaller file sizes than high-res images)
+- Code splitting for on-demand loading
 
 ### Data Transfer Reduction
 
