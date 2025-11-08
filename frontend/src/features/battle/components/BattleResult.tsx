@@ -114,7 +114,8 @@ export function BattleResult({
                   isDarkMode ? 'text-white' : 'text-black'
                 }`}
               >
-                +{formatNumber(rareCandyReward)} Rare Candy
+                +{formatNumber(rareCandyReward)} Rare Candy added to your
+                balance!
               </span>
             </div>
 

@@ -7,6 +7,7 @@ import {FocusTrap} from 'focus-trap-react';
 import {useModal} from '@/hooks/useModal';
 import {PokemonDetailCard} from './PokemonDetailCard';
 import {PokemonCarousel} from './PokemonCarousel';
+import {useEffect} from 'react';
 
 const ME_QUERY = gql`
   query Me {
@@ -42,6 +43,25 @@ export function PokemonDetailModal({
 
   useModal(isOpen, onClose);
 
+  // Set initial focus to close button when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      // Wait for carousel to fully initialize before setting focus
+      // This prevents focus from interfering with carousel initialization
+      const timeoutId = setTimeout(() => {
+        // Find the close button within the modal and focus it
+        const closeButton = document.querySelector(
+          '[aria-label="Exit"]'
+        ) as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.focus();
+        }
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen, pokemon?.id]); // Include pokemon.id to refocus when Pokemon changes
+
   if (!pokemon) return null;
 
   const ownedPokemonIds = userData?.me?.owned_pokemon_ids || [];
@@ -53,8 +73,10 @@ export function PokemonDetailModal({
         focusTrapOptions={{
           allowOutsideClick: true,
           escapeDeactivates: false, // We handle Escape in our own handler
-          initialFocus: false, // Let the dialog handle initial focus naturally
+          initialFocus: false, // We handle initial focus manually to prevent carousel interference
           returnFocusOnDeactivate: false, // We handle this manually for better control
+          clickOutsideDeactivates: false, // Prevent clicks outside from breaking the trap
+          preventScroll: true, // Prevent scroll when focusing elements
         }}
       >
         <DialogBody>

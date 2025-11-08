@@ -108,7 +108,6 @@ export const PokemonCard = memo(function PokemonCard({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      role="button"
       aria-label={`View details for ${pokemon.name}`}
     >
       <figure

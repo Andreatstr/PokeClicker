@@ -79,7 +79,7 @@ export function FavoritePokemonSelector({
                   >
                     <img
                       src={pokemon.sprite}
-                      alt={pokemon.name}
+                      alt=""
                       className="w-full h-16 sm:h-20 object-contain mx-auto"
                       loading="lazy"
                       decoding="async"

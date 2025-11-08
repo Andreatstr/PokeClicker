@@ -29,7 +29,7 @@ export function GameBoyConsole({
       data-onboarding="clicker-area"
       className="border-4 p-8 w-full max-w-md lg:max-w-lg"
       style={{
-        backgroundColor: isDarkMode ? '#6a6a6a' : '#9FA0A0',
+        backgroundColor: isDarkMode ? '#757474ff' : '#9FA0A0',
         borderColor: isDarkMode ? '#333333' : 'black',
         boxShadow: isDarkMode
           ? '8px 8px 0px 0px rgba(51,51,51,1)'
@@ -142,13 +142,13 @@ export function GameBoyConsole({
         <div className="mb-6 text-center">
           <p
             className="pixel-font text-[10px] tracking-wider mb-0.5"
-            style={{color: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
+            style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
             Nintendo
           </p>
           <p
             className="pixel-font text-[8px] font-bold tracking-widest italic"
-            style={{color: isDarkMode ? '#0f0f1a' : '#2a2a3e'}}
+            style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
             GAME BOY<span className="text-[6px]">™</span>
           </p>

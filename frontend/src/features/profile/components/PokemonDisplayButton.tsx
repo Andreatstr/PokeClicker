@@ -32,7 +32,7 @@ export function PokemonDisplayButton({
       >
         <img
           src={pokemon.sprite}
-          alt={pokemon.name}
+          alt=""
           className="w-16 h-16 sm:w-20 sm:h-20 object-contain flex-shrink-0"
           width={80}
           height={80}

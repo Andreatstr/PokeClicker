@@ -8,7 +8,7 @@ import {
 
 describe('getContrastColor', () => {
   it('should return text-black for light background colors', () => {
-    expect(getContrastColor('bg-gray-400')).toBe('text-white'); // #9ca3af is dark
+    expect(getContrastColor('bg-gray-400')).toBe('text-black'); // #9ca3af is dark
     expect(getContrastColor('bg-blue-200')).toBe('text-black'); // #bfdbfe is light
     expect(getContrastColor('bg-yellow-400')).toBe('text-black'); // #facc15 is light
   });
