@@ -200,6 +200,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           isMobile={isMobile}
           ownedPokemonIds={user?.owned_pokemon_ids ?? []}
           facets={cachedFacets ?? null}
+          isDarkMode={isDarkMode}
         />
       </Suspense>
 

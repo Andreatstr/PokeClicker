@@ -199,6 +199,7 @@ export function ProfileDashboard({
                 checked={checked}
                 onCheckedChange={handleCheckedChange}
                 disabled={isUpdating}
+                isDarkMode={isDarkMode}
               />
               Show me in ranks
             </label>

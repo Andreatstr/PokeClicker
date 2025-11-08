@@ -77,6 +77,7 @@ export function Navbar({
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Pokedex"
               onClick={() => onPageChange('pokedex')}
+              isDarkMode={isDarkMode}
             >
               Pokedex
             </Button>
@@ -85,6 +86,7 @@ export function Navbar({
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Clicker"
               onClick={() => onPageChange('clicker')}
+              isDarkMode={isDarkMode}
             >
               Clicker
             </Button>
@@ -93,6 +95,7 @@ export function Navbar({
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Map"
               onClick={() => onPageChange('map')}
+              isDarkMode={isDarkMode}
             >
               World
             </Button>
@@ -101,6 +104,7 @@ export function Navbar({
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Ranks"
               onClick={() => onPageChange('ranks')}
+              isDarkMode={isDarkMode}
             >
               Ranks
             </Button>
@@ -109,6 +113,7 @@ export function Navbar({
               onClick={onToggleTheme}
               className="min-w-[44px] min-h-[44px] p-2"
               aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+              isDarkMode={isDarkMode}
             >
               {isDarkMode ? (
                 <SunIcon className="w-4 h-4" />
@@ -124,6 +129,7 @@ export function Navbar({
                 onClick={() => onPageChange('profile')}
                 title={`Logged in as ${user?.username}`}
                 aria-label={`Profile for ${user?.username}`}
+                isDarkMode={isDarkMode}
               >
                 <UserIcon className="w-4 h-4" />
               </Button>
@@ -133,6 +139,7 @@ export function Navbar({
                 className="min-w-[44px] min-h-[44px] p-2"
                 onClick={() => onPageChange('login')}
                 aria-label="Login"
+                isDarkMode={isDarkMode}
               >
                 <UserIcon className="w-4 h-4" />
               </Button>
@@ -146,6 +153,7 @@ export function Navbar({
               className="min-w-[44px] min-h-[44px] px-3 py-4"
               aria-label="Toggle mobile menu"
               aria-expanded={isMobileMenuOpen}
+              isDarkMode={isDarkMode}
             >
               <MenuIcon className="w-5 h-5" />
             </Button>
@@ -180,6 +188,7 @@ export function Navbar({
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Pokedex"
                 onClick={() => onPageChange('pokedex')}
+                isDarkMode={isDarkMode}
               >
                 Pokedex
               </Button>
@@ -188,6 +197,7 @@ export function Navbar({
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Clicker"
                 onClick={() => onPageChange('clicker')}
+                isDarkMode={isDarkMode}
               >
                 Clicker
               </Button>
@@ -196,6 +206,7 @@ export function Navbar({
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Map"
                 onClick={() => onPageChange('map')}
+                isDarkMode={isDarkMode}
               >
                 World
               </Button>
@@ -204,6 +215,7 @@ export function Navbar({
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Ranks"
                 onClick={() => onPageChange('ranks')}
+                isDarkMode={isDarkMode}
               >
                 Ranks
               </Button>
@@ -218,6 +230,7 @@ export function Navbar({
                 className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                 onClick={onToggleTheme}
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+                isDarkMode={isDarkMode}
               >
                 {isDarkMode ? (
                   <>
@@ -239,6 +252,7 @@ export function Navbar({
                   onClick={() => onPageChange('profile')}
                   title={`Logged in as ${user?.username}`}
                   aria-label={`Profile for ${user?.username}`}
+                  isDarkMode={isDarkMode}
                 >
                   <UserIcon className="w-4 h-4" />
                   Profile
@@ -249,6 +263,7 @@ export function Navbar({
                   className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
                   onClick={() => onPageChange('login')}
                   aria-label="Login"
+                  isDarkMode={isDarkMode}
                 >
                   <UserIcon className="w-4 h-4" />
                   Login

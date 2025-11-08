@@ -20,6 +20,7 @@ interface FiltersAndCountProps {
   isMobile: boolean;
   ownedPokemonIds: number[];
   facets?: FilterFacets | null;
+  isDarkMode?: boolean;
 }
 
 export function FiltersAndCount({
@@ -28,6 +29,7 @@ export function FiltersAndCount({
   isMobile,
   ownedPokemonIds,
   facets,
+  isDarkMode = false,
 }: FiltersAndCountProps) {
   // Get all filter state and handlers from context
   const {
@@ -135,8 +137,9 @@ export function FiltersAndCount({
                     }}
                   >
                     <SelectTrigger
-                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      className="w-full text-sm"
                       aria-label="Region"
+                      isDarkMode={isDarkMode}
                     >
                       <SelectValue placeholder="All regions" />
                     </SelectTrigger>
@@ -162,7 +165,7 @@ export function FiltersAndCount({
                 <div role="group" aria-labelledby="type-filter-label">
                   <Label
                     id="type-filter-label"
-                    className="text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                    className={`text-xs font-bold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)] ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}`}
                     style={{color: 'var(--foreground)'}}
                   >
                     Type
@@ -171,9 +174,10 @@ export function FiltersAndCount({
                     options={[...POKEMON_TYPES]}
                     selected={tempTypes}
                     onChange={setTempTypes}
-                    className="w-full focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                    className="w-full"
                     aria-label="Type"
                     counts={showCounts ? typeCountMap : undefined}
+                    isDarkMode={isDarkMode}
                   />
                 </div>
 
@@ -193,8 +197,9 @@ export function FiltersAndCount({
                     }
                   >
                     <SelectTrigger
-                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      className="w-full text-sm"
                       aria-label="Sort by"
+                      isDarkMode={isDarkMode}
                     >
                       <SelectValue placeholder="ID" />
                     </SelectTrigger>
@@ -220,8 +225,9 @@ export function FiltersAndCount({
                     onValueChange={(v) => setTempSortOrder(v as 'asc' | 'desc')}
                   >
                     <SelectTrigger
-                      className="w-full text-sm focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      className="w-full text-sm"
                       aria-label="Order"
+                      isDarkMode={isDarkMode}
                     >
                       <SelectValue placeholder="Asc" />
                     </SelectTrigger>
@@ -252,8 +258,9 @@ export function FiltersAndCount({
                     }}
                   >
                     <SelectTrigger
-                      className="w-full text-sm mt-1 focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                      className="w-full text-sm mt-1"
                       aria-label="Owned filter"
+                      isDarkMode={isDarkMode}
                     >
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
@@ -298,6 +305,7 @@ export function FiltersAndCount({
                     setSelectedOwnedOnly('all');
                     setShowMobileFilters(false);
                   }}
+                  isDarkMode={isDarkMode}
                 >
                   Clear
                 </Button>
@@ -306,6 +314,7 @@ export function FiltersAndCount({
                   aria-label="Cancel filter changes"
                   className="min-h-[44px]"
                   onClick={() => setShowMobileFilters(false)}
+                  isDarkMode={isDarkMode}
                 >
                   Cancel
                 </Button>
@@ -321,6 +330,7 @@ export function FiltersAndCount({
                     setSelectedOwnedOnly(tempOwnedOnly);
                     setShowMobileFilters(false);
                   }}
+                  isDarkMode={isDarkMode}
                 >
                   Apply
                 </Button>

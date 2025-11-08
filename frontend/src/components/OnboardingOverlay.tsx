@@ -467,6 +467,7 @@ export function OnboardingOverlay({
               variant="secondary"
               aria-label="Previous step"
               onClick={onPrevious}
+              isDarkMode={isDarkMode}
             >
               Back
             </Button>
@@ -514,6 +515,7 @@ export function OnboardingOverlay({
             }}
             className="flex-1"
             aria-label={`${step === STEPS.length - 1 ? 'Finish' : 'Next'} step`}
+            isDarkMode={isDarkMode}
           >
             {step === STEPS.length - 1 ? 'Finish' : 'Next'}
           </Button>

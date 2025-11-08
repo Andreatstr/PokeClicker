@@ -490,6 +490,7 @@ export function PokemonMap({
         onToggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
         isMapLoading={!collisionMap.collisionMapLoaded}
+        isDarkMode={isDarkMode}
       >
         {/* Map/Battle Viewport Container - this is the game view */}
         <div

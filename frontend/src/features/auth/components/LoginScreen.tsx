@@ -15,6 +15,7 @@ import {useMobileDetection} from '@/hooks';
 
 type Props = {
   onNavigate: (page: 'pokedex' | 'clicker' | 'login') => void;
+  isDarkMode: boolean;
 };
 
 type FormValues = {
@@ -22,7 +23,7 @@ type FormValues = {
   password: string;
 };
 
-export function LoginScreen({onNavigate}: Props) {
+export function LoginScreen({onNavigate, isDarkMode}: Props) {
   const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
   const {login: authLogin} = useAuth();
 
@@ -140,6 +141,7 @@ export function LoginScreen({onNavigate}: Props) {
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('login')}
             aria-label="Log in"
+            isDarkMode={isDarkMode}
           >
             Log in
           </Button>
@@ -148,6 +150,7 @@ export function LoginScreen({onNavigate}: Props) {
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('signup')}
             aria-label="Sign up"
+            isDarkMode={isDarkMode}
           >
             Sign up
           </Button>
@@ -157,6 +160,7 @@ export function LoginScreen({onNavigate}: Props) {
             onClick={loginAsGuest}
             disabled={loading}
             aria-label="Guest user"
+            isDarkMode={isDarkMode}
           >
             Guest user
           </Button>
@@ -271,6 +275,7 @@ export function LoginScreen({onNavigate}: Props) {
                     className="text-sm py-2 w-full"
                     aria-label={`${modalType === 'login' ? 'Log in' : 'Sign up'}`}
                     disabled={loading}
+                    isDarkMode={isDarkMode}
                   >
                     {loading
                       ? modalType === 'login'

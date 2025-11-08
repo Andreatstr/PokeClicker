@@ -5,18 +5,26 @@ import {CheckIcon} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import './checkbox.css';
 
-function Checkbox({
-  className,
-  ...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+interface CheckboxProps
+  extends React.ComponentProps<typeof CheckboxPrimitive.Root> {
+  isDarkMode?: boolean;
+}
+
+function Checkbox({className, isDarkMode = false, ...props}: CheckboxProps) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:ring focus-visible:ring-3 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+        'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground outline-none dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:ring-2 focus-visible:ring-offset-3 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow disabled:cursor-not-allowed disabled:opacity-50',
         'checkbox-extended-touch',
         className
       )}
+      style={
+        {
+          '--tw-ring-color': isDarkMode ? 'white' : '#0066ff',
+          '--tw-ring-offset-color': isDarkMode ? '#1a1a1a' : 'white',
+        } as React.CSSProperties
+      }
       {...props}
     >
       <CheckboxPrimitive.Indicator

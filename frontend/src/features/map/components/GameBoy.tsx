@@ -19,6 +19,7 @@ interface GameBoyProps {
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   isMapLoading?: boolean;
+  isDarkMode?: boolean;
 }
 
 export function GameBoy({
@@ -34,6 +35,7 @@ export function GameBoy({
   onToggleFullscreen,
   isFullscreen: isFullscreenProp,
   isMapLoading = false,
+  isDarkMode = false,
 }: GameBoyProps) {
   // Unified mobile detection
   const isMobile = useMobileDetection(768);
@@ -244,6 +246,7 @@ export function GameBoy({
                 onBButtonClick={onBButtonClick}
                 isAuthenticated={isAuthenticated}
                 nearbyPokemon={nearbyPokemon}
+                isDarkMode={isDarkMode}
               />
             </div>
           </div>
