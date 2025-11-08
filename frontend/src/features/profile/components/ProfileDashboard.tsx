@@ -108,6 +108,9 @@ export function ProfileDashboard({
     }
   };
 
+  const focusRingColor = isDarkMode ? 'white' : '#0066ff';
+  const focusOffsetColor = isDarkMode ? '#1a1a1a' : 'white';
+
   return (
     <main
       className="max-w-4xl mx-auto py-4 px-4 sm:py-8 sm:px-6"
@@ -299,7 +302,7 @@ export function ProfileDashboard({
                 restartTutorial();
               }, 500);
             }}
-            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all text-sm"
+            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all text-sm focus-visible:outline-none"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: '#10845dff',
@@ -320,6 +323,16 @@ export function ProfileDashboard({
                 ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)';
             }}
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+              e.currentTarget.style.zIndex = '10';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.zIndex = '';
+            }}
           >
             RESTART TUTORIAL
           </button>
@@ -332,7 +345,7 @@ export function ProfileDashboard({
         >
           <button
             onClick={handleLogout}
-            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base focus-visible:outline-none"
             aria-label="Log out"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
@@ -354,6 +367,16 @@ export function ProfileDashboard({
                 ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)';
             }}
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+              e.currentTarget.style.zIndex = '10';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.zIndex = '';
+            }}
           >
             LOGOUT
           </button>
@@ -361,7 +384,7 @@ export function ProfileDashboard({
           <button
             onClick={() => setDeleteDialogOpen(true)}
             disabled={deleting}
-            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base focus-visible:outline-none"
             aria-label="Delete account"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
@@ -385,6 +408,18 @@ export function ProfileDashboard({
               e.currentTarget.style.boxShadow = isDarkMode
                 ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)';
+            }}
+            onFocus={(e) => {
+              if (!deleting) {
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+                e.currentTarget.style.zIndex = '10';
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.zIndex = '';
             }}
           >
             {deleting ? 'DELETING...' : 'DELETE ACCOUNT'}
