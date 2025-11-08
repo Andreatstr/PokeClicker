@@ -80,9 +80,12 @@ export function PokemonDetailModal({
         }}
       >
         <DialogBody>
-          <div className="md:hidden flex justify-center mb-2">
-            <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
-          </div>
+          <header className="md:hidden flex justify-center mb-2">
+            <div
+              className="w-12 h-1 bg-gray-400 rounded-full"
+              aria-hidden="true"
+            ></div>
+          </header>
 
           {allPokemon.length > 1 ? (
             <PokemonCarousel

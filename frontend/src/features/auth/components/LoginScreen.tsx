@@ -105,7 +105,7 @@ export function LoginScreen({onNavigate}: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-cover bg-center flex items-center justify-center">
+    <main className="fixed inset-0 bg-cover bg-center flex items-center justify-center">
       {/* Video Background */}
       <video
         autoPlay
@@ -120,10 +120,12 @@ export function LoginScreen({onNavigate}: Props) {
       </video>
 
       {/* Content */}
-      <div
+      <section
         className={`z-20 flex flex-col items-center text-center mx-auto ${isMobile ? 'max-w-xs gap-2 px-3' : 'max-w-md gap-6 px-6'}`}
+        aria-labelledby="login-heading"
       >
         <h1
+          id="login-heading"
           className={`pixel-font text-white ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl'} mb-3 drop-shadow-lg`}
           style={{WebkitTextStroke: '2px black', color: 'white'}}
         >
@@ -296,7 +298,7 @@ export function LoginScreen({onNavigate}: Props) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

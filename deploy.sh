@@ -16,8 +16,24 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Configuration
-DEPLOY_DIR="/var/www/html/project2"
+# Detect OS
+OS_TYPE=$(uname -s)
+
+# Configuration based on OS
+if [ "$OS_TYPE" = "Darwin" ]; then
+    # macOS configuration
+    DEPLOY_DIR="/Library/WebServer/Documents/project2"
+    WEB_USER="$USER"
+    WEB_GROUP="staff"
+    echo "Detected macOS - using path: $DEPLOY_DIR"
+else
+    # Linux configuration
+    DEPLOY_DIR="/var/www/html/project2"
+    WEB_USER="www-data"
+    WEB_GROUP="www-data"
+    echo "Detected Linux - using path: $DEPLOY_DIR"
+fi
+
 BACKEND_DIR="$HOME/project2-backend"
 
 echo -e "${BLUE}Step 1: Pulling Latest Changes${NC}"
@@ -80,8 +96,9 @@ if [ -d "$DEPLOY_DIR" ]; then
     sudo rm -rf "$DEPLOY_DIR"
 fi
 echo "Copying frontend build to ${DEPLOY_DIR}..."
-sudo cp -r frontend/dist "$DEPLOY_DIR"
-sudo chown -R www-data:www-data "$DEPLOY_DIR"
+sudo mkdir -p "$DEPLOY_DIR"
+sudo cp -r frontend/dist/* "$DEPLOY_DIR/"
+sudo chown -R $WEB_USER:$WEB_GROUP "$DEPLOY_DIR"
 sudo chmod -R 755 "$DEPLOY_DIR"
 echo -e "${GREEN}Frontend deployed!${NC}"
 echo ""
@@ -91,7 +108,14 @@ echo -e "${GREEN}Deployment Complete!${NC}"
 echo -e "${GREEN}=========================================${NC}"
 echo ""
 echo "Your application is now live:"
-echo "  Frontend: http://it2810-26.idi.ntnu.no/project2/"
-echo "  GraphQL: http://it2810-26.idi.ntnu.no/project2/graphql"
+if [ "$OS_TYPE" = "Darwin" ]; then
+    echo "  Frontend: http://localhost/project2/"
+    echo "  Backend: http://localhost:3001/graphql"
+    echo ""
+    echo "Note: Make sure Apache is running with: sudo apachectl start"
+else
+    echo "  Frontend: http://it2810-26.idi.ntnu.no/project2/"
+    echo "  GraphQL: http://it2810-26.idi.ntnu.no/project2/graphql"
+fi
 echo ""
 echo "To check backend status: cd backend && ./manage-backend.sh status"

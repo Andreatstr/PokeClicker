@@ -230,4 +230,12 @@
     border-right: 4px solid var(--custom-inner-border-color);
     border-bottom: 4px solid var(--custom-inner-border-color);
   }
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+
+  &:active:not(:disabled) {
+    filter: brightness(0.85);
+  }
 }

@@ -41,9 +41,14 @@ export function ErrorDisplay() {
   };
 
   return (
-    <div className="fixed top-20 right-4 z-50 max-w-md space-y-2">
+    <aside
+      className="fixed top-20 right-4 z-50 max-w-md space-y-2"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
       {errors.map((error) => (
-        <div key={error.id} className={getSeverityStyles(error.severity)}>
+        <article key={error.id} className={getSeverityStyles(error.severity)}>
           <button
             onClick={() => removeError(error.id)}
             className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-black text-white hover:bg-gray-800 transition-colors"
@@ -53,22 +58,26 @@ export function ErrorDisplay() {
           </button>
 
           <div className="flex items-start gap-3 pr-8">
-            <span className="text-2xl flex-shrink-0">
+            <span className="text-2xl flex-shrink-0" aria-hidden="true">
               {getSeverityIcon(error.severity)}
             </span>
             <div className="flex-1">
-              <p className="font-bold text-sm mb-1">
-                {error.severity.toUpperCase()}
-              </p>
+              <header>
+                <p className="font-bold text-sm mb-1">
+                  {error.severity.toUpperCase()}
+                </p>
+              </header>
               <p className="text-xs leading-relaxed">{error.userMessage}</p>
               {error.code && (
-                <p className="text-[10px] mt-2 opacity-60">
-                  Error Code: {error.code}
-                </p>
+                <footer>
+                  <p className="text-[10px] mt-2 opacity-60">
+                    Error Code: {error.code}
+                  </p>
+                </footer>
               )}
             </div>
           </div>
-        </div>
+        </article>
       ))}
 
       <style>{`
@@ -86,6 +95,6 @@ export function ErrorDisplay() {
           animation: slide-in 0.3s ease-out;
         }
       `}</style>
-    </div>
+    </aside>
   );
 }

@@ -13,8 +13,11 @@ export function CandyCounterOverlay({
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
-      <div
+    <aside
+      className="fixed bottom-4 right-4 z-50 pointer-events-none"
+      aria-label="Candy counter display"
+    >
+      <dl
         data-onboarding="candy-counter"
         className="flex items-center gap-2 px-3 py-2 border-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] pixel-font font-bold text-sm"
         style={{
@@ -23,13 +26,15 @@ export function CandyCounterOverlay({
           color: isDarkMode ? 'white' : 'black',
         }}
       >
-        <img
-          src={`${import.meta.env.BASE_URL}candy.webp`}
-          alt="Candy"
-          className="w-5 h-5"
-        />
-        <span>{formatNumber(user.rare_candy)}</span>
-      </div>
-    </div>
+        <figure className="w-5 h-5">
+          <img
+            src={`${import.meta.env.BASE_URL}candy.webp`}
+            alt="Candy"
+            className="w-5 h-5"
+          />
+        </figure>
+        <dd>{formatNumber(user.rare_candy)}</dd>
+      </dl>
+    </aside>
   );
 }

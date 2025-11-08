@@ -60,7 +60,7 @@ function SelectTrigger({
   return (
     <div
       className={cn(
-        'relative shadow-(--pixel-box-shadow) box-shadow-margin',
+        'relative shadow-(--pixel-box-shadow) box-shadow-margin hover:opacity-80 transition-opacity',
         inputVariants({font}),
         className
       )}

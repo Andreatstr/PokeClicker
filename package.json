@@ -30,6 +30,7 @@
     "@playwright/test": "^1.56.1",
     "concurrently": "^8.2.2",
     "husky": "^9.1.7",
+    "patch-package": "^8.0.0",
     "vitest": "^4.0.2"
   }
 }

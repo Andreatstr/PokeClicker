@@ -35,56 +35,70 @@ export function PaginationControls({
   if (isMobile) {
     // Mobile view: Arrows only with page info
     return (
-      <div className="flex items-center justify-center gap-4 py-4">
+      <nav
+        className="flex items-center justify-center gap-4 py-4"
+        aria-label="Pagination navigation"
+      >
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
           aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-6 h-6" />
         </button>
-        <span className="text-sm font-bold">
+        <span
+          className="text-sm font-bold"
+          aria-current="page"
+          aria-label={`Page ${currentPage} of ${totalPages}`}
+        >
           {currentPage} / {totalPages}
         </span>
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
           aria-label="Next page"
         >
           <ArrowRightIcon className="w-6 h-6" />
         </button>
-      </div>
+      </nav>
     );
   }
 
   // Desktop view: Previous, Page info, Next
   return (
     <footer className="flex flex-col items-center gap-4 mt-8">
-      <div className="flex items-center gap-4">
+      <nav
+        className="flex items-center gap-4"
+        aria-label="Pagination navigation"
+      >
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
           aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Previous</span>
         </button>
-        <span className="pixel-font text-sm whitespace-nowrap">
+        <span
+          className="pixel-font text-sm whitespace-nowrap"
+          aria-current="page"
+          aria-label={`Page ${currentPage} of ${totalPages}`}
+        >
           {currentPage} of {totalPages}
         </span>
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
           aria-label="Next page"
         >
           <span>Next</span>
           <ArrowRightIcon className="w-5 h-5" />
         </button>
-      </div>
+      </nav>
     </footer>
   );
 }

@@ -40,47 +40,58 @@ export function EvolutionPokemon({
 
   if (loading || !pokemon) {
     return (
-      <div className="evolutionItem flex items-center gap-1 md:gap-2">
-        <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse" />
+      <article className="evolutionItem flex items-center gap-1 md:gap-2">
+        <div
+          className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse"
+          aria-hidden="true"
+        />
         {showArrow && (
-          <span className="evolutionArrow">
+          <span className="evolutionArrow" aria-hidden="true">
             <ArrowRightIcon className="w-4 h-4 md:w-6 md:h-6" />
           </span>
         )}
-      </div>
+      </article>
     );
   }
 
   const evo = pokemon;
 
   return (
-    <div className="evolutionItem flex items-center gap-1 md:gap-2">
+    <article className="evolutionItem flex items-center gap-1 md:gap-2">
       <button
         className="evolutionButton bg-transparent border-none p-0 cursor-pointer relative"
         onClick={() => onSelectPokemon?.(evo.id)}
         title={isOwned ? `View ${evo.name}` : 'Unknown Pokémon'}
         tabIndex={0}
+        aria-label={isOwned ? `View ${evo.name}` : 'Unknown Pokémon'}
       >
         {isOwned ? (
-          <img
-            src={cachedSprite?.src || evo.sprite}
-            alt={evo.name}
-            className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
-            loading="lazy"
-            decoding="async"
-            style={{imageRendering: 'pixelated'}}
-          />
+          <figure>
+            <img
+              src={cachedSprite?.src || evo.sprite}
+              alt={evo.name}
+              className="evolutionImage w-16 h-16 md:w-20 md:h-20 scale-110 md:scale-125 origin-center object-contain hover:scale-125 md:hover:scale-150 transition-transform duration-200 ease-in-out"
+              loading="lazy"
+              decoding="async"
+              style={{imageRendering: 'pixelated'}}
+            />
+          </figure>
         ) : (
-          <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-            <span className="text-3xl md:text-4xl font-bold">?</span>
+          <div
+            className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"
+            aria-label="Locked evolution"
+          >
+            <span className="text-3xl md:text-4xl font-bold" aria-hidden="true">
+              ?
+            </span>
           </div>
         )}
       </button>
       {showArrow && (
-        <span className="evolutionArrow">
+        <span className="evolutionArrow" aria-hidden="true">
           <ArrowRightIcon className="w-6 h-6 md:w-8 md:h-8" />
         </span>
       )}
-    </div>
+    </article>
   );
 }

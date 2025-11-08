@@ -53,7 +53,7 @@ export function PokemonEvolutionSection({
     .map((item) => item.id);
 
   return (
-    <div
+    <section
       className="evolutionWrapper p-3 border-4 text-xs md:text-sm w-full max-w-[400px] font-press-start"
       style={{
         borderColor: isDarkMode ? '#333333' : 'black',
@@ -62,9 +62,15 @@ export function PokemonEvolutionSection({
           : '4px 4px 0px rgba(0,0,0,1)',
         backgroundColor: isDarkMode ? '#1e3a5f' : '#a0c8ff',
       }}
+      aria-labelledby="evolution-heading"
     >
-      <h3 className="font-bold mb-2">Evolution</h3>
-      <div className="evolutionChain flex flex-wrap items-center justify-center gap-2 md:gap-3">
+      <h3 id="evolution-heading" className="font-bold mb-2">
+        Evolution
+      </h3>
+      <nav
+        className="evolutionChain flex flex-wrap items-center justify-center gap-2 md:gap-3"
+        aria-label="Evolution chain"
+      >
         {sortedEvolutionIds.map((id, i, arr) => (
           <EvolutionPokemon
             key={id}
@@ -74,7 +80,7 @@ export function PokemonEvolutionSection({
             isOwned={ownedPokemonIds.includes(id)}
           />
         ))}
-      </div>
-    </div>
+      </nav>
+    </section>
   );
 }

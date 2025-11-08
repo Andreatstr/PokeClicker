@@ -161,7 +161,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
 
   if (error) {
     return (
-      <div className="text-center py-16">
+      <section className="text-center py-16" role="alert" aria-live="assertive">
         <p className="pixel-font text-xl text-red-600">Error loading Pokémon</p>
         <p
           className="pixel-font text-sm"
@@ -169,7 +169,7 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
         >
           {error.message}
         </p>
-      </div>
+      </section>
     );
   }
 

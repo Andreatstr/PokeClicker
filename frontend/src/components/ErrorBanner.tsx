@@ -13,12 +13,14 @@ export function ErrorBanner({
   isDarkMode = false,
 }: ErrorBannerProps) {
   return (
-    <div
+    <aside
       className="fixed top-4 right-4 px-4 py-2 rounded shadow-lg z-50"
       style={{
         backgroundColor: isDarkMode ? 'var(--destructive)' : '#ef4444',
         color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
       }}
+      role="alert"
+      aria-live="assertive"
     >
       {message}
       <button
@@ -27,9 +29,10 @@ export function ErrorBanner({
         style={{
           color: isDarkMode ? 'var(--destructive-foreground)' : 'white',
         }}
+        aria-label="Dismiss error"
       >
         X
       </button>
-    </div>
+    </aside>
   );
 }

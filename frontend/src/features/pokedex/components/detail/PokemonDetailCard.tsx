@@ -161,7 +161,11 @@ export function PokemonDetailCard({
   const upgradeLevel = upgrade?.level || 1;
 
   return (
-    <div className="flex flex-col gap-3 md:gap-4 items-center">
+    <article
+      className="flex flex-col gap-3 md:gap-4 items-center"
+      role="article"
+      aria-label="Pokemon details"
+    >
       {/* Pokemon Card */}
       <aside
         className={`leftBox border-4 p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
@@ -177,14 +181,17 @@ export function PokemonDetailCard({
       >
         {/* Owned Corner Tape Badge */}
         {isOwned && (
-          <div className="absolute top-0 left-0 z-20 overflow-visible">
-            <div className="relative w-0 h-0">
+          <aside
+            className="absolute top-0 left-0 z-20 overflow-visible"
+            aria-label="Pokemon ownership status"
+          >
+            <div className="relative w-0 h-0" aria-hidden="true">
               {/* Main tape */}
               <div className="bg-green-500 text-white text-[11px] md:text-sm font-bold px-8 md:px-10 py-1.5 md:py-2 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.4)] transform -rotate-45 origin-top-left translate-x-[-28px] translate-y-[62px] md:translate-x-[-33px] md:translate-y-[75px] min-w-[140px] md:min-w-[160px] text-center">
                 OWNED
               </div>
             </div>
-          </div>
+          </aside>
         )}
 
         {/* Close Button */}
@@ -203,13 +210,13 @@ export function PokemonDetailCard({
 
         {/* Type Badges */}
         {isOwned && (
-          <div className="mb-2 md:mb-3">
+          <section className="mb-2 md:mb-3" aria-label="Pokemon types">
             <PokemonTypeBadges
               types={pokemon.types}
               isDarkMode={isDarkMode}
               size="medium"
             />
-          </div>
+          </section>
         )}
 
         <figure
@@ -235,18 +242,23 @@ export function PokemonDetailCard({
         </figure>
 
         {/* Stats Section */}
-        <div data-onboarding="pokemon-stats" className="w-full">
+        <section
+          data-onboarding="pokemon-stats"
+          className="w-full"
+          aria-label="Pokemon statistics"
+        >
           <PokemonStatsDisplay
             stats={pokemon.stats!}
             upgradeLevel={upgradeLevel}
           />
-        </div>
+        </section>
 
         {/* Upgrade Button */}
         {isOwned && upgrade && (
-          <div
+          <section
             data-onboarding="pokemon-upgrade"
             className="w-full mb-2 md:mb-3"
+            aria-label="Pokemon upgrade"
           >
             <Button
               onClick={handleUpgrade}
@@ -262,7 +274,7 @@ export function PokemonDetailCard({
               {upgrading ? (
                 'Upgrading...'
               ) : (
-                <div className="flex items-center justify-center gap-3">
+                <span className="flex items-center justify-center gap-3">
                   <ArrowUpIcon size={20} />
                   <span>Upgrade</span>
                   <span className="px-2 py-1 border border-white rounded bg-black/20 font-bold">
@@ -275,15 +287,19 @@ export function PokemonDetailCard({
                     loading="lazy"
                     decoding="async"
                   />
-                </div>
+                </span>
               )}
             </Button>
             {error && (
-              <div className="text-xs text-red-500 mt-1 text-center font-bold">
+              <p
+                className="text-xs text-red-500 mt-1 text-center font-bold"
+                role="alert"
+                aria-live="polite"
+              >
                 {error}
-              </div>
+              </p>
             )}
-          </div>
+          </section>
         )}
 
         {/* Purchase Button */}
@@ -300,14 +316,17 @@ export function PokemonDetailCard({
       </aside>
 
       {/* Evolution Section */}
-      <div data-onboarding="pokemon-evolution">
+      <section
+        data-onboarding="pokemon-evolution"
+        aria-label="Pokemon evolution chain"
+      >
         <PokemonEvolutionSection
           evolutionIds={evolutionIds}
           ownedPokemonIds={ownedPokemonIds}
           onSelectPokemon={onSelectPokemon}
           isDarkMode={isDarkMode}
         />
-      </div>
-    </div>
+      </section>
+    </article>
   );
 }

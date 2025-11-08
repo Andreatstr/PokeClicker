@@ -164,7 +164,7 @@ body {
   --secondary-foreground: #e5e7eb;
   --muted: #4b5563;
   --muted-foreground: #9ca3af;
-  --accent: #374151;
+  --accent: #78808a; /* Subtly lighter gray for visible but gentle hover effect */
   --accent-foreground: #e5e7eb;
   --destructive: #ef4444;
   --border: #374151;

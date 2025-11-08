@@ -24,7 +24,7 @@ export function FavoritePokemonSelector({
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogBody>
-        <div
+        <section
           className="pixel-font p-4 sm:p-6 max-w-2xl mx-auto max-h-[80vh] overflow-auto"
           style={{
             backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
@@ -33,10 +33,16 @@ export function FavoritePokemonSelector({
               ? '8px 8px 0px rgba(51,51,51,1)'
               : '8px 8px 0px rgba(0,0,0,1)',
           }}
+          aria-labelledby="pokemon-selector-heading"
         >
-          <h2 className="text-lg sm:text-xl font-bold mb-4">
-            SELECT FAVORITE POKEMON
-          </h2>
+          <header>
+            <h2
+              id="pokemon-selector-heading"
+              className="text-lg sm:text-xl font-bold mb-4"
+            >
+              SELECT FAVORITE POKEMON
+            </h2>
+          </header>
 
           {loading ? (
             <p className="text-center py-8">Loading Pokemon...</p>
@@ -47,11 +53,28 @@ export function FavoritePokemonSelector({
                   <button
                     key={pokemon.id}
                     onClick={() => onSelect(pokemon.id)}
-                    className="p-3 border-2 transition-all hover:scale-105"
+                    className="p-3 border-2"
                     aria-label={`Select ${pokemon.id}`}
                     style={{
                       borderColor: isDarkMode ? '#333333' : 'black',
                       backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
+                      boxShadow: isDarkMode
+                        ? '4px 4px 0px rgba(51,51,51,1)'
+                        : '4px 4px 0px rgba(0,0,0,1)',
+                      transform: 'translate(0, 0)',
+                      transition: 'all 0.15s ease-in-out',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                      e.currentTarget.style.boxShadow = isDarkMode
+                        ? '6px 6px 0px rgba(51,51,51,1)'
+                        : '6px 6px 0px rgba(0,0,0,1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translate(0, 0)';
+                      e.currentTarget.style.boxShadow = isDarkMode
+                        ? '4px 4px 0px rgba(51,51,51,1)'
+                        : '4px 4px 0px rgba(0,0,0,1)';
                     }}
                   >
                     <img
@@ -79,7 +102,7 @@ export function FavoritePokemonSelector({
 
           <button
             onClick={onClose}
-            className="mt-4 w-full px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+            className="mt-4 w-full px-4 py-2 font-bold border-4 text-sm sm:text-base"
             aria-label="Cancel"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
@@ -88,11 +111,25 @@ export function FavoritePokemonSelector({
               boxShadow: isDarkMode
                 ? '4px 4px 0px rgba(51,51,51,1)'
                 : '4px 4px 0px rgba(0,0,0,1)',
+              transform: 'translate(0, 0)',
+              transition: 'all 0.15s ease-in-out',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '6px 6px 0px rgba(51,51,51,1)'
+                : '6px 6px 0px rgba(0,0,0,1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = isDarkMode
+                ? '4px 4px 0px rgba(51,51,51,1)'
+                : '4px 4px 0px rgba(0,0,0,1)';
             }}
           >
             CANCEL
           </button>
-        </div>
+        </section>
       </DialogBody>
     </Dialog>
   );

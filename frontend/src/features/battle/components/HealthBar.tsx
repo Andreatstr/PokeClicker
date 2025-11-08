@@ -22,10 +22,11 @@ export function HealthBar({
   };
 
   return (
-    <div
+    <figure
       className={`w-full ${side === 'opponent' ? 'text-right' : 'text-left'}`}
+      aria-label={`${label} health bar`}
     >
-      <div
+      <figcaption
         className="pixel-font text-xs mb-1 text-black"
         style={{
           textShadow:
@@ -33,18 +34,24 @@ export function HealthBar({
         }}
       >
         {label}
-      </div>
+      </figcaption>
       <div
         className={`h-4 border-2 ${
           isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-black bg-white'
         } relative overflow-hidden`}
+        role="progressbar"
+        aria-valuenow={current}
+        aria-valuemin={0}
+        aria-valuemax={max}
+        aria-label={`${Math.floor(current)} out of ${max} HP`}
       >
         <div
           className={`h-full ${getHealthColor()} transition-all duration-300 ease-out`}
           style={{width: `${percentage}%`}}
+          aria-hidden="true"
         />
       </div>
-      <div
+      <p
         className="pixel-font text-[10px] text-black mt-0.5"
         style={{
           textShadow:
@@ -52,7 +59,7 @@ export function HealthBar({
         }}
       >
         {Math.floor(current)} HP
-      </div>
-    </div>
+      </p>
+    </figure>
   );
 }

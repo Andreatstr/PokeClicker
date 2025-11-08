@@ -84,7 +84,7 @@ async function startServer() {
   });
 
   const {url} = await startStandaloneServer(server, {
-    listen: {port: PORT},
+    listen: {port: PORT, host: '0.0.0.0'},
     context: async ({req}): Promise<AuthContext> => {
       // Extract Authorization header
       const authHeader = req.headers.authorization;

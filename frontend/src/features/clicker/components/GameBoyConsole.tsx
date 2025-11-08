@@ -219,10 +219,22 @@ export function GameBoyConsole({
           </div>
         </div>
 
-        {/* Start/Select Buttons */}
-        <div className="flex gap-3 items-center mb-1 md:mb-0.5">
-          <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
-          <div className="w-9 h-2.5 rounded-full bg-[#4a4a5e] border border-[#2a2a3e] shadow-md"></div>
+        {/* Start/Select Buttons (visual only) */}
+        <div className="flex gap-4 items-center mb-2">
+          <div
+            className="w-10 h-3 rounded-full shadow-md border-2"
+            style={{
+              backgroundColor: '#4a4a5e',
+              borderColor: '#2a2a3e',
+            }}
+          />
+          <div
+            className="w-10 h-3 rounded-full shadow-md border-2"
+            style={{
+              backgroundColor: '#4a4a5e',
+              borderColor: '#2a2a3e',
+            }}
+          />
         </div>
 
         {/* Speaker Holes */}

@@ -59,7 +59,7 @@ export function PokemonGrid({
   return (
     <>
       {displayedPokemon.length === 0 && !loading ? (
-        <div className="text-center py-16">
+        <section className="text-center py-16" role="status" aria-live="polite">
           <p className="pixel-font text-xl">No Pokemon found</p>
           <p
             className="pixel-font text-sm"
@@ -67,14 +67,17 @@ export function PokemonGrid({
           >
             Try a different search term
           </p>
-        </div>
+        </section>
       ) : (
         <>
           {/* Mobile: Card on Top + List Below */}
           {isMobileView ? (
-            <div className="flex flex-col gap-4">
+            <section
+              className="flex flex-col gap-4"
+              aria-label="Mobile Pokemon view"
+            >
               {/* Top: Selected Pokemon Card */}
-              <div className="w-full flex justify-center">
+              <section className="w-full flex justify-center">
                 {selectedMobilePokemon && (
                   <Suspense
                     fallback={
@@ -111,10 +114,13 @@ export function PokemonGrid({
                     </div>
                   </Suspense>
                 )}
-              </div>
+              </section>
 
               {/* Bottom: Horizontal Scrollable Pokemon List */}
-              <div className="w-full relative">
+              <section
+                className="w-full relative"
+                aria-label="Pokemon selection list"
+              >
                 <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
                   <ArrowLeftIcon size={32} className="animate-pulse" />
                 </div>
@@ -125,7 +131,10 @@ export function PokemonGrid({
                 </div>
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-10 border-r-4 border-black"></div>
 
-                <div className="overflow-x-auto border-4 border-black bg-white dark:bg-gray-900 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                <nav
+                  className="overflow-x-auto border-4 border-black bg-white dark:bg-gray-900 shadow-[4px_4px_0px_rgba(0,0,0,1)]"
+                  aria-label="Pokemon scroll list"
+                >
                   <ul className="flex list-none p-0 m-0">
                     {displayedPokemon.map((pokemon) => (
                       <li
@@ -160,8 +169,8 @@ export function PokemonGrid({
                       </li>
                     ))}
                   </ul>
-                </div>
-              </div>
+                </nav>
+              </section>
 
               {/* Mobile Pagination Controls */}
               <PaginationControls
@@ -171,7 +180,7 @@ export function PokemonGrid({
                 loading={loading}
                 isMobile={true}
               />
-            </div>
+            </section>
           ) : (
             /* Desktop: Grid View */
             <>

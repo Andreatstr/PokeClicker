@@ -35,10 +35,13 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      'tcdux-129-241-236-87.a.free.pinggy.link',
       'localhost',
       '127.0.0.1',
+      // Add any additional dev hosts here if needed
     ],
+    watch: {
+      ignored: ['**/playwright-report/**', '**/test-results/**'],
+    },
   },
   resolve: {
     alias: {

@@ -176,7 +176,7 @@ async function main(): Promise<boolean> {
 }
 
 // Run the script (ESM entry point check)
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1]?.endsWith('split-tiles.ts')) {
   main()
     .then((success) => {
       process.exit(success ? 0 : 1);
