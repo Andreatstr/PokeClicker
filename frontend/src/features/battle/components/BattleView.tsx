@@ -7,6 +7,7 @@ import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getPlatformImage} from '../utils/platformMapping';
+import {toDecimal} from '@/lib/decimal';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -78,8 +79,12 @@ export function BattleView({
   }, [onAttackFunctionReady]);
 
   // Calculate rare candy reward (must match PokemonMap.tsx multiplier)
-  const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : 1;
-  const rareCandyReward = Math.floor(finalClickCount * candyPerClick * 10);
+  const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : '1';
+  const rareCandyReward = toDecimal(finalClickCount)
+    .times(candyPerClick)
+    .times(10)
+    .floor()
+    .toString();
 
   // Ready countdown state
   const [readyCount, setReadyCount] = useState(5);
@@ -105,7 +110,11 @@ export function BattleView({
 
   // Auto-award candy when battle is won
   useEffect(() => {
-    if (battleResult === 'victory' && rareCandyReward > 0 && !candyAwarded) {
+    if (
+      battleResult === 'victory' &&
+      toDecimal(rareCandyReward).gt(0) &&
+      !candyAwarded
+    ) {
       // Award candy immediately
       updateRareCandy(rareCandyReward, updateUser);
       setCandyAwarded(true);

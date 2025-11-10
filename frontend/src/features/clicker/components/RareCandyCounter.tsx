@@ -3,7 +3,7 @@ import {formatNumber} from '@/lib/formatNumber';
 
 interface RareCandyCounterProps {
   isDarkMode: boolean;
-  candyCount: number;
+  candyCount: string;
 }
 
 export function RareCandyCounter({
@@ -65,9 +65,9 @@ export function RareCandyCounter({
             style={{
               color: isDarkMode ? 'var(--foreground)' : 'var(--foreground)',
             }}
-            aria-label={`${formatNumber(Math.floor(candyCount))} Rare Candy`}
+            aria-label={`${formatNumber(candyCount)} Rare Candy`}
           >
-            {formatNumber(Math.floor(candyCount))}
+            {formatNumber(candyCount)}
           </span>
         </dd>
       </dl>

@@ -1,11 +1,7 @@
 import {Card, Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
 
-interface Candy {
-  id: number;
-  x: number;
-  amount: number;
-}
+import type {Candy} from '@/lib/graphql/types';
 
 interface GameBoyConsoleProps {
   isDarkMode: boolean;

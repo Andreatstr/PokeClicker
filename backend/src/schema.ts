@@ -50,9 +50,14 @@ export const typeDefs = `#graphql
     spAttack: Int!
     spDefense: Int!
     speed: Int!
-    # New simplified PokeClicker upgrades:
+    # PokeClicker upgrades:
     clickPower: Int
-    passiveIncome: Int
+    autoclicker: Int
+    critChance: Int
+    critMultiplier: Int
+    battleRewards: Int
+    clickMultiplier: Int
+    pokedexBonus: Int
   }
 
 	type AuthResponse {

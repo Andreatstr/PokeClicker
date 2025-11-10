@@ -162,7 +162,7 @@ describe('useClickerActions', () => {
       });
 
       expect(mockProps.flushPendingCandy).toHaveBeenCalled();
-      expect(mockProps.deductCandy).toHaveBeenCalledWith(10); // Cost for level 1->2
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('10'); // Cost for level 1->2
       expect(mockProps.setStats).toHaveBeenCalled();
       expect(mockProps.upgradeStat).toHaveBeenCalledWith(
         'clickPower',
@@ -222,7 +222,7 @@ describe('useClickerActions', () => {
       });
 
       // Cost for level 3->4 = Math.floor(10 * 2.8^2) = 78 (clickPower uses 2.8 multiplier)
-      expect(mockProps.deductCandy).toHaveBeenCalledWith(78);
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('78');
     });
 
     it('should flush pending candy before upgrading', async () => {

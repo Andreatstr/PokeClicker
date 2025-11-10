@@ -2,26 +2,70 @@ import {Card, Button} from '@ui/pixelact';
 import {ArrowRightIcon} from '@ui/pixelact/icons';
 import {formatNumber} from '@/lib/formatNumber';
 import {getStatDescription, getUpgradeCost} from '../utils/statDescriptions';
-
-interface Stats {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-  clickPower?: number;
-  passiveIncome?: number;
-}
+import {toDecimal} from '@/lib/decimal';
+import type {UserStats} from '@/lib/graphql/types';
 
 interface UpgradesPanelProps {
   isDarkMode: boolean;
-  stats: Stats;
-  currentCandy: number;
+  stats: UserStats;
+  currentCandy: string;
   isLoading: boolean;
   isAuthenticated: boolean;
-  onUpgrade: (stat: keyof Stats) => void;
+  onUpgrade: (stat: keyof UserStats) => void;
 }
+
+type UpgradeKey =
+  | 'clickPower'
+  | 'autoclicker'
+  | 'critChance'
+  | 'critMultiplier'
+  | 'battleRewards'
+  | 'clickMultiplier'
+  | 'pokedexBonus';
+
+interface UpgradeConfig {
+  label: string;
+  colorDark: string;
+  colorLight: string;
+}
+
+const UPGRADE_CONFIGS: Record<UpgradeKey, UpgradeConfig> = {
+  clickPower: {
+    label: 'Click Power',
+    colorDark: '#ea580c', // Orange
+    colorLight: '#f97316',
+  },
+  autoclicker: {
+    label: 'Autoclicker',
+    colorDark: '#16a34a', // Green
+    colorLight: '#22c55e',
+  },
+  critChance: {
+    label: 'Crit Chance',
+    colorDark: '#dc2626', // Red
+    colorLight: '#ef4444',
+  },
+  critMultiplier: {
+    label: 'Crit Power',
+    colorDark: '#b91c1c', // Dark red
+    colorLight: '#dc2626',
+  },
+  battleRewards: {
+    label: 'Battle Bonus',
+    colorDark: '#9333ea', // Purple
+    colorLight: '#a855f7',
+  },
+  clickMultiplier: {
+    label: 'Click Boost',
+    colorDark: '#ca8a04', // Gold
+    colorLight: '#eab308',
+  },
+  pokedexBonus: {
+    label: 'Pokedex Bonus',
+    colorDark: '#0891b2', // Cyan
+    colorLight: '#06b6d4',
+  },
+};
 
 export function UpgradesPanel({
   isDarkMode,
@@ -63,10 +107,16 @@ export function UpgradesPanel({
       </header>
       <section className="flex flex-col gap-3">
         {stats &&
-          (['clickPower', 'passiveIncome'] as const).map((key) => {
+          (Object.keys(UPGRADE_CONFIGS) as UpgradeKey[]).map((key) => {
             const value = stats[key] || 1;
             const cost = getUpgradeCost(key, value);
             const descriptionData = getStatDescription(key, stats);
+            const config = UPGRADE_CONFIGS[key];
+            const barColor = isDarkMode ? config.colorDark : config.colorLight;
+            const buttonColor = isDarkMode
+              ? config.colorDark
+              : config.colorLight;
+
             return (
               <article
                 key={key}
@@ -83,14 +133,7 @@ export function UpgradesPanel({
                     <div
                       className="w-2 h-8 border"
                       style={{
-                        backgroundColor:
-                          key === 'clickPower'
-                            ? isDarkMode
-                              ? '#ea580c' // Orange for click power
-                              : '#f97316'
-                            : isDarkMode
-                              ? '#16a34a' // Green for passive income
-                              : '#22c55e',
+                        backgroundColor: barColor,
                         borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                       }}
                       aria-hidden="true"
@@ -104,9 +147,7 @@ export function UpgradesPanel({
                             : 'var(--muted-foreground)',
                         }}
                       >
-                        {key === 'clickPower'
-                          ? 'Click Power'
-                          : 'Passive Income'}
+                        {config.label}
                       </dt>
                       <dd
                         className="pixel-font text-lg font-bold"
@@ -124,24 +165,18 @@ export function UpgradesPanel({
                     size="sm"
                     onClick={() => onUpgrade(key)}
                     disabled={
-                      !isAuthenticated || currentCandy < cost || isLoading
+                      !isAuthenticated ||
+                      toDecimal(currentCandy).lt(cost) ||
+                      isLoading
                     }
-                    bgColor={
-                      key === 'clickPower'
-                        ? isDarkMode
-                          ? '#bf2727ff' // Orange for click power
-                          : '#ff6767ff'
-                        : isDarkMode
-                          ? '#0b7633ff' // Green for passive income
-                          : '#2cda6bff'
-                    }
+                    bgColor={buttonColor}
                     className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Upgrade"
                   >
                     <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
                       ↑ {formatNumber(cost)}
                     </span>
-                  </Button>
+                  </Button>{' '}
                 </header>
                 <footer className="ml-5 flex items-center gap-1">
                   <p

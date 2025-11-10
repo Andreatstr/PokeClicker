@@ -1,7 +1,8 @@
 import {useState, useEffect, type ReactNode} from 'react';
 import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
-import {AuthContext, type User} from './AuthContextDefinition';
+import {AuthContext} from './AuthContextDefinition';
+import type {User} from '@/lib/graphql/types';
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);

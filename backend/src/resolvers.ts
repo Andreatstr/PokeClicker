@@ -48,9 +48,14 @@ function sanitizeUserForClient(
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: {
       ...userDoc.stats,
-      // Ensure new stats exist with defaults for backward compatibility
+      // Ensure clicker stats exist with defaults for backward compatibility
       clickPower: userDoc.stats.clickPower ?? 1,
-      passiveIncome: userDoc.stats.passiveIncome ?? 1,
+      autoclicker: userDoc.stats.autoclicker ?? 1,
+      critChance: userDoc.stats.critChance ?? 1,
+      critMultiplier: userDoc.stats.critMultiplier ?? 1,
+      battleRewards: userDoc.stats.battleRewards ?? 1,
+      clickMultiplier: userDoc.stats.clickMultiplier ?? 1,
+      pokedexBonus: userDoc.stats.pokedexBonus ?? 1,
     },
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
@@ -142,13 +147,28 @@ const authMutations = {
 function getUpgradeCost(currentLevel: number, stat: string): Decimal {
   let multiplier = 2.5; // default
 
-  // New simplified system for PokeClicker upgrades:
+  // PokeClicker upgrade costs (balanced for progression):
   if (stat === 'clickPower') {
-    // Click Power upgrade: More expensive (high reward)
+    // Click Power: Core active upgrade, moderate-high cost
     multiplier = 2.8;
-  } else if (stat === 'passiveIncome') {
-    // Passive Income (CPS) upgrade: Moderate cost
+  } else if (stat === 'autoclicker') {
+    // Autoclicker: Idle income, moderate cost
+    multiplier = 2.6;
+  } else if (stat === 'critChance') {
+    // Crit Chance: RNG boost, moderate cost
     multiplier = 2.5;
+  } else if (stat === 'critMultiplier') {
+    // Crit Multiplier: High impact, higher cost
+    multiplier = 2.9;
+  } else if (stat === 'battleRewards') {
+    // Battle Rewards: Bonus income source, moderate cost
+    multiplier = 2.4;
+  } else if (stat === 'clickMultiplier') {
+    // Click Multiplier: Percentage boost, high cost (scales with other upgrades)
+    multiplier = 3.0;
+  } else if (stat === 'pokedexBonus') {
+    // Pokedex Bonus: Collection reward, lower cost (encourages exploration)
+    multiplier = 2.3;
   }
   // Legacy support for old stat names (backwards compatibility):
   else if (stat === 'attack' || stat === 'spAttack') {
@@ -229,13 +249,24 @@ export const resolvers = {
       let needsUpdate = false;
       const updates: Record<string, number> = {};
 
-      if (!userDoc.stats.clickPower) {
-        updates['stats.clickPower'] = 1;
-        needsUpdate = true;
-      }
-      if (!userDoc.stats.passiveIncome) {
-        updates['stats.passiveIncome'] = 1;
-        needsUpdate = true;
+      const clickerStats = [
+        'clickPower',
+        'autoclicker',
+        'critChance',
+        'critMultiplier',
+        'battleRewards',
+        'clickMultiplier',
+        'pokedexBonus',
+      ];
+
+      for (const stat of clickerStats) {
+        const statValue = (userDoc.stats as Record<string, number | undefined>)[
+          stat
+        ];
+        if (!statValue) {
+          updates[`stats.${stat}`] = 1;
+          needsUpdate = true;
+        }
       }
 
       if (needsUpdate) {
@@ -856,11 +887,16 @@ export const resolvers = {
     ) => {
       const user = requireAuth(context);
 
-      // Validate stat name (includes new simplified stats + legacy stats)
+      // Validate stat name (includes new clicker upgrades + legacy stats)
       const validStats = [
-        // New simplified PokeClicker upgrades:
+        // PokeClicker upgrades:
         'clickPower',
-        'passiveIncome',
+        'autoclicker',
+        'critChance',
+        'critMultiplier',
+        'battleRewards',
+        'clickMultiplier',
+        'pokedexBonus',
         // Legacy stats (for backwards compatibility & per-Pokemon upgrades later):
         'hp',
         'attack',
@@ -885,28 +921,29 @@ export const resolvers = {
       }
 
       // Initialize new stats if they don't exist (migration for existing users)
+      const clickerStats = [
+        'clickPower',
+        'autoclicker',
+        'critChance',
+        'critMultiplier',
+        'battleRewards',
+        'clickMultiplier',
+        'pokedexBonus',
+      ];
+      const isClickerStat = clickerStats.includes(stat);
       let needsMigration = false;
-      if (
-        stat === 'clickPower' &&
-        (userDoc.stats.clickPower === undefined ||
-          userDoc.stats.clickPower === null)
-      ) {
-        needsMigration = true;
-        await users.updateOne(
-          {_id: new ObjectId(user.id)},
-          {$set: {'stats.clickPower': 1}}
-        );
-      }
-      if (
-        stat === 'passiveIncome' &&
-        (userDoc.stats.passiveIncome === undefined ||
-          userDoc.stats.passiveIncome === null)
-      ) {
-        needsMigration = true;
-        await users.updateOne(
-          {_id: new ObjectId(user.id)},
-          {$set: {'stats.passiveIncome': 1}}
-        );
+
+      if (isClickerStat) {
+        const statValue = (userDoc.stats as Record<string, number | undefined>)[
+          stat
+        ];
+        if (statValue === undefined || statValue === null) {
+          needsMigration = true;
+          await users.updateOne(
+            {_id: new ObjectId(user.id)},
+            {$set: {[`stats.${stat}`]: 1}}
+          );
+        }
       }
 
       // Re-fetch user if we did migration to get updated stats
@@ -917,9 +954,9 @@ export const resolvers = {
         }
       }
 
-      // Calculate cost - for new stats, ensure we use the correct level
+      // Calculate cost - get current level for the stat
       let currentLevel = 1;
-      if (stat === 'clickPower' || stat === 'passiveIncome') {
+      if (isClickerStat) {
         currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
         console.log(
           `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`

@@ -1,25 +1,5 @@
 import {createContext} from 'react';
-
-export interface User {
-  _id: string;
-  username: string;
-  rare_candy: string; // Changed to string for large number support
-  created_at: string;
-  stats: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-    clickPower?: number;
-    passiveIncome?: number;
-  };
-  owned_pokemon_ids: number[];
-  favorite_pokemon_id?: number | null;
-  selected_pokemon_id?: number | null;
-  showInRanks?: boolean;
-}
+import type {User} from '@/lib/graphql/types';
 
 interface AuthContextType {
   user: User | null;

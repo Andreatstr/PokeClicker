@@ -1,36 +1,26 @@
-/**
- * Calculate candy earned per click based on user stats
- * Shared utility used by both clicker and battle reward systems
- */
-export function calculateCandyPerClick(
-  stats:
-    | {
-        hp: number;
-        attack: number;
-        defense: number;
-        spAttack: number;
-        spDefense: number;
-        speed: number;
-        clickPower?: number; // New simplified stat
-        passiveIncome?: number;
-      }
-    | undefined
-): number {
+import Decimal from 'break_infinity.js';
+import type {UserStats} from './graphql/types';
+
+export function calculateCandyPerClick(stats: UserStats | undefined): string {
   // Guard against undefined stats
   if (!stats) {
-    return 1; // Minimum fallback value
+    return '1'; // Minimum fallback value
   }
 
   // New simplified system: Use clickPower if available
   if (stats.clickPower && stats.clickPower > 0) {
     // Exponential scaling: 1.75^(clickPower-1)
-    return Math.floor(Math.pow(1.75, stats.clickPower - 1));
+    return new Decimal(1.75)
+      .pow(stats.clickPower - 1)
+      .floor()
+      .toString();
   }
 
   // Legacy fallback: Use old attack + spAttack formula for backwards compatibility
-  const baseCandy = Math.floor(Math.pow(1.75, (stats.attack || 1) - 1));
-  const spAttackBonus = Math.floor(
-    0.5 * Math.pow(1.5, (stats.spAttack || 1) - 1)
-  );
-  return baseCandy + spAttackBonus;
+  const baseCandy = new Decimal(1.75).pow((stats.attack || 1) - 1).floor();
+  const spAttackBonus = new Decimal(1.5)
+    .pow((stats.spAttack || 1) - 1)
+    .times(0.5)
+    .floor();
+  return baseCandy.plus(spAttackBonus).toString();
 }

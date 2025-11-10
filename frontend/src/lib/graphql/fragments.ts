@@ -18,7 +18,12 @@ export const USER_FRAGMENT = gql`
       spDefense
       speed
       clickPower
-      passiveIncome
+      autoclicker
+      critChance
+      critMultiplier
+      battleRewards
+      clickMultiplier
+      pokedexBonus
     }
     owned_pokemon_ids
     favorite_pokemon_id

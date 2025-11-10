@@ -94,7 +94,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 5,
-          passiveIncome: 3,
+          autoclicker: 3,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1, 25],
         favorite_pokemon_id: 25,
@@ -151,7 +156,7 @@ describe('GraphQL Resolvers', () => {
           spAttack: 4,
           spDefense: 2,
           speed: 6,
-          // Missing clickPower and passiveIncome
+          // Missing clickPower and autoclicker
         },
         owned_pokemon_ids: [1],
       };
@@ -161,7 +166,7 @@ describe('GraphQL Resolvers', () => {
         stats: {
           ...mockUser.stats,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
         },
       };
 
@@ -178,10 +183,20 @@ describe('GraphQL Resolvers', () => {
 
       expect(mockUpdateOne).toHaveBeenCalledWith(
         {_id: mockUser._id},
-        {$set: {'stats.clickPower': 1, 'stats.passiveIncome': 1}}
+        {
+          $set: {
+            'stats.clickPower': 1,
+            'stats.autoclicker': 1,
+            'stats.critChance': 1,
+            'stats.critMultiplier': 1,
+            'stats.battleRewards': 1,
+            'stats.clickMultiplier': 1,
+            'stats.pokedexBonus': 1,
+          },
+        }
       );
       expect(result.stats.clickPower).toBe(1);
-      expect(result.stats.passiveIncome).toBe(1);
+      expect(result.stats.autoclicker).toBe(1);
     });
   });
 
@@ -384,7 +399,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -474,7 +494,7 @@ describe('GraphQL Resolvers', () => {
           spDefense: 2,
           speed: 3,
           clickPower: 2,
-          passiveIncome: 2,
+          autoclicker: 2,
         },
         owned_pokemon_ids: [1, 4, 7],
       };
@@ -537,7 +557,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -572,7 +597,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -618,7 +648,7 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 2,
-          passiveIncome: 1,
+          autoclicker: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -671,7 +701,7 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 2,
-          passiveIncome: 1,
+          autoclicker: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -716,7 +746,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -758,7 +793,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1, 25],
       };
@@ -789,7 +829,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -834,7 +879,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
@@ -876,7 +926,12 @@ describe('GraphQL Resolvers', () => {
           spDefense: 1,
           speed: 1,
           clickPower: 1,
-          passiveIncome: 1,
+          autoclicker: 1,
+          critChance: 1,
+          critMultiplier: 1,
+          battleRewards: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1, 25],
       };

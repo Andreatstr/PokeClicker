@@ -26,9 +26,14 @@ export interface UserStats {
     spAttack: number;
     spDefense: number;
     speed: number;
-    // New simplified PokeClicker upgrades:
+    // PokeClicker upgrades:
     clickPower?: number;
-    passiveIncome?: number;
+    autoclicker?: number;
+    critChance?: number;
+    critMultiplier?: number;
+    battleRewards?: number;
+    clickMultiplier?: number;
+    pokedexBonus?: number;
   };
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number;
@@ -67,9 +72,14 @@ export const DEFAULT_USER_STATS = {
     spAttack: 1,
     spDefense: 1,
     speed: 1,
-    // New simplified PokeClicker upgrades (start at level 1):
+    // PokeClicker upgrades (start at level 1):
     clickPower: 1,
-    passiveIncome: 1,
+    autoclicker: 1,
+    critChance: 1,
+    critMultiplier: 1,
+    battleRewards: 1,
+    clickMultiplier: 1,
+    pokedexBonus: 1,
   },
   owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
 };
