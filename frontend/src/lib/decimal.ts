@@ -66,16 +66,23 @@ const SUFFIXES = [
   'Tg',
 ];
 
-export function formatNumber(value: Decimal | string | number): string {
+export function formatNumber(
+  value: Decimal | string | number,
+  options?: {showDecimals?: boolean}
+): string {
   const decimal = toDecimal(value);
 
   // Handle negative numbers
   if (decimal.lt(0)) {
-    return '-' + formatNumber(decimal.abs());
+    return '-' + formatNumber(decimal.abs(), options);
   }
 
-  // Numbers less than 1000 show as-is
+  // Numbers less than 1000
   if (decimal.lt(1000)) {
+    // Show with 2 decimals for small values if requested
+    if (options?.showDecimals && decimal.lt(100)) {
+      return decimal.toFixed(2);
+    }
     return decimal.floor().toString();
   }
 

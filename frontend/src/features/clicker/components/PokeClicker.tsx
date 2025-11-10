@@ -128,6 +128,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
           isLoading={loading}
           isAuthenticated={isAuthenticated}
           onUpgrade={handleUpgrade}
+          ownedPokemonCount={user?.owned_pokemon_ids?.length || 0}
         />
       </div>
     </div>

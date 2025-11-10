@@ -147,37 +147,31 @@ const authMutations = {
 function getUpgradeCost(currentLevel: number, stat: string): Decimal {
   let multiplier = 2.5; // default
 
-  // PokeClicker upgrade costs (balanced for progression):
+  // Balanced upgrade costs (reduced from original to prevent exponential wall):
   if (stat === 'clickPower') {
-    // Click Power: Core active upgrade, moderate-high cost
-    multiplier = 2.8;
+    multiplier = 1.8;
   } else if (stat === 'autoclicker') {
-    // Autoclicker: Idle income, moderate cost
-    multiplier = 2.6;
+    multiplier = 1.7;
   } else if (stat === 'critChance') {
-    // Crit Chance: RNG boost, moderate cost
-    multiplier = 2.5;
+    multiplier = 1.9;
   } else if (stat === 'critMultiplier') {
-    // Crit Multiplier: High impact, higher cost
-    multiplier = 2.9;
+    multiplier = 2.0;
   } else if (stat === 'battleRewards') {
-    // Battle Rewards: Bonus income source, moderate cost
-    multiplier = 2.4;
+    multiplier = 1.6;
   } else if (stat === 'clickMultiplier') {
-    // Click Multiplier: Percentage boost, high cost (scales with other upgrades)
-    multiplier = 3.0;
+    multiplier = 2.0;
   } else if (stat === 'pokedexBonus') {
-    // Pokedex Bonus: Collection reward, lower cost (encourages exploration)
-    multiplier = 2.3;
+    multiplier = 1.5;
   }
   // Legacy support for old stat names (backwards compatibility):
   else if (stat === 'attack' || stat === 'spAttack') {
-    multiplier = 2.8;
+    multiplier = 1.8;
   } else if (stat === 'speed') {
-    multiplier = 2.2;
+    multiplier = 1.5;
   }
 
-  return new Decimal(10)
+  // Base cost increased from 10 to 50 to slow early game
+  return new Decimal(50)
     .times(new Decimal(multiplier).pow(currentLevel - 1))
     .floor();
 }

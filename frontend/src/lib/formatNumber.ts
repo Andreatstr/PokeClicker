@@ -11,7 +11,10 @@ import type {Decimal} from './decimal';
  * - 1,560,000 → "1.6M"
  * - 2.3e30 → "2.3No" (nonillion)
  */
-export function formatNumber(num: number | string | Decimal): string {
+export function formatNumber(
+  num: number | string | Decimal,
+  options?: {showDecimals?: boolean}
+): string {
   // Use the Decimal-based formatter which handles all number types
-  return formatDecimalNumber(num);
+  return formatDecimalNumber(num, options);
 }

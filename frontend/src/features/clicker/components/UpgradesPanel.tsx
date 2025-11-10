@@ -12,6 +12,7 @@ interface UpgradesPanelProps {
   isLoading: boolean;
   isAuthenticated: boolean;
   onUpgrade: (stat: keyof UserStats) => void;
+  ownedPokemonCount?: number;
 }
 
 type UpgradeKey =
@@ -74,6 +75,7 @@ export function UpgradesPanel({
   isLoading,
   isAuthenticated,
   onUpgrade,
+  ownedPokemonCount = 0,
 }: UpgradesPanelProps) {
   return (
     <Card
@@ -110,7 +112,11 @@ export function UpgradesPanel({
           (Object.keys(UPGRADE_CONFIGS) as UpgradeKey[]).map((key) => {
             const value = stats[key] || 1;
             const cost = getUpgradeCost(key, value);
-            const descriptionData = getStatDescription(key, stats);
+            const descriptionData = getStatDescription(
+              key,
+              stats,
+              ownedPokemonCount
+            );
             const config = UPGRADE_CONFIGS[key];
             const barColor = isDarkMode ? config.colorDark : config.colorLight;
             const buttonColor = isDarkMode

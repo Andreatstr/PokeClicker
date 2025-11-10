@@ -162,7 +162,7 @@ describe('useClickerActions', () => {
       });
 
       expect(mockProps.flushPendingCandy).toHaveBeenCalled();
-      expect(mockProps.deductCandy).toHaveBeenCalledWith('10'); // Cost for level 1->2
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('50'); // Cost for level 1->2 (base 50)
       expect(mockProps.setStats).toHaveBeenCalled();
       expect(mockProps.upgradeStat).toHaveBeenCalledWith(
         'clickPower',
@@ -199,7 +199,7 @@ describe('useClickerActions', () => {
       const props = {
         ...mockProps,
         stats: {...mockStats, clickPower: 3},
-        localRareCandy: 100,
+        localRareCandy: 200, // Enough to afford upgrade (cost is 162)
       };
 
       const mockUpdatedUser: User = {
@@ -221,8 +221,8 @@ describe('useClickerActions', () => {
         await result.current.handleUpgrade('clickPower');
       });
 
-      // Cost for level 3->4 = Math.floor(10 * 2.8^2) = 78 (clickPower uses 2.8 multiplier)
-      expect(mockProps.deductCandy).toHaveBeenCalledWith('78');
+      // Cost for level 3->4 = Math.floor(50 * 1.8^2) = 162 (clickPower uses 1.8 multiplier)
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('162');
     });
 
     it('should flush pending candy before upgrading', async () => {

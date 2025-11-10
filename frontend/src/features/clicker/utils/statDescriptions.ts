@@ -7,15 +7,49 @@ interface StatDescription {
   unit: string;
 }
 
+// Helper to calculate effective click power with all multipliers (excluding crit since it's RNG)
+function calculateEffectiveClickPower(
+  stats: UserStats,
+  ownedPokemonCount = 0
+): number {
+  // Base: 1.2^(level-1)
+  let power = Math.pow(1.2, (stats.clickPower || 1) - 1);
+
+  // Click multiplier: (1 + (level-1) * 0.02)
+  if (stats.clickMultiplier && stats.clickMultiplier > 1) {
+    power *= 1 + (stats.clickMultiplier - 1) * 0.02;
+  }
+
+  // Pokedex bonus: 1.005^(level * pokemonCount)
+  if (stats.pokedexBonus && stats.pokedexBonus > 1 && ownedPokemonCount > 0) {
+    power *= Math.pow(1.005, (stats.pokedexBonus - 1) * ownedPokemonCount);
+  }
+
+  return power;
+}
+
 export function getStatDescription(
   stat: string,
-  stats: UserStats
+  stats: UserStats,
+  ownedPokemonCount = 0
 ): StatDescription | string {
   switch (stat) {
     case 'clickPower': {
       const currentLevel = stats.clickPower || 1;
-      const currentCandy = Math.pow(1.15, currentLevel - 1);
-      const nextCandy = Math.pow(1.15, currentLevel);
+
+      // Calculate with ALL multipliers
+      const currentCandy = calculateEffectiveClickPower(
+        stats,
+        ownedPokemonCount
+      );
+
+      // Calculate what it would be with next level
+      const nextLevelStats = {...stats, clickPower: currentLevel + 1};
+      const nextCandy = calculateEffectiveClickPower(
+        nextLevelStats,
+        ownedPokemonCount
+      );
+
       // Show 2 decimal places for small values, 1 decimal for larger
       const currentRounded =
         currentCandy < 10
@@ -53,12 +87,12 @@ export function getStatDescription(
     }
     case 'critChance': {
       const currentLevel = stats.critChance || 1;
-      // Diminishing returns: 1 - 0.98^(level * 0.5)
+      // Logarithmic soft cap: 8 * ln(1 + 0.5 * level)
       const currentChance = parseFloat(
-        ((1 - Math.pow(0.98, (currentLevel - 1) * 0.5)) * 100).toFixed(1)
+        (8 * Math.log(1 + 0.5 * (currentLevel - 1))).toFixed(1)
       );
       const nextChance = parseFloat(
-        ((1 - Math.pow(0.98, currentLevel * 0.5)) * 100).toFixed(1)
+        (8 * Math.log(1 + 0.5 * currentLevel)).toFixed(1)
       );
       return {
         current: currentChance,
@@ -146,31 +180,32 @@ export function getStatDescription(
 export function getUpgradeCost(stat: string, currentLevel: number): string {
   let multiplier = 2.5; // default
 
-  // Balanced upgrade costs:
+  // Balanced upgrade costs (reduced from original to prevent exponential wall):
   if (stat === 'clickPower') {
-    multiplier = 2.8;
+    multiplier = 1.8;
   } else if (stat === 'autoclicker') {
-    multiplier = 2.5;
+    multiplier = 1.7;
   } else if (stat === 'critChance') {
-    multiplier = 2.5;
+    multiplier = 1.9;
   } else if (stat === 'critMultiplier') {
-    multiplier = 3.0;
+    multiplier = 2.0;
   } else if (stat === 'battleRewards') {
-    multiplier = 2.4;
+    multiplier = 1.6;
   } else if (stat === 'clickMultiplier') {
-    multiplier = 3.2;
+    multiplier = 2.0;
   } else if (stat === 'pokedexBonus') {
-    multiplier = 2.2;
+    multiplier = 1.5;
   }
   // Legacy support
   else if (stat === 'attack' || stat === 'spAttack') {
-    multiplier = 2.8;
+    multiplier = 1.8;
   } else if (stat === 'speed') {
-    multiplier = 2.2;
+    multiplier = 1.5;
   }
 
   // Use Decimal for large number support
-  return new Decimal(10)
+  // Base cost increased from 10 to 50 to slow early game
+  return new Decimal(50)
     .times(new Decimal(multiplier).pow(currentLevel - 1))
     .floor()
     .toString();

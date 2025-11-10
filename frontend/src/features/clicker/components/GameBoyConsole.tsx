@@ -104,7 +104,7 @@ export function GameBoyConsole({
                       textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
                     }}
                   >
-                    +{formatNumber(candy.amount)}
+                    +{formatNumber(candy.amount, {showDecimals: true})}
                   </span>
                   <img
                     src={`${import.meta.env.BASE_URL}candy.webp`}
