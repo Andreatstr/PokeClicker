@@ -267,7 +267,21 @@ export function OnboardingOverlay({
       previousStep.target === 'pokemon-upgrade' &&
       currentStep.target === 'pokemon-card-locked';
 
-    if (wasModal && !isNowModal && onClosePokemonModal && !skippingLocked) {
+    // Only close modal when going from modal step to non-modal step
+    // AND not going backwards (previousStep.page check ensures forward navigation)
+    const isGoingForward =
+      previousStep &&
+      currentStep &&
+      STEPS.findIndex((s) => s.target === currentStep.target) >
+        STEPS.findIndex((s) => s.target === previousStep.target);
+
+    if (
+      wasModal &&
+      !isNowModal &&
+      onClosePokemonModal &&
+      !skippingLocked &&
+      isGoingForward
+    ) {
       onClosePokemonModal();
     }
   }, [currentStep, previousStep, onClosePokemonModal]);
@@ -702,7 +716,48 @@ export function OnboardingOverlay({
                 size="sm"
                 variant="secondary"
                 aria-label="Previous step"
-                onClick={onPrevious}
+                onClick={() => {
+                  const modalTargets = [
+                    'pokemon-stats',
+                    'pokemon-upgrade',
+                    'pokemon-evolution',
+                  ];
+
+                  // Special case: going back from evolution should skip locked-card and go to upgrade
+                  if (currentStep.target === 'pokemon-evolution') {
+                    const prevTarget = STEPS[step - 1]?.target;
+                    const prevPrevTarget = STEPS[step - 2]?.target;
+                    if (
+                      prevTarget === 'pokemon-card-locked' &&
+                      prevPrevTarget === 'pokemon-upgrade'
+                    ) {
+                      // Skip locked-card and go directly to upgrade, keep modal open
+                      onPrevious(); // to locked
+                      setTimeout(() => {
+                        onPrevious(); // to upgrade
+                      }, 0);
+                      return;
+                    }
+                  }
+
+                  const isCurrentModal = modalTargets.includes(
+                    currentStep.target
+                  );
+                  const prevTarget = STEPS[step - 1]?.target;
+                  const isPrevModal = prevTarget
+                    ? modalTargets.includes(prevTarget)
+                    : false;
+
+                  // If going from modal to non-modal (backwards), close the modal
+                  if (isCurrentModal && !isPrevModal && onClosePokemonModal) {
+                    onClosePokemonModal();
+                    // Small delay to allow UI to update before going back
+                    setTimeout(() => onPrevious(), 150);
+                  } else {
+                    // If staying within modal steps or going from non-modal, just go back
+                    onPrevious();
+                  }
+                }}
               >
                 Back
               </Button>
