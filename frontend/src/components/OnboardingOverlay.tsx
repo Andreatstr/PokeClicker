@@ -722,12 +722,12 @@ export function OnboardingOverlay({
                     'pokemon-evolution',
                   ];
 
-                  // Special case: going back from clicker-nav (step 8) when locked-card (step 7) might have been skipped
+                  // Special case: navigation transitions that need page changes
                   if (currentStep.target === 'clicker-nav') {
+                    // Going back from clicker-nav (step 8) when locked-card (step 7) might have been skipped
                     const prevTarget = STEPS[step - 1]?.target;
                     const prevPrevTarget = STEPS[step - 2]?.target;
 
-                    // Going back from clicker-nav when locked-card might have been skipped
                     if (
                       prevTarget === 'pokemon-card-locked' &&
                       prevPrevTarget === 'pokemon-evolution'
@@ -764,6 +764,36 @@ export function OnboardingOverlay({
                         }, 100);
                         return;
                       }
+                    }
+                  }
+
+                  // Going back from world-nav to upgrade-panel (clicker page)
+                  if (currentStep.target === 'world-nav') {
+                    const prevTarget = STEPS[step - 1]?.target;
+                    if (prevTarget === 'upgrade-panel') {
+                      // Navigate back to clicker page
+                      if (onNavigate) {
+                        onNavigate('clicker');
+                      }
+                      setTimeout(() => {
+                        onPrevious();
+                      }, 100);
+                      return;
+                    }
+                  }
+
+                  // Going back from profile-button to map-canvas (map page)
+                  if (currentStep.target === 'profile-button') {
+                    const prevTarget = STEPS[step - 1]?.target;
+                    if (prevTarget === 'map-canvas') {
+                      // Navigate back to map page
+                      if (onNavigate) {
+                        onNavigate('map');
+                      }
+                      setTimeout(() => {
+                        onPrevious();
+                      }, 100);
+                      return;
                     }
                   }
 
