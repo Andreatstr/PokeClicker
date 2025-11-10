@@ -38,7 +38,7 @@ const STEPS: OnboardingStep[] = [
     target: 'pokemon-card',
     title: 'Pokemon Cards',
     description:
-      'Your Pokemon live here. Click a card to see stats and evolution.',
+      'Your Pokemon live here. Click a card to see stats and evolution. You can also buy new Pokemon.',
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -46,8 +46,7 @@ const STEPS: OnboardingStep[] = [
   {
     target: 'pokemon-stats',
     title: 'Pokemon Stats',
-    description:
-      'Stats and abilities live here: HP, Attack, Defense, Speed, and more.',
+    description: 'View Pokemon stats: HP, Attack, Defense, Speed, and more.',
     position: 'top',
     page: 'pokedex',
     highlight: true,
@@ -61,15 +60,6 @@ const STEPS: OnboardingStep[] = [
     highlight: true,
   },
   {
-    target: 'pokemon-card-locked',
-    title: 'Unlock New Pokemon',
-    description:
-      "Locked cards show Pokemon you don't own yet and how to unlock them.",
-    position: 'top',
-    page: 'pokedex',
-    highlight: true,
-  },
-  {
     target: 'pokemon-evolution',
     title: 'Evolution Chain',
     description:
@@ -78,7 +68,16 @@ const STEPS: OnboardingStep[] = [
     page: 'pokedex',
     highlight: true,
   },
-  // Transition to Clicker - Step 7
+  {
+    target: 'pokemon-card-locked',
+    title: 'Unlock New Pokemon',
+    description:
+      "Locked cards show Pokemon you don't own yet and how to unlock them.",
+    position: 'top',
+    page: 'pokedex',
+    highlight: true,
+  },
+  // Transition to Clicker - Step 8
   {
     target: 'clicker-nav',
     title: 'Now Visit the Clicker!',
@@ -87,7 +86,7 @@ const STEPS: OnboardingStep[] = [
     page: 'pokedex',
     highlight: true,
   },
-  // Clicker Page - Steps 8-9
+  // Clicker Page - Steps 9-10
   {
     target: 'clicker-area',
     title: 'Click to Earn Candy!',
@@ -104,7 +103,7 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // Transition to World - Step 10
+  // Transition to World - Step 11
   {
     target: 'world-nav',
     title: 'Explore the World!',
@@ -113,7 +112,7 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // World/Map Page - Steps 11-12
+  // World/Map Page - Steps 12-13
   {
     target: 'movement-controls',
     title: 'Movement Controls',
@@ -131,7 +130,7 @@ const STEPS: OnboardingStep[] = [
     page: 'map',
     highlight: true,
   },
-  // Transition to Profile - Step 13
+  // Transition to Profile - Step 14
   {
     target: 'profile-button',
     title: 'Visit Your Profile!',
@@ -723,20 +722,48 @@ export function OnboardingOverlay({
                     'pokemon-evolution',
                   ];
 
-                  // Special case: going back from evolution should skip locked-card and go to upgrade
-                  if (currentStep.target === 'pokemon-evolution') {
+                  // Special case: going back from clicker-nav (step 8) when locked-card (step 7) might have been skipped
+                  if (currentStep.target === 'clicker-nav') {
                     const prevTarget = STEPS[step - 1]?.target;
                     const prevPrevTarget = STEPS[step - 2]?.target;
+
+                    // Going back from clicker-nav when locked-card might have been skipped
                     if (
                       prevTarget === 'pokemon-card-locked' &&
-                      prevPrevTarget === 'pokemon-upgrade'
+                      prevPrevTarget === 'pokemon-evolution'
                     ) {
-                      // Skip locked-card and go directly to upgrade, keep modal open
-                      onPrevious(); // to locked
-                      setTimeout(() => {
-                        onPrevious(); // to upgrade
-                      }, 0);
-                      return;
+                      // Check if locked card exists
+                      const hasLockedCard = document.querySelector(
+                        '[data-onboarding="pokemon-card-locked"]'
+                      );
+                      if (!hasLockedCard) {
+                        // Navigate to pokedex page first
+                        if (onNavigate) {
+                          onNavigate('pokedex');
+                        }
+                        // Skip locked-card and go directly to evolution, open modal
+                        setTimeout(() => {
+                          onPrevious(); // to locked
+                          setTimeout(() => {
+                            onPrevious(); // to evolution
+                            if (onOpenFirstPokemon) {
+                              setTimeout(() => {
+                                onOpenFirstPokemon();
+                              }, 200);
+                            }
+                          }, 0);
+                        }, 100);
+                        return;
+                      } else {
+                        // If locked card exists, just navigate to pokedex
+                        if (onNavigate) {
+                          onNavigate('pokedex');
+                        }
+                        setTimeout(() => {
+                          onPrevious();
+                        }, 100);
+                        return;
+                      }
                     }
                   }
 
@@ -783,6 +810,7 @@ export function OnboardingOverlay({
                     return;
                   }
                 }
+
                 const modalTargets = [
                   'pokemon-stats',
                   'pokemon-upgrade',
@@ -795,6 +823,28 @@ export function OnboardingOverlay({
                 const isNextModal = nextTarget
                   ? modalTargets.includes(nextTarget)
                   : false;
+
+                // Special case: going forward from evolution when locked-card was skipped
+                if (
+                  currentStep.target === 'pokemon-evolution' &&
+                  nextTarget === 'pokemon-card-locked'
+                ) {
+                  const hasLockedCard = document.querySelector(
+                    '[data-onboarding="pokemon-card-locked"]'
+                  );
+                  if (!hasLockedCard) {
+                    // Close modal first
+                    if (onClosePokemonModal) {
+                      onClosePokemonModal();
+                    }
+                    // Skip locked-card and go directly to clicker-nav
+                    onNext(); // to locked
+                    setTimeout(() => {
+                      onNext(); // to clicker-nav
+                    }, 0);
+                    return;
+                  }
+                }
 
                 // If leaving a modal step to a non-modal step, close the modal first
                 if (isCurrentModal && !isNextModal && onClosePokemonModal) {
