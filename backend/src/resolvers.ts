@@ -184,11 +184,11 @@ function getUpgradeCost(currentLevel: number, stat: string): Decimal {
 
 // Helper to get Pokemon purchase cost
 function getPokemonCost(pokemonId: number): Decimal {
-  // Exponential pricing by tier: 100 × 2^(tier)
+  // Slower exponential pricing by tier: 100 × 1.5^(tier)
   // Pokemon are grouped into tiers of 10
-  // Tier 0 (ID 1-10): 100, Tier 1 (ID 11-20): 200, Tier 2 (ID 21-30): 400, etc.
+  // Tier 0 (ID 1-10): 100, Tier 1 (ID 11-20): 150, Tier 2 (ID 21-30): 225, etc.
   const tier = Math.floor(pokemonId / 10);
-  return new Decimal(100).times(new Decimal(2).pow(tier)).floor();
+  return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
 }
 
 // Helper to get Pokemon upgrade cost based on base stats

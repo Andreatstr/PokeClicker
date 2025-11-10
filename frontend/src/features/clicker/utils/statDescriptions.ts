@@ -14,10 +14,17 @@ export function getStatDescription(
   switch (stat) {
     case 'clickPower': {
       const currentLevel = stats.clickPower || 1;
-      const currentCandy = Math.pow(1.75, currentLevel - 1);
-      const nextCandy = Math.pow(1.75, currentLevel);
-      const currentRounded = Math.floor(currentCandy);
-      const nextRounded = Math.floor(nextCandy);
+      const currentCandy = Math.pow(1.15, currentLevel - 1);
+      const nextCandy = Math.pow(1.15, currentLevel);
+      // Show 2 decimal places for small values, 1 decimal for larger
+      const currentRounded =
+        currentCandy < 10
+          ? parseFloat(currentCandy.toFixed(2))
+          : parseFloat(currentCandy.toFixed(1));
+      const nextRounded =
+        nextCandy < 10
+          ? parseFloat(nextCandy.toFixed(2))
+          : parseFloat(nextCandy.toFixed(1));
       return {
         current: currentRounded,
         next: nextRounded,
@@ -26,26 +33,33 @@ export function getStatDescription(
     }
     case 'autoclicker': {
       const currentLevel = stats.autoclicker || 1;
-      // Auto-click frequency: clicks more often at higher levels
-      const currentFreq = Math.max(
-        1,
-        Math.floor(10 / Math.pow(1.2, currentLevel - 1))
+      // Interval: 10000ms / 1.3^(level-1)
+      const currentIntervalMs = Math.max(
+        1000,
+        Math.floor(10000 / Math.pow(1.3, currentLevel - 1))
       );
-      const nextFreq = Math.max(
-        1,
-        Math.floor(10 / Math.pow(1.2, currentLevel))
+      const nextIntervalMs = Math.max(
+        1000,
+        Math.floor(10000 / Math.pow(1.3, currentLevel))
       );
+      // Convert to clicks per second: 1000ms / interval
+      const currentFreq = parseFloat((1000 / currentIntervalMs).toFixed(2));
+      const nextFreq = parseFloat((1000 / nextIntervalMs).toFixed(2));
       return {
         current: currentFreq,
         next: nextFreq,
-        unit: 'sec/auto-click',
+        unit: 'clicks/sec',
       };
     }
     case 'critChance': {
       const currentLevel = stats.critChance || 1;
-      // Crit chance: starts at 5%, increases by 2% per level
-      const currentChance = 5 + (currentLevel - 1) * 2;
-      const nextChance = 5 + currentLevel * 2;
+      // Diminishing returns: 1 - 0.98^(level * 0.5)
+      const currentChance = parseFloat(
+        ((1 - Math.pow(0.98, (currentLevel - 1) * 0.5)) * 100).toFixed(1)
+      );
+      const nextChance = parseFloat(
+        ((1 - Math.pow(0.98, currentLevel * 0.5)) * 100).toFixed(1)
+      );
       return {
         current: currentChance,
         next: nextChance,
@@ -54,9 +68,11 @@ export function getStatDescription(
     }
     case 'critMultiplier': {
       const currentLevel = stats.critMultiplier || 1;
-      // Crit multiplier: starts at 2x, increases by 0.5x per level
-      const currentMult = 2 + (currentLevel - 1) * 0.5;
-      const nextMult = 2 + currentLevel * 0.5;
+      // Exponential: 1.2^(level-1)
+      const currentMult = parseFloat(
+        Math.pow(1.2, currentLevel - 1).toFixed(2)
+      );
+      const nextMult = parseFloat(Math.pow(1.2, currentLevel).toFixed(2));
       return {
         current: currentMult,
         next: nextMult,
@@ -65,20 +81,24 @@ export function getStatDescription(
     }
     case 'battleRewards': {
       const currentLevel = stats.battleRewards || 1;
-      // Battle rewards: starts at 100%, increases by 25% per level
-      const currentBonus = 100 + (currentLevel - 1) * 25;
-      const nextBonus = 100 + currentLevel * 25;
+      // Multiplicative: 1.05^(level-1)
+      const currentMult = parseFloat(
+        Math.pow(1.05, currentLevel - 1).toFixed(2)
+      );
+      const nextMult = parseFloat(Math.pow(1.05, currentLevel).toFixed(2));
       return {
-        current: currentBonus,
-        next: nextBonus,
-        unit: '% battle candy',
+        current: currentMult,
+        next: nextMult,
+        unit: 'x battle candy',
       };
     }
     case 'clickMultiplier': {
       const currentLevel = stats.clickMultiplier || 1;
-      // Click multiplier: starts at 100%, increases by 15% per level
-      const currentMult = 100 + (currentLevel - 1) * 15;
-      const nextMult = 100 + currentLevel * 15;
+      // Additive percentage: (1 + (level-1) * 0.02)
+      const currentMult = parseFloat(
+        ((1 + (currentLevel - 1) * 0.02) * 100).toFixed(0)
+      );
+      const nextMult = parseFloat(((1 + currentLevel * 0.02) * 100).toFixed(0));
       return {
         current: currentMult,
         next: nextMult,
@@ -87,12 +107,12 @@ export function getStatDescription(
     }
     case 'pokedexBonus': {
       const currentLevel = stats.pokedexBonus || 1;
-      // Pokedex bonus: bonus per unique Pokemon owned
+      // 1.005^(level * pokemonCount)
       const currentBonus = (currentLevel - 1) * 0.5;
       const nextBonus = currentLevel * 0.5;
       return {
-        current: currentBonus,
-        next: nextBonus,
+        current: parseFloat(currentBonus.toFixed(1)),
+        next: parseFloat(nextBonus.toFixed(1)),
         unit: '% per Pokemon',
       };
     }
@@ -126,21 +146,21 @@ export function getStatDescription(
 export function getUpgradeCost(stat: string, currentLevel: number): string {
   let multiplier = 2.5; // default
 
-  // PokeClicker upgrade costs (balanced for progression):
+  // Balanced upgrade costs:
   if (stat === 'clickPower') {
-    multiplier = 2.8; // Core active upgrade, moderate-high cost
+    multiplier = 2.8;
   } else if (stat === 'autoclicker') {
-    multiplier = 2.6; // Idle income, moderate cost
+    multiplier = 2.5;
   } else if (stat === 'critChance') {
-    multiplier = 2.5; // RNG boost, moderate cost
+    multiplier = 2.5;
   } else if (stat === 'critMultiplier') {
-    multiplier = 2.9; // High impact, higher cost
+    multiplier = 3.0;
   } else if (stat === 'battleRewards') {
-    multiplier = 2.4; // Bonus income source, moderate cost
+    multiplier = 2.4;
   } else if (stat === 'clickMultiplier') {
-    multiplier = 3.0; // Percentage boost, high cost (scales with other upgrades)
+    multiplier = 3.2;
   } else if (stat === 'pokedexBonus') {
-    multiplier = 2.3; // Collection reward, lower cost (encourages exploration)
+    multiplier = 2.2;
   }
   // Legacy support
   else if (stat === 'attack' || stat === 'spAttack') {

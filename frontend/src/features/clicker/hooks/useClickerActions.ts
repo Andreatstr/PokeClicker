@@ -20,6 +20,7 @@ interface UseClickerActionsProps {
     updateUser: (user: User) => void
   ) => Promise<User | undefined>;
   updateUser: (user: User) => void;
+  ownedPokemonCount: number;
 }
 
 /**
@@ -37,6 +38,7 @@ export function useClickerActions({
   setStats,
   upgradeStat,
   updateUser,
+  ownedPokemonCount,
 }: UseClickerActionsProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [candies, setCandies] = useState<Candy[]>([]);
@@ -47,7 +49,7 @@ export function useClickerActions({
       return;
     }
 
-    const candiesEarned = calculateCandyPerClick(stats);
+    const candiesEarned = calculateCandyPerClick(stats, ownedPokemonCount);
 
     addCandy(candiesEarned);
     setIsAnimating(true);
@@ -67,7 +69,7 @@ export function useClickerActions({
       () => setIsAnimating(false),
       GameConfig.clicker.clickAnimationDuration
     );
-  }, [isAuthenticated, stats, addCandy, setDisplayError]);
+  }, [isAuthenticated, stats, ownedPokemonCount, addCandy, setDisplayError]);
 
   const handleUpgrade = useCallback(
     async (stat: keyof UserStats) => {

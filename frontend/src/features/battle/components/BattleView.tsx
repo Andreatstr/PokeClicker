@@ -78,13 +78,22 @@ export function BattleView({
     }
   }, [onAttackFunctionReady]);
 
-  // Calculate rare candy reward (must match PokemonMap.tsx multiplier)
-  const candyPerClick = user?.stats ? calculateCandyPerClick(user.stats) : '1';
-  const rareCandyReward = toDecimal(finalClickCount)
-    .times(candyPerClick)
-    .times(10)
-    .floor()
-    .toString();
+  // Calculate rare candy reward
+  const candyPerClick = user?.stats
+    ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
+    : '1';
+
+  // Base reward: clicks × candyPerClick × 10
+  let battleReward = toDecimal(finalClickCount).times(candyPerClick).times(10);
+
+  // Apply battle rewards multiplier: 1.05^(level-1)
+  // Level 1 = 1.0x, Level 5 = 1.22x, Level 10 = 1.55x, Level 20 = 2.53x
+  if (user?.stats?.battleRewards && user.stats.battleRewards > 1) {
+    const battleMultiplier = Math.pow(1.05, user.stats.battleRewards - 1);
+    battleReward = battleReward.times(battleMultiplier);
+  }
+
+  const rareCandyReward = battleReward.floor().toString();
 
   // Ready countdown state
   const [readyCount, setReadyCount] = useState(5);

@@ -64,12 +64,14 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     setStats,
     upgradeStat,
     updateUser,
+    ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
   });
 
   useAutoclicker({
     stats,
     isAuthenticated,
     onAutoClick: addCandy,
+    ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
   });
 
   useEffect(() => {
