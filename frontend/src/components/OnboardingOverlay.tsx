@@ -722,10 +722,38 @@ export function OnboardingOverlay({
                     'pokemon-evolution',
                   ];
 
+                  const navButtonTargets = [
+                    'clicker-nav',
+                    'world-nav',
+                    'profile-button',
+                    'ranks-nav',
+                  ];
+
+                  // Helper function to open mobile nav menu if needed
+                  const openMobileMenuIfNeeded = () => {
+                    const menuButton = document.querySelector(
+                      '[data-nav-menu-toggle="true"]'
+                    ) as HTMLButtonElement;
+                    if (menuButton) {
+                      const isExpanded =
+                        menuButton.getAttribute('aria-expanded') === 'true';
+                      if (!isExpanded) {
+                        menuButton.click();
+                      }
+                    }
+                  };
+
+                  // Get previous step target
+                  const prevTarget = STEPS[step - 1]?.target;
+
+                  // If going back to a nav button, open the mobile menu first
+                  if (prevTarget && navButtonTargets.includes(prevTarget)) {
+                    openMobileMenuIfNeeded();
+                  }
+
                   // Special case: navigation transitions that need page changes
                   if (currentStep.target === 'clicker-nav') {
                     // Going back from clicker-nav (step 8) when locked-card (step 7) might have been skipped
-                    const prevTarget = STEPS[step - 1]?.target;
                     const prevPrevTarget = STEPS[step - 2]?.target;
 
                     if (
@@ -800,7 +828,6 @@ export function OnboardingOverlay({
                   const isCurrentModal = modalTargets.includes(
                     currentStep.target
                   );
-                  const prevTarget = STEPS[step - 1]?.target;
                   const isPrevModal = prevTarget
                     ? modalTargets.includes(prevTarget)
                     : false;
@@ -822,67 +849,170 @@ export function OnboardingOverlay({
             <Button
               size="sm"
               onClick={() => {
-                // If moving from Upgrade to Evolution, skip the intermediate locked-card step
-                if (currentStep.target === 'pokemon-upgrade') {
-                  const next = STEPS[step + 1]?.target;
-                  const next2 = STEPS[step + 2]?.target;
-                  if (
-                    next === 'pokemon-card-locked' &&
-                    next2 === 'pokemon-evolution'
-                  ) {
-                    skipLockedAfterUpgradeRef.current = true;
-                    onNext(); // to locked
-                    // Immediately advance to evolution and keep modal open
-                    setTimeout(() => {
-                      onNext();
-                      skipLockedAfterUpgradeRef.current = false;
-                    }, 0);
-                    return;
-                  }
-                }
-
-                const modalTargets = [
-                  'pokemon-stats',
-                  'pokemon-upgrade',
-                  'pokemon-evolution',
+                const navButtonTargets = [
+                  'clicker-nav',
+                  'world-nav',
+                  'profile-button',
+                  'ranks-nav',
                 ];
-                const isCurrentModal = modalTargets.includes(
-                  currentStep.target
-                );
-                const nextTarget = STEPS[step + 1]?.target;
-                const isNextModal = nextTarget
-                  ? modalTargets.includes(nextTarget)
-                  : false;
 
-                // Special case: going forward from evolution when locked-card was skipped
-                if (
-                  currentStep.target === 'pokemon-evolution' &&
-                  nextTarget === 'pokemon-card-locked'
-                ) {
-                  const hasLockedCard = document.querySelector(
-                    '[data-onboarding="pokemon-card-locked"]'
-                  );
-                  if (!hasLockedCard) {
-                    // Close modal first
-                    if (onClosePokemonModal) {
-                      onClosePokemonModal();
+                // Helper function to close mobile nav menu if open
+                const closeMobileMenuIfOpen = () => {
+                  const menuButton = document.querySelector(
+                    '[data-nav-menu-toggle="true"]'
+                  ) as HTMLButtonElement;
+                  if (menuButton) {
+                    const isExpanded =
+                      menuButton.getAttribute('aria-expanded') === 'true';
+                    if (isExpanded) {
+                      menuButton.click();
                     }
-                    // Skip locked-card and go directly to clicker-nav
-                    onNext(); // to locked
-                    setTimeout(() => {
-                      onNext(); // to clicker-nav
-                    }, 0);
-                    return;
+                  }
+                };
+
+                // Check if next step is a nav button - if so, need to open the menu
+                const nextStep = STEPS[step + 1];
+                const nextIsNavButton =
+                  nextStep && navButtonTargets.includes(nextStep.target);
+
+                // If going TO a nav button, open the mobile menu
+                if (nextIsNavButton) {
+                  const menuButton = document.querySelector(
+                    '[data-nav-menu-toggle="true"]'
+                  ) as HTMLButtonElement;
+                  if (menuButton) {
+                    const isExpanded =
+                      menuButton.getAttribute('aria-expanded') === 'true';
+                    if (!isExpanded) {
+                      menuButton.click();
+                    }
                   }
                 }
 
-                // If leaving a modal step to a non-modal step, close the modal first
-                if (isCurrentModal && !isNextModal && onClosePokemonModal) {
-                  onClosePokemonModal();
-                  // Small delay to allow UI to update before advancing step
-                  setTimeout(() => onNext(), 150);
-                } else {
-                  onNext();
+                // If leaving a nav button step, close the mobile menu and navigate/advance
+                if (navButtonTargets.includes(currentStep.target)) {
+                  closeMobileMenuIfOpen();
+
+                  // Check if next step is on a different page and navigate if needed
+                  if (
+                    nextStep &&
+                    nextStep.page !== currentStep.page &&
+                    onNavigate
+                  ) {
+                    onNavigate(nextStep.page);
+                    // Wait for page to load, menu to close, then advance step
+                    setTimeout(() => {
+                      // Ensure menu is still closed after page change
+                      closeMobileMenuIfOpen();
+                      setTimeout(() => {
+                        executeNextStep();
+                      }, 100);
+                    }, 200);
+                  } else {
+                    // Wait for menu to close before advancing
+                    setTimeout(() => {
+                      executeNextStep();
+                    }, 100);
+                  }
+                  return;
+                }
+
+                // Check if next step is on a different page and navigate if needed
+                if (
+                  nextStep &&
+                  nextStep.page !== currentStep.page &&
+                  onNavigate
+                ) {
+                  onNavigate(nextStep.page);
+                  // Wait for page to load before advancing step
+                  setTimeout(() => {
+                    executeNextStep();
+                  }, 200);
+                  return;
+                }
+
+                // Execute the next step logic immediately if no page change needed
+                executeNextStep();
+
+                function executeNextStep() {
+                  // If moving from Upgrade to Evolution, skip the intermediate locked-card step
+                  if (currentStep.target === 'pokemon-upgrade') {
+                    const next = STEPS[step + 1]?.target;
+                    const next2 = STEPS[step + 2]?.target;
+                    if (
+                      next === 'pokemon-card-locked' &&
+                      next2 === 'pokemon-evolution'
+                    ) {
+                      skipLockedAfterUpgradeRef.current = true;
+                      onNext(); // to locked
+                      // Immediately advance to evolution and keep modal open
+                      setTimeout(() => {
+                        onNext();
+                        skipLockedAfterUpgradeRef.current = false;
+                      }, 0);
+                      return;
+                    }
+                  }
+
+                  const modalTargets = [
+                    'pokemon-stats',
+                    'pokemon-upgrade',
+                    'pokemon-evolution',
+                  ];
+                  const isCurrentModal = modalTargets.includes(
+                    currentStep.target
+                  );
+                  const nextTarget = STEPS[step + 1]?.target;
+                  const isNextModal = nextTarget
+                    ? modalTargets.includes(nextTarget)
+                    : false;
+
+                  // Special case: going forward from evolution when locked-card was skipped
+                  if (
+                    currentStep.target === 'pokemon-evolution' &&
+                    nextTarget === 'pokemon-card-locked'
+                  ) {
+                    const hasLockedCard = document.querySelector(
+                      '[data-onboarding="pokemon-card-locked"]'
+                    );
+                    if (!hasLockedCard) {
+                      // Close modal first
+                      if (onClosePokemonModal) {
+                        onClosePokemonModal();
+                      }
+
+                      // Skip locked-card and go directly to clicker-nav
+                      onNext(); // to locked
+                      setTimeout(() => {
+                        onNext(); // to clicker-nav
+
+                        // Open mobile menu after advancing to clicker-nav (which is a nav button)
+                        setTimeout(() => {
+                          const menuButton = document.querySelector(
+                            '[data-nav-menu-toggle="true"]'
+                          ) as HTMLButtonElement;
+                          if (menuButton) {
+                            const isExpanded =
+                              menuButton.getAttribute('aria-expanded') ===
+                              'true';
+                            if (!isExpanded) {
+                              menuButton.click();
+                            }
+                          }
+                        }, 100);
+                      }, 0);
+                      return;
+                    }
+                  }
+
+                  // If leaving a modal step to a non-modal step, close the modal first
+                  if (isCurrentModal && !isNextModal && onClosePokemonModal) {
+                    onClosePokemonModal();
+                    // Small delay to allow UI to update before advancing step
+                    setTimeout(() => onNext(), 150);
+                  } else {
+                    onNext();
+                  }
                 }
               }}
               className="flex-1"

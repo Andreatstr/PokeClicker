@@ -142,6 +142,7 @@ export function Navbar({
           {/* Mobile Menu Button */}
           <section className="xl:hidden" aria-label="Mobile menu control">
             <Button
+              data-nav-menu-toggle="true"
               onClick={toggleMobileMenu}
               className="min-w-[44px] min-h-[44px] px-3 py-4"
               aria-label="Toggle mobile menu"

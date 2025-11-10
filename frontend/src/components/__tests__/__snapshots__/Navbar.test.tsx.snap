@@ -111,6 +111,7 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
           aria-expanded="false"
           aria-label="Toggle mobile menu"
           class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] px-3 py-4"
+          data-nav-menu-toggle="true"
           data-slot="button"
         >
           <svg
@@ -244,6 +245,7 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
           aria-expanded="false"
           aria-label="Toggle mobile menu"
           class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] px-3 py-4"
+          data-nav-menu-toggle="true"
           data-slot="button"
         >
           <svg
