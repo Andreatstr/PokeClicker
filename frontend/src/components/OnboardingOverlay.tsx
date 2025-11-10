@@ -273,7 +273,7 @@ export function OnboardingOverlay({
   }, [currentStep, previousStep, onClosePokemonModal]);
 
   const skippedStepRef = useRef<number | null>(null);
-  const maxWaitTimeRef = useRef<number | undefined>();
+  const maxWaitTimeRef = useRef<number | undefined>(undefined);
 
   // Helper to check if rects are significantly different (more than 5px in any dimension)
   const rectsAreDifferent = (
