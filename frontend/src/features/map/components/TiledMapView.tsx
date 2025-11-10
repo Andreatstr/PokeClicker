@@ -786,6 +786,12 @@ export function TiledMapView(props: TiledMapViewProps) {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
+                          <span
+                            className="pixel-font text-[11px]"
+                            style={{color: bodyTextColor}}
+                          >
+                            Start battle:
+                          </span>
                           <Button
                             size="sm"
                             bgColor="#8B3A62"
@@ -801,17 +807,19 @@ export function TiledMapView(props: TiledMapViewProps) {
                           >
                             B
                           </Button>
-                          <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
-                            style={{
-                              background: isDarkMode ? '#f9fafb' : '#ffffff',
-                              color: '#111827',
-                              borderColor: 'black',
-                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
-                            }}
-                          >
-                            B
-                          </span>
+                          {!isMobile && (
+                            <span
+                              className="pixel-font text-xs border-2 px-2 py-1"
+                              style={{
+                                background: isDarkMode ? '#f9fafb' : '#ffffff',
+                                color: '#111827',
+                                borderColor: 'black',
+                                boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                              }}
+                            >
+                              B
+                            </span>
+                          )}
                           <button
                             type="button"
                             className={`text-white px-3 py-1.5 pixel-font text-xs border-2 rounded focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
@@ -831,15 +839,15 @@ export function TiledMapView(props: TiledMapViewProps) {
                             Battle!
                           </button>
                         </div>
-                        <span
-                          className="pixel-font text-[11px]"
-                          style={{color: bodyTextColor}}
-                        >
-                          Start battle
-                        </span>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-center gap-2">
+                          <span
+                            className="pixel-font text-[11px]"
+                            style={{color: bodyTextColor}}
+                          >
+                            Attack:
+                          </span>
                           <Button
                             size="sm"
                             bgColor="#8B3A62"
@@ -870,40 +878,42 @@ export function TiledMapView(props: TiledMapViewProps) {
                           >
                             B
                           </Button>
-                          <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
-                            style={{
-                              background: isDarkMode ? '#f9fafb' : '#ffffff',
-                              color: '#111827',
-                              borderColor: 'black',
-                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
-                            }}
-                          >
-                            A
-                          </span>
-                          <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
-                            style={{
-                              background: isDarkMode ? '#f9fafb' : '#ffffff',
-                              color: '#111827',
-                              borderColor: 'black',
-                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
-                            }}
-                          >
-                            B
-                          </span>
+                          {!isMobile && (
+                            <>
+                              <span
+                                className="pixel-font text-xs border-2 px-2 py-1"
+                                style={{
+                                  background: isDarkMode
+                                    ? '#f9fafb'
+                                    : '#ffffff',
+                                  color: '#111827',
+                                  borderColor: 'black',
+                                  boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                                }}
+                              >
+                                A
+                              </span>
+                              <span
+                                className="pixel-font text-xs border-2 px-2 py-1"
+                                style={{
+                                  background: isDarkMode
+                                    ? '#f9fafb'
+                                    : '#ffffff',
+                                  color: '#111827',
+                                  borderColor: 'black',
+                                  boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                                }}
+                              >
+                                B
+                              </span>
+                            </>
+                          )}
                           <img
                             src={`${import.meta.env.BASE_URL}pixilated-hand.webp`}
                             alt="Hand"
                             className="w-8 h-8"
                           />
                         </div>
-                        <span
-                          className="pixel-font text-[11px]"
-                          style={{color: bodyTextColor}}
-                        >
-                          Attack
-                        </span>
                       </div>
                     </div>
                   </section>

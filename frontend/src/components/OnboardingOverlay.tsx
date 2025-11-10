@@ -16,7 +16,7 @@ interface OnboardingStep {
 }
 
 const STEPS: OnboardingStep[] = [
-  // Pokedex Page - Steps 0-6
+  // Pokedex Page - Steps 0-7
   {
     target: 'navbar',
     title: 'Welcome to PokeClicker!',
@@ -98,7 +98,7 @@ const STEPS: OnboardingStep[] = [
   {
     target: 'upgrade-panel',
     title: 'Upgrade Your Stats',
-    description: 'Use upgrades to boost earnings and efficiency later.',
+    description: 'Use upgrades to boost earnings and efficiency.',
     position: 'top',
     page: 'clicker',
     highlight: true,
@@ -125,7 +125,7 @@ const STEPS: OnboardingStep[] = [
     target: 'map-canvas',
     title: 'Wild Pokemon & Battles',
     description:
-      'Wild Pokemon appear as sprites on the map. Run into them to start a battle and catch them!',
+      'Wild Pokemon appear around the map. Start a battle and click your way to victory!',
     position: 'top',
     page: 'map',
     highlight: true,
@@ -139,17 +139,17 @@ const STEPS: OnboardingStep[] = [
     page: 'map',
     highlight: true,
   },
-  // Profile Page - Step 14
+  // Profile Page - Step 15
   {
-    target: 'pokemon-selection',
+    target: 'pokemon-selection-and-tutorial',
     title: 'Choose Your Pokemon',
     description:
-      'Pick your favorite Pokemon and your Clicker Pokemon. Your Clicker Pokemon appears on screen! Restart this tutorial anytime from here.',
+      'Pick your Battle and Clicker Pokemon. Restart this tutorial anytime.',
     position: 'top',
     page: 'profile',
     highlight: true,
   },
-  // Transition to Ranks - Step 15
+  // Transition to Ranks - Step 16
   {
     target: 'ranks-nav',
     title: 'Check the Ranks!',
@@ -158,12 +158,12 @@ const STEPS: OnboardingStep[] = [
     page: 'profile',
     highlight: true,
   },
-  // Ranks Page - Step 16
+  // Ranks Page - Step 17
   {
     target: 'league-buttons',
     title: 'Global Rankings',
     description:
-      'Compete in two leagues: Candy League for most Rare Candy and Pokemon League for most Pokemon caught. Climb the ranks!',
+      'Compete in two leagues: most Rare Candy and most Pokemon caught. Climb the ranks!',
     position: 'bottom',
     page: 'ranks',
     highlight: true,
@@ -688,7 +688,7 @@ export function OnboardingOverlay({
               onClick={onSkip}
               className="text-xs hover:opacity-70 transition-opacity"
               aria-label="Skip tutorial"
-              style={{color: isDarkMode ? '#ef4444' : '#dc2626'}}
+              style={{color: isDarkMode ? '#ef4444' : '#b91c1c'}}
             >
               Skip
             </button>
@@ -697,7 +697,7 @@ export function OnboardingOverlay({
           <h3
             id="onboarding-title"
             className="pixel-font text-base font-bold mb-2"
-            style={{color: '#facc15'}}
+            style={{color: isDarkMode ? '#facc15' : '#3971a9ff'}}
           >
             {currentStep.title}
           </h3>
