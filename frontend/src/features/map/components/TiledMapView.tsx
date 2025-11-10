@@ -4,6 +4,9 @@ import {type PokedexPokemon} from '@features/pokedex';
 import {useTileRenderer} from '../hooks/useTileRenderer';
 import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
 import {formatNumber} from '@/lib/formatNumber';
+import {Dialog, DialogBody} from '@ui/pixelact/dialog';
+import {Button} from '@ui/pixelact';
+import {useMobileDetection} from '@/hooks/useMobileDetection';
 
 // Constants
 const SPRITE_WIDTH = 68;
@@ -67,6 +70,9 @@ export function TiledMapView(props: TiledMapViewProps) {
       ? user.owned_pokemon_ids.length <= 3
       : false;
   });
+
+  const [showWorldInfo, setShowWorldInfo] = useState(false);
+  const isMobile = useMobileDetection(768);
 
   return (
     <>
@@ -230,17 +236,19 @@ export function TiledMapView(props: TiledMapViewProps) {
         </div>
       </div>
 
-      {/* Home Button - always bottom left */}
+      {/* Home Button - bottom left */}
       <div className="absolute bottom-2 left-2 z-20">
         <button
           onClick={onResetToHome}
-          className="flex items-center gap-1 border-2 border-black px-2 py-1"
+          className="flex items-center justify-center border-2 border-black w-10 h-10 text-white"
           title="Return to home position"
+          aria-label="Return to home position"
           style={{
             backgroundColor: 'rgba(59, 130, 246, 0.9)',
             boxShadow: '4px 4px 0px rgba(0,0,0,1)',
             transform: 'translate(0, 0)',
             transition: 'all 0.15s ease-in-out',
+            color: 'white',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translate(-2px, -2px)';
@@ -253,11 +261,634 @@ export function TiledMapView(props: TiledMapViewProps) {
             e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
           }}
         >
-          <span className="pixel-font text-xs font-bold text-white">
-            🏠 Home
-          </span>
+          <svg
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-5 h-5"
+          >
+            <path
+              d="M14 2h-4v2H8v2H6v2H4v2H2v2h2v10h7v-6h2v6h7V12h2v-2h-2V8h-2V6h-2V4h-2V2zm0 2v2h2v2h2v2h2v2h-2v8h-3v-6H9v6H6v-8H4v-2h2V8h2V6h2V4h4z"
+              fill="currentColor"
+            />
+          </svg>
         </button>
       </div>
+
+      {/* Info Button - bottom right */}
+      <div className="absolute bottom-2 right-2 z-20">
+        <button
+          onClick={() => setShowWorldInfo(true)}
+          className="flex items-center justify-center border-2 border-black w-10 h-10 text-white"
+          aria-label="How World works"
+          title="How World works"
+          style={{
+            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+            boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+            transform: 'translate(0, 0)',
+            transition: 'all 0.15s ease-in-out',
+            color: 'white',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translate(0, 0)';
+            e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+          }}
+        >
+          <svg
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-5 h-5"
+          >
+            <path
+              d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* World Info Modal */}
+      <Dialog open={showWorldInfo} onClose={() => setShowWorldInfo(false)}>
+        <DialogBody>
+          <div
+            className={`mx-auto max-w-xl md:max-w-[1400px] border-4 rounded-sm shadow-[8px_8px_0_rgba(0,0,0,1)] ${
+              isDarkMode
+                ? 'bg-gray-900 border-gray-700'
+                : 'bg-[#f5f1e8] border-black'
+            }`}
+          >
+            <header
+              className="flex items-center justify-between px-4 py-3 md:px-12 md:py-6 border-b-4"
+              style={{borderColor: isDarkMode ? '#374151' : 'black'}}
+            >
+              <h2
+                className="pixel-font text-base font-bold"
+                style={{color: isDarkMode ? '#facc15' : '#1f2937'}}
+              >
+                World Guide
+              </h2>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setShowWorldInfo(false)}
+                aria-label="Close"
+              >
+                Close
+              </Button>
+            </header>
+            <div className="px-4 py-4 md:px-12 md:py-12">
+              {/* Movement keys (Arrow keys and WASD) */}
+              <div className="mx-auto mb-6 md:mb-8" style={{maxWidth: '100%'}}>
+                <p
+                  className="pixel-font text-xs text-center mb-3"
+                  style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                >
+                  Move with
+                </p>
+                <div className="flex items-center justify-center gap-6">
+                  {/* Arrow keys layout - hidden on mobile */}
+                  {!isMobile && (
+                    <>
+                      <div
+                        className="flex flex-col items-center gap-1"
+                        aria-label="Arrow keys"
+                      >
+                        <div className="flex justify-center">
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ▲
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ◀
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ▼
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ▶
+                          </span>
+                        </div>
+                        <span
+                          className="pixel-font text-[10px] mt-1 h-4 flex items-center justify-center"
+                          style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                        >
+                          Arrow Keys
+                        </span>
+                      </div>
+
+                      <span
+                        className="pixel-font text-xs opacity-60"
+                        style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                      >
+                        or
+                      </span>
+
+                      {/* WASD layout - hidden on mobile */}
+                      <div
+                        className="flex flex-col items-center gap-1"
+                        aria-label="WASD keys"
+                      >
+                        <div className="flex justify-center">
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            W
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            A
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            S
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            D
+                          </span>
+                        </div>
+                        <span
+                          className="pixel-font text-[10px] mt-1 h-4 flex items-center justify-center"
+                          style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                        >
+                          WASD
+                        </span>
+                      </div>
+                      <span
+                        className="pixel-font text-xs opacity-60"
+                        style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                      >
+                        or
+                      </span>
+                    </>
+                  )}
+                  {/* Joystick preview (non-interactive) */}
+                  <div
+                    className="flex flex-col items-center gap-1"
+                    style={{pointerEvents: 'none'}}
+                    aria-label="Joystick preview"
+                  >
+                    <div
+                      style={{transform: 'scale(0.7)'}}
+                      className="relative w-[100px] h-[100px]"
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 bg-[#2a2a3e] rounded-full shadow-md border-2 border-[#1a1a2e]"></div>
+                      </div>
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 rounded-full border-2 border-red-700 shadow-lg" />
+                    </div>
+                    <span
+                      className="pixel-font text-[10px] mt-1 h-4 flex items-center justify-center w-full"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      Joystick
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Battle flow (inline sprite, Battle! button, candy) */}
+              <div className="mx-auto mt-6 md:mt-8" style={{maxWidth: '100%'}}>
+                <div className="flex flex-col md:flex-row md:items-stretch md:justify-center gap-3 md:gap-4">
+                  {/* Step 1: Find Pokemon */}
+                  <div
+                    className={`flex flex-col items-start gap-2 p-3 md:p-4 md:min-w-[200px] border-2 rounded-sm shadow-[4px_4px_0_rgba(0,0,0,1)] ${
+                      isDarkMode
+                        ? 'bg-gray-800 border-gray-600'
+                        : 'bg-white border-black'
+                    }`}
+                  >
+                    <span
+                      className="pixel-font text-xs md:text-[10px] text-left"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      <span className="font-bold">1.</span> Find a wild Pokémon
+                    </span>
+                    <div
+                      className="relative flex items-center justify-center self-center"
+                      style={{
+                        width: 80,
+                        height: 80,
+                        margin: '-8px',
+                      }}
+                    >
+                      <img
+                        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+                        alt="Wild Pokémon"
+                        className="image-pixelated relative z-10"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          imageRendering: 'pixelated',
+                          filter:
+                            'drop-shadow(0 0 12px rgba(34, 197, 94, 0.6)) drop-shadow(0 0 20px rgba(34, 197, 94, 0.4))',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Step 2: Press Battle */}
+                  <div
+                    className={`flex flex-col items-start gap-2 p-3 md:p-4 md:min-w-[200px] border-2 rounded-sm shadow-[4px_4px_0_rgba(0,0,0,1)] ${
+                      isDarkMode
+                        ? 'bg-gray-800 border-gray-600'
+                        : 'bg-white border-black'
+                    }`}
+                  >
+                    <span
+                      className="pixel-font text-xs md:text-[10px] text-left"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      <span className="font-bold">2.</span> Press Battle!
+                    </span>
+                    <button
+                      type="button"
+                      className={`text-white px-4 py-2 md:px-6 md:py-3 pixel-font text-sm md:text-base border-2 rounded focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 self-center ${
+                        isDarkMode ? 'border-gray-600' : 'border-black'
+                      }`}
+                      style={{
+                        backgroundColor: isDarkMode ? '#b91c1c' : '#dc2626',
+                        boxShadow: isDarkMode
+                          ? '4px 4px 0px rgba(51,51,51,1)'
+                          : '4px 4px 0px rgba(0,0,0,1)',
+                        transform: 'translate(0, 0)',
+                        transition: 'all 0.15s ease-in-out',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform =
+                          'translate(-2px, -2px)';
+                        e.currentTarget.style.boxShadow = isDarkMode
+                          ? '6px 6px 0px rgba(51,51,51,1)'
+                          : '6px 6px 0px rgba(0,0,0,1)';
+                        e.currentTarget.style.backgroundColor = isDarkMode
+                          ? '#991b1b'
+                          : '#b91c1c';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = 'translate(0, 0)';
+                        e.currentTarget.style.boxShadow = isDarkMode
+                          ? '4px 4px 0px rgba(51,51,51,1)'
+                          : '4px 4px 0px rgba(0,0,0,1)';
+                        e.currentTarget.style.backgroundColor = isDarkMode
+                          ? '#b91c1c'
+                          : '#dc2626';
+                      }}
+                      onClick={(e) => e.preventDefault()}
+                      aria-label="Battle"
+                    >
+                      Battle!
+                    </button>
+                  </div>
+
+                  {/* Step 3: Win to Earn Candy */}
+                  <div
+                    className={`flex flex-col items-start gap-2 p-3 md:p-4 md:min-w-[200px] border-2 rounded-sm shadow-[4px_4px_0_rgba(0,0,0,1)] ${
+                      isDarkMode
+                        ? 'bg-gray-800 border-gray-600'
+                        : 'bg-white border-black'
+                    }`}
+                  >
+                    <span
+                      className="pixel-font text-xs md:text-[10px] text-left"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      <span className="font-bold">3.</span> Win to earn Candy
+                    </span>
+                    <div className="flex items-center gap-1 self-center">
+                      <div className="relative flex items-center justify-center">
+                        <img
+                          src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
+                          alt="Candy"
+                          className="relative z-10"
+                          style={{
+                            width: 64,
+                            height: 64,
+                            imageRendering: 'pixelated',
+                            filter:
+                              'drop-shadow(0 0 12px rgba(236, 72, 153, 0.6)) drop-shadow(0 0 20px rgba(236, 72, 153, 0.4))',
+                          }}
+                        />
+                      </div>
+                      <span
+                        className="pixel-font text-xs font-bold"
+                        style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                      >
+                        +Candy
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual, minimal guide */}
+              <div className="mx-auto hidden" style={{maxWidth: 420}}>
+                <div
+                  className="relative border-4 rounded-sm shadow-[6px_6px_0_rgba(0,0,0,1)] mx-auto"
+                  style={{
+                    width: '100%',
+                    height: 240,
+                    backgroundColor: isDarkMode ? '#0b1220' : '#e6f0eb',
+                    borderColor: isDarkMode ? '#374151' : 'black',
+                  }}
+                >
+                  {/* Player (bigger) */}
+                  <div
+                    className="absolute"
+                    style={{
+                      left: '44%',
+                      top: '50%',
+                      width: 24,
+                      height: 24,
+                      backgroundColor: '#0ea5e9',
+                      border: '2px solid black',
+                      boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                    }}
+                  />
+
+                  {/* Wild Pokémon (bigger) */}
+                  <img
+                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+                    alt="Wild Pokémon"
+                    className="absolute"
+                    style={{
+                      left: '64%',
+                      top: '38%',
+                      width: 40,
+                      height: 40,
+                      imageRendering: 'pixelated',
+                    }}
+                  />
+
+                  {/* Candy indicator (bigger) */}
+                  <div
+                    className="absolute flex items-center gap-1"
+                    style={{top: 8, right: 8}}
+                  >
+                    <img
+                      src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
+                      alt="Candy"
+                      className="w-6 h-6"
+                      style={{imageRendering: 'pixelated'}}
+                    />
+                    <span
+                      className="pixel-font text-[12px] font-bold"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      +Candy
+                    </span>
+                  </div>
+
+                  {/* Home */}
+                  <div
+                    className="absolute flex items-center gap-1"
+                    style={{left: 8, bottom: 8}}
+                  >
+                    <svg
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      <path
+                        d="M14 2h-4v2H8v2H6v2H4v2H2v2h2v10h7v-6h2v6h7V12h2v-2h-2V8h-2V6h-2V4h-2V2zm0 2v2h2v2h2v2h2v2h-2v8h-3v-6H9v6H6v-8H4v-2h2V8h2V6h2V4h4z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span
+                      className="pixel-font text-[10px] font-bold"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      Home
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div
+                    className="absolute flex items-center gap-1"
+                    style={{right: 8, bottom: 8}}
+                  >
+                    <svg
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      <path
+                        d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span
+                      className="pixel-font text-[10px] font-bold"
+                      style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                    >
+                      Info
+                    </span>
+                  </div>
+
+                  {/* A button */}
+                  <div
+                    className="absolute flex items-center justify-center pixel-font text-[10px] font-bold"
+                    style={{
+                      left: '48%',
+                      bottom: 14,
+                      width: 20,
+                      height: 20,
+                      border: '2px solid black',
+                      borderRadius: 9999,
+                      background: '#8B3A62',
+                      color: 'white',
+                      boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                    }}
+                  >
+                    A
+                  </div>
+
+                  {/* SVG arrows */}
+                  <svg
+                    className="absolute inset-0"
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 420 240"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <marker
+                        id="arrowhead"
+                        markerWidth="6"
+                        markerHeight="6"
+                        refX="5"
+                        refY="3"
+                        orient="auto"
+                        fill={isDarkMode ? '#facc15' : '#111827'}
+                      >
+                        <path d="M0,0 L6,3 L0,6 Z" />
+                      </marker>
+                    </defs>
+                    {/* Move */}
+                    <g
+                      stroke={isDarkMode ? '#facc15' : '#111827'}
+                      strokeWidth="2"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    >
+                      <line x1="190" y1="125" x2="190" y2="95" />
+                      <line x1="190" y1="125" x2="160" y2="125" />
+                      <line x1="210" y1="125" x2="240" y2="125" />
+                      <line x1="200" y1="135" x2="200" y2="165" />
+                    </g>
+                    {/* Battle */}
+                    <path
+                      d="M208,118 C250,110 260,100 276,96"
+                      stroke={isDarkMode ? '#facc15' : '#ef4444'}
+                      strokeWidth="2.5"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    />
+                    {/* Reward */}
+                    <path
+                      d="M286,96 C320,70 354,40 392,26"
+                      stroke={isDarkMode ? '#facc15' : '#10b981'}
+                      strokeWidth="2.5"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    />
+                    {/* A -> Pokémon */}
+                    <path
+                      d="M210,190 C240,184 260,130 276,110"
+                      stroke={isDarkMode ? '#facc15' : '#111827'}
+                      strokeWidth="2"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    />
+                  </svg>
+
+                  {/* Tiny labels */}
+                  <span
+                    className="absolute pixel-font text-[10px] font-bold"
+                    style={{
+                      left: 12,
+                      top: 12,
+                      color: isDarkMode ? '#e5e7eb' : '#111827',
+                    }}
+                  >
+                    Move
+                  </span>
+                  <span
+                    className="absolute pixel-font text-[10px] font-bold"
+                    style={{
+                      left: '58%',
+                      top: '28%',
+                      color: isDarkMode ? '#e5e7eb' : '#111827',
+                    }}
+                  >
+                    Battle
+                  </span>
+                  <span
+                    className="absolute pixel-font text-[10px] font-bold"
+                    style={{
+                      right: 12,
+                      top: 28,
+                      color: isDarkMode ? '#e5e7eb' : '#111827',
+                    }}
+                  >
+                    Candy
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <p
+                    className="pixel-font text-[11px] text-center"
+                    style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                  >
+                    Walk into a wild Pokémon to start a battle, or press A when
+                    near.
+                  </p>
+                  <p
+                    className="pixel-font text-[11px] text-center opacity-80"
+                    style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                  >
+                    Win battles to earn Rare Candy and catch new Pokémon.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogBody>
+      </Dialog>
     </>
   );
 }
