@@ -6,8 +6,14 @@ import {useCanvasRenderer} from '../hooks/useCanvasRenderer';
 import {formatNumber} from '@/lib/formatNumber';
 
 // Constants
-const SPRITE_WIDTH = 68;
-const SPRITE_HEIGHT = 72;
+const SHEET_FRAME_CELL_W = 68; // width of each frame cell in the image file
+const SHEET_FRAME_CELL_H = 72; // height of each frame cell in the image file
+const SHEET_COLS = 4;
+const SHEET_ROWS = 4;
+
+const SPRITE_WIDTH = 46; // Character sprite display width
+const SPRITE_HEIGHT = 48.70588; // Character sprite display height
+
 const MOVE_SPEED = 120;
 
 interface PokemonSpawn {
@@ -68,6 +74,26 @@ export function TiledMapView(props: TiledMapViewProps) {
       : false;
   });
 
+  function parsePx(value?: string | number) {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    return parseFloat(String(value).replace('px', '')) || 0;
+  }
+
+  const backgroundSizeWidth = SHEET_COLS * SPRITE_WIDTH; // 4 * 46 = 184
+  const backgroundSizeHeight = SHEET_ROWS * SPRITE_HEIGHT; // 4 * 56 = 224
+
+  // scale factor from sheet cell -> displayed frame
+  const scaleX = SPRITE_WIDTH / SHEET_FRAME_CELL_W; // 46/68
+  const scaleY = SPRITE_HEIGHT / SHEET_FRAME_CELL_H; // 56/72
+
+  // scale incoming background positions (handles strings like "-68px")
+  const rawPosX = parsePx(spritePos.backgroundPositionX);
+  const rawPosY = parsePx(spritePos.backgroundPositionY);
+
+  const scaledPosX = `${rawPosX * scaleX}px`;
+  const scaledPosY = `${rawPosY * scaleY}px`;
+
   return (
     <>
       {/* Map Background */}
@@ -110,8 +136,9 @@ export function TiledMapView(props: TiledMapViewProps) {
           width: `${SPRITE_WIDTH}px`,
           height: `${SPRITE_HEIGHT}px`,
           backgroundImage: `url('${import.meta.env.BASE_URL}AshKetchumSprite.webp')`,
-          backgroundPositionX: spritePos.backgroundPositionX,
-          backgroundPositionY: spritePos.backgroundPositionY,
+          backgroundSize: `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
+          backgroundPositionX: scaledPosX,
+          backgroundPositionY: scaledPosY,
           imageRendering: 'pixelated',
           transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear`,
           zIndex: 10,

@@ -4,8 +4,12 @@ import {useAuth} from '@features/auth/hooks/useAuth';
 
 // Constants
 const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
-const SPRITE_WIDTH = 68; // Width of one character sprite frame (272 / 4)
-const SPRITE_HEIGHT = 72; // Height of one character sprite frame (288 / 4)
+const SHEET_FRAME_CELL_W = 68;
+const SHEET_FRAME_CELL_H = 72;
+
+// desired on-screen size
+const SPRITE_WIDTH = 46;
+const SPRITE_HEIGHT = 48.70588;
 const ANIMATION_SPEED = 120; // ms between animation frames (slower for smoother look)
 const MOVE_SPEED = 150; // ms for movement transition
 const ANIMATION_FRAMES = 4; // Number of frames per direction
@@ -566,21 +570,30 @@ export function useMapMovement(
   }, [worldPosition, renderSize]);
 
   // Calculate character's screen position relative to camera
+  // Position the character so their feet (bottom center) align with worldPosition
   const getCharacterScreenPosition = useCallback(() => {
     const camera = getCameraOffset();
+    // The worldPosition represents where the character's feet touch the ground
+    // So we need to offset the sprite upward by most of its height
     return {
-      x: worldPosition.x - camera.x - SPRITE_WIDTH / 2,
-      y: worldPosition.y - camera.y - SPRITE_HEIGHT / 2,
+      x: worldPosition.x - camera.x - SPRITE_WIDTH / 2 - 6, // Slight left adjustment for better centering
+      y: worldPosition.y - camera.y - SPRITE_HEIGHT + SPRITE_HEIGHT * 0.2, // Feet at bottom with slight offset
     };
   }, [worldPosition, getCameraOffset]);
 
-  // Calculate sprite background position
+  // Calculate sprite background position (returns raw sheet positions, TiledMapView will scale)
   const getSpritePosition = useCallback(() => {
     const row = SPRITE_POSITIONS[direction];
     const col = animationFrame;
+
+    // Return raw sheet cell positions (in sheet cell units)
+    // TiledMapView will handle the scaling to display size
+    const rawPosX = col * SHEET_FRAME_CELL_W;
+    const rawPosY = row * SHEET_FRAME_CELL_H;
+
     return {
-      backgroundPositionX: `-${col * SPRITE_WIDTH}px`,
-      backgroundPositionY: `-${row * SPRITE_HEIGHT}px`,
+      backgroundPositionX: `-${rawPosX}px`,
+      backgroundPositionY: `-${rawPosY}px`,
     };
   }, [direction, animationFrame]);
 
