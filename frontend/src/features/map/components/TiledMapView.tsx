@@ -216,7 +216,7 @@ export function TiledMapView(props: TiledMapViewProps) {
       )}
 
       {/* Rare Candy Counter */}
-      <div className="absolute top-2 right-2 z-20">
+      <div className="absolute top-2 right-3 z-20">
         <div className="flex items-center gap-2 bg-white/90 border-2 border-black px-2 py-1 shadow-[4px_4px_0_rgba(0,0,0,1)]">
           <img
             src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
@@ -231,7 +231,7 @@ export function TiledMapView(props: TiledMapViewProps) {
       </div>
 
       {/* Home Button - always bottom left */}
-      <div className="absolute bottom-2 left-2 z-20">
+      <div className="absolute bottom-3 left-2 z-20">
         <button
           onClick={onResetToHome}
           className="flex items-center gap-1 border-2 border-black px-2 py-1"
