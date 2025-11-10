@@ -112,7 +112,7 @@ export function TiledMapView(props: TiledMapViewProps) {
     }
   }, [isMobile, showWorldInfo]);
 
-  const accentColor = isDarkMode ? '#facc15' : '#7819e5ff';
+  const accentColor = isDarkMode ? '#facc15' : '#3971a9ff';
   const bodyTextColor = isDarkMode ? '#e5e7eb' : '#18181b';
 
   return (
@@ -278,7 +278,7 @@ export function TiledMapView(props: TiledMapViewProps) {
       </div>
 
       {/* Home Button - bottom left */}
-      <div className="absolute bottom-2 left-2 z-20">
+      <div className="absolute bottom-3 left-2 z-20">
         <button
           onClick={onResetToHome}
           className="flex items-center justify-center border-2 border-black w-10 h-10 text-white"
@@ -318,7 +318,7 @@ export function TiledMapView(props: TiledMapViewProps) {
 
       {/* Info Button - bottom right (only show if not controlled externally) */}
       {!onCloseWorldInfo && (
-        <div className="absolute bottom-2 right-2 z-20">
+        <div className="absolute bottom-3 right-3 z-20">
           <button
             onClick={() => setInternalShowWorldInfo(true)}
             className="flex items-center justify-center border-2 border-black w-10 h-10 text-white"
@@ -406,7 +406,7 @@ export function TiledMapView(props: TiledMapViewProps) {
             >
               {/* Close Button */}
               <button
-                className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+                className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
                 onClick={handleCloseWorldInfo}
                 aria-label="Exit"
               >
@@ -447,9 +447,8 @@ export function TiledMapView(props: TiledMapViewProps) {
                       <div
                         className="relative flex items-center justify-center self-center"
                         style={{
-                          width: 80,
-                          height: 80,
-                          margin: '-8px',
+                          width: 96,
+                          height: 96,
                         }}
                       >
                         <img
@@ -470,7 +469,7 @@ export function TiledMapView(props: TiledMapViewProps) {
 
                     {/* Step 2: Press Battle */}
                     <div
-                      className={`flex flex-col items-start gap-2 p-2 md:p-3 md:min-w-[200px] border-2 rounded-sm shadow-[4px_4px_0_rgba(0,0,0,1)] ${
+                      className={`flex flex-col items-start gap-6 p-2 md:p-3 md:min-w-[200px] border-2 rounded-sm shadow-[4px_4px_0_rgba(0,0,0,1)] ${
                         isDarkMode
                           ? 'bg-gray-800 border-gray-600'
                           : 'bg-white border-black'
@@ -545,8 +544,8 @@ export function TiledMapView(props: TiledMapViewProps) {
                             alt="Candy"
                             className="relative z-10"
                             style={{
-                              width: 64,
-                              height: 64,
+                              width: 58,
+                              height: 58,
                               imageRendering: 'pixelated',
                               filter:
                                 'drop-shadow(0 0 12px rgba(236, 72, 153, 0.6)) drop-shadow(0 0 20px rgba(236, 72, 153, 0.4))',
@@ -757,7 +756,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                         aria-label="Joystick preview"
                       >
                         <div
-                          style={{transform: 'scale(0.7)'}}
+                          style={{transform: 'scale(0.7)', height: '70px'}}
                           className="relative w-[100px] h-[100px]"
                         >
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -766,7 +765,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 rounded-full border-2 border-red-700 shadow-lg" />
                         </div>
                         <span
-                          className="pixel-font text-[10px] mt-1 h-4 flex items-center justify-center w-full"
+                          className="pixel-font text-[10px] h-4 flex items-center justify-center w-full"
                           style={{
                             color: isDarkMode ? '#e5e7eb' : '#111827',
                           }}
@@ -789,43 +788,6 @@ export function TiledMapView(props: TiledMapViewProps) {
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
-                            disabled={true}
-                            bgColor="#8B3A62"
-                            className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
-                            aria-label="A button"
-                            style={
-                              {
-                                borderColor: '#2a2a3e',
-                                '--custom-inner-border-color': '#2a2a3e',
-                              } as React.CSSProperties
-                            }
-                          >
-                            A
-                          </Button>
-                          <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
-                            style={{
-                              background: isDarkMode ? '#f9fafb' : '#ffffff',
-                              color: '#111827',
-                              borderColor: 'black',
-                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
-                            }}
-                          >
-                            A
-                          </span>
-                        </div>
-                        <span
-                          className="pixel-font text-[11px]"
-                          style={{color: bodyTextColor}}
-                        >
-                          Attack
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            disabled={true}
                             bgColor="#8B3A62"
                             className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
                             aria-label="B button"
@@ -833,6 +795,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                               {
                                 borderColor: '#2a2a3e',
                                 '--custom-inner-border-color': '#2a2a3e',
+                                pointerEvents: 'none',
                               } as React.CSSProperties
                             }
                           >
@@ -875,12 +838,79 @@ export function TiledMapView(props: TiledMapViewProps) {
                           Start battle
                         </span>
                       </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            bgColor="#8B3A62"
+                            className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
+                            aria-label="A button"
+                            style={
+                              {
+                                borderColor: '#2a2a3e',
+                                '--custom-inner-border-color': '#2a2a3e',
+                                pointerEvents: 'none',
+                              } as React.CSSProperties
+                            }
+                          >
+                            A
+                          </Button>
+                          <Button
+                            size="sm"
+                            bgColor="#8B3A62"
+                            className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
+                            aria-label="B button"
+                            style={
+                              {
+                                borderColor: '#2a2a3e',
+                                '--custom-inner-border-color': '#2a2a3e',
+                                pointerEvents: 'none',
+                              } as React.CSSProperties
+                            }
+                          >
+                            B
+                          </Button>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            A
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            B
+                          </span>
+                          <img
+                            src={`${import.meta.env.BASE_URL}pixilated-hand.webp`}
+                            alt="Hand"
+                            className="w-8 h-8"
+                          />
+                        </div>
+                        <span
+                          className="pixel-font text-[11px]"
+                          style={{color: bodyTextColor}}
+                        >
+                          Attack
+                        </span>
+                      </div>
                     </div>
                   </section>
 
                   <section>
                     <h3
-                      className="pixel-font text-sm font-bold mb-2"
+                      className="pixel-font text-sm font-bold mt-6 md:mt-8 mb-2"
                       style={{color: accentColor}}
                     >
                       Quick Tips
@@ -911,7 +941,7 @@ export function TiledMapView(props: TiledMapViewProps) {
                     className="pixel-font text-xs font-bold border-2 px-4 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
                     onClick={handleCloseWorldInfo}
                     style={{
-                      backgroundColor: isDarkMode ? '#10b981' : '#22c55e',
+                      backgroundColor: '#11873cff',
                       color: 'white',
                       borderColor: 'black',
                     }}
