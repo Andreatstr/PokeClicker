@@ -3,6 +3,7 @@ import {GameConfig} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 import {getPokemonCost} from '../utils/pokemonCost';
+import {toDecimal} from '@/lib/decimal';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations
@@ -27,7 +28,7 @@ export function usePokemonPurchaseHandler() {
     // Client-side validation: Check if user can afford the Pokemon
     // This prevents the optimistic response from flashing the unlocked state
     const cost = getPokemonCost(pokemonId);
-    if (user && user.rare_candy < cost) {
+    if (user && toDecimal(user.rare_candy).lt(cost)) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);

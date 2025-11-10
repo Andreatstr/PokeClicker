@@ -34,7 +34,7 @@ export const typeDefs = `#graphql
 	type User {
     _id: ID!
     username: String!
-    rare_candy: Int!
+    rare_candy: String!
     created_at: String!
     stats: UserStats!
     owned_pokemon_ids: [Int!]!
@@ -63,7 +63,7 @@ export const typeDefs = `#graphql
 	type Mutation {
     signup(username: String!, password: String!): AuthResponse!
     login(username: String!, password: String!): AuthResponse!
-    updateRareCandy(amount: Int!): User!
+    updateRareCandy(amount: String!): User!
     upgradeStat(stat: String!): User!
     purchasePokemon(pokemonId: Int!): User!
     catchPokemon(pokemonId: Int!): User!
@@ -77,7 +77,7 @@ export const typeDefs = `#graphql
   type PokemonUpgrade {
     pokemon_id: Int!
     level: Int!
-    cost: Int!
+    cost: String!
     user: User
   }
 
@@ -150,7 +150,7 @@ export const typeDefs = `#graphql
   type RanksEntry {
     position: Int!
     username: String!
-    score: Int!
+    score: String!
     userId: ID!
     showInRanks: Boolean!
   }

@@ -80,7 +80,8 @@ export function formatNumber(value: Decimal | string | number): string {
   }
 
   // Get the order of magnitude
-  const exponent = decimal.log10().floor().toNumber();
+  // Note: log10() returns a number, not a Decimal
+  const exponent = Math.floor(decimal.log10());
   const suffixIndex = Math.floor(exponent / 3);
 
   // Use suffix notation if we have a suffix for it

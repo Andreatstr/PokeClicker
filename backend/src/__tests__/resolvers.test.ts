@@ -85,7 +85,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 100,
+        rare_candy: '100',
         stats: {
           hp: 1,
           attack: 1,
@@ -111,7 +111,7 @@ describe('GraphQL Resolvers', () => {
 
       expect(result).toBeDefined();
       expect(result.username).toBe('testuser');
-      expect(result.rare_candy).toBe(100);
+      expect(result.rare_candy).toBe('100'); // Changed to string for large number support
       expect(result.stats.clickPower).toBe(5);
       expect(result.owned_pokemon_ids).toEqual([1, 25]);
       expect(result).not.toHaveProperty('password_hash');
@@ -143,7 +143,7 @@ describe('GraphQL Resolvers', () => {
         username: 'olduser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 50,
+        rare_candy: '50',
         stats: {
           hp: 10,
           attack: 5,
@@ -375,7 +375,7 @@ describe('GraphQL Resolvers', () => {
         username: 'newuser',
         password_hash: await bcrypt.hash('password123', 10),
         created_at: new Date(),
-        rare_candy: 0,
+        rare_candy: '0',
         stats: {
           hp: 1,
           attack: 1,
@@ -465,7 +465,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: await bcrypt.hash('password123', 10),
         created_at: new Date(),
-        rare_candy: 50,
+        rare_candy: '50',
         stats: {
           hp: 5,
           attack: 3,
@@ -489,7 +489,7 @@ describe('GraphQL Resolvers', () => {
       expect(result).toHaveProperty('token');
       expect(result).toHaveProperty('user');
       expect(result.user.username).toBe('testuser');
-      expect(result.user.rare_candy).toBe(50);
+      expect(result.user.rare_candy).toBe('50'); // Changed to string for large number support
 
       // Verify token
       const decoded = jwt.verify(result.token, JWT_SECRET) as jwt.JwtPayload;
@@ -528,7 +528,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: await bcrypt.hash('correctpassword', 10),
         created_at: new Date(),
-        rare_candy: 0,
+        rare_candy: '0',
         stats: {
           hp: 1,
           attack: 1,
@@ -563,7 +563,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 100,
+        rare_candy: '100',
         stats: {
           hp: 1,
           attack: 1,
@@ -577,7 +577,7 @@ describe('GraphQL Resolvers', () => {
         owned_pokemon_ids: [1],
       };
 
-      const updatedUser = {...mockUser, rare_candy: 150};
+      const updatedUser = {...mockUser, rare_candy: '150'};
       mockFindOneAndUpdate.mockResolvedValue(updatedUser);
 
       const context: AuthContext = {
@@ -586,18 +586,18 @@ describe('GraphQL Resolvers', () => {
 
       const result = await resolvers.Mutation.updateRareCandy(
         {},
-        {amount: 50},
+        {amount: '50'},
         context
       );
 
-      expect(result.rare_candy).toBe(150);
+      expect(result.rare_candy).toBe('150');
     });
 
     it('should throw error when user not authenticated', async () => {
       const context: AuthContext = {};
 
       await expect(
-        resolvers.Mutation.updateRareCandy({}, {amount: 50}, context)
+        resolvers.Mutation.updateRareCandy({}, {amount: '50'}, context)
       ).rejects.toThrow('Authentication required');
     });
   });
@@ -609,7 +609,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 100,
+        rare_candy: '100',
         stats: {
           hp: 1,
           attack: 1,
@@ -626,7 +626,7 @@ describe('GraphQL Resolvers', () => {
       const upgradedUser = {
         ...mockUser,
         stats: {...mockUser.stats, clickPower: 3},
-        rare_candy: 72, // 100 - 28 (cost for level 2->3)
+        rare_candy: '72', // 100 - 28 (cost for level 2->3)
       };
 
       mockFindOne.mockResolvedValue(mockUser);
@@ -643,7 +643,7 @@ describe('GraphQL Resolvers', () => {
       );
 
       expect(result.stats.clickPower).toBe(3);
-      expect(result.rare_candy).toBe(72);
+      expect(result.rare_candy).toBe('72'); // Changed to string for large number support
     });
 
     it('should throw error when stat is invalid', async () => {
@@ -662,7 +662,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 5, // Not enough for upgrade
+        rare_candy: '5', // Not enough for upgrade
         stats: {
           hp: 1,
           attack: 1,
@@ -707,7 +707,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 1000,
+        rare_candy: '1000',
         stats: {
           hp: 1,
           attack: 1,
@@ -724,7 +724,7 @@ describe('GraphQL Resolvers', () => {
       const updatedUser = {
         ...mockUser,
         owned_pokemon_ids: [1, 25],
-        rare_candy: 900, // Assuming 100 candy cost
+        rare_candy: '900', // Assuming 100 candy cost
       };
 
       mockFindOne.mockResolvedValue(mockUser);
@@ -749,7 +749,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 1000,
+        rare_candy: '1000',
         stats: {
           hp: 1,
           attack: 1,
@@ -780,7 +780,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 10,
+        rare_candy: '10',
         stats: {
           hp: 1,
           attack: 1,
@@ -825,7 +825,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 100,
+        rare_candy: '100',
         stats: {
           hp: 1,
           attack: 1,
@@ -858,7 +858,7 @@ describe('GraphQL Resolvers', () => {
       );
 
       expect(result.owned_pokemon_ids).toContain(25);
-      expect(result.rare_candy).toBe(100); // No cost
+      expect(result.rare_candy).toBe('100'); // No cost - changed to string for large number support
     });
 
     it('should return user without error when user already owns the Pokemon', async () => {
@@ -867,7 +867,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: 100,
+        rare_candy: '100',
         stats: {
           hp: 1,
           attack: 1,
@@ -895,7 +895,7 @@ describe('GraphQL Resolvers', () => {
 
       // Should return user without throwing error (idempotent operation)
       expect(result.owned_pokemon_ids).toContain(25);
-      expect(result.rare_candy).toBe(100);
+      expect(result.rare_candy).toBe('100'); // Changed to string for large number support
     });
   });
 });

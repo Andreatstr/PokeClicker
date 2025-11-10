@@ -21,6 +21,7 @@ import {
   FACET_TIMEOUT_MS,
   USE_STATIC_FALLBACK,
 } from './config.js';
+import {Decimal, toDecimal} from './decimal.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
@@ -33,10 +34,17 @@ const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 function sanitizeUserForClient(
   userDoc: UserDocument
 ): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
+  // Ensure rare_candy is always a string (handle migration from old number format)
+  const rareCandyValue: string | number = userDoc.rare_candy ?? '0';
+  const rareCandyString: string =
+    typeof rareCandyValue === 'number'
+      ? String(rareCandyValue)
+      : rareCandyValue;
+
   return {
     _id: userDoc._id,
     username: userDoc.username,
-    rare_candy: userDoc.rare_candy ?? 0,
+    rare_candy: rareCandyString,
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: {
       ...userDoc.stats,
@@ -131,7 +139,7 @@ const authMutations = {
 };
 
 // Helper to get upgrade cost (differentiated by stat type)
-function getUpgradeCost(currentLevel: number, stat: string): number {
+function getUpgradeCost(currentLevel: number, stat: string): Decimal {
   let multiplier = 2.5; // default
 
   // New simplified system for PokeClicker upgrades:
@@ -149,26 +157,30 @@ function getUpgradeCost(currentLevel: number, stat: string): number {
     multiplier = 2.2;
   }
 
-  return Math.floor(10 * Math.pow(multiplier, currentLevel - 1));
+  return new Decimal(10)
+    .times(new Decimal(multiplier).pow(currentLevel - 1))
+    .floor();
 }
 
 // Helper to get Pokemon purchase cost
-function getPokemonCost(pokemonId: number): number {
+function getPokemonCost(pokemonId: number): Decimal {
   // Exponential pricing by tier: 100 × 2^(tier)
   // Pokemon are grouped into tiers of 10
   // Tier 0 (ID 1-10): 100, Tier 1 (ID 11-20): 200, Tier 2 (ID 21-30): 400, etc.
   const tier = Math.floor(pokemonId / 10);
-  return Math.floor(100 * Math.pow(2, tier));
+  return new Decimal(100).times(new Decimal(2).pow(tier)).floor();
 }
 
 // Helper to get Pokemon upgrade cost based on base stats
 function getPokemonUpgradeCost(
   currentLevel: number,
   pokemonStats?: PokemonStats
-): number {
+): Decimal {
   // If no stats provided, fall back to old system for backwards compatibility
   if (!pokemonStats) {
-    return Math.floor(100 * Math.pow(2.5, currentLevel - 1));
+    return new Decimal(100)
+      .times(new Decimal(2.5).pow(currentLevel - 1))
+      .floor();
   }
 
   // Calculate base cost multiplier based on Pokemon's total base stats
@@ -189,7 +201,9 @@ function getPokemonUpgradeCost(
 
   // Cost formula: baseCost × 2.5^(level-1)
   // Level 1->2: baseCost, Level 2->3: baseCost×2.5, Level 3->4: baseCost×6.25, etc.
-  return Math.floor(baseCostMultiplier * Math.pow(2.5, currentLevel - 1));
+  return new Decimal(baseCostMultiplier)
+    .times(new Decimal(2.5).pow(currentLevel - 1))
+    .floor();
 }
 
 export const resolvers = {
@@ -562,7 +576,7 @@ export const resolvers = {
       return {
         pokemon_id: pokemonId,
         level,
-        cost,
+        cost: cost.toString(),
       };
     },
 
@@ -801,7 +815,7 @@ export const resolvers = {
     // Update rare candy count (increment/decrement by amount)
     updateRareCandy: async (
       _: unknown,
-      {amount}: {amount: number},
+      {amount}: {amount: string},
       context: AuthContext
     ) => {
       const user = requireAuth(context);
@@ -809,10 +823,21 @@ export const resolvers = {
       const db = getDatabase();
       const users = db.collection('users') as Collection<UserDocument>;
 
-      // Update rare candy atomically
+      // Get current user candy
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      if (!userDoc) {
+        throw new Error('User not found');
+      }
+
+      // Calculate new candy amount
+      const currentCandy = toDecimal(userDoc.rare_candy);
+      const amountDecimal = toDecimal(amount);
+      const newCandy = currentCandy.plus(amountDecimal);
+
+      // Update rare candy
       const result = await users.findOneAndUpdate(
         {_id: new ObjectId(user.id)},
-        {$inc: {rare_candy: amount}},
+        {$set: {rare_candy: newCandy.toString()}},
         {returnDocument: 'after'}
       );
 
@@ -905,23 +930,29 @@ export const resolvers = {
       const cost = getUpgradeCost(currentLevel, stat);
 
       console.log(
-        `[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost}, userCandy=${userDoc.rare_candy}`
+        `[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost.toString()}, userCandy=${userDoc.rare_candy}`
       );
 
       // Check if user has enough rare candy
-      if (userDoc.rare_candy < cost) {
+      const currentCandy = toDecimal(userDoc.rare_candy);
+      if (currentCandy.lt(cost)) {
         throw new Error(
-          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}. Current ${stat} level: ${currentLevel}`
+          `Not enough rare candy. Need ${cost.toString()}, have ${currentCandy.toString()}. Current ${stat} level: ${currentLevel}`
         );
       }
 
-      // Update stat and deduct cost atomically
+      // Calculate new candy amount
+      const newCandy = currentCandy.minus(cost);
+
+      // Update stat and deduct cost
       const result = await users.findOneAndUpdate(
         {_id: new ObjectId(user.id)},
         {
           $inc: {
             [`stats.${stat}`]: 1,
-            rare_candy: -cost,
+          },
+          $set: {
+            rare_candy: newCandy.toString(),
           },
         },
         {returnDocument: 'after'}
@@ -963,15 +994,19 @@ export const resolvers = {
       const cost = getPokemonCost(pokemonId);
 
       // Check if user has enough rare candy
-      if (userDoc.rare_candy < cost) {
+      const currentCandy = toDecimal(userDoc.rare_candy);
+      if (currentCandy.lt(cost)) {
         throw new Error(`Not enough candy.`);
       }
 
-      // Purchase Pokemon atomically: deduct rare candy and add to owned list
+      // Calculate new candy amount
+      const newCandy = currentCandy.minus(cost);
+
+      // Purchase Pokemon: deduct rare candy and add to owned list
       const result = await users.findOneAndUpdate(
         {_id: new ObjectId(user.id)},
         {
-          $inc: {rare_candy: -cost},
+          $set: {rare_candy: newCandy.toString()},
           $addToSet: {owned_pokemon_ids: pokemonId},
         },
         {returnDocument: 'after'}
@@ -1192,16 +1227,20 @@ export const resolvers = {
       const cost = getPokemonUpgradeCost(currentLevel, pokemon.stats);
 
       // Check if user has enough candy
-      if (userDoc.rare_candy < cost) {
+      const currentCandy = toDecimal(userDoc.rare_candy);
+      if (currentCandy.lt(cost)) {
         throw new Error(
-          `Not enough rare candy. Need ${cost}, have ${userDoc.rare_candy}`
+          `Not enough rare candy. Need ${cost.toString()}, have ${currentCandy.toString()}`
         );
       }
+
+      // Calculate new candy amount
+      const newCandy = currentCandy.minus(cost);
 
       // Deduct candy
       await users.updateOne(
         {_id: new ObjectId(user.id)},
-        {$inc: {rare_candy: -cost}}
+        {$set: {rare_candy: newCandy.toString()}}
       );
 
       // Update or create upgrade record
@@ -1233,7 +1272,7 @@ export const resolvers = {
         });
       }
 
-      const newCost = getPokemonUpgradeCost(newLevel);
+      const newCost = getPokemonUpgradeCost(newLevel, pokemon.stats);
 
       // Return updated user data so frontend can sync candy count
       const updatedUserDoc = await users.findOne({_id: new ObjectId(user.id)});
@@ -1244,7 +1283,7 @@ export const resolvers = {
       return {
         pokemon_id: pokemonId,
         level: newLevel,
-        cost: newCost,
+        cost: newCost.toString(),
         user: sanitizeUserForClient(updatedUserDoc),
       };
     },

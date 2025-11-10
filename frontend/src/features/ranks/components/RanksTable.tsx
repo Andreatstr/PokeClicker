@@ -4,7 +4,7 @@ import {formatNumber} from '@/lib/formatNumber';
 interface RanksEntry {
   position: number;
   username: string;
-  score: number;
+  score: string; // Changed to string for large number support
   userId: string;
   showInRanks: boolean;
 }

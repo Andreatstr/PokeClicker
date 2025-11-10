@@ -49,7 +49,7 @@ export const SIGNUP_MUTATION = gql`
  */
 export const UPDATE_RARE_CANDY_MUTATION = gql`
   ${USER_FRAGMENT}
-  mutation UpdateRareCandy($amount: Int!) {
+  mutation UpdateRareCandy($amount: String!) {
     updateRareCandy(amount: $amount) {
       ...UserFields
     }

@@ -6,6 +6,7 @@ import {
   type PurchasePokemonVariables,
 } from '@/lib/graphql';
 import {getPokemonCost} from '../utils/pokemonCost';
+import {toDecimal} from '@/lib/decimal';
 
 export function usePurchasePokemon() {
   const {user} = useAuth();
@@ -70,11 +71,12 @@ export function usePurchasePokemon() {
               __typename: 'User',
               _id: '',
               username: '',
-              rare_candy: 0,
+              rare_candy: '0',
               created_at: new Date().toISOString(),
               owned_pokemon_ids: [variables.pokemonId],
               favorite_pokemon_id: null,
               selected_pokemon_id: null,
+              showInRanks: true,
               stats: {
                 __typename: 'UserStats',
                 hp: 1,
@@ -92,7 +94,9 @@ export function usePurchasePokemon() {
 
         // Calculate optimistic rare_candy after purchase
         const pokemonCost = getPokemonCost(variables.pokemonId);
-        const optimisticRareCandy = user.rare_candy - pokemonCost;
+        const optimisticRareCandy = toDecimal(user.rare_candy)
+          .minus(pokemonCost)
+          .toString();
 
         // Return optimistic response with actual user data
         return {
@@ -105,6 +109,7 @@ export function usePurchasePokemon() {
             owned_pokemon_ids: [...user.owned_pokemon_ids, variables.pokemonId],
             favorite_pokemon_id: user.favorite_pokemon_id ?? null,
             selected_pokemon_id: user.selected_pokemon_id ?? null,
+            showInRanks: user.showInRanks ?? true,
             stats: user.stats
               ? {
                   __typename: 'UserStats',

@@ -18,7 +18,7 @@ import {ObjectId} from 'mongodb';
 // }
 
 export interface UserStats {
-  rare_candy: number;
+  rare_candy: string | number; // String for new data, number for old data (migration support)
   stats: {
     hp: number;
     attack: number;
@@ -59,7 +59,7 @@ export interface PokemonQueryArgs {
 }
 
 export const DEFAULT_USER_STATS = {
-  rare_candy: 0,
+  rare_candy: '0', // String to support large numbers (Decimal)
   stats: {
     hp: 1,
     attack: 1,

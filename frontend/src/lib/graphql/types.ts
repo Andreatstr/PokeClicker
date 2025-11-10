@@ -118,10 +118,10 @@ export interface PokemonByIdsVariables {
 export interface PokemonUpgrade {
   pokemon_id: number;
   level: number;
-  cost: number;
+  cost: string; // Changed to string for large number support
   user?: {
     _id: string;
-    rare_candy: number;
+    rare_candy: string; // Changed to string for large number support
   };
 }
 
@@ -146,7 +146,7 @@ export interface AuthResponse {
   user: {
     _id: string;
     username: string;
-    rare_candy: number;
+    rare_candy: string; // Changed to string for large number support
     created_at: string;
     stats: {
       hp: number;
@@ -185,7 +185,7 @@ export interface AuthVariables {
 export interface User {
   _id: string;
   username: string;
-  rare_candy: number;
+  rare_candy: string; // Changed to string for large number support
   created_at: string;
   stats: {
     hp: number;
@@ -208,7 +208,7 @@ export interface UpdateRareCandyData {
 }
 
 export interface UpdateRareCandyVariables {
-  amount: number;
+  amount: string; // Changed to string for large number support
 }
 
 export interface UpgradeStatData {

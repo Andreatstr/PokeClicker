@@ -3,6 +3,7 @@ import {logger} from '@/lib/logger';
 import {GameConfig} from '@/config';
 import {useGameMutations} from './useGameMutations';
 import type {User} from '@features/auth';
+import {toDecimal} from '@/lib/decimal';
 
 interface UseCandySyncProps {
   user: User | null;
@@ -22,7 +23,9 @@ export function useCandySync({
   const {updateRareCandy} = useGameMutations();
 
   // Local candy state - THIS is the source of truth for display!
-  const [localRareCandy, setLocalRareCandy] = useState(user?.rare_candy || 0);
+  const [localRareCandy, setLocalRareCandy] = useState(
+    user?.rare_candy ? toDecimal(user.rare_candy).toNumber() : 0
+  );
   const [unsyncedAmount, setUnsyncedAmount] = useState(0);
   const unsyncedAmountRef = useRef(0);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,7 +35,7 @@ export function useCandySync({
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (user && !hasMountedRef.current) {
-      setLocalRareCandy(user.rare_candy);
+      setLocalRareCandy(toDecimal(user.rare_candy).toNumber());
       setUnsyncedAmount(0);
       unsyncedAmountRef.current = 0;
       hasMountedRef.current = true;
