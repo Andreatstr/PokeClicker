@@ -14,6 +14,7 @@ interface GameBoyConsoleProps {
   candies: Candy[];
   selectedPokemonId: number | null;
   onClickScreen: () => void;
+  isOnboarding?: boolean;
 }
 
 export function GameBoyConsole({
@@ -23,6 +24,7 @@ export function GameBoyConsole({
   candies,
   selectedPokemonId,
   onClickScreen,
+  isOnboarding = false,
 }: GameBoyConsoleProps) {
   return (
     <Card
@@ -130,8 +132,9 @@ export function GameBoyConsole({
                   filter: isAnimating
                     ? 'drop-shadow(0 0 8px rgba(255, 193, 7, 0.8))'
                     : 'none',
-                  animation:
-                    'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
+                  animation: isOnboarding
+                    ? 'none'
+                    : 'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
                 }}
               />
             </button>

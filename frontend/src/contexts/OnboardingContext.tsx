@@ -17,13 +17,20 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
 
     // Always show onboarding for guest user (localStorage is cleared in AuthContext)
     // For other users, only show if they haven't seen it
-    if (!hasSeenTutorial) {
+    if (!hasSeenTutorial && !isActive) {
       setStep(0);
       setIsActive(true);
     }
-  }, [user]);
+  }, [user, isActive]);
 
-  const nextStep = () => setStep((s) => s + 1);
+  const nextStep = () => {
+    // There are 17 steps (0-16), so if we're at step 16, finish the tutorial
+    if (step >= 16) {
+      skipTutorial();
+    } else {
+      setStep((s) => s + 1);
+    }
+  };
 
   const previousStep = () => setStep((s) => Math.max(0, s - 1));
 

@@ -61,6 +61,9 @@ function App() {
   const {step, isActive, nextStep, previousStep, skipTutorial} =
     useOnboarding();
 
+  // Check if onboarding is on a modal step (pokemon-stats, pokemon-upgrade, pokemon-evolution)
+  const isOnboardingModalStep = isActive && [3, 4, 6].includes(step);
+
   // Track if map is in fullscreen mode
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
@@ -81,28 +84,54 @@ function App() {
   // Function to programmatically open the first Pokemon modal for tutorial
   const handleOpenFirstPokemon = () => {
     const tryClick = () => {
+      // Find the container with the onboarding marker
       const container = document.querySelector(
         '[data-onboarding="pokemon-card"]'
       );
-      const clickable = container?.querySelector<HTMLElement>(
-        '[role="button"], aside[role="button"]'
+
+      if (container) {
+        // The container wraps the <aside> which is the clickable card
+        const card = container.querySelector<HTMLElement>('aside');
+
+        if (card && card.click) {
+          console.log('🎯 Clicking pokemon card for tutorial');
+          card.click();
+          return true;
+        }
+      }
+
+      // Fallback: find any pokemon card (aside with cursor-pointer and onClick)
+      const anyCard = document.querySelector<HTMLElement>(
+        'aside.cursor-pointer'
       );
-      if (clickable) {
-        clickable.click();
+      if (anyCard && anyCard.click) {
+        console.log('🎯 Clicking fallback pokemon card');
+        anyCard.click();
         return true;
       }
+
       return false;
     };
+
+    // Try immediately
     if (tryClick()) return;
 
+    // If not found, poll with retries
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 20;
     const interval = setInterval(() => {
       attempts += 1;
       if (tryClick() || attempts >= maxAttempts) {
+        if (attempts >= maxAttempts) {
+          console.warn(
+            '⚠️ Could not find pokemon card after',
+            maxAttempts,
+            'attempts'
+          );
+        }
         clearInterval(interval);
       }
-    }, 300);
+    }, 150);
   };
 
   const getMainClassName = () => {
@@ -153,7 +182,7 @@ function App() {
                 />
               }
             >
-              <PokeClicker isDarkMode={isDarkMode} />
+              <PokeClicker isDarkMode={isDarkMode} isOnboarding={isActive} />
             </Suspense>
           </section>
         );
@@ -253,6 +282,7 @@ function App() {
                 onSelectPokemon={handleSelectPokemon}
                 onPurchase={handlePurchase}
                 isDarkMode={isDarkMode}
+                disableFocusTrap={isOnboardingModalStep}
               />
             </Suspense>
           )}

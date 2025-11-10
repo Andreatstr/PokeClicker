@@ -11,6 +11,7 @@ interface UsePassiveIncomeProps {
   stats: Stats;
   isAuthenticated: boolean;
   onIncomeGenerated: (amount: number) => void;
+  isOnboarding?: boolean;
 }
 
 /**
@@ -21,9 +22,11 @@ export function usePassiveIncome({
   stats,
   isAuthenticated,
   onIncomeGenerated,
+  isOnboarding = false,
 }: UsePassiveIncomeProps) {
   useEffect(() => {
-    if (!isAuthenticated || !stats) return;
+    // Don't generate passive income during onboarding to prevent re-renders
+    if (!isAuthenticated || !stats || isOnboarding) return;
 
     let passiveIncomeAmount = 0;
 
@@ -45,5 +48,5 @@ export function usePassiveIncome({
 
       return () => clearInterval(interval);
     }
-  }, [stats, isAuthenticated, onIncomeGenerated]);
+  }, [stats, isAuthenticated, onIncomeGenerated, isOnboarding]);
 }

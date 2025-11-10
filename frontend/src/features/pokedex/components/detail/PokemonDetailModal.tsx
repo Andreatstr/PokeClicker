@@ -26,6 +26,7 @@ interface Props {
   onSelectPokemon?: (id: number) => void;
   onPurchase?: (id: number) => void;
   isDarkMode?: boolean;
+  disableFocusTrap?: boolean;
 }
 
 export function PokemonDetailModal({
@@ -36,6 +37,7 @@ export function PokemonDetailModal({
   onSelectPokemon,
   onPurchase,
   isDarkMode = false,
+  disableFocusTrap = false,
 }: Props) {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
@@ -69,7 +71,7 @@ export function PokemonDetailModal({
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <FocusTrap
-        active={isOpen}
+        active={isOpen && !disableFocusTrap}
         focusTrapOptions={{
           allowOutsideClick: true,
           escapeDeactivates: false, // We handle Escape in our own handler
