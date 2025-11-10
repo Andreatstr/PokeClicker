@@ -4,7 +4,6 @@ import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
 import {TiledMapView} from './TiledMapView';
 import {BattleView} from '@features/battle';
-import {HowToPlayModal} from './HowToPlayModal';
 import {useCollisionMap} from '../hooks/useCollisionMap';
 import {useMapMovement} from '../hooks/useMapMovement';
 import {usePokemonSpawning} from '../hooks/usePokemonSpawning';
@@ -564,9 +563,6 @@ export function PokemonMap({
                 fill="currentColor"
               />
             </svg>
-            <span className="hidden sm:inline pixel-font text-xs text-white">
-              How to Play
-            </span>
           </button>
 
           {inBattle && battleOpponent && playerPokemon ? (
@@ -594,17 +590,12 @@ export function PokemonMap({
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}
               onResetToHome={movement.resetToHome}
+              showWorldInfo={showHowToPlay}
+              onCloseWorldInfo={() => setShowHowToPlay(false)}
             />
           )}
         </div>
       </GameBoy>
-
-      {/* How to Play Modal */}
-      <HowToPlayModal
-        isOpen={showHowToPlay}
-        onClose={() => setShowHowToPlay(false)}
-        isDarkMode={isDarkMode}
-      />
     </div>
   );
 }

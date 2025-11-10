@@ -46,10 +46,9 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setToken(savedToken);
         setUser(parsedUser);
 
-        // Always trigger onboarding for guest user on page reload
-        if (parsedUser.username.toLowerCase() === 'guest') {
-          localStorage.removeItem('onboarding_completed');
-        }
+        // Don't clear onboarding on page reload - let OnboardingContext handle it
+        // OnboardingContext checks sessionStorage for guest users, which persists during session
+        // This allows onboarding to show on new login, but not on page reload within same session
       } catch (e) {
         logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
@@ -64,9 +63,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setToken(newToken);
     setUser(newUser);
 
-    // Always trigger onboarding for guest user
+    // For guest users, clear sessionStorage on new login to trigger onboarding
+    // This ensures onboarding shows on new login, but not on page reload within same session
     if (newUser.username.toLowerCase() === 'guest') {
-      localStorage.removeItem('onboarding_completed');
+      sessionStorage.removeItem('onboarding_completed_session');
+      localStorage.removeItem('onboarding_completed'); // Clear old localStorage flag for backwards compatibility
     }
 
     await apolloClient.resetStore();
