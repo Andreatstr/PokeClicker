@@ -64,6 +64,18 @@ function App() {
   // Check if onboarding is on a modal step (pokemon-stats, pokemon-upgrade, pokemon-evolution)
   const isOnboardingModalStep = isActive && [3, 4, 6].includes(step);
 
+  // Ensure onboarding always starts from the Pokédex page for consistency
+  useEffect(() => {
+    if (
+      isActive &&
+      step === 0 &&
+      currentPage !== 'pokedex' &&
+      currentPage !== 'login'
+    ) {
+      setCurrentPage('pokedex');
+    }
+  }, [isActive, step, currentPage, setCurrentPage]);
+
   // Track if map is in fullscreen mode
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
