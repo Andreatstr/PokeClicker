@@ -55,7 +55,6 @@ export const typeDefs = `#graphql
     autoclicker: Int
     luckyHitChance: Int
     luckyHitMultiplier: Int
-    battleRewards: Int
     clickMultiplier: Int
     pokedexBonus: Int
   }

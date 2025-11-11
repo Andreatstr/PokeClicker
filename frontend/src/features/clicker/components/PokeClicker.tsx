@@ -32,7 +32,6 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       autoclicker: 1,
       luckyHitChance: 1,
       luckyHitMultiplier: 1,
-      battleRewards: 1,
       clickMultiplier: 1,
       pokedexBonus: 1,
     }

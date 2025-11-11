@@ -41,13 +41,6 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.6,
     unit: 'x on lucky',
   },
-  battleRewards: {
-    key: 'battleRewards',
-    displayName: 'Battle Bonus',
-    formula: (level) => Math.pow(1.05, level),
-    costMultiplier: 1.2649,
-    unit: 'x battle candy',
-  },
   clickMultiplier: {
     key: 'clickMultiplier',
     displayName: 'Click Boost',

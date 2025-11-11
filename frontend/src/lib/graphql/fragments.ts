@@ -21,7 +21,6 @@ export const USER_FRAGMENT = gql`
       autoclicker
       luckyHitChance
       luckyHitMultiplier
-      battleRewards
       clickMultiplier
       pokedexBonus
     }

@@ -18,7 +18,6 @@ export interface UserStats {
   autoclicker?: number;
   luckyHitChance?: number;
   luckyHitMultiplier?: number;
-  battleRewards?: number;
   clickMultiplier?: number;
   pokedexBonus?: number;
 }

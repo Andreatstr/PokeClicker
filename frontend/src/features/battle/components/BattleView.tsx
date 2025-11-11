@@ -84,15 +84,9 @@ export function BattleView({
     : '1';
 
   // Base reward: clicks × candyPerClick × 10
-  let battleReward = toDecimal(finalClickCount).times(candyPerClick).times(10);
-
-  // Apply battle rewards multiplier: 1.05^(level-1)
-  // Level 1 = 1.0x, Level 5 = 1.22x, Level 10 = 1.55x, Level 20 = 2.53x
-  if (user?.stats?.battleRewards && user.stats.battleRewards > 1) {
-    const battleMultiplier = Math.pow(1.05, user.stats.battleRewards - 1);
-    battleReward = battleReward.times(battleMultiplier);
-  }
-
+  const battleReward = toDecimal(finalClickCount)
+    .times(candyPerClick)
+    .times(10);
   const rareCandyReward = battleReward.floor().toString();
 
   // Ready countdown state

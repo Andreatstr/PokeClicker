@@ -21,7 +21,6 @@ type UpgradeKey =
   | 'autoclicker'
   | 'luckyHitChance'
   | 'luckyHitMultiplier'
-  | 'battleRewards'
   | 'clickMultiplier'
   | 'pokedexBonus';
 

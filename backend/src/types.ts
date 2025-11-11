@@ -31,7 +31,6 @@ export interface UserStats {
     autoclicker?: number;
     luckyHitChance?: number;
     luckyHitMultiplier?: number;
-    battleRewards?: number;
     clickMultiplier?: number;
     pokedexBonus?: number;
   };
@@ -77,7 +76,6 @@ export const DEFAULT_USER_STATS = {
     autoclicker: 1,
     luckyHitChance: 1,
     luckyHitMultiplier: 1,
-    battleRewards: 1,
     clickMultiplier: 1,
     pokedexBonus: 1,
   },

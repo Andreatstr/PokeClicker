@@ -56,17 +56,6 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
       light: '#dc2626',
     },
   },
-  battleRewards: {
-    key: 'battleRewards',
-    displayName: 'Battle Bonus',
-    formula: (level) => Math.pow(1.05, level),
-    costMultiplier: 1.2649,
-    unit: 'x battle candy',
-    color: {
-      dark: '#9333ea',
-      light: '#a855f7',
-    },
-  },
   clickMultiplier: {
     key: 'clickMultiplier',
     displayName: 'Click Boost',
