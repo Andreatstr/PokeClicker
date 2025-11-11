@@ -542,6 +542,7 @@ export function PokemonMap({
               worldPosition={movement.worldPosition}
               user={user}
               collisionMapLoaded={collisionMap.collisionMapLoaded}
+              isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
               viewportSize={renderSize}
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}

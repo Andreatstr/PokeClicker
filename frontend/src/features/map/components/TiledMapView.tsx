@@ -32,6 +32,7 @@ interface TiledMapViewProps {
   worldPosition: {x: number; y: number};
   user: {rare_candy?: number} | null;
   collisionMapLoaded: boolean;
+  isPositionSemiWalkable: (x: number, y: number) => boolean;
   viewportSize: {width: number; height: number};
   isDarkMode?: boolean;
   onStartBattle: (pokemon: PokedexPokemon, spawnId: string) => void;
@@ -46,6 +47,8 @@ export function TiledMapView(props: TiledMapViewProps) {
     wildPokemon,
     nearbyPokemon,
     user,
+    worldPosition,
+    isPositionSemiWalkable,
     viewportSize,
     isDarkMode = false,
     onStartBattle,
@@ -63,7 +66,7 @@ export function TiledMapView(props: TiledMapViewProps) {
     tileCacheRef,
     viewportSize,
     tileSize: 512,
-    backgroundColor: isDarkMode ? '#3b82f6' : '#3b82f6',
+    backgroundColor: isDarkMode ? '#000000' : '#000000',
   });
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
@@ -140,7 +143,13 @@ export function TiledMapView(props: TiledMapViewProps) {
           backgroundPositionX: scaledPosX,
           backgroundPositionY: scaledPosY,
           imageRendering: 'pixelated',
-          transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear`,
+          transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear, opacity 200ms ease-in-out`,
+          opacity: isPositionSemiWalkable(
+            worldPosition.x,
+            worldPosition.y + SPRITE_HEIGHT / 2 - 24
+          )
+            ? 0.5
+            : 1,
           zIndex: 10,
         }}
       />
