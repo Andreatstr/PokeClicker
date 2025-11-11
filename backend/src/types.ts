@@ -29,8 +29,8 @@ export interface UserStats {
     // PokeClicker upgrades:
     clickPower?: number;
     autoclicker?: number;
-    critChance?: number;
-    critMultiplier?: number;
+    luckyHitChance?: number;
+    luckyHitMultiplier?: number;
     battleRewards?: number;
     clickMultiplier?: number;
     pokedexBonus?: number;
@@ -75,8 +75,8 @@ export const DEFAULT_USER_STATS = {
     // PokeClicker upgrades (start at level 1):
     clickPower: 1,
     autoclicker: 1,
-    critChance: 1,
-    critMultiplier: 1,
+    luckyHitChance: 1,
+    luckyHitMultiplier: 1,
     battleRewards: 1,
     clickMultiplier: 1,
     pokedexBonus: 1,

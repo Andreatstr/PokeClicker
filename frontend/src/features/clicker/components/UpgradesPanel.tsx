@@ -4,6 +4,7 @@ import {formatNumber} from '@/lib/formatNumber';
 import {getStatDescription, getUpgradeCost} from '../utils/statDescriptions';
 import {toDecimal} from '@/lib/decimal';
 import type {UserStats} from '@/lib/graphql/types';
+import {UPGRADES} from '@/config/upgradeConfig';
 
 interface UpgradesPanelProps {
   isDarkMode: boolean;
@@ -18,55 +19,11 @@ interface UpgradesPanelProps {
 type UpgradeKey =
   | 'clickPower'
   | 'autoclicker'
-  | 'critChance'
-  | 'critMultiplier'
+  | 'luckyHitChance'
+  | 'luckyHitMultiplier'
   | 'battleRewards'
   | 'clickMultiplier'
   | 'pokedexBonus';
-
-interface UpgradeConfig {
-  label: string;
-  colorDark: string;
-  colorLight: string;
-}
-
-const UPGRADE_CONFIGS: Record<UpgradeKey, UpgradeConfig> = {
-  clickPower: {
-    label: 'Click Power',
-    colorDark: '#ea580c', // Orange
-    colorLight: '#f97316',
-  },
-  autoclicker: {
-    label: 'Autoclicker',
-    colorDark: '#16a34a', // Green
-    colorLight: '#22c55e',
-  },
-  critChance: {
-    label: 'Crit Chance',
-    colorDark: '#dc2626', // Red
-    colorLight: '#ef4444',
-  },
-  critMultiplier: {
-    label: 'Crit Power',
-    colorDark: '#b91c1c', // Dark red
-    colorLight: '#dc2626',
-  },
-  battleRewards: {
-    label: 'Battle Bonus',
-    colorDark: '#9333ea', // Purple
-    colorLight: '#a855f7',
-  },
-  clickMultiplier: {
-    label: 'Click Boost',
-    colorDark: '#ca8a04', // Gold
-    colorLight: '#eab308',
-  },
-  pokedexBonus: {
-    label: 'Pokedex Bonus',
-    colorDark: '#0891b2', // Cyan
-    colorLight: '#06b6d4',
-  },
-};
 
 export function UpgradesPanel({
   isDarkMode,
@@ -109,7 +66,7 @@ export function UpgradesPanel({
       </header>
       <section className="flex flex-col gap-3">
         {stats &&
-          (Object.keys(UPGRADE_CONFIGS) as UpgradeKey[]).map((key) => {
+          (Object.keys(UPGRADES) as UpgradeKey[]).map((key) => {
             const value = stats[key] || 1;
             const cost = getUpgradeCost(key, value);
             const descriptionData = getStatDescription(
@@ -117,11 +74,13 @@ export function UpgradesPanel({
               stats,
               ownedPokemonCount
             );
-            const config = UPGRADE_CONFIGS[key];
-            const barColor = isDarkMode ? config.colorDark : config.colorLight;
+            const config = UPGRADES[key];
+            const barColor = isDarkMode
+              ? config.color.dark
+              : config.color.light;
             const buttonColor = isDarkMode
-              ? config.colorDark
-              : config.colorLight;
+              ? config.color.dark
+              : config.color.light;
 
             return (
               <article
@@ -153,7 +112,7 @@ export function UpgradesPanel({
                             : 'var(--muted-foreground)',
                         }}
                       >
-                        {config.label}
+                        {config.displayName}
                       </dt>
                       <dd
                         className="pixel-font text-lg font-bold"
@@ -196,9 +155,14 @@ export function UpgradesPanel({
                     {typeof descriptionData === 'object' &&
                     'current' in descriptionData ? (
                       <>
-                        {descriptionData.current}
+                        {formatNumber(descriptionData.current, {
+                          showDecimals: true,
+                        })}
                         <ArrowRightIcon size={14} className="inline mx-1" />
-                        {descriptionData.next} {descriptionData.unit}
+                        {formatNumber(descriptionData.next, {
+                          showDecimals: true,
+                        })}{' '}
+                        {descriptionData.unit}
                       </>
                     ) : (
                       descriptionData

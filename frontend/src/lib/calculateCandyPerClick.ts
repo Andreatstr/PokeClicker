@@ -1,45 +1,91 @@
 import Decimal from 'break_infinity.js';
 import type {UserStats} from './graphql/types';
+import {UPGRADES} from '@/config/upgradeConfig';
 
+/**
+ * Calculate base candy per click WITHOUT crit (deterministic)
+ * Used for UI display to show consistent values
+ */
+export function calculateBaseCandyPerClick(
+  stats: UserStats | undefined,
+  ownedPokemonCount = 0
+): string {
+  if (!stats) return '1';
+
+  // Base click power from config
+  const clickPowerValue = UPGRADES.clickPower.formula(
+    (stats.clickPower || 1) - 1
+  );
+  let totalPower = new Decimal(clickPowerValue);
+
+  // Click multiplier from config
+  if (stats.clickMultiplier && stats.clickMultiplier > 1) {
+    const multiplier = UPGRADES.clickMultiplier.formula(
+      stats.clickMultiplier - 1
+    );
+    totalPower = totalPower.times(multiplier);
+  }
+
+  // Pokedex bonus from config
+  if (stats.pokedexBonus && stats.pokedexBonus > 1 && ownedPokemonCount > 0) {
+    const bonusMultiplier = UPGRADES.pokedexBonus.formula(
+      stats.pokedexBonus - 1,
+      {
+        pokemonCount: ownedPokemonCount,
+      }
+    );
+    totalPower = totalPower.times(bonusMultiplier);
+  }
+
+  return totalPower.toFixed(2);
+}
+
+/**
+ * Calculate actual candy per click WITH crit roll (RNG)
+ * Used for actual game clicks
+ */
 export function calculateCandyPerClick(
   stats: UserStats | undefined,
   ownedPokemonCount = 0
 ): string {
   if (!stats) return '1';
 
-  // Base click power: 1.2^(clickPower-1)
-  // Level 1 = 1, Level 10 = 5.16, Level 20 = 26.6
-  let totalPower = new Decimal(1.2).pow((stats.clickPower || 1) - 1);
+  // Base click power from config
+  const clickPowerValue = UPGRADES.clickPower.formula(
+    (stats.clickPower || 1) - 1
+  );
+  let totalPower = new Decimal(clickPowerValue);
 
-  // Apply click multiplier: (1 + (level-1) * 0.02)
-  // Level 1 = 1.0x, Level 2 = 1.02x, Level 10 = 1.18x
+  // Click multiplier from config
   if (stats.clickMultiplier && stats.clickMultiplier > 1) {
-    const multiplier = 1 + (stats.clickMultiplier - 1) * 0.02;
+    const multiplier = UPGRADES.clickMultiplier.formula(
+      stats.clickMultiplier - 1
+    );
     totalPower = totalPower.times(multiplier);
   }
 
-  // Apply pokedex bonus: 1.005^(level * ownedPokemonCount)
-  // Each pokemon = +0.5% per level
+  // Pokedex bonus from config
   if (stats.pokedexBonus && stats.pokedexBonus > 1 && ownedPokemonCount > 0) {
-    const bonusMultiplier = Math.pow(
-      1.005,
-      (stats.pokedexBonus - 1) * ownedPokemonCount
+    const bonusMultiplier = UPGRADES.pokedexBonus.formula(
+      stats.pokedexBonus - 1,
+      {
+        pokemonCount: ownedPokemonCount,
+      }
     );
     totalPower = totalPower.times(bonusMultiplier);
   }
 
-  // Roll for crit: Logarithmic soft cap
-  // Formula: 8 * ln(1 + 0.5 * level)
-  // Level 1 = 3.3%, Level 10 = 12.9%, Level 20 = 19.7%, Level 50 = 29.3%
-  if (stats.critChance && stats.critChance > 1) {
-    const critChancePercent = (8 * Math.log(1 + 0.5 * stats.critChance)) / 100;
-    const isCrit = Math.random() < critChancePercent;
+  // Lucky hit from config
+  if (stats.luckyHitChance && stats.luckyHitChance > 1) {
+    const luckyChancePercent =
+      UPGRADES.luckyHitChance.formula(stats.luckyHitChance) / 100;
+    const isLucky = Math.random() < luckyChancePercent;
 
-    // Crit multiplier: 1.2^(level-1)
-    // Level 1 = 1.2x, Level 2 = 1.44x, Level 10 = 5.16x
-    if (isCrit && stats.critMultiplier) {
-      const critMult = Math.pow(1.2, stats.critMultiplier - 1);
-      totalPower = totalPower.times(critMult);
+    if (isLucky && stats.luckyHitMultiplier) {
+      const luckyMult = UPGRADES.luckyHitMultiplier.formula(
+        stats.luckyHitMultiplier
+      );
+      totalPower = totalPower.times(luckyMult);
     }
   }
 

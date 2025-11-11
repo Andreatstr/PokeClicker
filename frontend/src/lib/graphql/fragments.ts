@@ -19,8 +19,8 @@ export const USER_FRAGMENT = gql`
       speed
       clickPower
       autoclicker
-      critChance
-      critMultiplier
+      luckyHitChance
+      luckyHitMultiplier
       battleRewards
       clickMultiplier
       pokedexBonus

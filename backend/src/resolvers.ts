@@ -22,6 +22,11 @@ import {
   USE_STATIC_FALLBACK,
 } from './config.js';
 import {Decimal, toDecimal} from './decimal.js';
+import {
+  getUpgradeCost as getUpgradeCostFromConfig,
+  isClickerUpgrade,
+  getClickerUpgradeKeys,
+} from './upgradeConfig.js';
 import 'dotenv/config';
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
@@ -51,8 +56,8 @@ function sanitizeUserForClient(
       // Ensure clicker stats exist with defaults for backward compatibility
       clickPower: userDoc.stats.clickPower ?? 1,
       autoclicker: userDoc.stats.autoclicker ?? 1,
-      critChance: userDoc.stats.critChance ?? 1,
-      critMultiplier: userDoc.stats.critMultiplier ?? 1,
+      luckyHitChance: userDoc.stats.luckyHitChance ?? 1,
+      luckyHitMultiplier: userDoc.stats.luckyHitMultiplier ?? 1,
       battleRewards: userDoc.stats.battleRewards ?? 1,
       clickMultiplier: userDoc.stats.clickMultiplier ?? 1,
       pokedexBonus: userDoc.stats.pokedexBonus ?? 1,
@@ -143,37 +148,11 @@ const authMutations = {
   },
 };
 
-// Helper to get upgrade cost (differentiated by stat type)
+// Helper to get upgrade cost (uses config as single source of truth)
 function getUpgradeCost(currentLevel: number, stat: string): Decimal {
-  let multiplier = 2.5; // default
-
-  // Balanced upgrade costs (reduced from original to prevent exponential wall):
-  if (stat === 'clickPower') {
-    multiplier = 1.8;
-  } else if (stat === 'autoclicker') {
-    multiplier = 1.7;
-  } else if (stat === 'critChance') {
-    multiplier = 1.9;
-  } else if (stat === 'critMultiplier') {
-    multiplier = 2.0;
-  } else if (stat === 'battleRewards') {
-    multiplier = 1.6;
-  } else if (stat === 'clickMultiplier') {
-    multiplier = 2.0;
-  } else if (stat === 'pokedexBonus') {
-    multiplier = 1.5;
-  }
-  // Legacy support for old stat names (backwards compatibility):
-  else if (stat === 'attack' || stat === 'spAttack') {
-    multiplier = 1.8;
-  } else if (stat === 'speed') {
-    multiplier = 1.5;
-  }
-
-  // Base cost increased from 10 to 50 to slow early game
-  return new Decimal(50)
-    .times(new Decimal(multiplier).pow(currentLevel - 1))
-    .floor();
+  // Use centralized config
+  const cost = getUpgradeCostFromConfig(stat, currentLevel);
+  return new Decimal(cost);
 }
 
 // Helper to get Pokemon purchase cost
@@ -243,15 +222,7 @@ export const resolvers = {
       let needsUpdate = false;
       const updates: Record<string, number> = {};
 
-      const clickerStats = [
-        'clickPower',
-        'autoclicker',
-        'critChance',
-        'critMultiplier',
-        'battleRewards',
-        'clickMultiplier',
-        'pokedexBonus',
-      ];
+      const clickerStats = getClickerUpgradeKeys();
 
       for (const stat of clickerStats) {
         const statValue = (userDoc.stats as Record<string, number | undefined>)[
@@ -881,27 +852,10 @@ export const resolvers = {
     ) => {
       const user = requireAuth(context);
 
-      // Validate stat name (includes new clicker upgrades + legacy stats)
-      const validStats = [
-        // PokeClicker upgrades:
-        'clickPower',
-        'autoclicker',
-        'critChance',
-        'critMultiplier',
-        'battleRewards',
-        'clickMultiplier',
-        'pokedexBonus',
-        // Legacy stats (for backwards compatibility & per-Pokemon upgrades later):
-        'hp',
-        'attack',
-        'defense',
-        'spAttack',
-        'spDefense',
-        'speed',
-      ];
-      if (!validStats.includes(stat)) {
+      // Validate stat name
+      if (!isClickerUpgrade(stat)) {
         throw new Error(
-          `Invalid stat: ${stat}. Must be one of: ${validStats.join(', ')}`
+          `Invalid stat: ${stat}. Must be one of: ${getClickerUpgradeKeys().join(', ')}`
         );
       }
 
@@ -914,34 +868,16 @@ export const resolvers = {
         throw new Error('User not found');
       }
 
-      // Initialize new stats if they don't exist (migration for existing users)
-      const clickerStats = [
-        'clickPower',
-        'autoclicker',
-        'critChance',
-        'critMultiplier',
-        'battleRewards',
-        'clickMultiplier',
-        'pokedexBonus',
+      // Initialize stat if it doesn't exist (migration for existing users)
+      const statValue = (userDoc.stats as Record<string, number | undefined>)[
+        stat
       ];
-      const isClickerStat = clickerStats.includes(stat);
-      let needsMigration = false;
-
-      if (isClickerStat) {
-        const statValue = (userDoc.stats as Record<string, number | undefined>)[
-          stat
-        ];
-        if (statValue === undefined || statValue === null) {
-          needsMigration = true;
-          await users.updateOne(
-            {_id: new ObjectId(user.id)},
-            {$set: {[`stats.${stat}`]: 1}}
-          );
-        }
-      }
-
-      // Re-fetch user if we did migration to get updated stats
-      if (needsMigration) {
+      if (statValue === undefined || statValue === null) {
+        await users.updateOne(
+          {_id: new ObjectId(user.id)},
+          {$set: {[`stats.${stat}`]: 1}}
+        );
+        // Re-fetch user to get updated stats
         userDoc = await users.findOne({_id: new ObjectId(user.id)});
         if (!userDoc) {
           throw new Error('User not found after migration');
@@ -949,15 +885,10 @@ export const resolvers = {
       }
 
       // Calculate cost - get current level for the stat
-      let currentLevel = 1;
-      if (isClickerStat) {
-        currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
-        console.log(
-          `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
-        );
-      } else {
-        currentLevel = userDoc.stats[stat as keyof typeof userDoc.stats] || 1;
-      }
+      const currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
+      console.log(
+        `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
+      );
       const cost = getUpgradeCost(currentLevel, stat);
 
       console.log(

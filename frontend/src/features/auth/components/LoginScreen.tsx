@@ -91,16 +91,38 @@ export function LoginScreen({onNavigate}: Props) {
 
   async function loginAsGuest() {
     try {
+      // Try to login first
       const result = await loginMutation({
         variables: {username: 'guest', password: '123456'},
       });
-      const authData = (result.data as LoginData | undefined)?.login;
+      let authData = (result.data as LoginData | undefined)?.login;
+
+      // If login fails (guest doesn't exist), create the guest user
+      if (!authData?.token) {
+        const signupResult = await signupMutation({
+          variables: {username: 'guest', password: '123456'},
+        });
+        authData = (signupResult.data as SignupData | undefined)?.signup;
+      }
+
       if (authData?.token && authData?.user) {
         await authLogin(authData.token, authData.user);
         onNavigate('pokedex');
       }
-    } catch (err) {
-      logger.logError(err, 'GuestLogin');
+    } catch {
+      // If login fails, try to create guest user
+      try {
+        const signupResult = await signupMutation({
+          variables: {username: 'guest', password: '123456'},
+        });
+        const authData = (signupResult.data as SignupData | undefined)?.signup;
+        if (authData?.token && authData?.user) {
+          await authLogin(authData.token, authData.user);
+          onNavigate('pokedex');
+        }
+      } catch (signupErr) {
+        logger.logError(signupErr, 'GuestSignup');
+      }
     }
   }
 

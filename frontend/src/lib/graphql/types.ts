@@ -16,8 +16,8 @@ export interface UserStats {
   speed: number;
   clickPower?: number;
   autoclicker?: number;
-  critChance?: number;
-  critMultiplier?: number;
+  luckyHitChance?: number;
+  luckyHitMultiplier?: number;
   battleRewards?: number;
   clickMultiplier?: number;
   pokedexBonus?: number;

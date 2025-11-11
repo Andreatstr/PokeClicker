@@ -53,8 +53,8 @@ export const typeDefs = `#graphql
     # PokeClicker upgrades:
     clickPower: Int
     autoclicker: Int
-    critChance: Int
-    critMultiplier: Int
+    luckyHitChance: Int
+    luckyHitMultiplier: Int
     battleRewards: Int
     clickMultiplier: Int
     pokedexBonus: Int

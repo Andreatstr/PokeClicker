@@ -1,7 +1,7 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {renderHook, act} from '@testing-library/react';
 import {useClickerActions} from '../useClickerActions';
-import type {User} from '@features/auth';
+import type {User} from '@/lib/graphql/types';
 
 // Mock dependencies
 vi.mock('@/lib/logger', () => ({
@@ -14,16 +14,16 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/calculateCandyPerClick', () => ({
   calculateCandyPerClick: vi.fn((stats) => {
-    // Simulate click power calculation
+    // Simulate click power calculation - returns string for Decimal support
     if (stats.clickPower) {
-      return Math.floor(Math.pow(1.75, stats.clickPower - 1));
+      return String(Math.floor(Math.pow(1.75, stats.clickPower - 1)));
     }
-    return 1;
+    return '1';
   }),
 }));
 
 vi.mock('../utils/statDescriptions', () => ({
-  getUpgradeCost: vi.fn((stat, level) => {
+  getUpgradeCost: vi.fn((_stat, level) => {
     // Simulate upgrade cost calculation
     return Math.floor(10 * Math.pow(2.5, level - 1));
   }),
@@ -48,11 +48,12 @@ describe('useClickerActions', () => {
     addCandy: vi.fn(),
     deductCandy: vi.fn(),
     flushPendingCandy: vi.fn().mockResolvedValue(undefined),
-    localRareCandy: 100,
+    localRareCandy: '100',
     setDisplayError: vi.fn(),
     setStats: vi.fn(),
     upgradeStat: vi.fn(),
     updateUser: vi.fn(),
+    ownedPokemonCount: 0,
   };
 
   beforeEach(() => {
@@ -73,7 +74,7 @@ describe('useClickerActions', () => {
         result.current.handleClick();
       });
 
-      expect(mockProps.addCandy).toHaveBeenCalledWith(1); // clickPower: 1 = 1 candy
+      expect(mockProps.addCandy).toHaveBeenCalledWith('1'); // clickPower: 1 = 1 candy
       expect(result.current.isAnimating).toBe(true);
       expect(result.current.candies).toHaveLength(1);
     });
@@ -104,7 +105,7 @@ describe('useClickerActions', () => {
       });
 
       // clickPower: 5 = Math.floor(1.75^4) = 9 candies
-      expect(mockProps.addCandy).toHaveBeenCalledWith(9);
+      expect(mockProps.addCandy).toHaveBeenCalledWith('9');
     });
 
     it('should remove floating candy after animation', () => {
@@ -162,7 +163,7 @@ describe('useClickerActions', () => {
       });
 
       expect(mockProps.flushPendingCandy).toHaveBeenCalled();
-      expect(mockProps.deductCandy).toHaveBeenCalledWith('50'); // Cost for level 1->2 (base 50)
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('25');
       expect(mockProps.setStats).toHaveBeenCalled();
       expect(mockProps.upgradeStat).toHaveBeenCalledWith(
         'clickPower',
@@ -185,7 +186,7 @@ describe('useClickerActions', () => {
     });
 
     it('should not upgrade if insufficient candy', async () => {
-      const props = {...mockProps, localRareCandy: 5}; // Not enough for upgrade
+      const props = {...mockProps, localRareCandy: '5'}; // Not enough for upgrade
       const {result} = renderHook(() => useClickerActions(props));
 
       await act(async () => {
@@ -199,7 +200,7 @@ describe('useClickerActions', () => {
       const props = {
         ...mockProps,
         stats: {...mockStats, clickPower: 3},
-        localRareCandy: 200, // Enough to afford upgrade (cost is 162)
+        localRareCandy: '200', // Enough to afford upgrade (cost is 162)
       };
 
       const mockUpdatedUser: User = {
@@ -221,8 +222,8 @@ describe('useClickerActions', () => {
         await result.current.handleUpgrade('clickPower');
       });
 
-      // Cost for level 3->4 = Math.floor(50 * 1.8^2) = 162 (clickPower uses 1.8 multiplier)
-      expect(mockProps.deductCandy).toHaveBeenCalledWith('162');
+      // Cost for level 3->4 = Math.floor(25 * 1.3416^2) = 44
+      expect(mockProps.deductCandy).toHaveBeenCalledWith('44');
     });
 
     it('should flush pending candy before upgrading', async () => {

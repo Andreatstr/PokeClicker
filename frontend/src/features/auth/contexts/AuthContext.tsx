@@ -3,6 +3,7 @@ import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
 import {AuthContext} from './AuthContextDefinition';
 import type {User} from '@/lib/graphql/types';
+import {DELETE_USER_MUTATION} from '@/lib/graphql/mutations';
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);
@@ -74,6 +75,17 @@ export function AuthProvider({children}: {children: ReactNode}) {
   };
 
   const logout = async () => {
+    // If logging out as guest, delete the user account
+    if (user?.username.toLowerCase() === 'guest') {
+      try {
+        await apolloClient.mutate({
+          mutation: DELETE_USER_MUTATION,
+        });
+      } catch (err) {
+        logger.logError(err, 'DeleteGuestUser');
+      }
+    }
+
     setToken(null);
     setUser(null);
     localStorage.removeItem('authToken');
