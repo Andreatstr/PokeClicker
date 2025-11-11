@@ -63,7 +63,7 @@ export function TiledMapView(props: TiledMapViewProps) {
     tileCacheRef,
     viewportSize,
     tileSize: 512,
-    backgroundColor: isDarkMode ? '#0b1220' : '#e6f0eb',
+    backgroundColor: isDarkMode ? '#3b82f6' : '#3b82f6',
   });
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {

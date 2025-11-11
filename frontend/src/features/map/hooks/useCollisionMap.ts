@@ -95,7 +95,7 @@ export function useCollisionMap(): CollisionMapState {
     };
   }, []);
 
-  // Check if a position is walkable (white pixel on collision map)
+  // Check if a position is walkable (magenta pixel on collision map)
   const isPositionWalkable = useCallback(
     (x: number, y: number): boolean => {
       if (!collisionPixelsRef.current || !collisionMapLoaded) {
@@ -112,19 +112,29 @@ export function useCollisionMap(): CollisionMapState {
 
       const pixels = collisionPixelsRef.current;
 
+      // Magenta (255, 0, 255) = walkable
+      const WALKABLE_COLOR = {r: 255, g: 0, b: 255};
+      const COLOR_TOLERANCE = 30; // Allow slight variations due to compression
+
       // Sample a small 3x3 neighborhood to tolerate boundaries after scaling
-      const threshold = 190; // Slightly lower due to scaling artifacts
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
           const nx = Math.max(0, Math.min(SCALED_WIDTH - 1, sx + dx));
           const ny = Math.max(0, Math.min(SCALED_HEIGHT - 1, sy + dy));
           const idx = (ny * SCALED_WIDTH + nx) * 4;
           if (idx < 0 || idx + 2 >= pixels.length) continue;
+
           const r = pixels[idx];
           const g = pixels[idx + 1];
           const b = pixels[idx + 2];
-          const brightness = (r + g + b) / 3;
-          if (brightness > threshold) return true;
+
+          // Check if color matches magenta (within tolerance)
+          const colorMatch =
+            Math.abs(r - WALKABLE_COLOR.r) < COLOR_TOLERANCE &&
+            Math.abs(g - WALKABLE_COLOR.g) < COLOR_TOLERANCE &&
+            Math.abs(b - WALKABLE_COLOR.b) < COLOR_TOLERANCE;
+
+          if (colorMatch) return true;
         }
       }
       return false;

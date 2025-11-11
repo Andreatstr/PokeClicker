@@ -3,7 +3,7 @@ import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 
 // Constants
-const TILE_SIZE = 24; // Pixel size of each step (gentle speed increase)
+const TILE_SIZE = 8; // Pixel size of each step (gentle speed increase)
 const SHEET_FRAME_CELL_W = 68;
 const SHEET_FRAME_CELL_H = 72;
 
@@ -11,7 +11,7 @@ const SHEET_FRAME_CELL_H = 72;
 const SPRITE_WIDTH = 46;
 const SPRITE_HEIGHT = 48.70588;
 const ANIMATION_SPEED = 120; // ms between animation frames (slower for smoother look)
-const MOVE_SPEED = 150; // ms for movement transition
+const MOVE_SPEED = 50; // ms for movement transition
 const ANIMATION_FRAMES = 4; // Number of frames per direction
 
 // Map dimensions
@@ -19,7 +19,8 @@ const MAP_WIDTH = 10560;
 const MAP_HEIGHT = 6080;
 // Spawn tweak: move initial spawn slightly down to avoid getting stuck on mobile
 // Use a multiple of TILE_SIZE to align to the grid
-const SPAWN_Y_OFFSET = 240; // 10 tiles down
+const SPAWN_X_OFFSET = 634; // 5280 + 634 = 5914
+const SPAWN_Y_OFFSET = 100; // 3040 + 100 = 3140
 
 // Sprite sheet layout: 4 rows (down, left, right, up) x 3 columns (animation frames)
 type Direction = 'down' | 'left' | 'right' | 'up';
@@ -73,13 +74,17 @@ export function useMapMovement(
     ? `${PLAYER_POSITION_KEY}_${user._id}`
     : PLAYER_POSITION_KEY;
 
-  // Helper for default/home position (centered, but nudged down by SPAWN_Y_OFFSET)
+  // Helper for default/home position (centered, but nudged by SPAWN_X_OFFSET and SPAWN_Y_OFFSET)
   const getHomePosition = () => {
+    const x = Math.min(
+      MAP_WIDTH - SPRITE_WIDTH / 2,
+      Math.max(SPRITE_WIDTH / 2, MAP_WIDTH / 2 + SPAWN_X_OFFSET)
+    );
     const y = Math.min(
       MAP_HEIGHT - SPRITE_HEIGHT / 2,
       Math.max(SPRITE_HEIGHT / 2, MAP_HEIGHT / 2 + SPAWN_Y_OFFSET)
     );
-    return {x: MAP_WIDTH / 2, y};
+    return {x, y};
   };
 
   // Character position in world coordinates - restore from user-specific localStorage
@@ -309,8 +314,12 @@ export function useMapMovement(
           break;
       }
 
-      // Check if the new position is walkable (check character center)
-      if (!collisionChecker.isPositionWalkable(newPos.x, newPos.y)) {
+      // Check collision at character's feet position
+      // Reduce the offset slightly so character appears lower on walkable area
+      const feetX = newPos.x;
+      const feetY = newPos.y + SPRITE_HEIGHT / 2 - 24;
+
+      if (!collisionChecker.isPositionWalkable(feetX, feetY)) {
         return currentPos; // Block movement if collision detected
       }
 
@@ -576,7 +585,7 @@ export function useMapMovement(
     // The worldPosition represents where the character's feet touch the ground
     // So we need to offset the sprite upward by most of its height
     return {
-      x: worldPosition.x - camera.x - SPRITE_WIDTH / 2 - 6, // Slight left adjustment for better centering
+      x: worldPosition.x - camera.x - SPRITE_WIDTH / 2, // Slight left adjustment for better centering
       y: worldPosition.y - camera.y - SPRITE_HEIGHT + SPRITE_HEIGHT * 0.2, // Feet at bottom with slight offset
     };
   }, [worldPosition, getCameraOffset]);
