@@ -71,10 +71,10 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     key: 'pokedexBonus',
     displayName: 'Pokedex Bonus',
     formula: (level, {pokemonCount = 0} = {}) =>
-      Math.pow(1.002, level * pokemonCount),
+      Math.pow(1.005, level * Math.sqrt(pokemonCount)),
     costMultiplier: 2.5,
-    unit: '% per Pokemon',
-    perPokemonBonus: (level) => 0.2 * level,
+    unit: '% total bonus',
+    perPokemonBonus: (level) => 0.5 * level,
     color: {
       dark: '#0891b2',
       light: '#06b6d4',

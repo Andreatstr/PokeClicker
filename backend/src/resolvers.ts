@@ -58,7 +58,6 @@ function sanitizeUserForClient(
       autoclicker: userDoc.stats.autoclicker ?? 1,
       luckyHitChance: userDoc.stats.luckyHitChance ?? 1,
       luckyHitMultiplier: userDoc.stats.luckyHitMultiplier ?? 1,
-      battleRewards: userDoc.stats.battleRewards ?? 1,
       clickMultiplier: userDoc.stats.clickMultiplier ?? 1,
       pokedexBonus: userDoc.stats.pokedexBonus ?? 1,
     },

@@ -50,15 +50,23 @@ export function getStatDescription(
     };
   }
 
-  // Special handling for pokedexBonus - show per-pokemon bonus, not total multiplier
-  if (stat === 'pokedexBonus' && config.perPokemonBonus) {
-    const currentPerPokemon = config.perPokemonBonus(currentLevel);
-    const nextPerPokemon = config.perPokemonBonus(currentLevel + 1);
+  // Special handling for pokedexBonus - show total multiplier based on owned pokemon
+  if (stat === 'pokedexBonus') {
+    const current = config.formula(currentLevel, {
+      pokemonCount: ownedPokemonCount,
+    });
+    const next = config.formula(currentLevel + 1, {
+      pokemonCount: ownedPokemonCount,
+    });
+
+    // Convert to percentage bonus (e.g., 1.5x = 50% bonus)
+    const currentBonus = (current - 1) * 100;
+    const nextBonus = (next - 1) * 100;
 
     return {
-      current: parseFloat(currentPerPokemon.toFixed(2)),
-      next: parseFloat(nextPerPokemon.toFixed(2)),
-      unit: config.unit,
+      current: parseFloat(currentBonus.toFixed(1)),
+      next: parseFloat(nextBonus.toFixed(1)),
+      unit: '% total bonus',
     };
   }
 

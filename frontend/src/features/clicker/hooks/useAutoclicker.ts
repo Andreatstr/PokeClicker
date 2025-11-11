@@ -1,4 +1,5 @@
 import {useEffect} from 'react';
+import Decimal from 'break_infinity.js';
 import type {UserStats} from '@/lib/graphql/types';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {UPGRADES} from '@/config/upgradeConfig';
@@ -20,18 +21,31 @@ export function useAutoclicker({
     if (!isAuthenticated || !stats) return;
     if (!stats.autoclicker || stats.autoclicker === 0) return;
 
-    const candyPerClick = calculateCandyPerClick(stats, ownedPokemonCount);
     const clicksPerSecond = UPGRADES.autoclicker.formula(stats.autoclicker - 1);
+    const updateIntervalMs = 100;
+    const clicksPerInterval = clicksPerSecond * (updateIntervalMs / 1000);
 
-    const updateIntervalMs = 500;
-    const candyPerUpdate = (
-      clicksPerSecond *
-      (updateIntervalMs / 1000) *
-      parseFloat(candyPerClick)
-    ).toFixed(2);
+    let accumulatedClicks = 0;
 
     const interval = setInterval(() => {
-      onAutoClick(candyPerUpdate);
+      accumulatedClicks += clicksPerInterval;
+      const clicksToProcess = Math.floor(accumulatedClicks);
+      accumulatedClicks -= clicksToProcess;
+
+      if (clicksToProcess === 0) return;
+
+      let totalCandy = new Decimal(0);
+
+      // Calculate each individual click with its own lucky hit roll
+      for (let i = 0; i < clicksToProcess; i++) {
+        const candyForThisClick = calculateCandyPerClick(
+          stats,
+          ownedPokemonCount
+        );
+        totalCandy = totalCandy.plus(candyForThisClick);
+      }
+
+      onAutoClick(totalCandy.toFixed(2));
     }, updateIntervalMs);
 
     return () => clearInterval(interval);
