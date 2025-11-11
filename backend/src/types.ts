@@ -46,6 +46,7 @@ export interface UserDocument extends UserStats {
   password_hash: string;
   created_at: Date;
   showInRanks?: boolean;
+  isGuestUser?: boolean;
 }
 
 export interface AuthResponse {

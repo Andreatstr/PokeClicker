@@ -25,13 +25,18 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
-/**
- * Mutation to sign up a new user with username and password
- */
 export const SIGNUP_MUTATION = gql`
   ${USER_FRAGMENT}
-  mutation Signup($username: String!, $password: String!) {
-    signup(username: $username, password: $password) {
+  mutation Signup(
+    $username: String!
+    $password: String!
+    $isGuestUser: Boolean
+  ) {
+    signup(
+      username: $username
+      password: $password
+      isGuestUser: $isGuestUser
+    ) {
       token
       user {
         ...UserFields

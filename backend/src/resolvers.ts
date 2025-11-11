@@ -39,7 +39,6 @@ const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 function sanitizeUserForClient(
   userDoc: UserDocument
 ): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
-  // Ensure rare_candy is always a string (handle migration from old number format)
   const rareCandyValue: string | number = userDoc.rare_candy ?? '0';
   const rareCandyString: string =
     typeof rareCandyValue === 'number'
@@ -53,7 +52,6 @@ function sanitizeUserForClient(
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: {
       ...userDoc.stats,
-      // Ensure clicker stats exist with defaults for backward compatibility
       clickPower: userDoc.stats.clickPower ?? 1,
       autoclicker: userDoc.stats.autoclicker ?? 1,
       luckyHitChance: userDoc.stats.luckyHitChance ?? 1,
@@ -64,13 +62,19 @@ function sanitizeUserForClient(
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
     selected_pokemon_id: userDoc.selected_pokemon_id,
+    showInRanks: userDoc.showInRanks,
+    isGuestUser: userDoc.isGuestUser,
   };
 }
 
 const authMutations = {
   async signup(
     _: unknown,
-    {username, password}: {username: string; password: string}
+    {
+      username,
+      password,
+      isGuestUser,
+    }: {username: string; password: string; isGuestUser?: boolean}
   ): Promise<AuthResponse> {
     if (!username || !password) throw new Error('Missing username or password');
     if (username.length < 3 || username.length > 20)
@@ -89,8 +93,9 @@ const authMutations = {
       created_at: new Date(),
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
       stats: DEFAULT_USER_STATS.stats,
-      owned_pokemon_ids: [1], // DEFAULT_USER_STATS.owned_pokemon_ids ?? [],
+      owned_pokemon_ids: [1],
       showInRanks: true,
+      isGuestUser: isGuestUser ?? false,
     };
 
     try {

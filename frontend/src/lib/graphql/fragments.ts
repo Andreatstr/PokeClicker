@@ -28,6 +28,7 @@ export const USER_FRAGMENT = gql`
     favorite_pokemon_id
     selected_pokemon_id
     showInRanks
+    isGuestUser
   }
 `;
 

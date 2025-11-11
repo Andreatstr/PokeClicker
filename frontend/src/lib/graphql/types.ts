@@ -38,6 +38,7 @@ export interface User {
   favorite_pokemon_id?: number | null;
   selected_pokemon_id?: number | null;
   showInRanks?: boolean;
+  isGuestUser?: boolean;
 }
 
 // ============================================================================
@@ -191,6 +192,7 @@ export interface SignupData {
 export interface AuthVariables {
   username: string;
   password: string;
+  isGuestUser?: boolean;
 }
 
 // ============================================================================

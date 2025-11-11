@@ -41,6 +41,7 @@ export const typeDefs = `#graphql
     favorite_pokemon_id: Int
     selected_pokemon_id: Int
     showInRanks: Boolean
+    isGuestUser: Boolean
   }
 
 	type UserStats {
@@ -65,7 +66,7 @@ export const typeDefs = `#graphql
   }
 
 	type Mutation {
-    signup(username: String!, password: String!): AuthResponse!
+    signup(username: String!, password: String!, isGuestUser: Boolean): AuthResponse!
     login(username: String!, password: String!): AuthResponse!
     updateRareCandy(amount: String!): User!
     upgradeStat(stat: String!): User!

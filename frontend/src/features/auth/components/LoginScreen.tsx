@@ -91,38 +91,46 @@ export function LoginScreen({onNavigate}: Props) {
 
   async function loginAsGuest() {
     try {
-      // Try to login first
-      const result = await loginMutation({
-        variables: {username: 'guest', password: '123456'},
-      });
-      let authData = (result.data as LoginData | undefined)?.login;
+      const guestUsername = `g_${crypto.randomUUID().slice(0, 8)}`;
+      const guestPassword = crypto.randomUUID();
 
-      // If login fails (guest doesn't exist), create the guest user
-      if (!authData?.token) {
-        const signupResult = await signupMutation({
-          variables: {username: 'guest', password: '123456'},
-        });
-        authData = (signupResult.data as SignupData | undefined)?.signup;
+      console.log('Creating guest user:', guestUsername);
+
+      const signupResult = await signupMutation({
+        variables: {
+          username: guestUsername,
+          password: guestPassword,
+          isGuestUser: true,
+        },
+      });
+
+      console.log('Signup result:', signupResult);
+
+      if (!signupResult) {
+        logger.logError(new Error('No result from signup'), 'GuestSignup');
+        return;
+      }
+
+      const authData = (signupResult.data as SignupData | undefined)?.signup;
+
+      console.log('Auth data:', authData);
+
+      if (!authData) {
+        logger.logError(new Error('No auth data in response'), 'GuestSignup');
+        return;
       }
 
       if (authData?.token && authData?.user) {
         await authLogin(authData.token, authData.user);
         onNavigate('pokedex');
+      } else {
+        logger.logError(
+          new Error('Missing token or user in auth data'),
+          'GuestSignup'
+        );
       }
-    } catch {
-      // If login fails, try to create guest user
-      try {
-        const signupResult = await signupMutation({
-          variables: {username: 'guest', password: '123456'},
-        });
-        const authData = (signupResult.data as SignupData | undefined)?.signup;
-        if (authData?.token && authData?.user) {
-          await authLogin(authData.token, authData.user);
-          onNavigate('pokedex');
-        }
-      } catch (signupErr) {
-        logger.logError(signupErr, 'GuestSignup');
-      }
+    } catch (err) {
+      logger.logError(err, 'GuestSignup');
     }
   }
 

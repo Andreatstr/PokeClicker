@@ -48,8 +48,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setToken(savedToken);
         setUser(parsedUser);
 
-        // Always trigger onboarding for guest user on page reload
-        if (parsedUser.username.toLowerCase() === 'guest') {
+        if (parsedUser.isGuestUser) {
           localStorage.removeItem('onboarding_completed');
         }
       } catch (e) {
@@ -66,8 +65,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setToken(newToken);
     setUser(newUser);
 
-    // Always trigger onboarding for guest user
-    if (newUser.username.toLowerCase() === 'guest') {
+    if (newUser.isGuestUser) {
       localStorage.removeItem('onboarding_completed');
     }
 
@@ -75,8 +73,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
   };
 
   const logout = async () => {
-    // If logging out as guest, delete the user account
-    if (user?.username.toLowerCase() === 'guest') {
+    if (user?.isGuestUser) {
       try {
         await apolloClient.mutate({
           mutation: DELETE_USER_MUTATION,
