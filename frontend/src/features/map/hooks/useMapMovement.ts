@@ -17,10 +17,16 @@ const ANIMATION_FRAMES = 4; // Number of frames per direction
 // Map dimensions
 const MAP_WIDTH = 10560;
 const MAP_HEIGHT = 6080;
-// Spawn tweak: move initial spawn slightly down to avoid getting stuck on mobile
-// Use a multiple of TILE_SIZE to align to the grid
-const SPAWN_X_OFFSET = 634; // 5280 + 634 = 5914
-const SPAWN_Y_OFFSET = 100; // 3040 + 100 = 3140
+
+// Define multiple teleport points (safe spawn locations)
+const TELEPORT_POINTS = [
+  {x: 4746, y: 4210, name: 'Central Town'},
+  {x: 1650, y: 4500, name: 'Western Beach'},
+  {x: 3270, y: 2200, name: 'Western Plains'},
+  {x: 5270, y: 2110, name: 'Northern Town'},
+  {x: 7800, y: 4900, name: 'Eastern Beach'},
+  {x: 9600, y: 2150, name: 'North Eastern Mountains'},
+] as const;
 
 // Sprite sheet layout: 4 rows (down, left, right, up) x 3 columns (animation frames)
 type Direction = 'down' | 'left' | 'right' | 'up';
@@ -44,6 +50,9 @@ interface MovementState {
   direction: Direction;
   isMoving: boolean;
   animationFrame: number;
+  teleportLocation: string | null;
+  isTeleporting: boolean;
+  teleportCooldown: number;
 }
 
 interface MovementActions {
@@ -54,7 +63,7 @@ interface MovementActions {
     direction: 'up' | 'down' | 'left' | 'right' | null
   ) => void;
   handleJoystickDirectionStop: () => void;
-  resetToHome: () => void;
+  teleportToRandomLocation: () => void;
 }
 
 interface CameraInfo {
@@ -74,24 +83,24 @@ export function useMapMovement(
     ? `${PLAYER_POSITION_KEY}_${user._id}`
     : PLAYER_POSITION_KEY;
 
-  // Helper for default/home position (centered, but nudged by SPAWN_X_OFFSET and SPAWN_Y_OFFSET)
-  const getHomePosition = () => {
-    const x = Math.min(
-      MAP_WIDTH - SPRITE_WIDTH / 2,
-      Math.max(SPRITE_WIDTH / 2, MAP_WIDTH / 2 + SPAWN_X_OFFSET)
-    );
-    const y = Math.min(
-      MAP_HEIGHT - SPRITE_HEIGHT / 2,
-      Math.max(SPRITE_HEIGHT / 2, MAP_HEIGHT / 2 + SPAWN_Y_OFFSET)
-    );
-    return {x, y};
+  // Helper for random teleport position - select from predefined points (excludes last location)
+  const getRandomTeleportPoint = (excludeIndex?: number | null) => {
+    // Filter out the last teleported location if provided
+    const availablePoints =
+      excludeIndex !== null && excludeIndex !== undefined
+        ? TELEPORT_POINTS.filter((_, index) => index !== excludeIndex)
+        : TELEPORT_POINTS;
+
+    const randomPoint =
+      availablePoints[Math.floor(Math.random() * availablePoints.length)];
+    return {x: randomPoint.x, y: randomPoint.y};
   };
 
   // Character position in world coordinates - restore from user-specific localStorage
   const [worldPosition, setWorldPosition] = useState(() => {
     if (!user?._id) {
-      // Not logged in - use default center
-      return getHomePosition();
+      // Not logged in - use default spawn point
+      return getRandomTeleportPoint();
     }
 
     const saved = localStorage.getItem(userPositionKey);
@@ -107,15 +116,24 @@ export function useMapMovement(
       }
     }
 
-    // First time for this user - start near center (nudged down)
-    logger.info(`[MapMovement] New user ${user._id}, starting at map center`);
-    return getHomePosition();
+    // First time for this user - start at random teleport point
+    logger.info(
+      `[MapMovement] New user ${user._id}, starting at random spawn point`
+    );
+    return getRandomTeleportPoint();
   });
   const [direction, setDirection] = useState<Direction>('down');
   const [isMoving, setIsMoving] = useState(false);
   const [animationFrame, setAnimationFrame] = useState(0);
+  const [teleportLocation, setTeleportLocation] = useState<string | null>(null);
+  const [isTeleporting, setIsTeleporting] = useState(false);
+  const [teleportCooldown, setTeleportCooldown] = useState(0);
+  const [lastTeleportIndex, setLastTeleportIndex] = useState<number | null>(
+    null
+  );
 
   const keysPressed = useRef<Set<string>>(new Set());
+  const teleportCooldownIntervalRef = useRef<number | null>(null);
   const animationIntervalRef = useRef<number | null>(null);
   const movementIntervalRef = useRef<number | null>(null);
   const animationResetTimeoutRef = useRef<number | null>(null);
@@ -126,6 +144,16 @@ export function useMapMovement(
       localStorage.setItem(userPositionKey, JSON.stringify(worldPosition));
     }
   }, [worldPosition, userPositionKey, user?._id]);
+
+  // Cleanup cooldown interval on unmount
+  useEffect(() => {
+    return () => {
+      if (teleportCooldownIntervalRef.current) {
+        clearInterval(teleportCooldownIntervalRef.current);
+        teleportCooldownIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   // Find nearest walkable point to a target (simple radial search)
   const findNearestWalkable = useCallback(
@@ -224,15 +252,17 @@ export function useMapMovement(
           setWorldPosition(restored);
         } catch (e) {
           logger.logError(e, 'RestorePlayerPosition');
-          logger.info(`[MapMovement] Failed to restore, resetting to home`);
-          setWorldPosition(getHomePosition());
+          logger.info(
+            `[MapMovement] Failed to restore, using random spawn point`
+          );
+          setWorldPosition(getRandomTeleportPoint());
         }
       } else {
-        // New user - start near center (nudged down)
+        // New user - start at random teleport point
         logger.info(
-          `[MapMovement] No saved position for user ${user._id}, starting at home`
+          `[MapMovement] No saved position for user ${user._id}, starting at random spawn point`
         );
-        setWorldPosition(getHomePosition());
+        setWorldPosition(getRandomTeleportPoint());
       }
     }
   }, [user?._id, userPositionKey]);
@@ -610,14 +640,92 @@ export function useMapMovement(
   const screenPos = getCharacterScreenPosition();
   const spritePos = getSpritePosition();
 
-  // Reset to home position
-  const resetToHome = useCallback(() => {
-    const homePosition = getHomePosition();
-    const legalHome = findNearestWalkable(homePosition.x, homePosition.y);
-    setWorldPosition(legalHome);
+  // Teleport to random location with cooldown (prevents same location)
+  const teleportToRandomLocation = useCallback(() => {
+    // Check if on cooldown
+    if (teleportCooldown > 0) {
+      return;
+    }
+
+    // Check if collision map is loaded
+    if (!collisionChecker.collisionMapLoaded) {
+      logger.info('[MapMovement] Waiting for collision map to load...');
+      return;
+    }
+
+    // Start teleporting state
+    setIsTeleporting(true);
+
+    // Get random teleport point excluding the last teleported location
+    const teleportPoint = getRandomTeleportPoint(lastTeleportIndex);
+    const walkablePosition = findNearestWalkable(
+      teleportPoint.x,
+      teleportPoint.y
+    );
+
+    // Find which teleport point was chosen and its index
+    const chosenIndex = TELEPORT_POINTS.findIndex(
+      (p) =>
+        Math.abs(p.x - teleportPoint.x) < 50 &&
+        Math.abs(p.y - teleportPoint.y) < 50
+    );
+    const chosenPoint =
+      chosenIndex !== -1 ? TELEPORT_POINTS[chosenIndex] : null;
+
+    // Store the chosen index to prevent teleporting to same place next time
+    if (chosenIndex !== -1) {
+      setLastTeleportIndex(chosenIndex);
+    }
+
+    setWorldPosition(walkablePosition);
     setIsMoving(false);
+    setDirection('down');
+    setAnimationFrame(0);
     keysPressed.current.clear();
-  }, [findNearestWalkable]);
+
+    // Wait a moment for tiles to load, then show notification
+    setTimeout(() => {
+      setIsTeleporting(false);
+
+      // Show teleport notification
+      if (chosenPoint) {
+        setTeleportLocation(chosenPoint.name);
+        logger.info(`[MapMovement] Teleported to ${chosenPoint.name}`);
+
+        // Clear notification after 3 seconds
+        setTimeout(() => {
+          setTeleportLocation(null);
+        }, 3000);
+      }
+
+      // Start 3-second cooldown AFTER teleportation is complete
+      setTeleportCooldown(3);
+
+      // Clear any existing cooldown interval
+      if (teleportCooldownIntervalRef.current) {
+        clearInterval(teleportCooldownIntervalRef.current);
+      }
+
+      // Countdown interval
+      teleportCooldownIntervalRef.current = window.setInterval(() => {
+        setTeleportCooldown((prev) => {
+          if (prev <= 1) {
+            if (teleportCooldownIntervalRef.current) {
+              clearInterval(teleportCooldownIntervalRef.current);
+              teleportCooldownIntervalRef.current = null;
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }, 500); // Wait 500ms for tiles to load
+  }, [
+    teleportCooldown,
+    collisionChecker.collisionMapLoaded,
+    findNearestWalkable,
+    lastTeleportIndex,
+  ]);
 
   return {
     // State
@@ -625,12 +733,15 @@ export function useMapMovement(
     direction,
     isMoving,
     animationFrame,
+    teleportLocation,
+    isTeleporting,
+    teleportCooldown,
 
     // Actions
     handleJoystickDirectionStart,
     handleJoystickDirectionChange,
     handleJoystickDirectionStop,
-    resetToHome,
+    teleportToRandomLocation,
 
     // Camera info
     camera,

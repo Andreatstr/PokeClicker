@@ -33,10 +33,13 @@ interface TiledMapViewProps {
   user: {rare_candy?: number} | null;
   collisionMapLoaded: boolean;
   isPositionSemiWalkable: (x: number, y: number) => boolean;
+  teleportLocation: string | null;
+  isTeleporting: boolean;
+  teleportCooldown: number;
   viewportSize: {width: number; height: number};
   isDarkMode?: boolean;
   onStartBattle: (pokemon: PokedexPokemon, spawnId: string) => void;
-  onResetToHome: () => void;
+  onTeleport: () => void;
 }
 
 export function TiledMapView(props: TiledMapViewProps) {
@@ -49,10 +52,13 @@ export function TiledMapView(props: TiledMapViewProps) {
     user,
     worldPosition,
     isPositionSemiWalkable,
+    teleportLocation,
+    isTeleporting,
+    teleportCooldown,
     viewportSize,
     isDarkMode = false,
     onStartBattle,
-    onResetToHome,
+    onTeleport,
   } = props;
 
   const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} =
@@ -153,6 +159,23 @@ export function TiledMapView(props: TiledMapViewProps) {
           zIndex: 10,
         }}
       />
+
+      {/* Teleport Notification */}
+      {teleportLocation && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none animate-fade-in">
+          <div
+            className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+              isDarkMode
+                ? 'bg-blue-500 text-white border-black'
+                : 'bg-blue-500 text-white border-black'
+            }`}
+          >
+            <div className="pixel-font text-xs font-bold text-white">
+              Teleported to {teleportLocation}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Welcome CTA */}
       {!nearbyPokemon && showWelcomeCTA && (
@@ -266,31 +289,61 @@ export function TiledMapView(props: TiledMapViewProps) {
         </div>
       </div>
 
-      {/* Home Button - always bottom left */}
-      <div className="absolute bottom-2 left-2 z-20">
+      {/* Teleport Button - always bottom left */}
+      <div className="absolute bottom-3 left-2 z-20">
         <button
-          onClick={onResetToHome}
-          className="flex items-center gap-1 border-2 border-black px-2 py-1"
-          title="Return to home position"
+          onClick={onTeleport}
+          disabled={isTeleporting || teleportCooldown > 0}
+          className="flex items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={
+            isTeleporting
+              ? 'Teleporting...'
+              : teleportCooldown > 0
+                ? `Wait ${teleportCooldown}s`
+                : 'Teleport to random location'
+          }
           style={{
-            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+            backgroundColor:
+              isTeleporting || teleportCooldown > 0
+                ? 'rgba(59, 130, 246, 0.85)'
+                : 'rgba(59, 130, 246, 0.9)',
             boxShadow: '4px 4px 0px rgba(0,0,0,1)',
             transform: 'translate(0, 0)',
             transition: 'all 0.15s ease-in-out',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translate(-2px, -2px)';
-            e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            if (!isTeleporting && teleportCooldown === 0) {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            }
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translate(0, 0)';
             e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+            e.currentTarget.style.backgroundColor =
+              isTeleporting || teleportCooldown > 0
+                ? 'rgba(59, 130, 246, 0.85)'
+                : 'rgba(59, 130, 246, 0.9)';
           }}
         >
+          <svg
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-4 h-4 text-white flex-shrink-0"
+          >
+            <path
+              d="M7 2h10v2H7V2zM5 6V4h2v2H5zm0 8H3V6h2v8zm2 2H5v-2h2v2zm2 2H7v-2h2v2zm2 2H9v-2h2v2zm2 0v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm0-8h2v8h-2V6zm0 0V4h-2v2h2zm-5 2h-4v4h4V8z"
+              fill="currentColor"
+            />
+          </svg>
           <span className="pixel-font text-xs font-bold text-white">
-            🏠 Home
+            {isTeleporting
+              ? ' Teleporting'
+              : teleportCooldown > 0
+                ? ` Wait ${teleportCooldown}s`
+                : ' Teleport'}
           </span>
         </button>
       </div>

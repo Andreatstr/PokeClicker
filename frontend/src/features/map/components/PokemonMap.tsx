@@ -543,10 +543,13 @@ export function PokemonMap({
               user={user}
               collisionMapLoaded={collisionMap.collisionMapLoaded}
               isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
+              teleportLocation={movement.teleportLocation}
+              isTeleporting={movement.isTeleporting}
+              teleportCooldown={movement.teleportCooldown}
               viewportSize={renderSize}
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}
-              onResetToHome={movement.resetToHome}
+              onTeleport={movement.teleportToRandomLocation}
             />
           )}
         </div>
