@@ -528,6 +528,7 @@ export function PokemonMap({
               onBattleComplete={handleBattleComplete}
               isDarkMode={isDarkMode}
               onAttackFunctionReady={setBattleAttackFunctionWrapper}
+              isFullscreen={isFullscreen}
             />
           ) : (
             <TiledMapView

@@ -41,7 +41,7 @@ export function BattleResult({
 
   return (
     <section
-      className="relative w-full h-full flex flex-col items-center justify-center p-2 md:p-3"
+      className="relative w-full h-full flex flex-col items-center justify-center p-2 md:p-3 select-none"
       aria-labelledby="battle-result-title"
     >
       <article
