@@ -30,6 +30,10 @@ export function BattleView({
   const {updateRareCandy} = useGameMutations();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
+
+  // Capitalize first letter of Pokemon names
+  const capitalizeName = (name: string) =>
+    name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(
     null
   );
@@ -191,7 +195,7 @@ export function BattleView({
       {/* Opponent Pokemon sprite */}
       <img
         src={opponentPokemon.sprite}
-        alt={opponentPokemon.name}
+        alt={capitalizeName(opponentPokemon.name)}
         className={`absolute image-pixelated pointer-events-none z-10 ${
           isFullscreen
             ? isMobile
@@ -211,7 +215,7 @@ export function BattleView({
               ? '20px'
               : '90px',
         }}
-        aria-label={`Opponent: ${opponentPokemon.name}`}
+        aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
       />
       {/* Opponent health bar */}
       <aside
@@ -230,7 +234,7 @@ export function BattleView({
         <HealthBar
           current={opponentHP}
           max={opponentMaxHP}
-          label={opponentPokemon.name}
+          label={capitalizeName(opponentPokemon.name)}
           side="opponent"
           isDarkMode={isDarkMode}
         />
@@ -266,7 +270,7 @@ export function BattleView({
       {/* Player Pokemon sprite */}
       <img
         src={playerPokemon.sprite}
-        alt={playerPokemon.name}
+        alt={capitalizeName(playerPokemon.name)}
         className={`absolute image-pixelated z-10 ${
           isFullscreen
             ? isMobile
@@ -287,7 +291,7 @@ export function BattleView({
               ? '32px'
               : '80px',
         }}
-        aria-label={`Click to attack with ${playerPokemon.name}`}
+        aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
       />
       {/* Player health bar */}
       <aside
@@ -306,7 +310,7 @@ export function BattleView({
         <HealthBar
           current={playerHP}
           max={playerMaxHP}
-          label={playerPokemon.name}
+          label={capitalizeName(playerPokemon.name)}
           side="player"
           isDarkMode={isDarkMode}
         />
