@@ -86,17 +86,27 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => {
+      // Auto-advance and autoplay the next track
+      shouldAutoplayRef.current = true;
+      nextTrack();
+    };
+    const handleError = () => {
+      // Skip problematic track and try the next one
+      logger.logError(audio.error, 'AudioElementError');
+      shouldAutoplayRef.current = true;
       nextTrack();
     };
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
     };
   }, [nextTrack]);
 
@@ -173,13 +183,12 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       {isMinimized ? (
         <aside
           data-onboarding="music-player"
-          className="fixed bottom-4 left-4 w-12 h-12 lg:w-auto lg:h-auto flex items-center justify-center p-2 lg:p-3 border-4 border-gray-300 dark:border-gray-600 rounded lg:rounded z-50"
+          className="fixed bottom-4 left-4 w-12 h-12 flex items-center justify-center p-2 border-2 border-black z-50 pixel-font"
           style={{
             backgroundColor: 'var(--card)',
             color: 'var(--foreground)',
-            boxShadow: isDarkMode
-              ? '8px 8px 0px 0px rgba(55,65,81,1)'
-              : '8px 8px 0px 0px rgba(187,183,178,1)',
+            borderColor: 'black',
+            boxShadow: '4px 4px 0px rgba(0,0,0,1)',
           }}
           aria-label="Music player (minimized)"
         >
@@ -210,13 +219,12 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
       ) : (
         <aside
           data-onboarding="music-player"
-          className="fixed bottom-4 left-4 lg:bottom-4 lg:left-4 flex items-center gap-2 p-3 border-4 border-gray-300 dark:border-gray-600 rounded z-50"
+          className="fixed bottom-4 left-4 flex items-center gap-2 p-3 border-2 border-black z-50 pixel-font"
           style={{
             backgroundColor: 'var(--card)',
             color: 'var(--foreground)',
-            boxShadow: isDarkMode
-              ? '8px 8px 0px 0px rgba(55,65,81,1)'
-              : '8px 8px 0px 0px rgba(187,183,178,1)',
+            borderColor: 'black',
+            boxShadow: '4px 4px 0px rgba(0,0,0,1)',
           }}
           role="region"
           aria-label="Music player controls"

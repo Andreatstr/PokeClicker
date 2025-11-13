@@ -34,11 +34,47 @@ export function Dialog({open, onClose, children}: DialogProps) {
     };
   }, [open]);
 
+  // Prevent body scroll when dialog is open
+  useEffect(() => {
+    if (!open) return;
+
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    const originalPosition = window.getComputedStyle(document.body).position;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0';
+
+    return () => {
+      document.body.style.overflow = originalStyle;
+      document.body.style.position = originalPosition;
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return createPortal(
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="dialog-backdrop"
+      onClick={onClose}
+      onTouchMove={(e) => {
+        // Prevent backdrop from scrolling
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+        }
+      }}
+    >
+      <div
+        className="dialog-content"
+        onClick={(e) => e.stopPropagation()}
+        onTouchMove={(e) => {
+          // Allow scrolling within dialog content
+          e.stopPropagation();
+        }}
+      >
         {children}
       </div>
     </div>,

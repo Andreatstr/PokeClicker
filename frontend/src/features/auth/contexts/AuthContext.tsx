@@ -35,9 +35,9 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setToken(savedToken);
         setUser(parsedUser);
 
-        if (parsedUser.isGuestUser) {
-          localStorage.removeItem('onboarding_completed');
-        }
+        // Don't clear onboarding on page reload - let OnboardingContext handle it.
+        // OnboardingContext checks sessionStorage for guest users, which persists during session.
+        // This allows onboarding to show on new login, but not on page reload within the same session.
       } catch (e) {
         logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
@@ -52,7 +52,10 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setToken(newToken);
     setUser(newUser);
 
-    if (newUser.isGuestUser) {
+    // For guest users, clear onboarding flags on new login so the tour restarts,
+    // but rely on sessionStorage to avoid replaying on simple reloads.
+    if (newUser.isGuestUser || newUser.username?.toLowerCase() === 'guest') {
+      sessionStorage.removeItem('onboarding_completed_session');
       localStorage.removeItem('onboarding_completed');
     }
 
@@ -60,7 +63,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
   };
 
   const logout = async () => {
-    if (user?.isGuestUser) {
+    if (user?.isGuestUser ?? user?.username?.toLowerCase() === 'guest') {
       try {
         await apolloClient.mutate({
           mutation: DELETE_USER_MUTATION,

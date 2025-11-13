@@ -98,7 +98,18 @@ export function PokemonGrid({
                               ) &&
                               displayedPokemon.findIndex(
                                 (p) => p.id === selectedMobilePokemon.id
-                              ) > 0
+                              ) > 0 &&
+                              displayedPokemon.findIndex(
+                                (p) => p.id === selectedMobilePokemon.id
+                              ) <= 5 &&
+                              displayedPokemon
+                                .slice(
+                                  0,
+                                  displayedPokemon.findIndex(
+                                    (p) => p.id === selectedMobilePokemon.id
+                                  )
+                                )
+                                .every((p) => ownedPokemonIds.includes(p.id))
                             ? 'pokemon-card-locked'
                             : undefined
                       }
@@ -136,38 +147,59 @@ export function PokemonGrid({
                   aria-label="Pokemon scroll list"
                 >
                   <ul className="flex list-none p-0 m-0">
-                    {displayedPokemon.map((pokemon) => (
-                      <li
-                        key={pokemon.id}
-                        onClick={() => setSelectedMobilePokemon(pokemon)}
-                        className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 border-r-2 border-black cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-                          selectedMobilePokemon?.id === pokemon.id
-                            ? 'bg-blue-100 dark:bg-blue-900'
-                            : ''
-                        }`}
-                        style={{minWidth: '100px'}}
-                      >
-                        <img
-                          src={pokemon.sprite}
-                          alt={
-                            pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'
+                    {displayedPokemon.map((pokemon, index) => {
+                      const isOwned = ownedPokemonIds.includes(pokemon.id);
+
+                      // Find first unowned Pokemon for locked card tutorial (on page 1, index 1-5)
+                      const isFirstLockedCard =
+                        paginationPage === 1 &&
+                        index > 0 &&
+                        index <= 5 &&
+                        !isOwned &&
+                        displayedPokemon
+                          .slice(0, index)
+                          .every((p) => ownedPokemonIds.includes(p.id));
+
+                      return (
+                        <li
+                          key={pokemon.id}
+                          onClick={() => setSelectedMobilePokemon(pokemon)}
+                          className={`flex-shrink-0 flex flex-col items-center gap-1 p-2 border-r-2 border-black cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+                            selectedMobilePokemon?.id === pokemon.id
+                              ? 'bg-blue-100 dark:bg-blue-900'
+                              : ''
+                          }`}
+                          style={{minWidth: '100px'}}
+                          data-onboarding={
+                            isFirstLockedCard
+                              ? 'pokemon-card-locked'
+                              : undefined
                           }
-                          className="w-16 h-16 pixelated"
-                          loading="lazy"
-                          decoding="async"
-                          style={{
-                            imageRendering: 'pixelated',
-                            filter: pokemon.isOwned ? 'none' : 'brightness(0)',
-                          }}
-                        />
-                        <p className="text-[10px] font-bold text-center">
-                          No. {pokemon.pokedexNumber}
-                        </p>
-                        <p className="text-xs font-bold capitalize text-center truncate w-full px-1">
-                          {pokemon.isOwned ? pokemon.name : '???'}
-                        </p>
-                      </li>
-                    ))}
+                        >
+                          <img
+                            src={pokemon.sprite}
+                            alt={
+                              pokemon.isOwned ? pokemon.name : 'Unknown Pokémon'
+                            }
+                            className="w-16 h-16 pixelated"
+                            loading="lazy"
+                            decoding="async"
+                            style={{
+                              imageRendering: 'pixelated',
+                              filter: pokemon.isOwned
+                                ? 'none'
+                                : 'brightness(0)',
+                            }}
+                          />
+                          <p className="text-[10px] font-bold text-center">
+                            No. {pokemon.pokedexNumber}
+                          </p>
+                          <p className="text-xs font-bold capitalize text-center truncate w-full px-1">
+                            {pokemon.isOwned ? pokemon.name : '???'}
+                          </p>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </nav>
               </section>

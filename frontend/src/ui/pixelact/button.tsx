@@ -75,19 +75,20 @@ const Button = React.forwardRef<
       return `#${toHex(darkenedR)}${toHex(darkenedG)}${toHex(darkenedB)}`;
     };
 
-    const ringColor = isDarkMode ? 'white' : '#0066ff';
-    const ringOffsetColor = isDarkMode ? '#757474ff' : '#9FA0A0';
+    const customStyle =
+      bgColor != null
+        ? ({
+            backgroundColor: bgColor,
+            '--custom-inner-border-color': darkenColor(bgColor, 90),
+            '--tw-ring-color': isDarkMode ? 'white' : '#0066ff',
+            '--tw-ring-opacity': '1',
+            '--tw-ring-offset-color': isDarkMode ? '#757474ff' : '#9FA0A0',
+          } as Record<string, string>)
+        : {};
 
     const buttonStyle = {
-      backgroundColor: bgColor,
-      ...(bgColor && {
-        '--custom-inner-border-color': darkenColor(bgColor, 90), // Much darker
-      }),
+      ...customStyle,
       ...style,
-      '--tw-ring-color': ringColor,
-      '--tw-ring-opacity': '1',
-      '--tw-ring-offset-width': '8px',
-      '--tw-ring-offset-color': ringOffsetColor,
     } as React.CSSProperties & Record<string, string>;
 
     return (
@@ -95,7 +96,6 @@ const Button = React.forwardRef<
         className={cn(
           pixelButtonVariants({variant, size}),
           '!rounded-none',
-          'focus-visible:ring-[4px]',
           bgColor && 'custom-color-button',
           className
         )}

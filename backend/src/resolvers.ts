@@ -41,19 +41,32 @@ function sanitizeUserForClient(
 ): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
   const rareCandyString: string = userDoc.rare_candy ?? '0';
 
+  // Ensure stats object exists and has all required fields
+  const stats = userDoc.stats || {};
+  const defaultStats = DEFAULT_USER_STATS.stats;
+
   return {
     _id: userDoc._id,
     username: userDoc.username,
     rare_candy: rareCandyString,
     created_at: userDoc.created_at?.toISOString() ?? new Date().toISOString(),
     stats: {
-      ...userDoc.stats,
-      clickPower: userDoc.stats.clickPower ?? 1,
-      autoclicker: userDoc.stats.autoclicker ?? 1,
-      luckyHitChance: userDoc.stats.luckyHitChance ?? 1,
-      luckyHitMultiplier: userDoc.stats.luckyHitMultiplier ?? 1,
-      clickMultiplier: userDoc.stats.clickMultiplier ?? 1,
-      pokedexBonus: userDoc.stats.pokedexBonus ?? 1,
+      // Battle stats (preserve existing values or use defaults)
+      hp: stats.hp ?? defaultStats.hp,
+      attack: stats.attack ?? defaultStats.attack,
+      defense: stats.defense ?? defaultStats.defense,
+      spAttack: stats.spAttack ?? defaultStats.spAttack,
+      spDefense: stats.spDefense ?? defaultStats.spDefense,
+      speed: stats.speed ?? defaultStats.speed,
+      // Clicker upgrades (preserve existing values or use defaults)
+      clickPower: stats.clickPower ?? defaultStats.clickPower ?? 1,
+      autoclicker: stats.autoclicker ?? defaultStats.autoclicker ?? 1,
+      luckyHitChance: stats.luckyHitChance ?? defaultStats.luckyHitChance ?? 1,
+      luckyHitMultiplier:
+        stats.luckyHitMultiplier ?? defaultStats.luckyHitMultiplier ?? 1,
+      clickMultiplier:
+        stats.clickMultiplier ?? defaultStats.clickMultiplier ?? 1,
+      pokedexBonus: stats.pokedexBonus ?? defaultStats.pokedexBonus ?? 1,
     },
     owned_pokemon_ids: userDoc.owned_pokemon_ids ?? [],
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
@@ -807,19 +820,26 @@ export const resolvers = {
         throw new Error('User not found');
       }
 
-      // Calculate cost - get current level for the stat
-      const currentLevel = (userDoc.stats as Record<string, number>)[stat];
-      if (!currentLevel) {
-        throw new Error(`Stat ${stat} not found. Please run migration script.`);
+      // Ensure stats object exists (TypeScript workaround - will be properly initialized if missing)
+      if (!userDoc.stats) {
+        userDoc.stats = DEFAULT_USER_STATS.stats;
       }
-      console.log(
-        `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
-      );
-      const cost = getUpgradeCost(currentLevel, stat);
 
-      console.log(
-        `[DEBUG] Upgrade ${stat}: level=${currentLevel}, cost=${cost.toString()}, userCandy=${userDoc.rare_candy}`
-      );
+      // Get current level for the stat, initialize to 1 if missing
+      let currentLevel = (userDoc.stats as Record<string, number>)[stat];
+      if (!currentLevel || currentLevel < 1) {
+        currentLevel = 1;
+        // Initialize the stat in the database if it's missing
+        await users.updateOne(
+          {_id: new ObjectId(user.id)},
+          {
+            $set: {
+              [`stats.${stat}`]: 1,
+            },
+          }
+        );
+      }
+      const cost = getUpgradeCost(currentLevel, stat);
 
       // Check if user has enough rare candy
       const currentCandy = toDecimal(userDoc.rare_candy);
@@ -832,17 +852,29 @@ export const resolvers = {
       // Calculate new candy amount
       const newCandy = currentCandy.minus(cost);
 
+      // Ensure stats object exists before incrementing
+      const setOperation: Record<string, unknown> = {
+        rare_candy: newCandy.toString(),
+      };
+
+      // If stats object doesn't exist, create it first
+      if (!userDoc.stats || Object.keys(userDoc.stats).length === 0) {
+        setOperation.stats = DEFAULT_USER_STATS.stats;
+      }
+
+      const updateOperation: Record<string, unknown> = {
+        $set: setOperation,
+      };
+
+      // Increment the stat (MongoDB will create the field if it doesn't exist)
+      updateOperation.$inc = {
+        [`stats.${stat}`]: 1,
+      };
+
       // Update stat and deduct cost
       const result = await users.findOneAndUpdate(
         {_id: new ObjectId(user.id)},
-        {
-          $inc: {
-            [`stats.${stat}`]: 1,
-          },
-          $set: {
-            rare_candy: newCandy.toString(),
-          },
-        },
+        updateOperation,
         {returnDocument: 'after'}
       );
 

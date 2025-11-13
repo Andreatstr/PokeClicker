@@ -10,6 +10,7 @@ interface GameBoyConsoleProps {
   candies: Candy[];
   selectedPokemonId: number | null;
   onClickScreen: () => void;
+  isOnboarding?: boolean;
 }
 
 export function GameBoyConsole({
@@ -19,6 +20,7 @@ export function GameBoyConsole({
   candies,
   selectedPokemonId,
   onClickScreen,
+  isOnboarding = false,
 }: GameBoyConsoleProps) {
   return (
     <Card
@@ -126,8 +128,9 @@ export function GameBoyConsole({
                   filter: isAnimating
                     ? 'drop-shadow(0 0 8px rgba(255, 193, 7, 0.8))'
                     : 'none',
-                  animation:
-                    'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
+                  animation: isOnboarding
+                    ? 'none'
+                    : 'idle-bounce 2s ease-in-out infinite, walk-horizontal 4s ease-in-out infinite',
                 }}
               />
             </button>
@@ -217,24 +220,6 @@ export function GameBoyConsole({
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Start/Select Buttons (visual only) */}
-        <div className="flex gap-4 items-center mb-2">
-          <div
-            className="w-10 h-3 rounded-full shadow-md border-2"
-            style={{
-              backgroundColor: '#4a4a5e',
-              borderColor: '#2a2a3e',
-            }}
-          />
-          <div
-            className="w-10 h-3 rounded-full shadow-md border-2"
-            style={{
-              backgroundColor: '#4a4a5e',
-              borderColor: '#2a2a3e',
-            }}
-          />
         </div>
 
         {/* Speaker Holes */}

@@ -87,7 +87,6 @@ describe('PokeClicker component', () => {
 
     render(<PokeClicker />);
 
-    expect(screen.getByText('Rare Candy')).toBeInTheDocument();
     expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
   });
 

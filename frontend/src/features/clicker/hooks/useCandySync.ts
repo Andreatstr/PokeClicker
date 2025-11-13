@@ -4,6 +4,7 @@ import {GameConfig} from '@/config';
 import {useGameMutations} from './useGameMutations';
 import type {User} from '@features/auth';
 import {toDecimal} from '@/lib/decimal';
+import {emitCandyUpdate} from '@/lib/candyEvents';
 
 interface UseCandySyncProps {
   user: User | null;
@@ -31,14 +32,14 @@ export function useCandySync({
   const lastSyncRef = useRef<number>(Date.now());
   const [displayError, setDisplayError] = useState<string | null>(null);
 
-  const hasMountedRef = useRef(false);
   useEffect(() => {
-    if (user && !hasMountedRef.current) {
-      setLocalRareCandy(String(user.rare_candy));
-      setUnsyncedAmount('0');
-      unsyncedAmountRef.current = '0';
-      hasMountedRef.current = true;
-    }
+    if (!user) return;
+
+    const nextValue = String(user.rare_candy ?? '0');
+    setLocalRareCandy(nextValue);
+    setUnsyncedAmount('0');
+    unsyncedAmountRef.current = '0';
+    emitCandyUpdate(nextValue);
   }, [user]);
 
   const flushPendingCandy = useCallback(async () => {
@@ -113,7 +114,11 @@ export function useCandySync({
   }, []);
 
   const addCandy = useCallback((amount: string) => {
-    setLocalRareCandy((prev) => toDecimal(prev).plus(amount).toString());
+    setLocalRareCandy((prev) => {
+      const next = toDecimal(prev).plus(amount).toString();
+      emitCandyUpdate(next);
+      return next;
+    });
     setUnsyncedAmount((prev) => {
       const newAmount = toDecimal(prev).plus(amount).toString();
       unsyncedAmountRef.current = newAmount;
@@ -122,7 +127,11 @@ export function useCandySync({
   }, []);
 
   const deductCandy = useCallback((amount: string) => {
-    setLocalRareCandy((prev) => toDecimal(prev).minus(amount).toString());
+    setLocalRareCandy((prev) => {
+      const next = toDecimal(prev).minus(amount).toString();
+      emitCandyUpdate(next);
+      return next;
+    });
   }, []);
 
   return {

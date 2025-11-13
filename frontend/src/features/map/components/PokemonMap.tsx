@@ -2,6 +2,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
+import {CandyCounterOverlay} from '@/components';
 import {TiledMapView} from './TiledMapView';
 import {BattleView} from '@features/battle';
 import {useCollisionMap} from '../hooks/useCollisionMap';
@@ -91,6 +92,9 @@ export function PokemonMap({
   // Fullscreen state
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // How to Play modal state
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
 
   // Responsive viewport for fitting GameBoy on mobile and web
   const [viewport, setViewport] = useState<{width: number; height: number}>(
@@ -475,11 +479,13 @@ export function PokemonMap({
         <div
           ref={viewportRef}
           className={`relative shadow-inner bg-black overflow-hidden ${
-            isFullscreen
-              ? 'border-2 border-black w-full h-full'
-              : 'border-4 border-black w-full h-full box-content'
+            isFullscreen ? 'w-full h-full' : 'w-full h-full box-content'
           }`}
         >
+          {/* Candy counter in fullscreen, anchored to the GameBoy viewport (top-right) */}
+          {isFullscreen && (
+            <CandyCounterOverlay position="top-right" strategy="absolute" />
+          )}
           {/* Fullscreen/Exit Button - top left of viewport */}
           <button
             onClick={toggleFullscreen}
@@ -522,6 +528,51 @@ export function PokemonMap({
               {isFullscreen ? 'EXIT' : 'FULL'}
             </span>
           </button>
+
+          {/* Info / How to Play Button - Bottom Right */}
+          {!inBattle && (
+            <button
+              onClick={() => setShowHowToPlay(true)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setShowHowToPlay(true);
+              }}
+              className="absolute bottom-3 right-3 z-50 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
+              title="How to play"
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+                transform: 'translate(0, 0)',
+                transition: 'all 0.15s ease-in-out',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor =
+                  'rgba(37, 99, 235, 0.95)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+                e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor =
+                  'rgba(59, 130, 246, 0.9)';
+              }}
+            >
+              <svg
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5 text-white"
+              >
+                <path
+                  d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          )}
+
           {inBattle && battleOpponent && playerPokemon ? (
             <BattleView
               playerPokemon={playerPokemon}
@@ -551,6 +602,8 @@ export function PokemonMap({
               viewportSize={renderSize}
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}
+              showWorldInfo={showHowToPlay}
+              onCloseWorldInfo={() => setShowHowToPlay(false)}
               onTeleport={movement.teleportToRandomLocation}
             />
           )}

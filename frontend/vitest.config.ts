@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    // Inline problematic deps so Vite/Esbuild bundles them and resolves ESM/CJS interop
+    deps: {
+      inline: ['jsdom', 'parse5'],
+    },
     setupFiles: ['./src/test/setup.ts'],
     exclude: [
       '**/node_modules/**',

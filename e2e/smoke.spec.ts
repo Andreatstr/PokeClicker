@@ -44,7 +44,8 @@ test.describe("Smoke Tests", () => {
 
     await navbar.navigateToClicker();
     await page.waitForTimeout(500);
-    await expect(page.getByText("Rare Candy")).toBeVisible();
+    // Check for global candy counter overlay instead of local "Rare Candy" text
+    await expect(page.locator('[data-onboarding="candy-counter"]')).toBeVisible();
   });
 
   test("clicker game displays and works", async ({ page }) => {

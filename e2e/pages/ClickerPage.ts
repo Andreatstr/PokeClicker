@@ -9,12 +9,11 @@ export class ClickerPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    // Candy count is displayed next to "Rare Candy" text
+    // Candy count is now in the global overlay with data-onboarding="candy-counter"
+    // The count is in the <dd> element next to the candy icon
     this.candyCount = page
-      .getByText("Rare Candy")
-      .locator("..")
-      .locator("..")
-      .getByText(/^\d+$/);
+      .locator('[data-onboarding="candy-counter"]')
+      .locator('dd');
     // Click button is the Pokemon button
     this.clickButton = page.getByRole('button', { name: /click pokemon to earn rare candy/i });
     // Stats are now simplified to Click Power and Passive Income
@@ -27,9 +26,13 @@ export class ClickerPage extends BasePage {
   }
 
   async getCandyCount(): Promise<number> {
+    // Wait for the candy counter to be visible first
+    await this.page.locator('[data-onboarding="candy-counter"]').waitFor({ state: 'visible' });
     const text = await this.candyCount.textContent();
-    const match = text?.match(/[\d.]+/);
-    return match ? parseFloat(match[0]) : 0;
+    // Handle formatted numbers (may include commas, spaces, or other formatting)
+    // Remove all non-digit characters except decimal points
+    const cleaned = text?.replace(/[^\d.]/g, '') || '0';
+    return parseFloat(cleaned) || 0;
   }
 
   async getStatLevel(

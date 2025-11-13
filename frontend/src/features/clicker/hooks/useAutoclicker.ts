@@ -9,6 +9,7 @@ interface UseAutoclickerProps {
   isAuthenticated: boolean;
   onAutoClick: (amount: string) => void;
   ownedPokemonCount: number;
+  isOnboarding?: boolean;
 }
 
 export function useAutoclicker({
@@ -16,9 +17,10 @@ export function useAutoclicker({
   isAuthenticated,
   onAutoClick,
   ownedPokemonCount,
+  isOnboarding = false,
 }: UseAutoclickerProps) {
   useEffect(() => {
-    if (!isAuthenticated || !stats) return;
+    if (!isAuthenticated || !stats || isOnboarding) return;
     if (!stats.autoclicker || stats.autoclicker === 0) return;
 
     const clicksPerSecond = UPGRADES.autoclicker.formula(stats.autoclicker - 1);
@@ -49,5 +51,5 @@ export function useAutoclicker({
     }, updateIntervalMs);
 
     return () => clearInterval(interval);
-  }, [stats, isAuthenticated, onAutoClick, ownedPokemonCount]);
+  }, [stats, isAuthenticated, onAutoClick, ownedPokemonCount, isOnboarding]);
 }

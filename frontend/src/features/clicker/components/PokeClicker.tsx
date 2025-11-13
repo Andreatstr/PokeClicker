@@ -7,16 +7,19 @@ import {useAutoclicker} from '../hooks/useAutoclicker';
 import {useClickerActions} from '../hooks/useClickerActions';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
 import {GameBoyConsole} from './GameBoyConsole';
-import {RareCandyCounter} from './RareCandyCounter';
 import {UpgradesPanel} from './UpgradesPanel';
 import {UnauthenticatedMessage} from './UnauthenticatedMessage';
 import {ErrorBanner} from '@/components';
 
 interface PokeClickerProps {
   isDarkMode?: boolean;
+  isOnboarding?: boolean;
 }
 
-export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
+export function PokeClicker({
+  isDarkMode = false,
+  isOnboarding = false,
+}: PokeClickerProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
   const {upgradeStat, loading} = useGameMutations();
 
@@ -71,6 +74,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     isAuthenticated,
     onAutoClick: addCandy,
     ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
+    isOnboarding,
   });
 
   useEffect(() => {
@@ -115,11 +119,10 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
         candies={candies}
         selectedPokemonId={user?.selected_pokemon_id || null}
         onClickScreen={handleClick}
+        isOnboarding={isOnboarding}
       />
 
       <div className="flex flex-col gap-6 w-full max-w-md lg:max-w-lg">
-        <RareCandyCounter isDarkMode={isDarkMode} candyCount={localRareCandy} />
-
         <UpgradesPanel
           isDarkMode={isDarkMode}
           stats={stats}

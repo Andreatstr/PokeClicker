@@ -135,11 +135,11 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
           {/* League toggle buttons */}
           <nav
             data-onboarding="league-buttons"
-            className="flex justify-center md:justify-start gap-2"
+            className="w-full max-w-full grid grid-cols-1 sm:grid-cols-2 gap-2 md:flex md:justify-start"
             aria-label="League selection"
           >
             <Button
-              className={`flex-1 md:flex-none text-xs sm:text-sm ${
+              className={`w-full md:w-auto min-w-0 px-3 py-2 text-xs sm:text-sm ${
                 activeLeague === 'candy'
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
@@ -152,7 +152,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
               Candy League
             </Button>
             <Button
-              className={`flex-1 md:flex-none text-xs sm:text-sm ${
+              className={`w-full md:w-auto min-w-0 px-3 py-2 text-xs sm:text-sm ${
                 activeLeague === 'pokemon'
                   ? 'bg-gray-800 text-white hover:bg-gray-900'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'

@@ -7,6 +7,7 @@
   justify-content: center;
   align-items: center;
   z-index: 10000; /* Higher than tutorial overlay (9999) */
+  overflow: hidden;
 }
 
 .dialog-content {
@@ -47,16 +48,41 @@
 @media (max-width: 768px) {
   .dialog-backdrop {
     align-items: flex-end;
+    touch-action: none;
   }
 
   .dialog-content {
     width: 100%;
     max-width: 100%;
+    max-height: 85vh;
     border-radius: 16px 16px 0 0;
     padding: 1rem;
     animation: drawer-slide-up 0.3s ease-out;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  /* Hide scrollbar on mobile but keep functionality */
+  .dialog-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dialog-content {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 }
 
 .dialog-body {
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .dialog-body {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
 }

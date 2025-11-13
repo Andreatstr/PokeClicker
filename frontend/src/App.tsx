@@ -45,6 +45,10 @@ const RanksPage = lazy(() =>
   }))
 );
 
+const ONBOARDING_MODAL_STEPS = [3, 4, 6];
+const POKEMON_CARD_POLL_INTERVAL_MS = 150;
+const POKEMON_CARD_MAX_ATTEMPTS = 20;
+
 function App() {
   const {isDarkMode, toggleTheme} = useTheme();
   const {currentPage, setCurrentPage} = usePageNavigation();
@@ -60,6 +64,21 @@ function App() {
 
   const {step, isActive, nextStep, previousStep, skipTutorial} =
     useOnboarding();
+
+  const isOnboardingModalStep =
+    isActive && ONBOARDING_MODAL_STEPS.includes(step);
+
+  // Ensure onboarding always starts from the Pokédex page for consistency
+  useEffect(() => {
+    if (
+      isActive &&
+      step === 0 &&
+      currentPage !== 'pokedex' &&
+      currentPage !== 'login'
+    ) {
+      setCurrentPage('pokedex');
+    }
+  }, [isActive, step, currentPage, setCurrentPage]);
 
   // Track if map is in fullscreen mode
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
@@ -78,31 +97,40 @@ function App() {
     }
   }, [isMapFullscreen]);
 
-  // Function to programmatically open the first Pokemon modal for tutorial
   const handleOpenFirstPokemon = () => {
     const tryClick = () => {
       const container = document.querySelector(
         '[data-onboarding="pokemon-card"]'
       );
-      const clickable = container?.querySelector<HTMLElement>(
-        '[role="button"], aside[role="button"]'
+
+      if (container) {
+        const card = container.querySelector<HTMLElement>('aside');
+        if (card) {
+          card.click();
+          return true;
+        }
+      }
+
+      const anyCard = document.querySelector<HTMLElement>(
+        'aside.cursor-pointer'
       );
-      if (clickable) {
-        clickable.click();
+      if (anyCard) {
+        anyCard.click();
         return true;
       }
+
       return false;
     };
+
     if (tryClick()) return;
 
     let attempts = 0;
-    const maxAttempts = 10;
     const interval = setInterval(() => {
       attempts += 1;
-      if (tryClick() || attempts >= maxAttempts) {
+      if (tryClick() || attempts >= POKEMON_CARD_MAX_ATTEMPTS) {
         clearInterval(interval);
       }
-    }, 300);
+    }, POKEMON_CARD_POLL_INTERVAL_MS);
   };
 
   const getMainClassName = () => {
@@ -122,7 +150,6 @@ function App() {
               isDarkMode={isDarkMode}
               onPokemonClick={handlePokemonClick}
             />
-            <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
         );
 
@@ -153,7 +180,7 @@ function App() {
                 />
               }
             >
-              <PokeClicker isDarkMode={isDarkMode} />
+              <PokeClicker isDarkMode={isDarkMode} isOnboarding={isActive} />
             </Suspense>
           </section>
         );
@@ -194,7 +221,6 @@ function App() {
               isDarkMode={isDarkMode}
               onPokemonClick={handlePokemonClick}
             />
-            <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
         );
     }
@@ -253,11 +279,15 @@ function App() {
                 onSelectPokemon={handleSelectPokemon}
                 onPurchase={handlePurchase}
                 isDarkMode={isDarkMode}
+                disableFocusTrap={isOnboardingModalStep}
               />
             </Suspense>
           )}
         </>
       )}
+      {/* Candy counter shows on all pages; hide global when world is fullscreen */}
+      {!(currentPage === 'map' && isMapFullscreen) && <CandyCounterOverlay />}
+
       {/* Keep music player visible and playing in fullscreen */}
       <div className="relative">
         <BackgroundMusic isDarkMode={isDarkMode} />
