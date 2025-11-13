@@ -383,9 +383,21 @@ export function PokemonMap({
       if (!isCurrentlyFullscreen) {
         // Request fullscreen with vendor prefixes
         await requestFullscreen(element);
+
+        // Verify fullscreen was successfully activated
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (!isFullscreenActive(document)) {
+          throw new Error('Fullscreen request failed - not activated');
+        }
       } else {
         // Exit fullscreen with vendor prefixes
         await exitFullscreen(document);
+
+        // Verify fullscreen was successfully exited
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (isFullscreenActive(document)) {
+          throw new Error('Fullscreen exit failed - still active');
+        }
       }
     } catch (error) {
       logger.logError(error, 'ToggleFullscreen');

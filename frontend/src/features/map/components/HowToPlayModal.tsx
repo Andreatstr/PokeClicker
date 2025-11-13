@@ -1,3 +1,4 @@
+import {useEffect, useRef} from 'react';
 import {Button, Dialog, DialogBody} from '@/ui/pixelact';
 
 const DEMO_BUTTON_STYLE = {pointerEvents: 'none' as const};
@@ -17,6 +18,18 @@ export function HowToPlayModal({
 }: HowToPlayModalProps) {
   const accentColor = isDarkMode ? '#60a5fa' : '#1e40af';
   const bodyTextColor = isDarkMode ? '#e5e7eb' : '#111827';
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus management: move focus to dialog when opened
+  useEffect(() => {
+    if (isOpen && dialogRef.current) {
+      // Small delay to ensure the dialog is fully rendered
+      const timeoutId = setTimeout(() => {
+        dialogRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -31,6 +44,8 @@ export function HowToPlayModal({
 
         <div
           id="world-guide-modal"
+          ref={dialogRef}
+          tabIndex={-1}
           className={`pixel-font border-4 p-3 md:p-4 relative backdrop-blur-md w-full ${
             isDarkMode
               ? 'bg-gray-900 border-gray-700'
@@ -44,6 +59,7 @@ export function HowToPlayModal({
             backgroundColor: isDarkMode
               ? 'rgba(20, 20, 20, 0.98)'
               : 'rgba(245, 241, 232, 1)',
+            outline: 'none', // Remove default focus outline
           }}
         >
           {/* Close Button */}
