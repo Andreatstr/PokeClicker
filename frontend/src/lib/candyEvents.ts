@@ -32,4 +32,3 @@ export function subscribeToCandyUpdates(
     window.removeEventListener(CANDY_UPDATE_EVENT, handler);
   };
 }
-
