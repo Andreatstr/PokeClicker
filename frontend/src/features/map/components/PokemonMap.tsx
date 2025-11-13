@@ -2,6 +2,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
+import {CandyCounterOverlay} from '@/components';
 import {TiledMapView} from './TiledMapView';
 import {BattleView} from '@features/battle';
 import {useCollisionMap} from '../hooks/useCollisionMap';
@@ -477,11 +478,17 @@ export function PokemonMap({
         <div
           ref={viewportRef}
           className={`relative shadow-inner bg-black overflow-hidden ${
-            isFullscreen
-              ? 'border-2 border-black w-full h-full'
-              : 'border-4 border-black w-full h-full box-content'
+            isFullscreen ? 'w-full h-full' : 'w-full h-full box-content'
           }`}
         >
+          {/* Candy counter in fullscreen, anchored to the GameBoy viewport (top-right) */}
+          {isFullscreen && (
+            <CandyCounterOverlay
+              isDarkMode={false}
+              position="top-right"
+              strategy="absolute"
+            />
+          )}
           {/* Fullscreen/Exit Button - top left of viewport */}
           <button
             onClick={toggleFullscreen}
@@ -576,6 +583,7 @@ export function PokemonMap({
               onBattleComplete={handleBattleComplete}
               isDarkMode={isDarkMode}
               onAttackFunctionReady={setBattleAttackFunctionWrapper}
+              isFullscreen={isFullscreen}
             />
           ) : (
             <TiledMapView
@@ -590,12 +598,16 @@ export function PokemonMap({
               worldPosition={movement.worldPosition}
               user={user}
               collisionMapLoaded={collisionMap.collisionMapLoaded}
+              isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
+              teleportLocation={movement.teleportLocation}
+              isTeleporting={movement.isTeleporting}
+              teleportCooldown={movement.teleportCooldown}
               viewportSize={renderSize}
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}
-              onResetToHome={movement.resetToHome}
               showWorldInfo={showHowToPlay}
               onCloseWorldInfo={() => setShowHowToPlay(false)}
+              onTeleport={movement.teleportToRandomLocation}
             />
           )}
         </div>

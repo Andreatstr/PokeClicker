@@ -150,7 +150,6 @@ function App() {
               isDarkMode={isDarkMode}
               onPokemonClick={handlePokemonClick}
             />
-            <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
         );
 
@@ -222,7 +221,6 @@ function App() {
               isDarkMode={isDarkMode}
               onPokemonClick={handlePokemonClick}
             />
-            <CandyCounterOverlay isDarkMode={isDarkMode} />
           </>
         );
     }
@@ -287,6 +285,11 @@ function App() {
           )}
         </>
       )}
+      {/* Candy counter shows on all pages; hide global when world is fullscreen */}
+      {!(currentPage === 'map' && isMapFullscreen) && (
+        <CandyCounterOverlay isDarkMode={isDarkMode} />
+      )}
+
       {/* Keep music player visible and playing in fullscreen */}
       <div className="relative">
         <BackgroundMusic isDarkMode={isDarkMode} />
