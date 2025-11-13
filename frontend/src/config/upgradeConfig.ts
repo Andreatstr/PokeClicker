@@ -86,7 +86,9 @@ export const BASE_UPGRADE_COST = 25;
 
 export function getUpgradeCost(statKey: string, currentLevel: number): number {
   const config = UPGRADES[statKey];
-  if (!config) return 25;
+  if (!config) {
+    throw new Error(`Unknown upgrade stat: ${statKey}`);
+  }
 
   return Math.floor(
     BASE_UPGRADE_COST * Math.pow(config.costMultiplier, currentLevel - 1)

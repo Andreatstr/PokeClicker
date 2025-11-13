@@ -22,15 +22,6 @@ export const GameConfig = {
   },
 
   /**
-   * Upgrade costs and formulas
-   * Cost formula: baseCost × multiplier^(level - 1)
-   */
-  upgrades: {
-    baseCost: 10,
-    costMultiplier: 1.5,
-  },
-
-  /**
    * Pokemon purchase
    */
   purchase: {

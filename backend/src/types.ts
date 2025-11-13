@@ -18,7 +18,7 @@ import {ObjectId} from 'mongodb';
 // }
 
 export interface UserStats {
-  rare_candy: string | number; // String for new data, number for old data (migration support)
+  rare_candy: string;
   stats: {
     hp: number;
     attack: number;
@@ -64,7 +64,7 @@ export interface PokemonQueryArgs {
 }
 
 export const DEFAULT_USER_STATS = {
-  rare_candy: '0', // String to support large numbers (Decimal)
+  rare_candy: '0',
   stats: {
     hp: 1,
     attack: 1,
@@ -72,7 +72,7 @@ export const DEFAULT_USER_STATS = {
     spAttack: 1,
     spDefense: 1,
     speed: 1,
-    // PokeClicker upgrades (start at level 1):
+    // PokeClicker upgrades:
     clickPower: 1,
     autoclicker: 1,
     luckyHitChance: 1,

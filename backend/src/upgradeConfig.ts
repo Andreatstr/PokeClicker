@@ -1,7 +1,4 @@
-/**
- * Single source of truth for all upgrade configurations
- * Formulas, costs, and upgrade behavior defined here
- */
+// Formulas, costs, and upgrade behavior defined here
 
 export interface UpgradeConfig {
   key: string;
@@ -67,8 +64,7 @@ export const BASE_UPGRADE_COST = 25;
 export function getUpgradeCost(statKey: string, currentLevel: number): number {
   const config = UPGRADES[statKey];
   if (!config) {
-    // Fallback for unknown stats (legacy support)
-    return Math.floor(BASE_UPGRADE_COST * Math.pow(2.5, currentLevel - 1));
+    throw new Error(`Unknown upgrade stat: ${statKey}`);
   }
 
   return Math.floor(

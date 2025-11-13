@@ -39,11 +39,7 @@ const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 function sanitizeUserForClient(
   userDoc: UserDocument
 ): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
-  const rareCandyValue: string | number = userDoc.rare_candy ?? '0';
-  const rareCandyString: string =
-    typeof rareCandyValue === 'number'
-      ? String(rareCandyValue)
-      : rareCandyValue;
+  const rareCandyString: string = userDoc.rare_candy ?? '0';
 
   return {
     _id: userDoc._id,
@@ -91,7 +87,7 @@ const authMutations = {
       username,
       password_hash,
       created_at: new Date(),
-      rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
+      rare_candy: DEFAULT_USER_STATS.rare_candy ?? '0',
       stats: DEFAULT_USER_STATS.stats,
       owned_pokemon_ids: [1],
       showInRanks: true,
@@ -161,9 +157,6 @@ function getUpgradeCost(currentLevel: number, stat: string): Decimal {
 
 // Helper to get Pokemon purchase cost
 function getPokemonCost(pokemonId: number): Decimal {
-  // Slower exponential pricing by tier: 100 × 1.5^(tier)
-  // Pokemon are grouped into tiers of 10
-  // Tier 0 (ID 1-10): 100, Tier 1 (ID 11-20): 150, Tier 2 (ID 21-30): 225, etc.
   const tier = Math.floor(pokemonId / 10);
   return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
 }
@@ -171,15 +164,8 @@ function getPokemonCost(pokemonId: number): Decimal {
 // Helper to get Pokemon upgrade cost based on base stats
 function getPokemonUpgradeCost(
   currentLevel: number,
-  pokemonStats?: PokemonStats
+  pokemonStats: PokemonStats
 ): Decimal {
-  // If no stats provided, fall back to old system for backwards compatibility
-  if (!pokemonStats) {
-    return new Decimal(100)
-      .times(new Decimal(2.5).pow(currentLevel - 1))
-      .floor();
-  }
-
   // Calculate base cost multiplier based on Pokemon's total base stats
   const totalBaseStats =
     pokemonStats.hp +

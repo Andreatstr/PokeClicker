@@ -115,7 +115,7 @@ describe('GraphQL Resolvers', () => {
 
       expect(result).toBeDefined();
       expect(result.username).toBe('testuser');
-      expect(result.rare_candy).toBe('100'); // Changed to string for large number support
+      expect(result.rare_candy).toBe('100');
       expect(result.stats.clickPower).toBe(5);
       expect(result.owned_pokemon_ids).toEqual([1, 25]);
       expect(result).not.toHaveProperty('password_hash');
@@ -506,7 +506,7 @@ describe('GraphQL Resolvers', () => {
       expect(result).toHaveProperty('token');
       expect(result).toHaveProperty('user');
       expect(result.user.username).toBe('testuser');
-      expect(result.user.rare_candy).toBe('50'); // Changed to string for large number support
+      expect(result.user.rare_candy).toBe('50');
 
       // Verify token
       const decoded = jwt.verify(result.token, JWT_SECRET) as jwt.JwtPayload;
@@ -668,7 +668,7 @@ describe('GraphQL Resolvers', () => {
       );
 
       expect(result.stats.clickPower).toBe(3);
-      expect(result.rare_candy).toBe('72'); // Changed to string for large number support
+      expect(result.rare_candy).toBe('72');
     });
 
     it('should throw error when stat is invalid', async () => {
@@ -899,7 +899,7 @@ describe('GraphQL Resolvers', () => {
       );
 
       expect(result.owned_pokemon_ids).toContain(25);
-      expect(result.rare_candy).toBe('100'); // No cost - changed to string for large number support
+      expect(result.rare_candy).toBe('100');
     });
 
     it('should return user without error when user already owns the Pokemon', async () => {
@@ -940,7 +940,7 @@ describe('GraphQL Resolvers', () => {
 
       // Should return user without throwing error (idempotent operation)
       expect(result.owned_pokemon_ids).toContain(25);
-      expect(result.rare_candy).toBe('100'); // Changed to string for large number support
+      expect(result.rare_candy).toBe('100');
     });
   });
 });
