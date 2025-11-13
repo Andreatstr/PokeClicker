@@ -21,6 +21,9 @@ import {
   waitForRect,
   // utils for legacy behavior only
   scrollElementToTop,
+  // helpers used in scroll/resize handling
+  isRectInViewport,
+  scrollElementIntoView,
 } from './onboardingUtils';
 
 type Page = 'pokedex' | 'clicker' | 'map' | 'profile' | 'ranks';
@@ -222,6 +225,7 @@ export function OnboardingOverlay({
   const pendingTimeoutsRef = useRef<number[]>([]);
   const openedMobileMenuForStepRef = useRef<number | null>(null);
   const skippedStepRef = useRef<number | null>(null);
+  const recenterAttemptsRef = useRef<Record<number, number>>({});
   // revert advanced recentering for web; mobile-specific scroll handled inline
   const maxWaitTimeRef = useRef<number | undefined>(undefined);
   const hasShownRef = useRef<boolean>(false);
@@ -279,7 +283,7 @@ export function OnboardingOverlay({
       onOpenFirstPokemon
     ) {
       const isMobile = isMobileDevice();
-      let openDelay = TIMING.MODAL_OPEN_DEFAULT;
+      let openDelay: number = TIMING.MODAL_OPEN_DEFAULT;
       if (currentStep.target === 'pokemon-stats') {
         openDelay = isMobile ? TIMING.MODAL_OPEN_MOBILE : 400; // give desktop extra time for modal mount
       }

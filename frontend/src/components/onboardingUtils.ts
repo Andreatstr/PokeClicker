@@ -143,7 +143,8 @@ export function getScrollableAncestor(el: HTMLElement): HTMLElement | Document {
     if (isScrollable(node)) return node;
     node = node.parentElement;
   }
-  return document.scrollingElement || document.documentElement;
+  // Use Document as a sentinel for window/document scrolling
+  return document;
 }
 
 export function scrollElementIntoView(
