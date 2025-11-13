@@ -141,10 +141,10 @@ describe('GraphQL Resolvers', () => {
       );
     });
 
-    it('should migrate missing stats for existing users', async () => {
+    it('should return user with all stats', async () => {
       const mockUser: UserDocument = {
         _id: new ObjectId(),
-        username: 'olduser',
+        username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
         rare_candy: '50',
@@ -155,46 +155,27 @@ describe('GraphQL Resolvers', () => {
           spAttack: 4,
           spDefense: 2,
           speed: 6,
-          // Missing clickPower and autoclicker
+          clickPower: 2,
+          autoclicker: 3,
+          luckyHitChance: 1,
+          luckyHitMultiplier: 1,
+          clickMultiplier: 1,
+          pokedexBonus: 1,
         },
         owned_pokemon_ids: [1],
       };
 
-      const updatedUser = {
-        ...mockUser,
-        stats: {
-          ...mockUser.stats,
-          clickPower: 1,
-          autoclicker: 1,
-        },
-      };
-
-      mockFindOne
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(updatedUser);
-      mockUpdateOne.mockResolvedValue({modifiedCount: 1});
+      mockFindOne.mockResolvedValueOnce(mockUser);
 
       const context: AuthContext = {
-        user: {id: mockUser._id.toString(), username: 'olduser'},
+        user: {id: mockUser._id.toString(), username: 'testuser'},
       };
 
       const result = await resolvers.Query.me({}, {}, context);
 
-      expect(mockUpdateOne).toHaveBeenCalledWith(
-        {_id: mockUser._id},
-        {
-          $set: {
-            'stats.clickPower': 1,
-            'stats.autoclicker': 1,
-            'stats.luckyHitChance': 1,
-            'stats.luckyHitMultiplier': 1,
-            'stats.clickMultiplier': 1,
-            'stats.pokedexBonus': 1,
-          },
-        }
-      );
-      expect(result.stats.clickPower).toBe(1);
-      expect(result.stats.autoclicker).toBe(1);
+      expect(result.stats.clickPower).toBe(2);
+      expect(result.stats.autoclicker).toBe(3);
+      expect(result.stats.luckyHitChance).toBe(1);
     });
   });
 

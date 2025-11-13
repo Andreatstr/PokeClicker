@@ -34,17 +34,6 @@ export async function initializeSchema(db: Db): Promise<void> {
     );
     console.log('Created index on showInRanks');
 
-    // Migrate existing users to have showInRanks default value
-    const migrationResult = await usersCollection.updateMany(
-      {showInRanks: {$exists: false}},
-      {$set: {showInRanks: true}}
-    );
-    if (migrationResult.modifiedCount > 0) {
-      console.log(
-        `Migrated ${migrationResult.modifiedCount} existing users with showInRanks=true`
-      );
-    }
-
     console.log('Database schema initialized successfully');
   } catch (error) {
     console.error('Failed to initialize schema:', error);

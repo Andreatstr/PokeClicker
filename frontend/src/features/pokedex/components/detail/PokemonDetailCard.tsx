@@ -10,11 +10,11 @@ import {useState, useRef} from 'react';
 import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
-import {getPokemonCost, getBackgroundImageUrl} from '../../utils/pokemonCost';
 import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
+import {getPokemonCost} from '@/config';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -156,7 +156,7 @@ export function PokemonDetailCard({
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = isOwned
-    ? getBackgroundImageUrl(pokemon.types)
+    ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
   const upgradeLevel = upgrade?.level || 1;

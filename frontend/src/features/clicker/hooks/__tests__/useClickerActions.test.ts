@@ -14,7 +14,6 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/calculateCandyPerClick', () => ({
   calculateCandyPerClick: vi.fn((stats) => {
-    // Simulate click power calculation - returns string for Decimal support
     if (stats.clickPower) {
       return String(Math.floor(Math.pow(1.75, stats.clickPower - 1)));
     }

@@ -148,20 +148,16 @@ const authMutations = {
   },
 };
 
-// Helper to get upgrade cost (uses config as single source of truth)
 function getUpgradeCost(currentLevel: number, stat: string): Decimal {
-  // Use centralized config
   const cost = getUpgradeCostFromConfig(stat, currentLevel);
   return new Decimal(cost);
 }
 
-// Helper to get Pokemon purchase cost
 function getPokemonCost(pokemonId: number): Decimal {
   const tier = Math.floor(pokemonId / 10);
   return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
 }
 
-// Helper to get Pokemon upgrade cost based on base stats
 function getPokemonUpgradeCost(
   currentLevel: number,
   pokemonStats: PokemonStats
@@ -175,15 +171,8 @@ function getPokemonUpgradeCost(
     pokemonStats.spDefense +
     pokemonStats.speed;
 
-  // Much more aggressive scaling to match purchase cost differences
-  // Weak Pokemon (~200 stats): ~25 base cost
-  // Average Pokemon (~400 stats): ~100 base cost
-  // Strong Pokemon (~600 stats): ~300 base cost
-  // Legendary Pokemon (~800+ stats): ~800+ base cost
-  const baseCostMultiplier = Math.max(25, Math.floor(totalBaseStats / 2)); // Much steeper scaling
+  const baseCostMultiplier = Math.max(25, Math.floor(totalBaseStats / 2));
 
-  // Cost formula: baseCost × 2.5^(level-1)
-  // Level 1->2: baseCost, Level 2->3: baseCost×2.5, Level 3->4: baseCost×6.25, etc.
   return new Decimal(baseCostMultiplier)
     .times(new Decimal(2.5).pow(currentLevel - 1))
     .floor();
@@ -202,35 +191,10 @@ export const resolvers = {
 
       const db = getDatabase();
       const users = db.collection('users') as Collection<UserDocument>;
-      let userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
 
       if (!userDoc) {
         throw new Error('User not found');
-      }
-
-      // Automatic migration: Initialize new stats for existing users
-      let needsUpdate = false;
-      const updates: Record<string, number> = {};
-
-      const clickerStats = getClickerUpgradeKeys();
-
-      for (const stat of clickerStats) {
-        const statValue = (userDoc.stats as Record<string, number | undefined>)[
-          stat
-        ];
-        if (!statValue) {
-          updates[`stats.${stat}`] = 1;
-          needsUpdate = true;
-        }
-      }
-
-      if (needsUpdate) {
-        await users.updateOne({_id: new ObjectId(user.id)}, {$set: updates});
-        // Re-fetch to get updated document
-        userDoc = await users.findOne({_id: new ObjectId(user.id)});
-        if (!userDoc) {
-          throw new Error('User not found after migration');
-        }
       }
 
       return sanitizeUserForClient(userDoc as UserDocument);
@@ -246,7 +210,6 @@ export const resolvers = {
       const pokemon = await fetchPokemonById(id);
       if (!pokemon) return null;
 
-      // Check if user owns this Pokemon
       let isOwned = false;
       if (context.user?.id) {
         try {
@@ -274,11 +237,9 @@ export const resolvers = {
       {ids}: {ids: number[]},
       context: AuthContext
     ) => {
-      // Fetch all Pokemon in parallel
       const pokemonPromises = ids.map((id) => fetchPokemonById(id));
       const pokemon = await Promise.all(pokemonPromises);
 
-      // Get owned Pokemon IDs if user is authenticated
       let ownedPokemonIds: number[] = [];
       if (context.user?.id) {
         try {
@@ -295,7 +256,6 @@ export const resolvers = {
         }
       }
 
-      // Filter out any null results and add ownership info
       return pokemon.filter(Boolean).map((p) => ({
         ...p,
         isOwned: ownedPokemonIds.includes(p.id),
@@ -360,7 +320,6 @@ export const resolvers = {
         };
       }
 
-      // Query MongoDB for scalable filtering/sorting/pagination
       const db = getDatabase();
       const metadataCollection = db.collection('pokemon_metadata');
 
@@ -371,7 +330,6 @@ export const resolvers = {
         baseMatch.generation = generation.toLowerCase();
       }
 
-      // FIX: Multi-type UNION filtering
       if (types && types.length > 0) {
         baseMatch.types = {$in: types.map((t) => t.toLowerCase())};
       }
@@ -396,21 +354,18 @@ export const resolvers = {
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
       } else if (sortBy === 'type') {
-        // Sort by first type, then by ID as secondary
         sort.types = sortOrder === 'asc' ? 1 : -1;
-        sort.id = 1; // Always ascending ID as secondary sort
+        sort.id = 1;
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
 
-      // Check total dataset size for adaptive faceting strategy
       const totalPokemonCount = await metadataCollection.countDocuments({});
       const useDynamicFacets = totalPokemonCount <= DYNAMIC_FACET_THRESHOLD;
 
       let facets = null;
 
       if (useDynamicFacets) {
-        // STRATEGY 1: Dynamic faceted aggregation for small datasets
         try {
           const facetResult = await Promise.race([
             computeDynamicFacets(
@@ -447,7 +402,6 @@ export const resolvers = {
             isDynamic: true,
           };
 
-          // Fetch full Pokemon details
           const pokemonPromises = result.paginatedResults.map((meta) =>
             fetchPokemonById(meta.id)
           );
@@ -468,11 +422,10 @@ export const resolvers = {
             'Dynamic facets failed or timed out, falling back to static counts',
             error
           );
-          // Fall through to static counts fallback
         }
       }
 
-      // STRATEGY 2: Static counts fallback (or if dynamic failed)
+      // Static counts fallback (or if dynamic failed)
       if (USE_STATIC_FALLBACK) {
         const staticCounts = await getStaticFilterCounts(db);
         if (staticCounts) {
@@ -533,7 +486,6 @@ export const resolvers = {
       return {pokemon: pokedexPokemon, total, facets};
     },
 
-    // Get Pokemon upgrade level for a specific Pokemon
     pokemonUpgrade: async (
       _: unknown,
       {pokemonId}: {pokemonId: number},
@@ -577,8 +529,6 @@ export const resolvers = {
         const db = getDatabase();
         const usersCollection = db.collection('users');
 
-        // Use $facet to run all queries in parallel for optimal performance
-        // This reduces 6 separate queries down to 1 aggregation pipeline
         const result = await usersCollection
           .aggregate([
             // First, match only users who are visible in ranks
@@ -798,7 +748,6 @@ export const resolvers = {
   Mutation: {
     ...authMutations,
 
-    // Update rare candy count (increment/decrement by amount)
     updateRareCandy: async (
       _: unknown,
       {amount}: {amount: string},
@@ -853,29 +802,16 @@ export const resolvers = {
       const users = db.collection('users') as Collection<UserDocument>;
 
       // Get current user state
-      let userDoc = await users.findOne({_id: new ObjectId(user.id)});
+      const userDoc = await users.findOne({_id: new ObjectId(user.id)});
       if (!userDoc) {
         throw new Error('User not found');
       }
 
-      // Initialize stat if it doesn't exist (migration for existing users)
-      const statValue = (userDoc.stats as Record<string, number | undefined>)[
-        stat
-      ];
-      if (statValue === undefined || statValue === null) {
-        await users.updateOne(
-          {_id: new ObjectId(user.id)},
-          {$set: {[`stats.${stat}`]: 1}}
-        );
-        // Re-fetch user to get updated stats
-        userDoc = await users.findOne({_id: new ObjectId(user.id)});
-        if (!userDoc) {
-          throw new Error('User not found after migration');
-        }
-      }
-
       // Calculate cost - get current level for the stat
-      const currentLevel = (userDoc.stats as Record<string, number>)[stat] || 1;
+      const currentLevel = (userDoc.stats as Record<string, number>)[stat];
+      if (!currentLevel) {
+        throw new Error(`Stat ${stat} not found. Please run migration script.`);
+      }
       console.log(
         `[DEBUG] Upgrading ${stat}: currentLevel=${currentLevel}, cost will be calculated from this level`
       );

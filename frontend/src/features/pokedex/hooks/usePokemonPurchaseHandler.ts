@@ -1,8 +1,7 @@
 import {useState, useRef} from 'react';
-import {GameConfig} from '@/config';
+import {GameConfig, getPokemonCost} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
-import {getPokemonCost} from '../utils/pokemonCost';
 import {toDecimal} from '@/lib/decimal';
 
 /**

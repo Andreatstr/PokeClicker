@@ -22,8 +22,6 @@ export function useCandySync({
 }: UseCandySyncProps) {
   const {updateRareCandy} = useGameMutations();
 
-  // Local candy state - THIS is the source of truth for display!
-  // Using string to support very large numbers with Decimal
   const [localRareCandy, setLocalRareCandy] = useState(
     user?.rare_candy ? String(user.rare_candy) : '0'
   );

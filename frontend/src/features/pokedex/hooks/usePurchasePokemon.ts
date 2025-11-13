@@ -5,8 +5,8 @@ import {
   type PurchasePokemonData,
   type PurchasePokemonVariables,
 } from '@/lib/graphql';
-import {getPokemonCost} from '../utils/pokemonCost';
 import {toDecimal} from '@/lib/decimal';
+import {getPokemonCost} from '@/config';
 
 export function usePurchasePokemon() {
   const {user} = useAuth();

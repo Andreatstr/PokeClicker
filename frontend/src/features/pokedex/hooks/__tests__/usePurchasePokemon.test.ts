@@ -121,7 +121,7 @@ describe('usePurchasePokemon hook', () => {
     expect(result.purchasePokemon).toHaveProperty('__typename', 'User');
     expect(result.purchasePokemon).toHaveProperty('_id', '');
     expect(result.purchasePokemon).toHaveProperty('username', '');
-    expect(result.purchasePokemon).toHaveProperty('rare_candy', '0'); // Changed to string for large number support
+    expect(result.purchasePokemon).toHaveProperty('rare_candy', '0');
     expect(result.purchasePokemon).toHaveProperty('owned_pokemon_ids', [25]);
     expect(result.purchasePokemon).toHaveProperty('stats');
     expect(result.purchasePokemon.stats).toHaveProperty(

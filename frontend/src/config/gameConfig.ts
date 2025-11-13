@@ -30,7 +30,33 @@ export const GameConfig = {
     /** Error display duration in milliseconds */
     errorDisplayDuration: 1200,
   },
+
+  /**
+   * Pokemon pricing
+   * Formula: 100 × 1.5^(tier), where tier = floor(pokemonId / 10)
+   * Must match backend logic in resolvers.ts:getPokemonCost()
+   */
+  pricing: {
+    /** Base cost for tier 0 Pokemon (ID 1-10) */
+    baseCost: 100,
+    /** Cost multiplier per tier */
+    tierMultiplier: 1.5,
+    /** Number of Pokemon per tier */
+    pokemonPerTier: 10,
+  },
 } as const;
 
 // Type-safe access to config
 export type GameConfigType = typeof GameConfig;
+
+/**
+ * Calculate Pokemon purchase cost based on its ID
+ * Must match backend logic in resolvers.ts:getPokemonCost()
+ */
+export function getPokemonCost(pokemonId: number): number {
+  const tier = Math.floor(pokemonId / GameConfig.pricing.pokemonPerTier);
+  return Math.floor(
+    GameConfig.pricing.baseCost *
+      Math.pow(GameConfig.pricing.tierMultiplier, tier)
+  );
+}

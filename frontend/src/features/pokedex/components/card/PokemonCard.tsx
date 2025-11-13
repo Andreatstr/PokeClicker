@@ -4,11 +4,11 @@ import '@ui/pixelact/styles/patterns.css';
 import {useState, memo, useEffect} from 'react';
 import {UnlockButton} from '@ui/pixelact';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
-import {getPokemonCost, getBackgroundImageUrl} from '../../utils/pokemonCost';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
 import {usePokemonPurchaseHandler} from '../../hooks/usePokemonPurchaseHandler';
 import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
+import {getPokemonCost} from '@/config';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
@@ -32,7 +32,7 @@ export const PokemonCard = memo(function PokemonCard({
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = isOwned
-    ? getBackgroundImageUrl(pokemon.types)
+    ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
 
   const {handlePurchase, error, isAnimating} = usePokemonPurchaseHandler();

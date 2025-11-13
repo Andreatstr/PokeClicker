@@ -24,7 +24,7 @@ interface TiledMapViewProps {
   wildPokemon: PokemonSpawn[];
   nearbyPokemon: PokemonSpawn | null;
   worldPosition: {x: number; y: number};
-  user: {rare_candy?: string} | null; // Changed to string for large number support
+  user: {rare_candy?: string} | null;
   collisionMapLoaded: boolean;
   viewportSize: {width: number; height: number};
   isDarkMode?: boolean;

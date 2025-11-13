@@ -16,33 +16,20 @@ export function AuthProvider({children}: {children: ReactNode}) {
       try {
         const parsedUser = JSON.parse(savedUser);
 
-        // Validate and migrate user data to ensure stats exist
-        if (parsedUser && typeof parsedUser === 'object') {
-          if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
-            logger.warn(
-              'User data missing stats object, clearing localStorage',
-              'AuthContext'
-            );
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            return;
-          }
-
-          const defaultStats = {
-            hp: 1,
-            attack: 1,
-            defense: 1,
-            spAttack: 1,
-            spDefense: 1,
-            speed: 1,
-            clickPower: 1,
-            passiveIncome: 1,
-          };
-
-          parsedUser.stats = {
-            ...defaultStats,
-            ...parsedUser.stats,
-          };
+        // Validate user data
+        if (
+          !parsedUser ||
+          typeof parsedUser !== 'object' ||
+          !parsedUser.stats ||
+          typeof parsedUser.stats !== 'object'
+        ) {
+          logger.warn(
+            'Invalid user data in localStorage, clearing',
+            'AuthContext'
+          );
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          return;
         }
 
         setToken(savedToken);
