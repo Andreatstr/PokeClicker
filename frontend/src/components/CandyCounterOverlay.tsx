@@ -26,13 +26,14 @@ export function CandyCounterOverlay({
           color: isDarkMode ? 'white' : 'black',
         }}
       >
-        <figure className="w-5 h-5">
+        <dt className="w-5 h-5">
           <img
             src={`${import.meta.env.BASE_URL}candy.webp`}
-            alt="Candy"
+            alt=""
             className="w-5 h-5"
+            aria-hidden="true"
           />
-        </figure>
+        </dt>
         <dd>{formatNumber(user.rare_candy)}</dd>
       </dl>
     </aside>

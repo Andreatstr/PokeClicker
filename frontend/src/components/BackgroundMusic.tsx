@@ -162,6 +162,10 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
   };
+
+  const focusRingColor = isDarkMode ? 'white' : '#0066ff';
+  const focusOffsetColor = isDarkMode ? '#1a1a1a' : 'white';
+
   return (
     <>
       {/* Persisted audio element to prevent resets on toggle */}
@@ -181,7 +185,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         >
           <button
             onClick={toggleMinimize}
-            className="relative w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-4"
+            className="relative w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label="Expand music controls"
           >
             <svg
@@ -212,9 +222,16 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           aria-label="Music player controls"
         >
           <button
-            onClick={prevTrack}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
-            aria-label="Previous song"
+            onClick={() => prevTrack()}
+            disabled={tracks.length === 0}
+            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            aria-label="Previous track"
           >
             <svg
               fill="none"
@@ -231,7 +248,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={togglePlay}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
+            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             <svg
@@ -253,7 +276,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={nextTrack}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
+            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label="Next song"
           >
             <svg
@@ -272,7 +301,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           <button
             onClick={decreaseVolume}
             disabled={volume === 0}
-            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
+            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label="Decrease volume"
           >
             <svg
@@ -291,7 +326,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           <button
             onClick={increaseVolume}
             disabled={volume === 1}
-            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
+            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label="Increase volume"
           >
             <svg
@@ -324,7 +365,13 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={toggleMinimize}
-            className="w-7 h-7 hover:opacity-70 transition-opacity border-0 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2"
+            className="w-7 h-7 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             aria-label="Minimize music controls"
           >
             <svg

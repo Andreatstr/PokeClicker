@@ -35,54 +35,77 @@ export interface PixelButtonProps
     VariantProps<typeof pixelButtonVariants> {
   asChild?: boolean;
   bgColor?: string;
+  isDarkMode?: boolean;
 }
 
 const Button = React.forwardRef<
   React.ComponentRef<typeof ShadcnButton>,
   PixelButtonProps
->(({className, variant, size, onClick, bgColor, style, ...props}, ref) => {
-  // Function to darken a hex color
-  const darkenColor = (color: string, percent: number = 30): string => {
-    // Remove # if present
-    const hex = color.replace('#', '');
+>(
+  (
+    {
+      className,
+      variant,
+      size,
+      onClick,
+      bgColor,
+      style,
+      isDarkMode = false,
+      ...props
+    },
+    ref
+  ) => {
+    // Function to darken a hex color
+    const darkenColor = (color: string, percent: number = 30): string => {
+      // Remove # if present
+      const hex = color.replace('#', '');
 
-    // Parse RGB
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+      // Parse RGB
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
 
-    // Darken each component
-    const darkenedR = Math.max(0, Math.floor((r * (100 - percent)) / 100));
-    const darkenedG = Math.max(0, Math.floor((g * (100 - percent)) / 100));
-    const darkenedB = Math.max(0, Math.floor((b * (100 - percent)) / 100));
+      // Darken each component
+      const darkenedR = Math.max(0, Math.floor((r * (100 - percent)) / 100));
+      const darkenedG = Math.max(0, Math.floor((g * (100 - percent)) / 100));
+      const darkenedB = Math.max(0, Math.floor((b * (100 - percent)) / 100));
 
-    // Convert back to hex
-    const toHex = (n: number) => n.toString(16).padStart(2, '0');
-    return `#${toHex(darkenedR)}${toHex(darkenedG)}${toHex(darkenedB)}`;
-  };
+      // Convert back to hex
+      const toHex = (n: number) => n.toString(16).padStart(2, '0');
+      return `#${toHex(darkenedR)}${toHex(darkenedG)}${toHex(darkenedB)}`;
+    };
 
-  const buttonStyle = {
-    backgroundColor: bgColor,
-    ...(bgColor && {
-      '--custom-inner-border-color': darkenColor(bgColor, 90), // Much darker
-    }),
-    ...style,
-  } as React.CSSProperties & Record<string, string>;
+    const ringColor = isDarkMode ? 'white' : '#0066ff';
+    const ringOffsetColor = isDarkMode ? '#757474ff' : '#9FA0A0';
 
-  return (
-    <ShadcnButton
-      className={cn(
-        pixelButtonVariants({variant, size}),
-        '!rounded-none',
-        bgColor && 'custom-color-button',
-        className
-      )}
-      style={buttonStyle}
-      onClick={onClick}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+    const buttonStyle = {
+      backgroundColor: bgColor,
+      ...(bgColor && {
+        '--custom-inner-border-color': darkenColor(bgColor, 90), // Much darker
+      }),
+      ...style,
+      '--tw-ring-color': ringColor,
+      '--tw-ring-opacity': '1',
+      '--tw-ring-offset-width': '8px',
+      '--tw-ring-offset-color': ringOffsetColor,
+    } as React.CSSProperties & Record<string, string>;
+
+    return (
+      <ShadcnButton
+        className={cn(
+          pixelButtonVariants({variant, size}),
+          '!rounded-none',
+          'focus-visible:ring-[4px]',
+          bgColor && 'custom-color-button',
+          className
+        )}
+        style={buttonStyle}
+        onClick={onClick}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
 
 export {Button};

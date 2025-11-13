@@ -6,6 +6,7 @@ interface PaginationControlsProps {
   onPageChange: (page: number) => void;
   loading?: boolean;
   isMobile?: boolean;
+  isDarkMode?: boolean;
 }
 
 export function PaginationControls({
@@ -14,6 +15,7 @@ export function PaginationControls({
   onPageChange,
   loading = false,
   isMobile = false,
+  isDarkMode = false,
 }: PaginationControlsProps) {
   const hasPrevious = currentPage > 1;
   const hasNext = currentPage < totalPages;
@@ -30,6 +32,9 @@ export function PaginationControls({
     }
   };
 
+  const focusRingColor = isDarkMode ? 'white' : '#0066ff';
+  const focusOffsetColor = isDarkMode ? '#1a1a1a' : 'white';
+
   if (totalPages <= 1) return null;
 
   if (isMobile) {
@@ -42,7 +47,24 @@ export function PaginationControls({
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          style={
+            {
+              '--focus-ring-color': focusRingColor,
+              '--focus-offset-color': focusOffsetColor,
+            } as React.CSSProperties & {
+              '--focus-ring-color': string;
+              '--focus-offset-color': string;
+            }
+          }
+          onFocus={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none';
+          }}
           aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-6 h-6" />
@@ -57,7 +79,24 @@ export function PaginationControls({
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          className="py-2 px-4 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center min-w-12 min-h-12 outline-none hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          style={
+            {
+              '--focus-ring-color': focusRingColor,
+              '--focus-offset-color': focusOffsetColor,
+            } as React.CSSProperties & {
+              '--focus-ring-color': string;
+              '--focus-offset-color': string;
+            }
+          }
+          onFocus={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none';
+          }}
           aria-label="Next page"
         >
           <ArrowRightIcon className="w-6 h-6" />
@@ -76,7 +115,24 @@ export function PaginationControls({
         <button
           onClick={handlePrevious}
           disabled={!hasPrevious || loading}
-          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          style={
+            {
+              '--focus-ring-color': focusRingColor,
+              '--focus-offset-color': focusOffsetColor,
+            } as React.CSSProperties & {
+              '--focus-ring-color': string;
+              '--focus-offset-color': string;
+            }
+          }
+          onFocus={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none';
+          }}
           aria-label="Previous page"
         >
           <ArrowLeftIcon className="w-5 h-5" />
@@ -92,7 +148,24 @@ export function PaginationControls({
         <button
           onClick={handleNext}
           disabled={!hasNext || loading}
-          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none focus-visible:ring-4 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-3 focus-visible:ring-offset-[var(--background)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          className="min-w-[120px] min-h-12 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 outline-none hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition-colors rounded"
+          style={
+            {
+              '--focus-ring-color': focusRingColor,
+              '--focus-offset-color': focusOffsetColor,
+            } as React.CSSProperties & {
+              '--focus-ring-color': string;
+              '--focus-offset-color': string;
+            }
+          }
+          onFocus={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none';
+          }}
           aria-label="Next page"
         >
           <span>Next</span>

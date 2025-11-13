@@ -221,7 +221,7 @@ function App() {
             />
           }
         >
-          <LoginScreen onNavigate={setCurrentPage} />
+          <LoginScreen onNavigate={setCurrentPage} isDarkMode={isDarkMode} />
         </Suspense>
       ) : (
         <>

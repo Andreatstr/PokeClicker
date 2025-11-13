@@ -54,11 +54,12 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
               }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              isDarkMode={isDarkMode}
             />
             {searchTerm && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#0066ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+                className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)] ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}`}
                 type="button"
                 aria-label="Clear search"
               >
@@ -89,6 +90,7 @@ export function SearchBar({isDarkMode = false}: SearchBarProps) {
             aria-controls="mobile-filter-dialog"
             aria-label="Open filter options"
             onClick={() => setShowMobileFilters((prev) => !prev)}
+            isDarkMode={isDarkMode}
           >
             Filters
           </Button>

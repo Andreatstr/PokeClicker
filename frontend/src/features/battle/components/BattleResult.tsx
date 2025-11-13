@@ -148,6 +148,7 @@ export function BattleResult({
             onClick={onContinue}
             className="w-full text-[10px] md:text-xs py-1 md:py-1.5"
             aria-label={`${isVictory ? 'Continue' : 'Return to Map'}`}
+            isDarkMode={isDarkMode}
           >
             {isVictory ? 'Continue' : 'Return to Map'}
           </Button>

@@ -33,39 +33,44 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
       >
         <button
           aria-label="Pokedex"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           Pokedex
         </button>
         <button
           aria-label="Clicker"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="clicker-nav"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           Clicker
         </button>
         <button
           aria-label="Map"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="world-nav"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           World
         </button>
         <button
           aria-label="Ranks"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="ranks-nav"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           Ranks
         </button>
         <button
           aria-label="Switch to light mode"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] p-2"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] p-2"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           <svg
             class="w-4 h-4"
@@ -83,9 +88,10 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
         </button>
         <button
           aria-label="Profile for testuser"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] p-2"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] p-2"
           data-onboarding="profile-button"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
           title="Logged in as testuser"
         >
           <svg
@@ -110,8 +116,9 @@ exports[`Navbar Semantic HTML > should render in dark mode (baseline snapshot) 1
         <button
           aria-expanded="false"
           aria-label="Toggle mobile menu"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] px-3 py-4"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] px-3 py-4"
           data-slot="button"
+          style="--tw-ring-color: white; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #757474ff;"
         >
           <svg
             class="w-5 h-5"
@@ -166,39 +173,44 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
       >
         <button
           aria-label="Pokedex"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           Pokedex
         </button>
         <button
           aria-label="Clicker"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="clicker-nav"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           Clicker
         </button>
         <button
           aria-label="Map"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="world-nav"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           World
         </button>
         <button
           aria-label="Ranks"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none text-xs md:text-sm min-w-[44px] min-h-[44px]"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 px-4 py-2 !rounded-none focus-visible:ring-[4px] text-xs md:text-sm min-w-[44px] min-h-[44px]"
           data-onboarding="ranks-nav"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           Ranks
         </button>
         <button
           aria-label="Switch to dark mode"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] p-2"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] p-2"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           <svg
             class="w-4 h-4"
@@ -216,9 +228,10 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
         </button>
         <button
           aria-label="Profile for testuser"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] p-2"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] p-2"
           data-onboarding="profile-button"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
           title="Logged in as testuser"
         >
           <svg
@@ -243,8 +256,9 @@ exports[`Navbar Semantic HTML > should render with current structure (baseline s
         <button
           aria-expanded="false"
           aria-label="Toggle mobile menu"
-          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none min-w-[44px] min-h-[44px] px-3 py-4"
+          class="inline-flex gap-2 font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:ring-offset-4 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 has-[>svg]:px-3 pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent] pixel-default__button box-shadow-margin h-10 !rounded-none focus-visible:ring-[4px] min-w-[44px] min-h-[44px] px-3 py-4"
           data-slot="button"
+          style="--tw-ring-color: #0066ff; --tw-ring-opacity: 1; --tw-ring-offset-width: 8px; --tw-ring-offset-color: #9FA0A0;"
         >
           <svg
             class="w-5 h-5"

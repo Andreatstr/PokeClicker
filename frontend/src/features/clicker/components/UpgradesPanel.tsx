@@ -136,6 +136,7 @@ export function UpgradesPanel({
                     bgColor={buttonColor}
                     className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Upgrade"
+                    isDarkMode={isDarkMode}
                   >
                     <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
                       ↑ {formatNumber(cost)}
