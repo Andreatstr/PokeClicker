@@ -23,7 +23,7 @@ export function HealthBar({
 
   return (
     <figure
-      className={`w-full ${side === 'opponent' ? 'text-right' : 'text-left'}`}
+      className={`w-full select-none ${side === 'opponent' ? 'text-right' : 'text-left'}`}
       aria-label={`${label} health bar`}
     >
       <figcaption

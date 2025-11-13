@@ -528,6 +528,7 @@ export function PokemonMap({
               onBattleComplete={handleBattleComplete}
               isDarkMode={isDarkMode}
               onAttackFunctionReady={setBattleAttackFunctionWrapper}
+              isFullscreen={isFullscreen}
             />
           ) : (
             <TiledMapView
@@ -542,10 +543,14 @@ export function PokemonMap({
               worldPosition={movement.worldPosition}
               user={user}
               collisionMapLoaded={collisionMap.collisionMapLoaded}
+              isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
+              teleportLocation={movement.teleportLocation}
+              isTeleporting={movement.isTeleporting}
+              teleportCooldown={movement.teleportCooldown}
               viewportSize={renderSize}
               isDarkMode={isDarkMode}
               onStartBattle={startBattle}
-              onResetToHome={movement.resetToHome}
+              onTeleport={movement.teleportToRandomLocation}
             />
           )}
         </div>
