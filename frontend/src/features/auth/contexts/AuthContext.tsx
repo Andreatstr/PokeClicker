@@ -1,7 +1,9 @@
 import {useState, useEffect, type ReactNode} from 'react';
 import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
-import {AuthContext, type User} from './AuthContextDefinition';
+import {AuthContext} from './AuthContextDefinition';
+import type {User} from '@/lib/graphql/types';
+import {DELETE_USER_MUTATION} from '@/lib/graphql/mutations';
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);
@@ -14,41 +16,28 @@ export function AuthProvider({children}: {children: ReactNode}) {
       try {
         const parsedUser = JSON.parse(savedUser);
 
-        // Validate and migrate user data to ensure stats exist
-        if (parsedUser && typeof parsedUser === 'object') {
-          if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
-            logger.warn(
-              'User data missing stats object, clearing localStorage',
-              'AuthContext'
-            );
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            return;
-          }
-
-          const defaultStats = {
-            hp: 1,
-            attack: 1,
-            defense: 1,
-            spAttack: 1,
-            spDefense: 1,
-            speed: 1,
-            clickPower: 1,
-            passiveIncome: 1,
-          };
-
-          parsedUser.stats = {
-            ...defaultStats,
-            ...parsedUser.stats,
-          };
+        // Validate user data
+        if (
+          !parsedUser ||
+          typeof parsedUser !== 'object' ||
+          !parsedUser.stats ||
+          typeof parsedUser.stats !== 'object'
+        ) {
+          logger.warn(
+            'Invalid user data in localStorage, clearing',
+            'AuthContext'
+          );
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          return;
         }
 
         setToken(savedToken);
         setUser(parsedUser);
 
-        // Don't clear onboarding on page reload - let OnboardingContext handle it
-        // OnboardingContext checks sessionStorage for guest users, which persists during session
-        // This allows onboarding to show on new login, but not on page reload within same session
+        // Don't clear onboarding on page reload - let OnboardingContext handle it.
+        // OnboardingContext checks sessionStorage for guest users, which persists during session.
+        // This allows onboarding to show on new login, but not on page reload within the same session.
       } catch (e) {
         logger.logError(e, 'ParseSavedUser');
         localStorage.removeItem('authToken');
@@ -63,17 +52,27 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setToken(newToken);
     setUser(newUser);
 
-    // For guest users, clear sessionStorage on new login to trigger onboarding
-    // This ensures onboarding shows on new login, but not on page reload within same session
-    if (newUser.username.toLowerCase() === 'guest') {
+    // For guest users, clear onboarding flags on new login so the tour restarts,
+    // but rely on sessionStorage to avoid replaying on simple reloads.
+    if (newUser.isGuestUser || newUser.username?.toLowerCase() === 'guest') {
       sessionStorage.removeItem('onboarding_completed_session');
-      localStorage.removeItem('onboarding_completed'); // Clear old localStorage flag for backwards compatibility
+      localStorage.removeItem('onboarding_completed');
     }
 
     await apolloClient.resetStore();
   };
 
   const logout = async () => {
+    if (user?.isGuestUser ?? user?.username?.toLowerCase() === 'guest') {
+      try {
+        await apolloClient.mutate({
+          mutation: DELETE_USER_MUTATION,
+        });
+      } catch (err) {
+        logger.logError(err, 'DeleteGuestUser');
+      }
+    }
+
     setToken(null);
     setUser(null);
     localStorage.removeItem('authToken');

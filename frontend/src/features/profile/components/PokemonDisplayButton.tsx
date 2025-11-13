@@ -23,7 +23,7 @@ export function PokemonDisplayButton({
     return (
       <button
         onClick={onClick}
-        className="px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px]"
+        className={`px-6 py-4 border-4 transition-all hover:scale-105 cursor-pointer flex items-center gap-4 w-full sm:w-auto sm:min-w-[200px] focus-visible:ring-4 ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}  focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--background)]`}
         style={{
           borderColor: isDarkMode ? '#333333' : 'black',
           backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',

@@ -10,10 +10,11 @@ import {useState, useRef} from 'react';
 import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
-import {getPokemonCost, getBackgroundImageUrl} from '../../utils/pokemonCost';
 import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
+import {toDecimal} from '@/lib/decimal';
+import {getPokemonCost} from '@/config';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -63,7 +64,7 @@ export function PokemonDetailCard({
 
     // Client-side validation: Check if user can afford the Pokemon
     // This prevents the optimistic response from flashing the unlocked state
-    if (user && user.rare_candy < cost) {
+    if (user && toDecimal(user.rare_candy).lt(cost)) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
@@ -111,7 +112,7 @@ export function PokemonDetailCard({
 
     // Client-side validation: Check if user can afford the upgrade
     // This prevents the optimistic response from causing UI inconsistencies
-    if (user && upgrade && user.rare_candy < upgrade.cost) {
+    if (user && upgrade && toDecimal(user.rare_candy).lt(upgrade.cost)) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
@@ -155,7 +156,7 @@ export function PokemonDetailCard({
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = isOwned
-    ? getBackgroundImageUrl(pokemon.types)
+    ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
   const cost = getPokemonCost(pokemon.id);
   const upgradeLevel = upgrade?.level || 1;
@@ -187,7 +188,7 @@ export function PokemonDetailCard({
           >
             <div className="relative w-0 h-0" aria-hidden="true">
               {/* Main tape */}
-              <div className="bg-green-500 text-white text-[11px] md:text-sm font-bold px-8 md:px-10 py-1.5 md:py-2 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.4)] transform -rotate-45 origin-top-left translate-x-[-28px] translate-y-[62px] md:translate-x-[-33px] md:translate-y-[75px] min-w-[140px] md:min-w-[160px] text-center">
+              <div className="bg-green-700 text-white text-[11px] md:text-sm font-bold px-8 md:px-10 py-1.5 md:py-2 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.4)] transform -rotate-45 origin-top-left translate-x-[-28px] translate-y-[62px] md:translate-x-[-33px] md:translate-y-[75px] min-w-[140px] md:min-w-[160px] text-center">
                 OWNED
               </div>
             </div>
@@ -196,7 +197,7 @@ export function PokemonDetailCard({
 
         {/* Close Button */}
         <button
-          className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-500 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+          className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
           onClick={onClose}
           aria-label="Exit"
         >
@@ -262,10 +263,14 @@ export function PokemonDetailCard({
           >
             <Button
               onClick={handleUpgrade}
-              disabled={upgrading || !!(user && user.rare_candy < upgrade.cost)}
+              disabled={
+                upgrading ||
+                !!(user && toDecimal(user.rare_candy).lt(upgrade.cost))
+              }
               className="w-full pixel-font text-xs md:text-sm font-bold py-6 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              bgColor={isDarkMode ? '#3b82f6' : '#60a5fa'}
+              bgColor={isDarkMode ? '#3472d7ff' : '#3c77b3ff'}
               aria-label="Upgrade pokemon"
+              isDarkMode={isDarkMode}
               style={{
                 color: 'white',
                 borderColor: 'black',

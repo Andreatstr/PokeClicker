@@ -2,26 +2,27 @@ import {Card, Button} from '@ui/pixelact';
 import {ArrowRightIcon} from '@ui/pixelact/icons';
 import {formatNumber} from '@/lib/formatNumber';
 import {getStatDescription, getUpgradeCost} from '../utils/statDescriptions';
-
-interface Stats {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-  clickPower?: number;
-  passiveIncome?: number;
-}
+import {toDecimal} from '@/lib/decimal';
+import type {UserStats} from '@/lib/graphql/types';
+import {UPGRADES} from '@/config/upgradeConfig';
 
 interface UpgradesPanelProps {
   isDarkMode: boolean;
-  stats: Stats;
-  currentCandy: number;
+  stats: UserStats;
+  currentCandy: string;
   isLoading: boolean;
   isAuthenticated: boolean;
-  onUpgrade: (stat: keyof Stats) => void;
+  onUpgrade: (stat: keyof UserStats) => void;
+  ownedPokemonCount?: number;
 }
+
+type UpgradeKey =
+  | 'clickPower'
+  | 'autoclicker'
+  | 'luckyHitChance'
+  | 'luckyHitMultiplier'
+  | 'clickMultiplier'
+  | 'pokedexBonus';
 
 export function UpgradesPanel({
   isDarkMode,
@@ -30,6 +31,7 @@ export function UpgradesPanel({
   isLoading,
   isAuthenticated,
   onUpgrade,
+  ownedPokemonCount = 0,
 }: UpgradesPanelProps) {
   return (
     <Card
@@ -63,10 +65,22 @@ export function UpgradesPanel({
       </header>
       <section className="flex flex-col gap-3">
         {stats &&
-          (['clickPower', 'passiveIncome'] as const).map((key) => {
+          (Object.keys(UPGRADES) as UpgradeKey[]).map((key) => {
             const value = stats[key] || 1;
             const cost = getUpgradeCost(key, value);
-            const descriptionData = getStatDescription(key, stats);
+            const descriptionData = getStatDescription(
+              key,
+              stats,
+              ownedPokemonCount
+            );
+            const config = UPGRADES[key];
+            const barColor = isDarkMode
+              ? config.color.dark
+              : config.color.light;
+            const buttonColor = isDarkMode
+              ? config.color.dark
+              : config.color.light;
+
             return (
               <article
                 key={key}
@@ -83,14 +97,7 @@ export function UpgradesPanel({
                     <div
                       className="w-2 h-8 border"
                       style={{
-                        backgroundColor:
-                          key === 'clickPower'
-                            ? isDarkMode
-                              ? '#ea580c' // Orange for click power
-                              : '#f97316'
-                            : isDarkMode
-                              ? '#16a34a' // Green for passive income
-                              : '#22c55e',
+                        backgroundColor: barColor,
                         borderColor: isDarkMode ? '#374151' : '#bbb7b2',
                       }}
                       aria-hidden="true"
@@ -104,9 +111,7 @@ export function UpgradesPanel({
                             : 'var(--muted-foreground)',
                         }}
                       >
-                        {key === 'clickPower'
-                          ? 'Click Power'
-                          : 'Passive Income'}
+                        {config.displayName}
                       </dt>
                       <dd
                         className="pixel-font text-lg font-bold"
@@ -124,24 +129,19 @@ export function UpgradesPanel({
                     size="sm"
                     onClick={() => onUpgrade(key)}
                     disabled={
-                      !isAuthenticated || currentCandy < cost || isLoading
+                      !isAuthenticated ||
+                      toDecimal(currentCandy).lt(cost) ||
+                      isLoading
                     }
-                    bgColor={
-                      key === 'clickPower'
-                        ? isDarkMode
-                          ? '#bf2727ff' // Orange for click power
-                          : '#ff6767ff'
-                        : isDarkMode
-                          ? '#0b7633ff' // Green for passive income
-                          : '#2cda6bff'
-                    }
+                    bgColor={buttonColor}
                     className="pixel-font text-xs text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Upgrade"
+                    isDarkMode={isDarkMode}
                   >
                     <span className="drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
                       ↑ {formatNumber(cost)}
                     </span>
-                  </Button>
+                  </Button>{' '}
                 </header>
                 <footer className="ml-5 flex items-center gap-1">
                   <p
@@ -155,9 +155,14 @@ export function UpgradesPanel({
                     {typeof descriptionData === 'object' &&
                     'current' in descriptionData ? (
                       <>
-                        {descriptionData.current}
+                        {formatNumber(descriptionData.current, {
+                          showDecimals: true,
+                        })}
                         <ArrowRightIcon size={14} className="inline mx-1" />
-                        {descriptionData.next} {descriptionData.unit}
+                        {formatNumber(descriptionData.next, {
+                          showDecimals: true,
+                        })}{' '}
+                        {descriptionData.unit}
                       </>
                     ) : (
                       descriptionData

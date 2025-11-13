@@ -247,7 +247,7 @@ function App() {
             />
           }
         >
-          <LoginScreen onNavigate={setCurrentPage} />
+          <LoginScreen onNavigate={setCurrentPage} isDarkMode={isDarkMode} />
         </Suspense>
       ) : (
         <>
@@ -286,9 +286,7 @@ function App() {
         </>
       )}
       {/* Candy counter shows on all pages; hide global when world is fullscreen */}
-      {!(currentPage === 'map' && isMapFullscreen) && (
-        <CandyCounterOverlay isDarkMode={isDarkMode} />
-      )}
+      {!(currentPage === 'map' && isMapFullscreen) && <CandyCounterOverlay />}
 
       {/* Keep music player visible and playing in fullscreen */}
       <div className="relative">

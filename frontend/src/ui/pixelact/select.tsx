@@ -49,12 +49,14 @@ interface SelectTriggerProps
   extends React.ComponentProps<typeof SelectPrimitive.Trigger>,
     VariantProps<typeof inputVariants> {
   asChild?: boolean;
+  isDarkMode?: boolean;
 }
 
 function SelectTrigger({
   children,
   className,
   font,
+  isDarkMode = false,
   ...props
 }: SelectTriggerProps) {
   return (
@@ -67,15 +69,15 @@ function SelectTrigger({
     >
       <ShadcnSelectTrigger
         {...props}
-        className={cn(
-          'rounded-none ring-0 w-full border-0 select-none min-h-[44px]',
-          className
-        )}
-        style={{
-          backgroundColor: 'var(--input)',
-          color: 'var(--foreground)',
-          ...props.style,
-        }}
+        className={`rounded-none ring-0 w-full border-0 select-none min-h-[44px] focus-visible:ring-3 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--card)] ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}`}
+        style={
+          {
+            backgroundColor: 'var(--input)',
+            color: 'var(--foreground)',
+            '--tw-ring-color': isDarkMode ? 'white' : '#0066ff',
+            ...props.style,
+          } as React.CSSProperties
+        }
       >
         {children}
       </ShadcnSelectTrigger>

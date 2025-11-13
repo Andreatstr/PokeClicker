@@ -5,12 +5,14 @@ interface GameBoyButtonsProps {
   onBButtonClick: () => void;
   isAuthenticated: boolean;
   nearbyPokemon: {pokemon: {name: string}} | null;
+  isDarkMode?: boolean;
 }
 
 export function GameBoyButtons({
   onAButtonClick,
   onBButtonClick,
   isAuthenticated,
+  isDarkMode = false,
 }: GameBoyButtonsProps) {
   return (
     <div className="flex gap-2 items-center -rotate-[20deg] mb-2">
@@ -22,10 +24,12 @@ export function GameBoyButtons({
           bgColor="#8B3A62"
           className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
           aria-label="B button"
+          isDarkMode={isDarkMode}
           style={
             {
               borderColor: '#2a2a3e',
               '--custom-inner-border-color': '#2a2a3e',
+              color: 'white',
             } as React.CSSProperties
           }
         >
@@ -40,10 +44,12 @@ export function GameBoyButtons({
           bgColor="#8B3A62"
           className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
           aria-label="A button"
+          isDarkMode={isDarkMode}
           style={
             {
               borderColor: '#2a2a3e',
               '--custom-inner-border-color': '#2a2a3e',
+              color: 'white',
             } as React.CSSProperties
           }
         >

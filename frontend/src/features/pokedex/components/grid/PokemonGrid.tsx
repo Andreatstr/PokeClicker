@@ -211,6 +211,7 @@ export function PokemonGrid({
                 onPageChange={onPageChange}
                 loading={loading}
                 isMobile={true}
+                isDarkMode={isDarkMode}
               />
             </section>
           ) : (
@@ -274,6 +275,7 @@ export function PokemonGrid({
                 onPageChange={onPageChange}
                 loading={loading}
                 isMobile={false}
+                isDarkMode={isDarkMode}
               />
             </>
           )}

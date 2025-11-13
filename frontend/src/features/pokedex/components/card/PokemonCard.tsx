@@ -4,11 +4,11 @@ import '@ui/pixelact/styles/patterns.css';
 import {useState, memo, useEffect} from 'react';
 import {UnlockButton} from '@ui/pixelact';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
-import {getPokemonCost, getBackgroundImageUrl} from '../../utils/pokemonCost';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
 import {usePokemonPurchaseHandler} from '../../hooks/usePokemonPurchaseHandler';
 import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
+import {getPokemonCost} from '@/config';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
@@ -32,7 +32,7 @@ export const PokemonCard = memo(function PokemonCard({
     ? getTypeColors(primaryType, isDarkMode)
     : getUnknownPokemonColors(isDarkMode);
   const backgroundImageUrl = isOwned
-    ? getBackgroundImageUrl(pokemon.types)
+    ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
 
   const {handlePurchase, error, isAnimating} = usePokemonPurchaseHandler();
@@ -84,13 +84,17 @@ export const PokemonCard = memo(function PokemonCard({
     <aside
       className={`relative cursor-pointer border-4 p-4 w-full max-w-[280px] h-[440px] pixel-font flex flex-col items-center ${typeColors.cardBg}
         transition-all duration-200 ease-in-out
-        hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}`}
-      style={{
-        borderColor: isDarkMode ? '#333333' : 'black',
-        boxShadow: isDarkMode
-          ? '4px 4px 0px rgba(51,51,51,1)'
-          : '4px 4px 0px rgba(0,0,0,1)',
-      }}
+        hover:translate-y-[-4px] ${isAnimating ? 'animate-dopamine-release' : ''}
+        focus-visible:outline-none`}
+      style={
+        {
+          borderColor: isDarkMode ? '#333333' : 'black',
+          boxShadow: isDarkMode
+            ? '4px 4px 0px rgba(51,51,51,1)'
+            : '4px 4px 0px rgba(0,0,0,1)',
+          '--focus-ring-color': isDarkMode ? 'white' : '#0066ff',
+        } as React.CSSProperties & {'--focus-ring-color': string}
+      }
       onMouseEnter={(e) => {
         if (!isAnimating) {
           e.currentTarget.style.boxShadow = isDarkMode
@@ -107,6 +111,15 @@ export const PokemonCard = memo(function PokemonCard({
       }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onFocus={(e) => {
+        const focusColor = isDarkMode ? 'white' : '#0066ff';
+        e.currentTarget.style.boxShadow = `0 0 0 2px ${isDarkMode ? '#1a1a1a' : 'white'}, 0 0 0 6px ${focusColor}`;
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.boxShadow = isDarkMode
+          ? '4px 4px 0px rgba(51,51,51,1)'
+          : '4px 4px 0px rgba(0,0,0,1)';
+      }}
       tabIndex={0}
       aria-label={`View details for ${pokemon.name}`}
     >
@@ -139,9 +152,9 @@ export const PokemonCard = memo(function PokemonCard({
         <div className="infoGrid flex flex-col gap-1.5 text-[10px] flex-1">
           {/* Pokemon Name */}
           <header className="flex items-center justify-between min-h-[20px]">
-            <h3 className="font-bold text-sm capitalize truncate">
+            <h2 className="font-bold text-sm capitalize truncate">
               {isOwned ? pokemon.name : '???'}
-            </h3>
+            </h2>
             {isOwned && (
               <span
                 className="font-normal text-[9px] px-2 py-0.5 rounded whitespace-nowrap ml-2"
@@ -189,10 +202,7 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <dt
-                    className="font-bold text-[8px] uppercase tracking-wide"
-                    style={{color: 'var(--muted-foreground)'}}
-                  >
+                  <dt className="font-bold text-[8px] uppercase tracking-wide">
                     Height
                   </dt>
                   <dd className="font-bold text-[11px] tabular-nums">
@@ -210,10 +220,7 @@ export const PokemonCard = memo(function PokemonCard({
                       : '1px solid rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <dt
-                    className="font-bold text-[8px] uppercase tracking-wide"
-                    style={{color: 'var(--muted-foreground)'}}
-                  >
+                  <dt className="font-bold text-[8px] uppercase tracking-wide">
                     Weight
                   </dt>
                   <dd className="font-bold text-[11px] tabular-nums">
@@ -225,7 +232,7 @@ export const PokemonCard = memo(function PokemonCard({
               {/* Abilities */}
               {pokemon.abilities && pokemon.abilities.length > 0 && (
                 <section className="text-[9px]">
-                  <h4 className="font-bold text-[8px]">Abilities</h4>
+                  <h3 className="font-bold text-[8px]">Abilities</h3>
                   <ul className="flex flex-wrap gap-0.5 mt-0.5 list-none p-0 m-0">
                     {pokemon.abilities.map((ability) => (
                       <li

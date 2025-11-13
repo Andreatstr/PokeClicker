@@ -1,18 +1,32 @@
+import {useEffect, useState} from 'react';
 import {useAuth} from '@features/auth';
 import {formatNumber} from '@/lib/formatNumber';
-
-interface CandyCounterOverlayProps {
-  isDarkMode?: boolean;
-  position?: 'bottom-left' | 'bottom-right' | 'top-right';
-  strategy?: 'fixed' | 'absolute';
-}
+import {subscribeToCandyUpdates} from '@/lib/candyEvents';
 
 export function CandyCounterOverlay({
-  isDarkMode = false,
   position = 'bottom-right',
   strategy = 'fixed',
-}: CandyCounterOverlayProps) {
+}: {
+  position?: 'bottom-left' | 'bottom-right' | 'top-right';
+  strategy?: 'fixed' | 'absolute';
+}) {
   const {user} = useAuth();
+
+  const [displayCandy, setDisplayCandy] = useState<string>(() =>
+    user?.rare_candy !== undefined ? String(user.rare_candy) : '0'
+  );
+
+  useEffect(() => {
+    if (user?.rare_candy === undefined || user.rare_candy === null) return;
+    setDisplayCandy(String(user.rare_candy));
+  }, [user?.rare_candy]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCandyUpdates((amount) => {
+      setDisplayCandy(amount);
+    });
+    return unsubscribe;
+  }, []);
 
   if (!user) return null;
 
@@ -32,19 +46,19 @@ export function CandyCounterOverlay({
         data-onboarding="candy-counter"
         className="flex items-center gap-2 h-12 px-3 border-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] pixel-font font-bold text-sm"
         style={{
-          backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
+          backgroundColor: 'var(--card)',
           borderColor: 'black',
-          color: isDarkMode ? 'white' : 'black',
+          color: 'var(--foreground)',
         }}
       >
-        <figure className="w-6 h-6">
+        <dt className="w-6 h-6">
           <img
             src={`${import.meta.env.BASE_URL}candy.webp`}
-            alt="Candy"
+            alt="Rare candy icon"
             className="w-6 h-6"
           />
-        </figure>
-        <dd>{formatNumber(user.rare_candy)}</dd>
+        </dt>
+        <dd>{formatNumber(displayCandy)}</dd>
       </dl>
     </aside>
   );

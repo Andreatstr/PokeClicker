@@ -15,6 +15,7 @@ import {useMobileDetection} from '@/hooks';
 
 type Props = {
   onNavigate: (page: 'pokedex' | 'clicker' | 'login') => void;
+  isDarkMode: boolean;
 };
 
 type FormValues = {
@@ -22,7 +23,7 @@ type FormValues = {
   password: string;
 };
 
-export function LoginScreen({onNavigate}: Props) {
+export function LoginScreen({onNavigate, isDarkMode}: Props) {
   const [modalType, setModalType] = useState<'login' | 'signup' | null>(null);
   const {login: authLogin} = useAuth();
 
@@ -91,16 +92,46 @@ export function LoginScreen({onNavigate}: Props) {
 
   async function loginAsGuest() {
     try {
-      const result = await loginMutation({
-        variables: {username: 'guest', password: '123456'},
+      const guestUsername = `g_${crypto.randomUUID().slice(0, 8)}`;
+      const guestPassword = crypto.randomUUID();
+
+      console.log('Creating guest user:', guestUsername);
+
+      const signupResult = await signupMutation({
+        variables: {
+          username: guestUsername,
+          password: guestPassword,
+          isGuestUser: true,
+        },
       });
-      const authData = (result.data as LoginData | undefined)?.login;
+
+      console.log('Signup result:', signupResult);
+
+      if (!signupResult) {
+        logger.logError(new Error('No result from signup'), 'GuestSignup');
+        return;
+      }
+
+      const authData = (signupResult.data as SignupData | undefined)?.signup;
+
+      console.log('Auth data:', authData);
+
+      if (!authData) {
+        logger.logError(new Error('No auth data in response'), 'GuestSignup');
+        return;
+      }
+
       if (authData?.token && authData?.user) {
         await authLogin(authData.token, authData.user);
         onNavigate('pokedex');
+      } else {
+        logger.logError(
+          new Error('Missing token or user in auth data'),
+          'GuestSignup'
+        );
       }
     } catch (err) {
-      logger.logError(err, 'GuestLogin');
+      logger.logError(err, 'GuestSignup');
     }
   }
 
@@ -140,6 +171,7 @@ export function LoginScreen({onNavigate}: Props) {
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('login')}
             aria-label="Log in"
+            isDarkMode={isDarkMode}
           >
             Log in
           </Button>
@@ -148,6 +180,7 @@ export function LoginScreen({onNavigate}: Props) {
             className={`w-52 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 focus-visible:ring-offset-0 ${isMobile ? 'text-sm py-2' : 'text-base sm:text-lg py-3'}`}
             onClick={() => setModalType('signup')}
             aria-label="Sign up"
+            isDarkMode={isDarkMode}
           >
             Sign up
           </Button>
@@ -157,6 +190,7 @@ export function LoginScreen({onNavigate}: Props) {
             onClick={loginAsGuest}
             disabled={loading}
             aria-label="Guest user"
+            isDarkMode={isDarkMode}
           >
             Guest user
           </Button>
@@ -271,6 +305,7 @@ export function LoginScreen({onNavigate}: Props) {
                     className="text-sm py-2 w-full"
                     aria-label={`${modalType === 'login' ? 'Log in' : 'Sign up'}`}
                     disabled={loading}
+                    isDarkMode={isDarkMode}
                   >
                     {loading
                       ? modalType === 'login'

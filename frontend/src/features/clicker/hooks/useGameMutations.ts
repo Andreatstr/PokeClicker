@@ -16,12 +16,12 @@ export function useGameMutations() {
     useMutation<UpgradeStatData>(UPGRADE_STAT_MUTATION);
 
   const updateRareCandy = async (
-    amount: number,
+    amount: number | string,
     onCompleted?: (user: User) => void
   ) => {
     try {
       const result = await updateRareCandyMutation({
-        variables: {amount},
+        variables: {amount: amount.toString()},
       });
 
       if (result?.data?.updateRareCandy && onCompleted) {

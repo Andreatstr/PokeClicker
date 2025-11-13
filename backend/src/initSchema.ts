@@ -1,6 +1,4 @@
 import {Db} from 'mongodb';
-import bcrypt from 'bcrypt';
-import {DEFAULT_USER_STATS} from './types.js';
 
 export async function initializeSchema(db: Db): Promise<void> {
   try {
@@ -35,33 +33,6 @@ export async function initializeSchema(db: Db): Promise<void> {
       {name: 'show_in_ranks_index'}
     );
     console.log('Created index on showInRanks');
-
-    // Migrate existing users to have showInRanks default value
-    const migrationResult = await usersCollection.updateMany(
-      {showInRanks: {$exists: false}},
-      {$set: {showInRanks: true}}
-    );
-    if (migrationResult.modifiedCount > 0) {
-      console.log(
-        `Migrated ${migrationResult.modifiedCount} existing users with showInRanks=true`
-      );
-    }
-
-    // Ensure a default guest user exists for simple guest login
-    const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
-    const existingGuest = await usersCollection.findOne({username: 'guest'});
-    if (!existingGuest) {
-      const password_hash = await bcrypt.hash('123456', SALT_ROUNDS);
-      await usersCollection.insertOne({
-        username: 'guest',
-        password_hash,
-        created_at: new Date(),
-        rare_candy: DEFAULT_USER_STATS.rare_candy ?? 0,
-        stats: DEFAULT_USER_STATS.stats,
-        owned_pokemon_ids: DEFAULT_USER_STATS.owned_pokemon_ids,
-      });
-      console.log('Created default guest user');
-    }
 
     console.log('Database schema initialized successfully');
   } catch (error) {

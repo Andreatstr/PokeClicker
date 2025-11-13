@@ -1,11 +1,7 @@
 import {Card, Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
 
-interface Candy {
-  id: number;
-  x: number;
-  amount: number;
-}
+import type {Candy} from '@/lib/graphql/types';
 
 interface GameBoyConsoleProps {
   isDarkMode: boolean;
@@ -110,7 +106,7 @@ export function GameBoyConsole({
                       textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
                     }}
                   >
-                    +{formatNumber(candy.amount)}
+                    +{formatNumber(candy.amount, {showDecimals: true})}
                   </span>
                   <img
                     src={`${import.meta.env.BASE_URL}candy.webp`}
@@ -147,13 +143,13 @@ export function GameBoyConsole({
             className="pixel-font text-[10px] tracking-wider mb-0.5"
             style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
-            Nintendo
+            Pretendo
           </p>
           <p
             className="pixel-font text-[8px] font-bold tracking-widest italic"
             style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
           >
-            GAME BOY<span className="text-[6px]">™</span>
+            PLAY BOY<span className="text-[6px]">™</span>
           </p>
         </div>
 
@@ -191,10 +187,12 @@ export function GameBoyConsole({
                 bgColor="#8B3A62"
                 className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
                 aria-label="B button"
+                isDarkMode={isDarkMode}
                 style={
                   {
                     borderColor: '#2a2a3e',
                     '--custom-inner-border-color': '#2a2a3e',
+                    color: 'white',
                   } as React.CSSProperties
                 }
               >
@@ -209,10 +207,12 @@ export function GameBoyConsole({
                 bgColor="#8B3A62"
                 className="w-14 h-14 rounded-full border-2 shadow-lg pixel-font text-sm text-white font-bold p-0"
                 aria-label="A button"
+                isDarkMode={isDarkMode}
                 style={
                   {
                     borderColor: '#2a2a3e',
                     '--custom-inner-border-color': '#2a2a3e',
+                    color: 'white',
                   } as React.CSSProperties
                 }
               >
@@ -220,24 +220,6 @@ export function GameBoyConsole({
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Start/Select Buttons (visual only) */}
-        <div className="flex gap-4 items-center mb-2">
-          <div
-            className="w-10 h-3 rounded-full shadow-md border-2"
-            style={{
-              backgroundColor: '#4a4a5e',
-              borderColor: '#2a2a3e',
-            }}
-          />
-          <div
-            className="w-10 h-3 rounded-full shadow-md border-2"
-            style={{
-              backgroundColor: '#4a4a5e',
-              borderColor: '#2a2a3e',
-            }}
-          />
         </div>
 
         {/* Speaker Holes */}

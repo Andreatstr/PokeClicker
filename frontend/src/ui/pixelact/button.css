@@ -28,8 +28,11 @@
   }
 
   &:focus-visible {
-    outline: 3px solid #0066ff;
-    outline-offset: 2px;
+    position: relative;
+    z-index: 10;
+    box-shadow:
+      0 0 0 5px var(--tw-ring-offset-color, transparent),
+      0 0 0 calc(4px + 4px) var(--tw-ring-color, #0066ff) !important;
   }
 }
 

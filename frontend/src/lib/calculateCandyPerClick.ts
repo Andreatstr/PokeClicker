@@ -1,36 +1,80 @@
-/**
- * Calculate candy earned per click based on user stats
- * Shared utility used by both clicker and battle reward systems
- */
-export function calculateCandyPerClick(
-  stats:
-    | {
-        hp: number;
-        attack: number;
-        defense: number;
-        spAttack: number;
-        spDefense: number;
-        speed: number;
-        clickPower?: number; // New simplified stat
-        passiveIncome?: number;
-      }
-    | undefined
-): number {
-  // Guard against undefined stats
-  if (!stats) {
-    return 1; // Minimum fallback value
-  }
+import Decimal from 'break_infinity.js';
+import type {UserStats} from './graphql/types';
+import {UPGRADES} from '@/config/upgradeConfig';
 
-  // New simplified system: Use clickPower if available
-  if (stats.clickPower && stats.clickPower > 0) {
-    // Exponential scaling: 1.75^(clickPower-1)
-    return Math.floor(Math.pow(1.75, stats.clickPower - 1));
-  }
+export function calculateBaseCandyPerClick(
+  stats: UserStats | undefined,
+  ownedPokemonCount = 0
+): string {
+  if (!stats) return '1';
 
-  // Legacy fallback: Use old attack + spAttack formula for backwards compatibility
-  const baseCandy = Math.floor(Math.pow(1.75, (stats.attack || 1) - 1));
-  const spAttackBonus = Math.floor(
-    0.5 * Math.pow(1.5, (stats.spAttack || 1) - 1)
+  // Base click power
+  const clickPowerValue = UPGRADES.clickPower.formula(
+    (stats.clickPower || 1) - 1
   );
-  return baseCandy + spAttackBonus;
+  let totalPower = new Decimal(clickPowerValue);
+
+  // Click multiplier
+  if (stats.clickMultiplier && stats.clickMultiplier > 1) {
+    const multiplier = UPGRADES.clickMultiplier.formula(
+      stats.clickMultiplier - 1
+    );
+    totalPower = totalPower.times(multiplier);
+  }
+
+  // Pokedex bonus
+  if (stats.pokedexBonus && stats.pokedexBonus > 1 && ownedPokemonCount > 0) {
+    const bonusMultiplier = UPGRADES.pokedexBonus.formula(
+      stats.pokedexBonus - 1,
+      {
+        pokemonCount: ownedPokemonCount,
+      }
+    );
+    totalPower = totalPower.times(bonusMultiplier);
+  }
+
+  return totalPower.toFixed(2);
+}
+
+export function calculateCandyPerClick(
+  stats: UserStats | undefined,
+  ownedPokemonCount = 0
+): string {
+  if (!stats) return '1';
+
+  const clickPowerValue = UPGRADES.clickPower.formula(
+    (stats.clickPower || 1) - 1
+  );
+  let totalPower = new Decimal(clickPowerValue);
+
+  if (stats.clickMultiplier && stats.clickMultiplier > 1) {
+    const multiplier = UPGRADES.clickMultiplier.formula(
+      stats.clickMultiplier - 1
+    );
+    totalPower = totalPower.times(multiplier);
+  }
+
+  if (stats.pokedexBonus && stats.pokedexBonus > 1 && ownedPokemonCount > 0) {
+    const bonusMultiplier = UPGRADES.pokedexBonus.formula(
+      stats.pokedexBonus - 1,
+      {
+        pokemonCount: ownedPokemonCount,
+      }
+    );
+    totalPower = totalPower.times(bonusMultiplier);
+  }
+
+  if (stats.luckyHitChance && stats.luckyHitChance > 1) {
+    const luckyChancePercent =
+      UPGRADES.luckyHitChance.formula(stats.luckyHitChance) / 100;
+    const isLucky = Math.random() < luckyChancePercent;
+
+    if (isLucky && stats.luckyHitMultiplier) {
+      const luckyMult = UPGRADES.luckyHitMultiplier.formula(
+        stats.luckyHitMultiplier
+      );
+      totalPower = totalPower.times(luckyMult);
+    }
+  }
+  return totalPower.toFixed(2);
 }

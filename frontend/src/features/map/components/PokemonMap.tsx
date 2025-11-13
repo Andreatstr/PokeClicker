@@ -473,6 +473,7 @@ export function PokemonMap({
         onToggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
         isMapLoading={!collisionMap.collisionMapLoaded}
+        isDarkMode={isDarkMode}
       >
         {/* Map/Battle Viewport Container - this is the game view */}
         <div
@@ -483,11 +484,7 @@ export function PokemonMap({
         >
           {/* Candy counter in fullscreen, anchored to the GameBoy viewport (top-right) */}
           {isFullscreen && (
-            <CandyCounterOverlay
-              isDarkMode={false}
-              position="top-right"
-              strategy="absolute"
-            />
+            <CandyCounterOverlay position="top-right" strategy="absolute" />
           )}
           {/* Fullscreen/Exit Button - top left of viewport */}
           <button

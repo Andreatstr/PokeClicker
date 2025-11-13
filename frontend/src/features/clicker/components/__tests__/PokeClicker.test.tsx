@@ -55,9 +55,9 @@ vi.mock('../hooks/useClickerActions', () => ({
   }),
 }));
 
-// Mock passive income hook
-vi.mock('../hooks/usePassiveIncome', () => ({
-  usePassiveIncome: () => {},
+// Mock autoclicker hook
+vi.mock('../hooks/useAutoclicker', () => ({
+  useAutoclicker: () => {},
 }));
 
 // Mock game assets cache
@@ -87,7 +87,6 @@ describe('PokeClicker component', () => {
 
     render(<PokeClicker />);
 
-    expect(screen.getByText('Rare Candy')).toBeInTheDocument();
     expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
   });
 

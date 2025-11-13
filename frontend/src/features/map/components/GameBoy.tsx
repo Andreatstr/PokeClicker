@@ -19,6 +19,7 @@ interface GameBoyProps {
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   isMapLoading?: boolean;
+  isDarkMode?: boolean;
 }
 
 export function GameBoy({
@@ -34,6 +35,7 @@ export function GameBoy({
   onToggleFullscreen,
   isFullscreen: isFullscreenProp,
   isMapLoading = false,
+  isDarkMode = false,
 }: GameBoyProps) {
   // Unified mobile detection
   const isMobile = useMobileDetection(768);
@@ -90,14 +92,15 @@ export function GameBoy({
     >
       {/* GameBoy Console Shell */}
       <Card
-        className={`bg-[#9FA0A0] ${
+        className={`${
           isFullscreen
             ? 'w-full h-full flex flex-col border-0 shadow-none'
-            : 'p-4 md:p-3 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mx-auto'
+            : 'p-4 md:p-3 border-4 mx-auto'
         }`}
         style={
           isFullscreen
             ? {
+                backgroundColor: isDarkMode ? '#757474ff' : '#9FA0A0',
                 width: '100%',
                 height: '100%',
                 maxWidth: 'none',
@@ -105,6 +108,11 @@ export function GameBoy({
                 padding: '12px',
               }
             : {
+                backgroundColor: isDarkMode ? '#757474ff' : '#9FA0A0',
+                borderColor: isDarkMode ? '#333333' : 'black',
+                boxShadow: isDarkMode
+                  ? '8px 8px 0px 0px rgba(51,51,51,1)'
+                  : '8px 8px 0px 0px rgba(0,0,0,1)',
                 width: isMobile
                   ? '100%'
                   : `${Math.min(viewport.width + 120, window.innerWidth * 0.9)}px`,
@@ -117,7 +125,7 @@ export function GameBoy({
         >
           {/* Screen Bezel */}
           <div
-            className={`bg-[#3E3E52] rounded-md shadow-inner border-2 border-[#2a2a3e] ${
+            className={`rounded-md shadow-inner border-2 ${
               isFullscreen
                 ? isMobile
                   ? 'flex flex-col p-2 mb-2 w-full'
@@ -127,9 +135,14 @@ export function GameBoy({
             style={
               isFullscreen
                 ? {
+                    backgroundColor: isDarkMode ? '#1a1a2e' : '#3E3E52',
+                    borderColor: isDarkMode ? '#0f0f1a' : '#2a2a3e',
                     height: isMobile ? 'min(60vh, calc(100vh - 280px))' : '75%',
                   }
-                : undefined
+                : {
+                    backgroundColor: isDarkMode ? '#1a1a2e' : '#3E3E52',
+                    borderColor: isDarkMode ? '#0f0f1a' : '#2a2a3e',
+                  }
             }
           >
             {/* Screen Label - hide in fullscreen on mobile */}
@@ -194,10 +207,16 @@ export function GameBoy({
               isFullscreen ? 'mb-2 text-center' : 'mb-3 md:mb-1 text-center'
             }
           >
-            <p className="pixel-font text-[10px] text-[#2a2a3e] tracking-wider mb-0.5">
+            <p
+              className="pixel-font text-[10px] tracking-wider mb-0.5"
+              style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
+            >
               Pretendo
             </p>
-            <p className="pixel-font text-[8px] text-[#2a2a3e] font-bold tracking-widest italic">
+            <p
+              className="pixel-font text-[8px] font-bold tracking-widest italic"
+              style={{color: isDarkMode ? '#000000ff' : '#2a2a3e'}}
+            >
               PLAY BOY<span className="text-[6px]">™</span>
             </p>
           </div>
@@ -244,6 +263,7 @@ export function GameBoy({
                 onBButtonClick={onBButtonClick}
                 isAuthenticated={isAuthenticated}
                 nearbyPokemon={nearbyPokemon}
+                isDarkMode={isDarkMode}
               />
             </div>
           </div>

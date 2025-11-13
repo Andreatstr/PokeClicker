@@ -1,93 +1,97 @@
+import Decimal from 'break_infinity.js';
+import type {UserStats} from '@/lib/graphql/types';
+import {calculateBaseCandyPerClick} from '@/lib/calculateCandyPerClick';
+import {
+  UPGRADES,
+  getUpgradeCost as getUpgradeCostFromConfig,
+} from '@/config/upgradeConfig';
+
 interface StatDescription {
   current: number;
   next: number;
   unit: string;
 }
 
-interface Stats {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-  clickPower?: number;
-  passiveIncome?: number;
-}
-
-/**
- * Get stat description showing current → next level benefit
- */
 export function getStatDescription(
   stat: string,
-  stats: Stats
+  stats: UserStats,
+  ownedPokemonCount = 0
 ): StatDescription | string {
-  switch (stat) {
-    case 'clickPower': {
-      const currentLevel = stats.clickPower || 1;
-      const currentCandy = Math.pow(1.75, currentLevel - 1);
-      const nextCandy = Math.pow(1.75, currentLevel);
-      const currentRounded = Math.floor(currentCandy);
-      const nextRounded = Math.floor(nextCandy);
-      return {
-        current: currentRounded,
-        next: nextRounded,
-        unit: 'candy/click',
-      };
-    }
-    case 'passiveIncome': {
-      const currentLevel = stats.passiveIncome || 1;
-      const currentCandy = Math.pow(1.5, currentLevel - 1);
-      const nextCandy = Math.pow(1.5, currentLevel);
-      const currentRounded = Math.floor(currentCandy);
-      const nextRounded = Math.floor(nextCandy);
-      return {
-        current: currentRounded,
-        next: nextRounded,
-        unit: 'candy/sec',
-      };
-    }
-    // Legacy descriptions (kept for backwards compatibility)
-    case 'hp': {
-      const hpPassive = (stats.hp - 1) * 0.5;
-      return `+${hpPassive.toFixed(1)}/s passive`;
-    }
-    case 'attack':
-      return `+${stats.attack} per click`;
-    case 'defense': {
-      const defPassive = (stats.defense - 1) * 0.3;
-      return `+${defPassive.toFixed(1)}/s passive`;
-    }
-    case 'spAttack':
-      return `+${Math.floor(stats.spAttack * 0.5)} per click`;
-    case 'spDefense':
-      return `Coming soon`;
-    case 'speed':
-      return `Coming soon`;
-    default:
-      return '';
+  const config = UPGRADES[stat];
+
+  if (!config) {
+    return 'Unknown stat';
   }
+
+  const currentLevel = (stats as unknown as Record<string, number>)[stat] || 1;
+
+  if (stat === 'clickPower') {
+    const currentCandy = parseFloat(
+      calculateBaseCandyPerClick(stats, ownedPokemonCount)
+    );
+
+    const nextLevelStats = {...stats, clickPower: currentLevel + 1};
+    const nextCandy = parseFloat(
+      calculateBaseCandyPerClick(nextLevelStats, ownedPokemonCount)
+    );
+
+    const currentRounded =
+      currentCandy < 10
+        ? parseFloat(currentCandy.toFixed(2))
+        : parseFloat(currentCandy.toFixed(1));
+    const nextRounded =
+      nextCandy < 10
+        ? parseFloat(nextCandy.toFixed(2))
+        : parseFloat(nextCandy.toFixed(1));
+    return {
+      current: currentRounded,
+      next: nextRounded,
+      unit: config.unit,
+    };
+  }
+
+  // Special handling for pokedexBonus - show total multiplier based on owned pokemon
+  if (stat === 'pokedexBonus') {
+    const current = config.formula(currentLevel, {
+      pokemonCount: ownedPokemonCount,
+    });
+    const next = config.formula(currentLevel + 1, {
+      pokemonCount: ownedPokemonCount,
+    });
+
+    // Convert to percentage bonus (e.g., 1.5x = 50% bonus)
+    const currentBonus = (current - 1) * 100;
+    const nextBonus = (next - 1) * 100;
+
+    return {
+      current: parseFloat(currentBonus.toFixed(1)),
+      next: parseFloat(nextBonus.toFixed(1)),
+      unit: '% total bonus',
+    };
+  }
+
+  const current = config.formula(currentLevel, {
+    pokemonCount: ownedPokemonCount,
+  });
+  const next = config.formula(currentLevel + 1, {
+    pokemonCount: ownedPokemonCount,
+  });
+
+  let currentDisplay = current;
+  let nextDisplay = next;
+
+  if (stat === 'clickMultiplier') {
+    currentDisplay = current * 100;
+    nextDisplay = next * 100;
+  }
+
+  return {
+    current: parseFloat(currentDisplay.toFixed(2)),
+    next: parseFloat(nextDisplay.toFixed(2)),
+    unit: config.unit,
+  };
 }
 
-/**
- * Calculate upgrade cost for a given stat
- * Different stats have different multipliers
- */
-export function getUpgradeCost(stat: string, currentLevel: number): number {
-  let multiplier = 2.5; // default
-
-  // New simplified system
-  if (stat === 'clickPower') {
-    multiplier = 2.8; // More expensive (high reward)
-  } else if (stat === 'passiveIncome') {
-    multiplier = 2.5; // Moderate cost
-  }
-  // Legacy support
-  else if (stat === 'attack' || stat === 'spAttack') {
-    multiplier = 2.8;
-  } else if (stat === 'speed') {
-    multiplier = 2.2;
-  }
-
-  return Math.floor(10 * Math.pow(multiplier, currentLevel - 1));
+export function getUpgradeCost(stat: string, currentLevel: number): string {
+  return new Decimal(getUpgradeCostFromConfig(stat, currentLevel)).toString();
 }

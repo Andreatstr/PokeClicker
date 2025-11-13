@@ -25,13 +25,18 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
-/**
- * Mutation to sign up a new user with username and password
- */
 export const SIGNUP_MUTATION = gql`
   ${USER_FRAGMENT}
-  mutation Signup($username: String!, $password: String!) {
-    signup(username: $username, password: $password) {
+  mutation Signup(
+    $username: String!
+    $password: String!
+    $isGuestUser: Boolean
+  ) {
+    signup(
+      username: $username
+      password: $password
+      isGuestUser: $isGuestUser
+    ) {
       token
       user {
         ...UserFields
@@ -49,7 +54,7 @@ export const SIGNUP_MUTATION = gql`
  */
 export const UPDATE_RARE_CANDY_MUTATION = gql`
   ${USER_FRAGMENT}
-  mutation UpdateRareCandy($amount: Int!) {
+  mutation UpdateRareCandy($amount: String!) {
     updateRareCandy(amount: $amount) {
       ...UserFields
     }

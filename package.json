@@ -33,6 +33,9 @@
     "patch-package": "^8.0.0",
     "vitest": "^4.0.2"
   },
+  "dependencies": {
+    "break_infinity.js": "^2.2.0"
+  },
   "pnpm": {
     "overrides": {
       "parse5": "7.1.2"

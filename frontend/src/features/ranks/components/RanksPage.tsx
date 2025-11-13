@@ -147,6 +147,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
               aria-label="Candy league"
               disabled={activeLeague === 'candy'}
               onClick={() => setActiveLeague('candy')}
+              isDarkMode={isDarkMode}
             >
               Candy League
             </Button>
@@ -158,6 +159,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
               }`}
               disabled={activeLeague === 'pokemon'}
               onClick={() => setActiveLeague('pokemon')}
+              isDarkMode={isDarkMode}
             >
               Pokemon League
             </Button>
@@ -178,11 +180,9 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
                   checked={checked}
                   onCheckedChange={handleCheckedChange}
                   disabled={isUpdating}
+                  isDarkMode={isDarkMode}
                 />
-                <span
-                  className="text-xs sm:text-sm whitespace-nowrap"
-                  style={{color: 'var(--foreground)'}}
-                >
+                <span className="text-xs sm:text-sm whitespace-nowrap">
                   Show me
                 </span>
               </label>
@@ -193,6 +193,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
                 onClick={handleRefresh}
                 disabled={!canRefresh}
                 className="text-xs sm:text-sm"
+                isDarkMode={isDarkMode}
               >
                 {canRefresh ? 'Refresh' : `Wait ${refreshTimer}s`}
               </Button>
@@ -221,6 +222,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
               aria-label="Load more"
               onClick={() => setLimit((prev) => prev + INITIAL_RANKS_LIMIT)}
               className="text-xs sm:text-sm"
+              isDarkMode={isDarkMode}
             >
               Load More
             </Button>

@@ -40,7 +40,7 @@ interface TiledMapViewProps {
   wildPokemon: PokemonSpawn[];
   nearbyPokemon: PokemonSpawn | null;
   worldPosition: {x: number; y: number};
-  user: {rare_candy?: number} | null;
+  user: {rare_candy?: string} | null;
   collisionMapLoaded: boolean;
   isPositionSemiWalkable: (x: number, y: number) => boolean;
   teleportLocation: string | null;
