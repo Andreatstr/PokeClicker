@@ -129,3 +129,102 @@ export async function waitForRect(
 
   return rect;
 }
+
+// Find the nearest scrollable ancestor (or return document.scrollingElement/window sentinel)
+export function getScrollableAncestor(el: HTMLElement): HTMLElement | Document {
+  const isScrollable = (node: HTMLElement) => {
+    const style = window.getComputedStyle(node);
+    const overflowY = style.overflowY;
+    const canScroll = /(auto|scroll|overlay)/.test(overflowY);
+    return canScroll && node.scrollHeight > node.clientHeight;
+  };
+  let node: HTMLElement | null = el.parentElement;
+  while (node && node !== document.body) {
+    if (isScrollable(node)) return node;
+    node = node.parentElement;
+  }
+  return document.scrollingElement || document.documentElement;
+}
+
+export function scrollElementIntoView(
+  target: HTMLElement,
+  position: 'start' | 'center' = 'center',
+  margin = 16
+) {
+  const container = getScrollableAncestor(target);
+  if (container instanceof HTMLElement) {
+    const cRect = container.getBoundingClientRect();
+    const tRect = target.getBoundingClientRect();
+    const current = container.scrollTop;
+    const deltaTop = tRect.top - cRect.top;
+    let targetTop =
+      current +
+      deltaTop -
+      (position === 'center'
+        ? Math.max(0, (cRect.height - tRect.height) / 2)
+        : margin);
+    const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+    targetTop = Math.max(0, Math.min(targetTop, maxTop));
+    container.scrollTo({top: targetTop, behavior: 'smooth'});
+  } else {
+    // window/document scroll
+    const tRect = target.getBoundingClientRect();
+    const pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    let top =
+      pageY +
+      tRect.top -
+      (position === 'center'
+        ? Math.max(0, (window.innerHeight - tRect.height) / 2)
+        : margin);
+    const docEl = document.scrollingElement || document.documentElement;
+    const maxTop = Math.max(0, (docEl?.scrollHeight || 0) - window.innerHeight);
+    top = Math.max(0, Math.min(top, maxTop));
+    window.scrollTo({top, behavior: 'smooth'});
+  }
+}
+
+export function isRectInViewport(rect: DOMRect, margin = 16): boolean {
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  const topOk = rect.top >= margin;
+  const leftOk = rect.left >= 0;
+  const rightOk = rect.right <= vw;
+  const bottomOk = rect.bottom <= vh - margin;
+  return topOk && leftOk && rightOk && bottomOk;
+}
+
+// Compute target's offsetTop relative to a specific container (not the page)
+export function getOffsetTopWithin(
+  container: HTMLElement,
+  target: HTMLElement
+): number {
+  let offset = 0;
+  let node: HTMLElement | null = target;
+  while (node && node !== container && node !== document.body) {
+    offset += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return offset;
+}
+
+export function scrollElementToTop(target: HTMLElement) {
+  const container = getScrollableAncestor(target);
+  if (container instanceof HTMLElement) {
+    const top = Math.max(
+      0,
+      Math.min(
+        getOffsetTopWithin(container, target),
+        container.scrollHeight - container.clientHeight
+      )
+    );
+    container.scrollTo({top, behavior: 'smooth'});
+  } else {
+    // window/document
+    const rect = target.getBoundingClientRect();
+    const pageY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const docEl = document.scrollingElement || document.documentElement;
+    const maxTop = Math.max(0, (docEl?.scrollHeight || 0) - window.innerHeight);
+    const top = Math.max(0, Math.min(pageY + rect.top, maxTop));
+    window.scrollTo({top, behavior: 'smooth'});
+  }
+}

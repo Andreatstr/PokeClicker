@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {FocusTrap} from 'focus-trap-react';
 import {Button} from '@ui/pixelact';
+import {logger} from '@/lib/logger';
 import {
   Z_INDEX,
   TIMING,
@@ -18,6 +19,8 @@ import {
   findVisibleOnboardingElement,
   delay,
   waitForRect,
+  // utils for legacy behavior only
+  scrollElementToTop,
 } from './onboardingUtils';
 
 type Page = 'pokedex' | 'clicker' | 'map' | 'profile' | 'ranks';
@@ -178,6 +181,12 @@ const STEPS: OnboardingStep[] = [
   },
 ];
 
+// Targets that should align to the very top of the viewport/scroll container
+const START_ALIGN_TARGETS = new Set<string>([
+  'movement-controls',
+  'league-buttons',
+]);
+
 interface OnboardingOverlayProps {
   step: number;
   onNext: () => void;
@@ -213,7 +222,9 @@ export function OnboardingOverlay({
   const pendingTimeoutsRef = useRef<number[]>([]);
   const openedMobileMenuForStepRef = useRef<number | null>(null);
   const skippedStepRef = useRef<number | null>(null);
+  // revert advanced recentering for web; mobile-specific scroll handled inline
   const maxWaitTimeRef = useRef<number | undefined>(undefined);
+  const hasShownRef = useRef<boolean>(false);
 
   const clearPendingTimeouts = () => {
     for (const id of pendingTimeoutsRef.current) clearTimeout(id);
@@ -232,10 +243,32 @@ export function OnboardingOverlay({
 
   useEffect(() => {
     if (!currentStep) return;
+    logger.debug(
+      `Step change → ${step}: target=${currentStep?.target}, page=${currentStep?.page}`,
+      'Onboarding'
+    );
 
     if (previousStep && currentStep.page !== previousStep.page) {
       if (onNavigate) {
         onNavigate(currentStep.page);
+      }
+      // Mobile: only force scroll-to-top for nav-step transitions to avoid twitching on content steps
+      if (
+        isMobileDevice() &&
+        NAV_BUTTON_TARGETS.includes(
+          currentStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+        )
+      ) {
+        setTimeout(() => {
+          try {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            const mainEl = document.querySelector('main');
+            if (mainEl)
+              (mainEl as HTMLElement).scrollTo({top: 0, behavior: 'smooth'});
+          } catch (e) {
+            void e;
+          }
+        }, TIMING.SCROLL_SMOOTH_DELAY);
       }
     }
 
@@ -246,16 +279,18 @@ export function OnboardingOverlay({
       onOpenFirstPokemon
     ) {
       const isMobile = isMobileDevice();
-      const openDelay =
-        isMobile && currentStep.target === 'pokemon-stats'
-          ? TIMING.MODAL_OPEN_MOBILE
-          : TIMING.MODAL_OPEN_DEFAULT;
+      let openDelay = TIMING.MODAL_OPEN_DEFAULT;
+      if (currentStep.target === 'pokemon-stats') {
+        openDelay = isMobile ? TIMING.MODAL_OPEN_MOBILE : 400; // give desktop extra time for modal mount
+      }
       const t = setTimeout(() => {
         onOpenFirstPokemon();
       }, openDelay);
       return () => clearTimeout(t);
     }
-  }, [currentStep, previousStep, onNavigate, onOpenFirstPokemon]);
+
+    // Keep burger menu handling inside find/poll loop to avoid conflicts
+  }, [currentStep, previousStep, onNavigate, onOpenFirstPokemon, step]);
 
   useEffect(() => {
     if (!currentStep || !previousStep) return;
@@ -298,6 +333,7 @@ export function OnboardingOverlay({
     setRectStep(null);
     foundElementRef.current = false;
     lastRectRef.current = null;
+    hasShownRef.current = false;
 
     const startTime = Date.now();
     const navTargetsSet = new Set(NAV_BUTTON_TARGETS);
@@ -311,21 +347,65 @@ export function OnboardingOverlay({
       requestAnimationFrame(async () => {
         if (foundElementRef.current) return;
 
+        // Mobile nav: proactively open burger menu before querying target to ensure correct element is present
+        if (
+          isMobileDevice() &&
+          NAV_BUTTON_TARGETS.includes(
+            currentStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+          )
+        ) {
+          const burgerBtn =
+            document.querySelector<HTMLButtonElement>(
+              'button[aria-label="Toggle mobile menu"]'
+            ) ||
+            document.querySelector<HTMLButtonElement>(
+              'section[aria-label="Mobile menu control"] button'
+            );
+          const burgerClosed =
+            burgerBtn?.getAttribute('aria-expanded') !== 'true';
+          if (burgerBtn && burgerClosed) {
+            try {
+              burgerBtn.click();
+              openedMobileMenuForStepRef.current = step;
+              await delay(TIMING.BURGER_MENU_DELAY);
+            } catch (e) {
+              void e;
+            }
+          }
+        }
+
         const targetElement = findVisibleOnboardingElement(currentStep.target);
 
         if (targetElement) {
+          logger.debug(
+            `Found target '${currentStep.target}'. Measuring rect...`,
+            'Onboarding'
+          );
           foundElementRef.current = true;
 
-          const blockBehavior: ScrollLogicalPosition =
-            MODAL_STEP_TARGETS.includes(
-              currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
-            )
-              ? 'start'
-              : 'center';
-          targetElement.scrollIntoView({
-            behavior: 'smooth',
-            block: blockBehavior,
-          });
+          const isModalTarget = MODAL_STEP_TARGETS.includes(
+            currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+          );
+          const blockBehavior: ScrollLogicalPosition = isModalTarget
+            ? 'start'
+            : 'center';
+          // Mobile: for specific targets, snap to top for full visibility
+          if (
+            isMobileDevice() &&
+            (currentStep.target === 'movement-controls' ||
+              currentStep.target === 'league-buttons')
+          ) {
+            scrollElementToTop(targetElement);
+          } else {
+            // Mobile settle: avoid fighting prior scroll (e.g., 11 -> 12)
+            if (isMobileDevice() && currentStep.target === 'map-canvas') {
+              await delay(220);
+            }
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: blockBehavior,
+            });
+          }
 
           const isModalStep = MODAL_STEP_TARGETS.includes(
             currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
@@ -337,6 +417,10 @@ export function OnboardingOverlay({
             isModalStep,
             isStatsStep
           );
+          logger.debug(
+            `Rect ready for '${currentStep.target}': ${JSON.stringify({top: Math.round(rect.top), left: Math.round(rect.left), w: Math.round(rect.width), h: Math.round(rect.height)})}`,
+            'Onboarding'
+          );
           lastRectRef.current = rect;
           setTargetRect(rect);
           setRectStep(step);
@@ -344,7 +428,29 @@ export function OnboardingOverlay({
 
           await delay(TIMING.CARD_VISIBILITY_DELAY);
           setIsCardVisible(true);
+          hasShownRef.current = true;
+
+          // Mobile-only: ensure highlight is visible by aligning to start for specific targets
+          if (isMobileDevice()) {
+            if (
+              currentStep.target === 'movement-controls' ||
+              currentStep.target === 'map-canvas' ||
+              currentStep.target === 'league-buttons'
+            ) {
+              targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
+            }
+          }
         } else {
+          const count = document.querySelectorAll(
+            `[data-onboarding="${currentStep.target}"]`
+          ).length;
+          logger.debug(
+            `Target '${currentStep.target}' not visible yet (candidates: ${count}). Polling...`,
+            'Onboarding'
+          );
           const navTargets = new Set(NAV_BUTTON_TARGETS);
           const burgerBtn =
             document.querySelector<HTMLButtonElement>(
@@ -363,20 +469,35 @@ export function OnboardingOverlay({
             burgerClosed &&
             openedMobileMenuForStepRef.current !== step
           ) {
-            openedMobileMenuForStepRef.current = step;
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            // Scroll to top, then attempt to open. Only mark as opened if aria-expanded flips to true.
+            try {
+              window.scrollTo({top: 0, behavior: 'smooth'});
+            } catch (e) {
+              void e;
+            }
             await delay(TIMING.SCROLL_SMOOTH_DELAY);
             try {
               burgerBtn.click();
+              await delay(TIMING.BURGER_MENU_DELAY);
+              const nowExpanded =
+                burgerBtn.getAttribute('aria-expanded') === 'true';
+              if (nowExpanded) {
+                openedMobileMenuForStepRef.current = step;
+              }
             } catch (e) {
               void e;
             }
           }
 
-          if (Date.now() - startTime > MAX_WAIT_TIME) {
+          // Enforce a max wait time only if we haven't shown a target yet
+          if (Date.now() - startTime > MAX_WAIT_TIME && !hasShownRef.current) {
             setIsLoading(false);
             setTargetRect(null);
             setRectStep(null);
+            logger.debug(
+              `Max wait exceeded for '${currentStep.target}'. Giving up for now.`,
+              'Onboarding'
+            );
           }
         }
       });
@@ -396,11 +517,15 @@ export function OnboardingOverlay({
       currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
     );
 
-    maxWaitTimeRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, MAX_WAIT_TIME);
+    // For modal steps, do not set a max wait timer; keep polling until the element appears
+    if (!isModalStep) {
+      maxWaitTimeRef.current = setTimeout(() => {
+        setIsLoading(false);
+      }, MAX_WAIT_TIME);
+    }
 
     let skipTimer: number | undefined;
+    // Auto-skip locked-card step when no locked card is visible
     if (
       currentStep.target === 'pokemon-card-locked' &&
       !isModalStep &&
@@ -416,6 +541,8 @@ export function OnboardingOverlay({
         }
       }, 800);
     }
+
+    // Intentionally do NOT auto-skip the upgrade step; allow extra time for data to load
 
     const handleResize = () => {
       if (foundElementRef.current) {
@@ -438,6 +565,27 @@ export function OnboardingOverlay({
           lastRectRef.current = rect;
           setTargetRect(rect);
           setRectStep(step);
+
+          // If the target drifts near the edge after layout/scroll, recenter a limited number of times
+          const attempts = recenterAttemptsRef.current[step] ?? 0;
+          if (!isRectInViewport(rect, 24) && attempts < 3) {
+            recenterAttemptsRef.current[step] = attempts + 1;
+            const isModalTarget = MODAL_STEP_TARGETS.includes(
+              currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+            );
+            const forceStart = START_ALIGN_TARGETS.has(currentStep.target);
+            const blockBehavior =
+              isModalTarget || forceStart ? 'start' : 'center';
+            logger.debug(
+              `Post-update recenter for '${currentStep.target}' (attempt ${attempts + 1})`,
+              'Onboarding'
+            );
+            if (forceStart) {
+              scrollElementToTop(el);
+            } else {
+              scrollElementIntoView(el, blockBehavior, 16);
+            }
+          }
         }
       } else if (!foundElementRef.current) {
         findAndScrollToTarget();
@@ -467,8 +615,11 @@ export function OnboardingOverlay({
   if (isLoading || !targetRect || rectStep !== step || !isCardVisible) {
     return createPortal(
       <div
-        className={`fixed inset-0 bg-black/70 ${isModalStep ? `z-[${Z_INDEX.MODAL_BACKDROP}]` : `z-[${Z_INDEX.BACKDROP}]`}`}
-        style={{pointerEvents: 'auto'}}
+        className="fixed inset-0 bg-black/70"
+        style={{
+          pointerEvents: 'auto',
+          zIndex: isModalStep ? Z_INDEX.MODAL_BACKDROP : Z_INDEX.BACKDROP,
+        }}
         aria-hidden="true"
       />,
       document.body
@@ -523,18 +674,23 @@ export function OnboardingOverlay({
   return createPortal(
     <>
       <div
-        className={`fixed inset-0 ${isModalStep ? `z-[${Z_INDEX.MODAL_BACKDROP}]` : `z-[${Z_INDEX.BACKDROP}]`}`}
-        style={{pointerEvents: 'auto', background: 'transparent'}}
+        className="fixed inset-0"
+        style={{
+          pointerEvents: 'auto',
+          background: 'transparent',
+          zIndex: isModalStep ? Z_INDEX.MODAL_BACKDROP : Z_INDEX.BACKDROP,
+        }}
         aria-hidden="true"
       />
 
       <div
-        className={`fixed ${isModalStep ? `z-[${Z_INDEX.MODAL_SPOTLIGHT}]` : `z-[${Z_INDEX.SPOTLIGHT}]`} border-4 border-yellow-400 rounded-lg pointer-events-none`}
+        className="fixed border-4 border-yellow-400 rounded-lg pointer-events-none"
         style={{
           top: targetRect.top - 8,
           left: targetRect.left - 8,
           width: targetRect.width + 16,
           height: targetRect.height + 16,
+          zIndex: isModalStep ? Z_INDEX.MODAL_SPOTLIGHT : Z_INDEX.SPOTLIGHT,
           boxShadow:
             '0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.8)',
           animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -554,10 +710,11 @@ export function OnboardingOverlay({
       >
         <div
           ref={popupRef}
-          className={`fixed ${isModalStep ? `z-[${Z_INDEX.MODAL_POPUP}]` : `z-[${Z_INDEX.POPUP}]`} border-4 p-4 max-w-[350px] pixel-font pointer-events-auto`}
+          className="fixed border-4 p-4 max-w-[350px] pixel-font pointer-events-auto"
           style={{
             top: isCardVisible ? `${popupPosition.top}px` : '-9999px',
             left: isCardVisible ? `${popupPosition.left}px` : '-9999px',
+            zIndex: isModalStep ? Z_INDEX.MODAL_POPUP : Z_INDEX.POPUP,
             backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
             borderColor: isDarkMode ? '#333333' : 'black',
             boxShadow: isDarkMode
