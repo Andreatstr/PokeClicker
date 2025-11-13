@@ -47,6 +47,7 @@
 @media (max-width: 768px) {
   .dialog-backdrop {
     align-items: flex-end;
+    touch-action: none;
   }
 
   .dialog-content {
@@ -57,7 +58,10 @@
     padding: 1rem;
     animation: drawer-slide-up 0.3s ease-out;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   /* Hide scrollbar on mobile but keep functionality */
@@ -72,4 +76,12 @@
 }
 
 .dialog-body {
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+  .dialog-body {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
 }
