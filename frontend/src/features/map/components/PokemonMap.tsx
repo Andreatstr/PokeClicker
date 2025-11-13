@@ -526,44 +526,48 @@ export function PokemonMap({
           </button>
 
           {/* Info / How to Play Button - Bottom Right */}
-          <button
-            onClick={() => setShowHowToPlay(true)}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              setShowHowToPlay(true);
-            }}
-            className="absolute bottom-3 right-3 z-50 flex items-center justify-center gap-1 active:bg-blue-700 border-2 border-black px-2 h-[30px] py-1 touch-manipulation text-xs font-bold"
-            title="How to play"
-            style={{
-              WebkitTapHighlightColor: 'transparent',
-              backgroundColor: 'rgba(59, 130, 246, 0.9)',
-              boxShadow: '4px 4px 0px rgba(0,0,0,1)',
-              transform: 'translate(0, 0)',
-              transition: 'all 0.15s ease-in-out',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translate(-2px, -2px)';
-              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
-            }}
-          >
-            <svg
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              className="w-4 h-4 text-white"
+          {!inBattle && (
+            <button
+              onClick={() => setShowHowToPlay(true)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setShowHowToPlay(true);
+              }}
+              className="absolute bottom-3 right-3 z-50 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
+              title="How to play"
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+                transform: 'translate(0, 0)',
+                transition: 'all 0.15s ease-in-out',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor =
+                  'rgba(37, 99, 235, 0.95)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+                e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor =
+                  'rgba(59, 130, 246, 0.9)';
+              }}
             >
-              <path
-                d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
+              <svg
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-5 h-5 text-white"
+              >
+                <path
+                  d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          )}
 
           {inBattle && battleOpponent && playerPokemon ? (
             <BattleView

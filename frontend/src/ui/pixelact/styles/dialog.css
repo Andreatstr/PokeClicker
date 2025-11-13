@@ -52,9 +52,22 @@
   .dialog-content {
     width: 100%;
     max-width: 100%;
+    max-height: 85vh;
     border-radius: 16px 16px 0 0;
     padding: 1rem;
     animation: drawer-slide-up 0.3s ease-out;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar on mobile but keep functionality */
+  .dialog-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dialog-content {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 }
 
