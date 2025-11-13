@@ -3,39 +3,24 @@ import {logger} from '@/lib/logger';
 import {GameConfig} from '@/config';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getUpgradeCost} from '../utils/statDescriptions';
-import type {User} from '@features/auth';
-
-interface Stats {
-  hp: number;
-  attack: number;
-  defense: number;
-  spAttack: number;
-  spDefense: number;
-  speed: number;
-  clickPower?: number;
-  passiveIncome?: number;
-}
-
-interface Candy {
-  id: number;
-  x: number;
-  amount: number;
-}
+import type {User, UserStats, Candy} from '@/lib/graphql/types';
+import {toDecimal} from '@/lib/decimal';
 
 interface UseClickerActionsProps {
-  stats: Stats;
+  stats: UserStats;
   isAuthenticated: boolean;
-  addCandy: (amount: number) => void;
-  deductCandy: (amount: number) => void;
+  addCandy: (amount: string) => void;
+  deductCandy: (amount: string) => void;
   flushPendingCandy: () => Promise<void>;
-  localRareCandy: number;
+  localRareCandy: string;
   setDisplayError: (error: string | null) => void;
-  setStats: React.Dispatch<React.SetStateAction<Stats>>;
+  setStats: React.Dispatch<React.SetStateAction<UserStats>>;
   upgradeStat: (
     stat: string,
     updateUser: (user: User) => void
   ) => Promise<User | undefined>;
   updateUser: (user: User) => void;
+  ownedPokemonCount: number;
 }
 
 /**
@@ -53,6 +38,7 @@ export function useClickerActions({
   setStats,
   upgradeStat,
   updateUser,
+  ownedPokemonCount,
 }: UseClickerActionsProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [candies, setCandies] = useState<Candy[]>([]);
@@ -63,7 +49,7 @@ export function useClickerActions({
       return;
     }
 
-    const candiesEarned = calculateCandyPerClick(stats);
+    const candiesEarned = calculateCandyPerClick(stats, ownedPokemonCount);
 
     addCandy(candiesEarned);
     setIsAnimating(true);
@@ -83,10 +69,10 @@ export function useClickerActions({
       () => setIsAnimating(false),
       GameConfig.clicker.clickAnimationDuration
     );
-  }, [isAuthenticated, stats, addCandy, setDisplayError]);
+  }, [isAuthenticated, stats, ownedPokemonCount, addCandy, setDisplayError]);
 
   const handleUpgrade = useCallback(
-    async (stat: keyof Stats) => {
+    async (stat: keyof UserStats) => {
       if (!isAuthenticated) {
         setDisplayError('Please log in to upgrade stats');
         return;
@@ -94,7 +80,7 @@ export function useClickerActions({
 
       const cost = getUpgradeCost(stat, stats[stat] || 1);
 
-      if (localRareCandy < cost) {
+      if (toDecimal(localRareCandy).lt(cost)) {
         return; // Not enough candy
       }
 

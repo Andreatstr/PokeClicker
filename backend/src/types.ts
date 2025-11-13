@@ -18,7 +18,7 @@ import {ObjectId} from 'mongodb';
 // }
 
 export interface UserStats {
-  rare_candy: number;
+  rare_candy: string;
   stats: {
     hp: number;
     attack: number;
@@ -26,9 +26,13 @@ export interface UserStats {
     spAttack: number;
     spDefense: number;
     speed: number;
-    // New simplified PokeClicker upgrades:
+    // PokeClicker upgrades:
     clickPower?: number;
-    passiveIncome?: number;
+    autoclicker?: number;
+    luckyHitChance?: number;
+    luckyHitMultiplier?: number;
+    clickMultiplier?: number;
+    pokedexBonus?: number;
   };
   owned_pokemon_ids: number[];
   favorite_pokemon_id?: number;
@@ -42,6 +46,7 @@ export interface UserDocument extends UserStats {
   password_hash: string;
   created_at: Date;
   showInRanks?: boolean;
+  isGuestUser?: boolean;
 }
 
 export interface AuthResponse {
@@ -59,7 +64,7 @@ export interface PokemonQueryArgs {
 }
 
 export const DEFAULT_USER_STATS = {
-  rare_candy: 0,
+  rare_candy: '0',
   stats: {
     hp: 1,
     attack: 1,
@@ -67,9 +72,13 @@ export const DEFAULT_USER_STATS = {
     spAttack: 1,
     spDefense: 1,
     speed: 1,
-    // New simplified PokeClicker upgrades (start at level 1):
+    // PokeClicker upgrades:
     clickPower: 1,
-    passiveIncome: 1,
+    autoclicker: 1,
+    luckyHitChance: 1,
+    luckyHitMultiplier: 1,
+    clickMultiplier: 1,
+    pokedexBonus: 1,
   },
   owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
 };

@@ -7,7 +7,7 @@ interface BattleResultProps {
   result: 'victory' | 'defeat';
   opponentPokemon: PokedexPokemon;
   clickCount: number;
-  rareCandyReward: number;
+  rareCandyReward: string;
   onContinue: () => void;
   isDarkMode?: boolean;
 }

@@ -1,12 +1,3 @@
-/**
- * Centralized GraphQL TypeScript Types
- * All types for queries, mutations, and their variables are defined here
- */
-
-// ============================================================================
-// SHARED TYPES
-// ============================================================================
-
 export interface PokemonStats {
   hp: number;
   attack: number;
@@ -14,6 +5,40 @@ export interface PokemonStats {
   spAttack: number;
   spDefense: number;
   speed: number;
+}
+
+export interface UserStats {
+  hp: number;
+  attack: number;
+  defense: number;
+  spAttack: number;
+  spDefense: number;
+  speed: number;
+  clickPower?: number;
+  autoclicker?: number;
+  luckyHitChance?: number;
+  luckyHitMultiplier?: number;
+  clickMultiplier?: number;
+  pokedexBonus?: number;
+}
+
+export interface Candy {
+  id: number;
+  x: number;
+  amount: string;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  rare_candy: string;
+  created_at: string;
+  stats: UserStats;
+  owned_pokemon_ids: number[];
+  favorite_pokemon_id?: number | null;
+  selected_pokemon_id?: number | null;
+  showInRanks?: boolean;
+  isGuestUser?: boolean;
 }
 
 // ============================================================================
@@ -118,10 +143,10 @@ export interface PokemonByIdsVariables {
 export interface PokemonUpgrade {
   pokemon_id: number;
   level: number;
-  cost: number;
+  cost: string;
   user?: {
     _id: string;
-    rare_candy: number;
+    rare_candy: string;
   };
 }
 
@@ -146,18 +171,9 @@ export interface AuthResponse {
   user: {
     _id: string;
     username: string;
-    rare_candy: number;
+    rare_candy: string;
     created_at: string;
-    stats: {
-      hp: number;
-      attack: number;
-      defense: number;
-      spAttack: number;
-      spDefense: number;
-      speed: number;
-      clickPower: number;
-      passiveIncome: number;
-    };
+    stats: UserStats;
     owned_pokemon_ids: number[];
     favorite_pokemon_id: number | null;
     selected_pokemon_id: number | null;
@@ -176,39 +192,19 @@ export interface SignupData {
 export interface AuthVariables {
   username: string;
   password: string;
+  isGuestUser?: boolean;
 }
 
 // ============================================================================
 // USER MUTATION TYPES
 // ============================================================================
 
-export interface User {
-  _id: string;
-  username: string;
-  rare_candy: number;
-  created_at: string;
-  stats: {
-    hp: number;
-    attack: number;
-    defense: number;
-    spAttack: number;
-    spDefense: number;
-    speed: number;
-    clickPower: number;
-    passiveIncome: number;
-  };
-  owned_pokemon_ids: number[];
-  favorite_pokemon_id: number | null;
-  selected_pokemon_id: number | null;
-  showInRanks?: boolean;
-}
-
 export interface UpdateRareCandyData {
   updateRareCandy: User;
 }
 
 export interface UpdateRareCandyVariables {
-  amount: number;
+  amount: string;
 }
 
 export interface UpgradeStatData {

@@ -91,16 +91,46 @@ export function LoginScreen({onNavigate}: Props) {
 
   async function loginAsGuest() {
     try {
-      const result = await loginMutation({
-        variables: {username: 'guest', password: '123456'},
+      const guestUsername = `g_${crypto.randomUUID().slice(0, 8)}`;
+      const guestPassword = crypto.randomUUID();
+
+      console.log('Creating guest user:', guestUsername);
+
+      const signupResult = await signupMutation({
+        variables: {
+          username: guestUsername,
+          password: guestPassword,
+          isGuestUser: true,
+        },
       });
-      const authData = (result.data as LoginData | undefined)?.login;
+
+      console.log('Signup result:', signupResult);
+
+      if (!signupResult) {
+        logger.logError(new Error('No result from signup'), 'GuestSignup');
+        return;
+      }
+
+      const authData = (signupResult.data as SignupData | undefined)?.signup;
+
+      console.log('Auth data:', authData);
+
+      if (!authData) {
+        logger.logError(new Error('No auth data in response'), 'GuestSignup');
+        return;
+      }
+
       if (authData?.token && authData?.user) {
         await authLogin(authData.token, authData.user);
         onNavigate('pokedex');
+      } else {
+        logger.logError(
+          new Error('Missing token or user in auth data'),
+          'GuestSignup'
+        );
       }
     } catch (err) {
-      logger.logError(err, 'GuestLogin');
+      logger.logError(err, 'GuestSignup');
     }
   }
 

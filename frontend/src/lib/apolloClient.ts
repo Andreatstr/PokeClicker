@@ -71,7 +71,21 @@ const errorLink = onError(({graphQLErrors}) => {
 
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      User: {
+        fields: {
+          rare_candy: {
+            // Ensure rare_candy is always stored and read as a string
+            // This prevents Apollo from converting large number strings to numbers
+            merge(_existing, incoming) {
+              return String(incoming);
+            },
+          },
+        },
+      },
+    },
+  }),
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-first',

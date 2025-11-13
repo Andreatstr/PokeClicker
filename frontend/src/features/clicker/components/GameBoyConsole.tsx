@@ -1,11 +1,7 @@
 import {Card, Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
 
-interface Candy {
-  id: number;
-  x: number;
-  amount: number;
-}
+import type {Candy} from '@/lib/graphql/types';
 
 interface GameBoyConsoleProps {
   isDarkMode: boolean;
@@ -108,7 +104,7 @@ export function GameBoyConsole({
                       textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
                     }}
                   >
-                    +{formatNumber(candy.amount)}
+                    +{formatNumber(candy.amount, {showDecimals: true})}
                   </span>
                   <img
                     src={`${import.meta.env.BASE_URL}candy.webp`}

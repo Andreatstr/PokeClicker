@@ -37,7 +37,6 @@ export {
 } from './hooks/usePokemonUpgrade';
 
 // Utils
-export {getPokemonCost, getBackgroundImageUrl} from './utils/pokemonCost';
 export {
   getTypeColors,
   getContrastColor,

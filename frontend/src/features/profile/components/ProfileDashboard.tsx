@@ -154,9 +154,7 @@ export function ProfileDashboard({
               <dt className="inline">
                 <strong>RARE CANDY:</strong>
               </dt>
-              <dd className="inline ml-2">
-                {formatNumber(Math.floor(user.rare_candy))}
-              </dd>
+              <dd className="inline ml-2">{formatNumber(user.rare_candy)}</dd>
             </div>
 
             <div>

@@ -3,7 +3,7 @@ import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '../hooks/useGameMutations';
 import {useCandySync} from '../hooks/useCandySync';
-import {usePassiveIncome} from '../hooks/usePassiveIncome';
+import {useAutoclicker} from '../hooks/useAutoclicker';
 import {useClickerActions} from '../hooks/useClickerActions';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
 import {GameBoyConsole} from './GameBoyConsole';
@@ -29,7 +29,11 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
       spDefense: 1,
       speed: 1,
       clickPower: 1,
-      passiveIncome: 1,
+      autoclicker: 1,
+      luckyHitChance: 1,
+      luckyHitMultiplier: 1,
+      clickMultiplier: 1,
+      pokedexBonus: 1,
     }
   );
 
@@ -59,12 +63,14 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
     setStats,
     upgradeStat,
     updateUser,
+    ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
   });
 
-  usePassiveIncome({
+  useAutoclicker({
     stats,
     isAuthenticated,
-    onIncomeGenerated: addCandy,
+    onAutoClick: addCandy,
+    ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
   });
 
   useEffect(() => {
@@ -121,6 +127,7 @@ export function PokeClicker({isDarkMode = false}: PokeClickerProps) {
           isLoading={loading}
           isAuthenticated={isAuthenticated}
           onUpgrade={handleUpgrade}
+          ownedPokemonCount={user?.owned_pokemon_ids?.length || 0}
         />
       </div>
     </div>

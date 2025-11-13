@@ -55,9 +55,9 @@ vi.mock('../hooks/useClickerActions', () => ({
   }),
 }));
 
-// Mock passive income hook
-vi.mock('../hooks/usePassiveIncome', () => ({
-  usePassiveIncome: () => {},
+// Mock autoclicker hook
+vi.mock('../hooks/useAutoclicker', () => ({
+  useAutoclicker: () => {},
 }));
 
 // Mock game assets cache

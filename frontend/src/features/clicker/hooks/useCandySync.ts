@@ -3,6 +3,7 @@ import {logger} from '@/lib/logger';
 import {GameConfig} from '@/config';
 import {useGameMutations} from './useGameMutations';
 import type {User} from '@features/auth';
+import {toDecimal} from '@/lib/decimal';
 
 interface UseCandySyncProps {
   user: User | null;
@@ -21,10 +22,11 @@ export function useCandySync({
 }: UseCandySyncProps) {
   const {updateRareCandy} = useGameMutations();
 
-  // Local candy state - THIS is the source of truth for display!
-  const [localRareCandy, setLocalRareCandy] = useState(user?.rare_candy || 0);
-  const [unsyncedAmount, setUnsyncedAmount] = useState(0);
-  const unsyncedAmountRef = useRef(0);
+  const [localRareCandy, setLocalRareCandy] = useState(
+    user?.rare_candy ? String(user.rare_candy) : '0'
+  );
+  const [unsyncedAmount, setUnsyncedAmount] = useState('0');
+  const unsyncedAmountRef = useRef('0');
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncRef = useRef<number>(Date.now());
   const [displayError, setDisplayError] = useState<string | null>(null);
@@ -32,19 +34,19 @@ export function useCandySync({
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (user && !hasMountedRef.current) {
-      setLocalRareCandy(user.rare_candy);
-      setUnsyncedAmount(0);
-      unsyncedAmountRef.current = 0;
+      setLocalRareCandy(String(user.rare_candy));
+      setUnsyncedAmount('0');
+      unsyncedAmountRef.current = '0';
       hasMountedRef.current = true;
     }
   }, [user]);
 
   const flushPendingCandy = useCallback(async () => {
-    if (unsyncedAmount === 0 || !isAuthenticated) return;
+    if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
 
     const amountToSync = unsyncedAmount;
-    setUnsyncedAmount(0);
-    unsyncedAmountRef.current = 0;
+    setUnsyncedAmount('0');
+    unsyncedAmountRef.current = '0';
     lastSyncRef.current = Date.now();
 
     if (batchTimerRef.current) {
@@ -58,7 +60,7 @@ export function useCandySync({
       logger.logError(err, 'SyncCandy');
       setDisplayError('Failed to save progress. Will retry...');
       setUnsyncedAmount((prev) => {
-        const newAmount = prev + amountToSync;
+        const newAmount = toDecimal(prev).plus(amountToSync).toString();
         unsyncedAmountRef.current = newAmount;
         return newAmount;
       });
@@ -70,10 +72,12 @@ export function useCandySync({
   }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
 
   useEffect(() => {
-    if (unsyncedAmount === 0 || !isAuthenticated) return;
+    if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
 
     const shouldFlush =
-      unsyncedAmount >= GameConfig.clicker.batchSyncClickThreshold ||
+      toDecimal(unsyncedAmount).gte(
+        GameConfig.clicker.batchSyncClickThreshold
+      ) ||
       Date.now() - lastSyncRef.current >=
         GameConfig.clicker.batchSyncTimeThreshold;
 
@@ -102,23 +106,23 @@ export function useCandySync({
   // Empty deps - we want this to run ONLY on unmount, refs handle current values
   useEffect(() => {
     return () => {
-      if (unsyncedAmountRef.current > 0) {
+      if (toDecimal(unsyncedAmountRef.current).gt(0)) {
         flushPendingCandyRef.current();
       }
     };
   }, []);
 
-  const addCandy = useCallback((amount: number) => {
-    setLocalRareCandy((prev) => prev + amount);
+  const addCandy = useCallback((amount: string) => {
+    setLocalRareCandy((prev) => toDecimal(prev).plus(amount).toString());
     setUnsyncedAmount((prev) => {
-      const newAmount = prev + amount;
+      const newAmount = toDecimal(prev).plus(amount).toString();
       unsyncedAmountRef.current = newAmount;
       return newAmount;
     });
   }, []);
 
-  const deductCandy = useCallback((amount: number) => {
-    setLocalRareCandy((prev) => prev - amount);
+  const deductCandy = useCallback((amount: string) => {
+    setLocalRareCandy((prev) => toDecimal(prev).minus(amount).toString());
   }, []);
 
   return {

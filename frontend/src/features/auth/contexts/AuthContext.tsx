@@ -1,7 +1,9 @@
 import {useState, useEffect, type ReactNode} from 'react';
 import {logger} from '@/lib/logger';
 import {apolloClient} from '@/lib/apolloClient';
-import {AuthContext, type User} from './AuthContextDefinition';
+import {AuthContext} from './AuthContextDefinition';
+import type {User} from '@/lib/graphql/types';
+import {DELETE_USER_MUTATION} from '@/lib/graphql/mutations';
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);
@@ -14,40 +16,26 @@ export function AuthProvider({children}: {children: ReactNode}) {
       try {
         const parsedUser = JSON.parse(savedUser);
 
-        // Validate and migrate user data to ensure stats exist
-        if (parsedUser && typeof parsedUser === 'object') {
-          if (!parsedUser.stats || typeof parsedUser.stats !== 'object') {
-            logger.warn(
-              'User data missing stats object, clearing localStorage',
-              'AuthContext'
-            );
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            return;
-          }
-
-          const defaultStats = {
-            hp: 1,
-            attack: 1,
-            defense: 1,
-            spAttack: 1,
-            spDefense: 1,
-            speed: 1,
-            clickPower: 1,
-            passiveIncome: 1,
-          };
-
-          parsedUser.stats = {
-            ...defaultStats,
-            ...parsedUser.stats,
-          };
+        // Validate user data
+        if (
+          !parsedUser ||
+          typeof parsedUser !== 'object' ||
+          !parsedUser.stats ||
+          typeof parsedUser.stats !== 'object'
+        ) {
+          logger.warn(
+            'Invalid user data in localStorage, clearing',
+            'AuthContext'
+          );
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          return;
         }
 
         setToken(savedToken);
         setUser(parsedUser);
 
-        // Always trigger onboarding for guest user on page reload
-        if (parsedUser.username.toLowerCase() === 'guest') {
+        if (parsedUser.isGuestUser) {
           localStorage.removeItem('onboarding_completed');
         }
       } catch (e) {
@@ -64,8 +52,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setToken(newToken);
     setUser(newUser);
 
-    // Always trigger onboarding for guest user
-    if (newUser.username.toLowerCase() === 'guest') {
+    if (newUser.isGuestUser) {
       localStorage.removeItem('onboarding_completed');
     }
 
@@ -73,6 +60,16 @@ export function AuthProvider({children}: {children: ReactNode}) {
   };
 
   const logout = async () => {
+    if (user?.isGuestUser) {
+      try {
+        await apolloClient.mutate({
+          mutation: DELETE_USER_MUTATION,
+        });
+      } catch (err) {
+        logger.logError(err, 'DeleteGuestUser');
+      }
+    }
+
     setToken(null);
     setUser(null);
     localStorage.removeItem('authToken');

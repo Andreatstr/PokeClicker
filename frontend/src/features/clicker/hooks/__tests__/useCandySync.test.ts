@@ -64,8 +64,8 @@ describe('useCandySync', () => {
     it('should initialize with user candy amount', () => {
       const {result} = renderHook(() => useCandySync(mockProps));
 
-      expect(result.current.localRareCandy).toBe(100);
-      expect(result.current.unsyncedAmount).toBe(0);
+      expect(result.current.localRareCandy).toBe('100');
+      expect(result.current.unsyncedAmount).toBe('0');
       expect(result.current.displayError).toBeNull();
     });
 
@@ -73,8 +73,8 @@ describe('useCandySync', () => {
       const props = {...mockProps, user: null};
       const {result} = renderHook(() => useCandySync(props));
 
-      expect(result.current.localRareCandy).toBe(0);
-      expect(result.current.unsyncedAmount).toBe(0);
+      expect(result.current.localRareCandy).toBe('0');
+      expect(result.current.unsyncedAmount).toBe('0');
     });
 
     it('should update local candy when user changes', () => {
@@ -82,11 +82,11 @@ describe('useCandySync', () => {
         initialProps: {...mockProps, user: null},
       });
 
-      expect(result.current.localRareCandy).toBe(0);
+      expect(result.current.localRareCandy).toBe('0');
 
       rerender(mockProps);
 
-      expect(result.current.localRareCandy).toBe(100);
+      expect(result.current.localRareCandy).toBe('100');
     });
   });
 
@@ -98,8 +98,8 @@ describe('useCandySync', () => {
         result.current.addCandy(10);
       });
 
-      expect(result.current.localRareCandy).toBe(110);
-      expect(result.current.unsyncedAmount).toBe(10);
+      expect(result.current.localRareCandy).toBe('110');
+      expect(result.current.unsyncedAmount).toBe('10');
     });
 
     it('should accumulate multiple additions', () => {
@@ -111,8 +111,8 @@ describe('useCandySync', () => {
         result.current.addCandy(7);
       });
 
-      expect(result.current.localRareCandy).toBe(115);
-      expect(result.current.unsyncedAmount).toBe(15);
+      expect(result.current.localRareCandy).toBe('115');
+      expect(result.current.unsyncedAmount).toBe('15');
     });
   });
 
@@ -124,7 +124,7 @@ describe('useCandySync', () => {
         result.current.deductCandy(20);
       });
 
-      expect(result.current.localRareCandy).toBe(80);
+      expect(result.current.localRareCandy).toBe('80');
     });
 
     it('should not affect unsynced amount', () => {
@@ -135,8 +135,8 @@ describe('useCandySync', () => {
         result.current.deductCandy(5);
       });
 
-      expect(result.current.localRareCandy).toBe(105);
-      expect(result.current.unsyncedAmount).toBe(10); // Only additions tracked
+      expect(result.current.localRareCandy).toBe('105');
+      expect(result.current.unsyncedAmount).toBe('10'); // Only additions tracked
     });
   });
 
@@ -156,10 +156,10 @@ describe('useCandySync', () => {
 
       // Flush should have been called immediately (no timer needed)
       expect(mockUpdateRareCandy).toHaveBeenCalledWith(
-        50,
+        '50',
         mockProps.updateUser
       );
-      expect(result.current.unsyncedAmount).toBe(0);
+      expect(result.current.unsyncedAmount).toBe('0');
     });
 
     it('should not flush below threshold', () => {
@@ -170,7 +170,7 @@ describe('useCandySync', () => {
       });
 
       expect(mockUpdateRareCandy).not.toHaveBeenCalled();
-      expect(result.current.unsyncedAmount).toBe(10);
+      expect(result.current.unsyncedAmount).toBe('10');
     });
   });
 
@@ -192,7 +192,7 @@ describe('useCandySync', () => {
 
       // Flush should have been called after timer expires
       expect(mockUpdateRareCandy).toHaveBeenCalledWith(
-        10,
+        '10',
         mockProps.updateUser
       );
     });
@@ -266,7 +266,7 @@ describe('useCandySync', () => {
         'Failed to save progress. Will retry...'
       );
       // Should restore unsynced amount for retry
-      expect(result.current.unsyncedAmount).toBe(10);
+      expect(result.current.unsyncedAmount).toBe('10');
 
       // Error should clear after timeout
       act(() => {
@@ -292,9 +292,12 @@ describe('useCandySync', () => {
         await result.current.flushPendingCandy();
       });
 
-      expect(mockUpdateRareCandy).toHaveBeenCalledWith(6, mockProps.updateUser);
-      expect(result.current.localRareCandy).toBe(106);
-      expect(result.current.unsyncedAmount).toBe(0);
+      expect(mockUpdateRareCandy).toHaveBeenCalledWith(
+        '6',
+        mockProps.updateUser
+      );
+      expect(result.current.localRareCandy).toBe('106');
+      expect(result.current.unsyncedAmount).toBe('0');
     });
   });
 });

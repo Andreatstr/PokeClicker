@@ -30,7 +30,7 @@ interface TiledMapViewProps {
   wildPokemon: PokemonSpawn[];
   nearbyPokemon: PokemonSpawn | null;
   worldPosition: {x: number; y: number};
-  user: {rare_candy?: number} | null;
+  user: {rare_candy?: string} | null;
   collisionMapLoaded: boolean;
   isPositionSemiWalkable: (x: number, y: number) => boolean;
   teleportLocation: string | null;
@@ -284,7 +284,7 @@ export function TiledMapView(props: TiledMapViewProps) {
             style={{imageRendering: 'pixelated'}}
           />
           <span className="pixel-font text-base font-bold text-black">
-            {formatNumber(Math.floor(user?.rare_candy ?? 0))}
+            {formatNumber(user?.rare_candy ?? '0')}
           </span>
         </div>
       </div>
