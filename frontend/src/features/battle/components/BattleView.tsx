@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useMemo} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
@@ -138,6 +138,232 @@ export function BattleView({
     updateUser,
   ]);
 
+  type LayoutPosition = {
+    width: string;
+    maxWidth?: string;
+    top?: string;
+    bottom?: string;
+    left?: string;
+    right?: string;
+    aspectRatio?: string;
+    translateX?: string;
+    translateY?: string;
+    extraTransform?: string;
+  };
+
+  type LayoutConfig = {
+    opponentPlatform: LayoutPosition;
+    opponentSprite: LayoutPosition;
+    opponentHealth: LayoutPosition;
+    playerPlatform: LayoutPosition;
+    playerSprite: LayoutPosition;
+    playerHealth: LayoutPosition;
+  };
+
+  const layoutConfig = useMemo<LayoutConfig>(() => {
+    if (isFullscreen) {
+      if (isMobile) {
+        return {
+          opponentPlatform: {
+            width: '42%',
+            maxWidth: '240px',
+            top: '25%',
+            right: '6%',
+            aspectRatio: '7 / 3',
+          },
+          opponentSprite: {
+            width: '20%',
+            maxWidth: '200px',
+            top: '19%',
+            right: '16%',
+          },
+          opponentHealth: {
+            width: '40%',
+            maxWidth: '260px',
+            top: '22%',
+            left: '30%',
+            translateX: '-50%',
+          },
+          playerPlatform: {
+            width: '60%',
+            maxWidth: '340px',
+            bottom: '1%',
+            left: '5%',
+            aspectRatio: '7 / 3',
+          },
+          playerSprite: {
+            width: '30%',
+            maxWidth: '240px',
+            bottom: '6%',
+            left: '20%',
+            extraTransform: 'scaleX(-1)',
+          },
+          playerHealth: {
+            width: '40%',
+            maxWidth: '280px',
+            bottom: '14%',
+            left: '75%',
+            translateX: '-50%',
+          },
+        };
+      }
+
+      return {
+        opponentPlatform: {
+          width: '40%',
+          maxWidth: '400px',
+          top: '20%',
+          right: '5%',
+          aspectRatio: '7 / 3',
+        },
+        opponentSprite: {
+          width: '16%',
+          maxWidth: '150px',
+          top: '13%',
+          right: '14%',
+        },
+        opponentHealth: {
+          width: '32%',
+          maxWidth: '460px',
+          top: '20%',
+          right: '30%',
+        },
+        playerPlatform: {
+          width: '40%',
+          maxWidth: '620px',
+          bottom: '5%',
+          left: '3%',
+          aspectRatio: '7 / 3',
+        },
+        playerSprite: {
+          width: '26%',
+          maxWidth: '250px',
+          bottom: '14%',
+          left: '13%',
+          extraTransform: 'scaleX(-1)',
+        },
+        playerHealth: {
+          width: '32%',
+          maxWidth: '460px',
+          bottom: '28%',
+          left: '44%',
+        },
+      };
+    }
+
+    if (isMobile) {
+      return {
+        opponentPlatform: {
+          width: '50%',
+          maxWidth: '220px',
+          top: '20%',
+          right: '4%',
+          aspectRatio: '7 / 3',
+        },
+        opponentSprite: {
+          width: '25%',
+          maxWidth: '180px',
+          top: '14%',
+          right: '17%',
+        },
+        opponentHealth: {
+          width: '40%',
+          maxWidth: '260px',
+          top: '20%',
+          left: '30%',
+          translateX: '-50%',
+        },
+        playerPlatform: {
+          width: '60%',
+          maxWidth: '300px',
+          bottom: '0%',
+          left: '0%',
+          aspectRatio: '7 / 3',
+        },
+        playerSprite: {
+          width: '30%',
+          maxWidth: '220px',
+          bottom: '3%',
+          left: '13%',
+          extraTransform: 'scaleX(-1)',
+        },
+        playerHealth: {
+          width: '40%',
+          maxWidth: '260px',
+          bottom: '10%',
+          left: '75%',
+          translateX: '-50%',
+        },
+      };
+    }
+
+    return {
+      opponentPlatform: {
+        width: '30%',
+        maxWidth: '280px',
+        top: '20%',
+        right: '7%',
+        aspectRatio: '7 / 3',
+      },
+      opponentSprite: {
+        width: '10%',
+        maxWidth: '220px',
+        top: '19%',
+        right: '17%',
+      },
+      opponentHealth: {
+        width: '22%',
+        maxWidth: '240px',
+        top: '15%',
+        right: '32%',
+      },
+      playerPlatform: {
+        width: '40%',
+        maxWidth: '380px',
+        bottom: '2%',
+        left: '2%',
+        aspectRatio: '7 / 3',
+      },
+      playerSprite: {
+        width: '19%',
+        maxWidth: '280px',
+        bottom: '8%',
+        left: '12%',
+        extraTransform: 'scaleX(-1)',
+      },
+      playerHealth: {
+        width: '24%',
+        maxWidth: '260px',
+        bottom: '18%',
+        left: '42%',
+      },
+    };
+  }, [isFullscreen, isMobile]);
+
+  const createPositionStyle = useMemo(
+    () =>
+      (config: LayoutPosition): React.CSSProperties => {
+        const transforms: string[] = [];
+        if (config.translateX)
+          transforms.push(`translateX(${config.translateX})`);
+        if (config.translateY)
+          transforms.push(`translateY(${config.translateY})`);
+        if (config.extraTransform) transforms.push(config.extraTransform);
+
+        return {
+          width: config.width,
+          maxWidth: config.maxWidth,
+          top: config.top,
+          bottom: config.bottom,
+          left: config.left,
+          right: config.right,
+          aspectRatio: config.aspectRatio,
+          transform: transforms.length ? transforms.join(' ') : undefined,
+        };
+      },
+    []
+  );
+
   if (showResult && battleResult) {
     return (
       <BattleResult
@@ -177,30 +403,16 @@ export function BattleView({
       }}
       onClick={handleAttackClick}
     >
-      {/* Opponent Pokemon (top right) - absolute positioned overlay */}
-      {/* Opponent platform */}
       <img
         src={getPlatformImage(opponentPokemon.types)}
         alt="Opponent platform"
-        className={`absolute object-contain pointer-events-none z-0 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-40 h-20'
-              : 'w-52 h-26'
-            : 'w-32 h-16 md:w-40 md:h-20'
-        }`}
+        className="absolute object-contain pointer-events-none z-0"
         loading="lazy"
         decoding="async"
         style={{
-          top: isFullscreen ? (isMobile ? '80px' : '80px') : '80px',
-          right: isFullscreen
-            ? isMobile
-              ? '20px'
-              : '60px'
-            : isMobile
-              ? '8px'
-              : '60px',
+          ...createPositionStyle(layoutConfig.opponentPlatform),
           filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+          objectFit: 'contain',
         }}
         aria-hidden="true"
       />
@@ -208,40 +420,22 @@ export function BattleView({
       <img
         src={opponentPokemon.sprite}
         alt={capitalizeName(opponentPokemon.name)}
-        className={`absolute image-pixelated pointer-events-none z-10 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-24 h-24'
-              : 'w-32 h-32'
-            : 'w-20 h-20 md:w-24 md:h-24'
-        }`}
+        className="absolute image-pixelated pointer-events-none z-10"
         decoding="async"
         style={{
           imageRendering: 'pixelated',
-          top: isFullscreen ? (isMobile ? '40px' : '40px') : '55px',
-          right: isFullscreen
-            ? isMobile
-              ? '50px'
-              : '100px'
-            : isMobile
-              ? '20px'
-              : '90px',
+          objectFit: 'contain',
+          objectPosition: 'center bottom',
+          ...createPositionStyle(layoutConfig.opponentSprite),
         }}
         aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
       />
       {/* Opponent health bar */}
       <aside
-        className={`absolute z-10 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-[140px] top-16 right-[180px]'
-              : 'w-[180px] top-16 right-[300px]'
-            : isMobile
-              ? 'w-[120px] top-18 left-[35%] -translate-x-1/2'
-              : 'w-[160px] top-18 right-[250px]'
-        }`}
+        className="absolute z-10"
         role="status"
         aria-live="polite"
+        style={createPositionStyle(layoutConfig.opponentHealth)}
       >
         <HealthBar
           current={opponentHP}
@@ -257,25 +451,13 @@ export function BattleView({
       <img
         src={getPlatformImage(playerPokemon.types)}
         alt="Player platform"
-        className={`absolute object-contain pointer-events-none z-0 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-56 h-28'
-              : 'w-72 h-36'
-            : 'w-48 h-24 md:w-60 md:h-30'
-        }`}
+        className="absolute object-contain pointer-events-none z-0"
         loading="lazy"
         decoding="async"
         style={{
-          bottom: isFullscreen ? (isMobile ? '70px' : '100px') : '10px',
-          left: isFullscreen
-            ? isMobile
-              ? '20px'
-              : '60px'
-            : isMobile
-              ? '8px'
-              : '60px',
+          ...createPositionStyle(layoutConfig.playerPlatform),
           filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+          objectFit: 'contain',
         }}
         aria-hidden="true"
       />
@@ -283,41 +465,22 @@ export function BattleView({
       <img
         src={playerPokemon.sprite}
         alt={capitalizeName(playerPokemon.name)}
-        className={`absolute image-pixelated z-10 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-32 h-32'
-              : 'w-40 h-40'
-            : 'w-32 h-32 md:w-40 md:h-40'
-        }`}
+        className="absolute image-pixelated z-10"
         decoding="async"
         style={{
           imageRendering: 'pixelated',
-          transform: 'scaleX(-1)',
-          bottom: isFullscreen ? (isMobile ? '90px' : '120px') : '20px',
-          left: isFullscreen
-            ? isMobile
-              ? '60px'
-              : '125px'
-            : isMobile
-              ? '32px'
-              : '80px',
+          objectFit: 'contain',
+          objectPosition: 'center bottom',
+          ...createPositionStyle(layoutConfig.playerSprite),
         }}
         aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
       />
       {/* Player health bar */}
       <aside
-        className={`absolute z-10 ${
-          isFullscreen
-            ? isMobile
-              ? 'w-[140px] bottom-[100px] left-[240px]'
-              : 'w-[180px] bottom-[140px] left-[350px]'
-            : isMobile
-              ? 'w-[120px] bottom-[40px] left-[75%] -translate-x-1/2'
-              : 'w-[160px] bottom-[60px] left-[350px]'
-        }`}
+        className="absolute z-10"
         role="status"
         aria-live="polite"
+        style={createPositionStyle(layoutConfig.playerHealth)}
       >
         <HealthBar
           current={playerHP}
