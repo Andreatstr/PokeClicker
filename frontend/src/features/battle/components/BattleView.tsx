@@ -236,7 +236,7 @@ export function BattleView({
           aspectRatio: '7 / 3',
         },
         playerSprite: {
-          width: '26%',
+          width: '16%',
           maxWidth: '250px',
           bottom: '14%',
           left: '13%',
@@ -325,7 +325,7 @@ export function BattleView({
         aspectRatio: '7 / 3',
       },
       playerSprite: {
-        width: '19%',
+        width: '18%',
         maxWidth: '280px',
         bottom: '8%',
         left: '12%',
