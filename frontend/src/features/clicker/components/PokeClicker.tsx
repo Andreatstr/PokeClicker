@@ -139,7 +139,7 @@ export function PokeClicker({
               e.preventDefault();
               setShowHelp(true);
             }}
-            className="absolute top-2 right-2 z-10 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
+            className="absolute top-2 right-2 z-10 flex items-center justify-center border-2 border-black w-11 h-11 touch-manipulation text-xs font-bold"
             title="Upgrade guide"
             aria-label="Show upgrade guide"
             style={{
