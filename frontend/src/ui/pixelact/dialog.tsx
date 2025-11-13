@@ -57,8 +57,24 @@ export function Dialog({open, onClose, children}: DialogProps) {
   if (!open) return null;
 
   return createPortal(
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="dialog-backdrop"
+      onClick={onClose}
+      onTouchMove={(e) => {
+        // Prevent backdrop from scrolling
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+        }
+      }}
+    >
+      <div
+        className="dialog-content"
+        onClick={(e) => e.stopPropagation()}
+        onTouchMove={(e) => {
+          // Allow scrolling within dialog content
+          e.stopPropagation();
+        }}
+      >
         {children}
       </div>
     </div>,
