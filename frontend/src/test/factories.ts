@@ -4,7 +4,7 @@ import type {PokedexPokemon} from '@features/pokedex';
 export const createMockUser = (overrides = {}): User => ({
   _id: '1',
   username: 'testuser',
-  rare_candy: '1000', // Changed to string for large number support
+  rare_candy: '1000',
   created_at: '2024-01-01T00:00:00Z',
   stats: {
     hp: 100,

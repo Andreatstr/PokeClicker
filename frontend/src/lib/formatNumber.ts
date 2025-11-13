@@ -2,8 +2,7 @@ import {formatNumber as formatDecimalNumber} from './decimal';
 import type {Decimal} from './decimal';
 
 /**
- * Format large numbers into human-readable strings
- * Now supports both regular numbers and Decimal/string for very large numbers
+ * Format large numbers into human-readable strings:
  * Examples:
  * - 850 → "850"
  * - 1,234 → "1.2K"
