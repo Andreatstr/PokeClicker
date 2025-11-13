@@ -8,8 +8,14 @@ import {useMobileDetection} from '@/hooks/useMobileDetection';
 import {Button} from '@ui/pixelact';
 
 // Constants
-const SPRITE_WIDTH = 68;
-const SPRITE_HEIGHT = 72;
+const SHEET_FRAME_CELL_W = 68; // width of each frame cell in the image file
+const SHEET_FRAME_CELL_H = 72; // height of each frame cell in the image file
+const SHEET_COLS = 4;
+const SHEET_ROWS = 4;
+
+const SPRITE_WIDTH = 46; // Character sprite display width
+const SPRITE_HEIGHT = 48.70588; // Character sprite display height
+
 const MOVE_SPEED = 120;
 
 interface PokemonSpawn {
@@ -28,12 +34,16 @@ interface TiledMapViewProps {
   worldPosition: {x: number; y: number};
   user: {rare_candy?: number} | null;
   collisionMapLoaded: boolean;
+  isPositionSemiWalkable: (x: number, y: number) => boolean;
+  teleportLocation: string | null;
+  isTeleporting: boolean;
+  teleportCooldown: number;
   viewportSize: {width: number; height: number};
   isDarkMode?: boolean;
   onStartBattle: (pokemon: PokedexPokemon, spawnId: string) => void;
-  onResetToHome: () => void;
   showWorldInfo?: boolean;
   onCloseWorldInfo?: () => void;
+  onTeleport: () => void;
 }
 
 export function TiledMapView(props: TiledMapViewProps) {
@@ -44,12 +54,17 @@ export function TiledMapView(props: TiledMapViewProps) {
     wildPokemon,
     nearbyPokemon,
     user,
+    worldPosition,
+    isPositionSemiWalkable,
+    teleportLocation,
+    isTeleporting,
+    teleportCooldown,
     viewportSize,
     isDarkMode = false,
     onStartBattle,
-    onResetToHome,
     showWorldInfo: externalShowWorldInfo,
     onCloseWorldInfo,
+    onTeleport,
   } = props;
 
   const {visibleTiles, visiblePokemon, isLoading, tileCacheRef} =
@@ -64,7 +79,7 @@ export function TiledMapView(props: TiledMapViewProps) {
     tileCacheRef,
     viewportSize,
     tileSize: 512,
-    backgroundColor: isDarkMode ? '#0b1220' : '#e6f0eb',
+    backgroundColor: isDarkMode ? '#000000' : '#000000',
   });
 
   const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
@@ -74,46 +89,69 @@ export function TiledMapView(props: TiledMapViewProps) {
       ? user.owned_pokemon_ids.length <= 3
       : false;
   });
+  
+  // --- From feat/on-boarding-fix ---
+const [internalShowWorldInfo, setInternalShowWorldInfo] = useState(false);
+const showWorldInfo =
+  externalShowWorldInfo !== undefined
+    ? externalShowWorldInfo
+    : internalShowWorldInfo;
 
-  const [internalShowWorldInfo, setInternalShowWorldInfo] = useState(false);
-  const showWorldInfo =
-    externalShowWorldInfo !== undefined
-      ? externalShowWorldInfo
-      : internalShowWorldInfo;
-  const handleCloseWorldInfo = () => {
-    if (onCloseWorldInfo) {
-      onCloseWorldInfo();
-    } else {
-      setInternalShowWorldInfo(false);
-    }
-  };
+const handleCloseWorldInfo = () => {
+  if (onCloseWorldInfo) {
+    onCloseWorldInfo();
+  } else {
+    setInternalShowWorldInfo(false);
+  }
+};
 
-  // Hide scrollbar on mobile
-  useEffect(() => {
-    if (isMobile && showWorldInfo) {
-      const style = document.createElement('style');
-      style.id = 'world-guide-scrollbar-hide';
-      style.textContent = `
-        #world-guide-modal::-webkit-scrollbar {
-          display: none;
-          width: 0;
-          height: 0;
-        }
-      `;
-      document.head.appendChild(style);
-      return () => {
-        const existingStyle = document.head.querySelector(
-          '#world-guide-scrollbar-hide'
-        );
-        if (existingStyle) {
-          document.head.removeChild(existingStyle);
-        }
-      };
-    }
-  }, [isMobile, showWorldInfo]);
+// Hide scrollbar on mobile
+useEffect(() => {
+  if (isMobile && showWorldInfo) {
+    const style = document.createElement('style');
+    style.id = 'world-guide-scrollbar-hide';
+    style.textContent = `
+      #world-guide-modal::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      const existingStyle = document.head.querySelector(
+        '#world-guide-scrollbar-hide'
+      );
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    };
+  }
+}, [isMobile, showWorldInfo]);
 
-  const accentColor = isDarkMode ? '#facc15' : '#3971a9ff';
-  const bodyTextColor = isDarkMode ? '#e5e7eb' : '#18181b';
+const accentColor = isDarkMode ? '#facc15' : '#3971a9ff';
+const bodyTextColor = isDarkMode ? '#e5e7eb' : '#18181b';
+
+// --- From main ---
+function parsePx(value?: string | number) {
+  if (typeof value === 'number') return value;
+  if (!value) return 0;
+  return parseFloat(String(value).replace('px', '')) || 0;
+}
+
+const backgroundSizeWidth = SHEET_COLS * SPRITE_WIDTH;
+const backgroundSizeHeight = SHEET_ROWS * SPRITE_HEIGHT;
+
+// scale factor from sheet cell -> displayed frame
+const scaleX = SPRITE_WIDTH / SHEET_FRAME_CELL_W;
+const scaleY = SPRITE_HEIGHT / SHEET_FRAME_CELL_H;
+
+// scale incoming background positions (handles strings like "-68px")
+const rawPosX = parsePx(spritePos.backgroundPositionX);
+const rawPosY = parsePx(spritePos.backgroundPositionY);
+
+const scaledPosX = `${rawPosX * scaleX}px`;
+const scaledPosY = `${rawPosY * scaleY}px`;
 
   return (
     <>
@@ -157,13 +195,37 @@ export function TiledMapView(props: TiledMapViewProps) {
           width: `${SPRITE_WIDTH}px`,
           height: `${SPRITE_HEIGHT}px`,
           backgroundImage: `url('${import.meta.env.BASE_URL}AshKetchumSprite.webp')`,
-          backgroundPositionX: spritePos.backgroundPositionX,
-          backgroundPositionY: spritePos.backgroundPositionY,
+          backgroundSize: `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
+          backgroundPositionX: scaledPosX,
+          backgroundPositionY: scaledPosY,
           imageRendering: 'pixelated',
-          transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear`,
+          transition: `top ${MOVE_SPEED}ms ease-linear, left ${MOVE_SPEED}ms ease-linear, opacity 200ms ease-in-out`,
+          opacity: isPositionSemiWalkable(
+            worldPosition.x,
+            worldPosition.y + SPRITE_HEIGHT / 2 - 24
+          )
+            ? 0.5
+            : 1,
           zIndex: 10,
         }}
       />
+
+      {/* Teleport Notification */}
+      {teleportLocation && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none animate-fade-in">
+          <div
+            className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+              isDarkMode
+                ? 'bg-blue-500 text-white border-black'
+                : 'bg-blue-500 text-white border-black'
+            }`}
+          >
+            <div className="pixel-font text-xs font-bold text-white">
+              Teleported to {teleportLocation}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Welcome CTA */}
       {!nearbyPokemon && showWelcomeCTA && (
@@ -276,43 +338,64 @@ export function TiledMapView(props: TiledMapViewProps) {
           </span>
         </div>
       </div>
-
-      {/* Home Button - bottom left */}
+      
+      {/* Teleport Button - always bottom left */}
       <div className="absolute bottom-3 left-2 z-20">
         <button
-          onClick={onResetToHome}
-          className="flex items-center justify-center border-2 border-black w-10 h-10 text-white"
-          title="Return to home position"
-          aria-label="Return to home position"
+          onClick={onTeleport}
+          disabled={isTeleporting || teleportCooldown > 0}
+          className="flex items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={
+            isTeleporting
+              ? 'Teleporting...'
+              : teleportCooldown > 0
+                ? `Wait ${teleportCooldown}s`
+                : 'Teleport to random location'
+          }
           style={{
-            backgroundColor: 'rgba(59, 130, 246, 0.9)',
+            backgroundColor:
+              isTeleporting || teleportCooldown > 0
+                ? 'rgba(59, 130, 246, 0.85)'
+                : 'rgba(59, 130, 246, 0.9)',
             boxShadow: '4px 4px 0px rgba(0,0,0,1)',
             transform: 'translate(0, 0)',
             transition: 'all 0.15s ease-in-out',
             color: 'white',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translate(-2px, -2px)';
-            e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            if (!isTeleporting && teleportCooldown === 0) {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            }
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translate(0, 0)';
             e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+            e.currentTarget.style.backgroundColor =
+              isTeleporting || teleportCooldown > 0
+                ? 'rgba(59, 130, 246, 0.85)'
+                : 'rgba(59, 130, 246, 0.9)';
           }}
         >
           <svg
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            className="w-5 h-5"
+            className="w-4 h-4 text-white flex-shrink-0"
           >
             <path
-              d="M14 2h-4v2H8v2H6v2H4v2H2v2h2v10h7v-6h2v6h7V12h2v-2h-2V8h-2V6h-2V4h-2V2zm0 2v2h2v2h2v2h2v2h-2v8h-3v-6H9v6H6v-8H4v-2h2V8h2V6h2V4h4z"
+              d="M7 2h10v2H7V2zM5 6V4h2v2H5zm0 8H3V6h2v8zm2 2H5v-2h2v2zm2 2H7v-2h2v2zm2 2H9v-2h2v2zm2 0v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm0-8h2v8h-2V6zm0 0V4h-2v2h2zm-5 2h-4v4h4V8z"
               fill="currentColor"
             />
           </svg>
+          <span className="pixel-font text-xs font-bold text-white">
+            {isTeleporting
+              ? ' Teleporting'
+              : teleportCooldown > 0
+                ? ` Wait ${teleportCooldown}s`
+                : ' Teleport'}
+          </span>
         </button>
       </div>
 

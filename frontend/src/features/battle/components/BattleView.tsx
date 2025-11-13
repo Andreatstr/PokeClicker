@@ -2,6 +2,7 @@ import {useState, useEffect, useRef} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
+import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
 import {useBattle} from '../hooks/useBattle';
@@ -14,6 +15,7 @@ interface BattleViewProps {
   onBattleComplete: (result: 'victory' | 'defeat') => void;
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
+  isFullscreen?: boolean;
 }
 
 export function BattleView({
@@ -22,10 +24,16 @@ export function BattleView({
   onBattleComplete,
   isDarkMode = false,
   onAttackFunctionReady,
+  isFullscreen = false,
 }: BattleViewProps) {
   const {user, updateUser} = useAuth();
   const {updateRareCandy} = useGameMutations();
+  const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
+
+  // Capitalize first letter of Pokemon names
+  const capitalizeName = (name: string) =>
+    name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(
     null
   );
@@ -133,7 +141,7 @@ export function BattleView({
 
   return (
     <main
-      className="relative w-full h-full flex flex-col cursor-pointer"
+      className="relative w-full h-full flex flex-col cursor-pointer select-none"
       aria-label="Battle arena"
       style={{
         pointerEvents: !isActive ? 'none' : 'auto',
@@ -157,111 +165,156 @@ export function BattleView({
       }}
       onClick={handleAttackClick}
     >
-      {/* Oval platforms - positioned based on Pokemon locations */}
-      <div
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+      {/* Opponent Pokemon (top right) - absolute positioned overlay */}
+      {/* Opponent platform */}
+      <img
+        src={getPlatformImage(opponentPokemon.types)}
+        alt="Opponent platform"
+        className={`absolute object-contain pointer-events-none z-0 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-40 h-20'
+              : 'w-52 h-26'
+            : 'w-32 h-16 md:w-40 md:h-20'
+        }`}
+        loading="lazy"
+        decoding="async"
+        style={{
+          top: isFullscreen ? (isMobile ? '80px' : '80px') : '80px',
+          right: isFullscreen
+            ? isMobile
+              ? '20px'
+              : '60px'
+            : isMobile
+              ? '8px'
+              : '60px',
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+        }}
         aria-hidden="true"
+      />
+      {/* Opponent Pokemon sprite */}
+      <img
+        src={opponentPokemon.sprite}
+        alt={capitalizeName(opponentPokemon.name)}
+        className={`absolute image-pixelated pointer-events-none z-10 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-24 h-24'
+              : 'w-32 h-32'
+            : 'w-20 h-20 md:w-24 md:h-24'
+        }`}
+        decoding="async"
+        style={{
+          imageRendering: 'pixelated',
+          top: isFullscreen ? (isMobile ? '40px' : '40px') : '55px',
+          right: isFullscreen
+            ? isMobile
+              ? '50px'
+              : '100px'
+            : isMobile
+              ? '20px'
+              : '90px',
+        }}
+        aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
+      />
+      {/* Opponent health bar */}
+      <aside
+        className={`absolute z-10 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-[140px] top-16 right-[180px]'
+              : 'w-[180px] top-16 right-[300px]'
+            : isMobile
+              ? 'w-[120px] top-18 left-[35%] -translate-x-1/2'
+              : 'w-[160px] top-18 right-[250px]'
+        }`}
+        role="status"
+        aria-live="polite"
       >
-        {/* Opponent platform - positioned under opponent Pokemon (moved lower on mobile) */}
-        <img
-          src={getPlatformImage(opponentPokemon.types)}
-          alt="Opponent platform"
-          className="absolute w-32 h-16 md:w-40 md:h-20 md:mr-4 md:mt-4 object-contain"
-          loading="lazy"
-          decoding="async"
-          style={{
-            top: '20%',
-            right: '8px',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-          }}
+        <HealthBar
+          current={opponentHP}
+          max={opponentMaxHP}
+          label={capitalizeName(opponentPokemon.name)}
+          side="opponent"
+          isDarkMode={isDarkMode}
         />
-        {/* Player platform - positioned under player Pokemon (moved left and higher on mobile) */}
-        <img
-          src={getPlatformImage(playerPokemon.types)}
-          alt="Player platform"
-          className="absolute w-48 h-24 md:w-60 md:h-30 object-contain"
-          loading="lazy"
-          decoding="async"
-          style={{
-            bottom: '-16px',
-            left: '0px',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-          }}
+      </aside>
+
+      {/* Player Pokemon (bottom left) - absolute positioned overlay */}
+      {/* Player platform */}
+      <img
+        src={getPlatformImage(playerPokemon.types)}
+        alt="Player platform"
+        className={`absolute object-contain pointer-events-none z-0 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-56 h-28'
+              : 'w-72 h-36'
+            : 'w-48 h-24 md:w-60 md:h-30'
+        }`}
+        loading="lazy"
+        decoding="async"
+        style={{
+          bottom: isFullscreen ? (isMobile ? '70px' : '100px') : '10px',
+          left: isFullscreen
+            ? isMobile
+              ? '20px'
+              : '60px'
+            : isMobile
+              ? '8px'
+              : '60px',
+          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+        }}
+        aria-hidden="true"
+      />
+      {/* Player Pokemon sprite */}
+      <img
+        src={playerPokemon.sprite}
+        alt={capitalizeName(playerPokemon.name)}
+        className={`absolute image-pixelated z-10 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-32 h-32'
+              : 'w-40 h-40'
+            : 'w-32 h-32 md:w-40 md:h-40'
+        }`}
+        decoding="async"
+        style={{
+          imageRendering: 'pixelated',
+          transform: 'scaleX(-1)',
+          bottom: isFullscreen ? (isMobile ? '90px' : '120px') : '20px',
+          left: isFullscreen
+            ? isMobile
+              ? '60px'
+              : '125px'
+            : isMobile
+              ? '32px'
+              : '80px',
+        }}
+        aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
+      />
+      {/* Player health bar */}
+      <aside
+        className={`absolute z-10 ${
+          isFullscreen
+            ? isMobile
+              ? 'w-[140px] bottom-[100px] left-[240px]'
+              : 'w-[180px] bottom-[140px] left-[350px]'
+            : isMobile
+              ? 'w-[120px] bottom-[40px] left-[75%] -translate-x-1/2'
+              : 'w-[160px] bottom-[60px] left-[350px]'
+        }`}
+        role="status"
+        aria-live="polite"
+      >
+        <HealthBar
+          current={playerHP}
+          max={playerMaxHP}
+          label={capitalizeName(playerPokemon.name)}
+          side="player"
+          isDarkMode={isDarkMode}
         />
-      </div>
-
-      {/* Opponent Pokemon (top right) */}
-      <section
-        className="flex-1 flex flex-col justify-start p-2 pt-4 md:p-4 md:pt-4"
-        aria-label={`Opponent: ${opponentPokemon.name}`}
-      >
-        <header
-          className="flex justify-center items-center gap-2 md:gap-4 translate-y-8 md:translate-y-8 md:justify-end"
-          role="group"
-          aria-label="Opponent Pokemon and health"
-        >
-          <aside
-            className="flex-1 max-w-[120px] md:max-w-xs -ml-8 mr-8 md:ml-0"
-            role="status"
-            aria-live="polite"
-          >
-            <HealthBar
-              current={opponentHP}
-              max={opponentMaxHP}
-              label={opponentPokemon.name}
-              side="opponent"
-              isDarkMode={isDarkMode}
-            />
-          </aside>
-          <figure className="-mr-8 md:mr-8">
-            <img
-              src={opponentPokemon.sprite}
-              alt={opponentPokemon.name}
-              className="w-20 h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 image-pixelated"
-              decoding="async"
-              style={{imageRendering: 'pixelated'}}
-            />
-          </figure>
-        </header>
-      </section>
-
-      {/* Player Pokemon (bottom left) */}
-      <section
-        className="flex-1 flex flex-col justify-end p-2 pb-4 md:p-4 md:pb-6"
-        aria-label={`Player: ${playerPokemon.name}`}
-      >
-        <footer
-          className="flex justify-start items-end gap-2 md:gap-4"
-          role="group"
-          aria-label="Player Pokemon and health"
-        >
-          <figure
-            className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 flex-shrink-0 relative group ml-8 -mb-4 md:ml-4 md:-mb-6"
-            aria-label={`Click to attack with ${playerPokemon.name}`}
-          >
-            <img
-              src={playerPokemon.sprite}
-              alt={playerPokemon.name}
-              className="w-full h-full image-pixelated transition-transform group-hover:scale-110 group-active:scale-95"
-              decoding="async"
-              style={{imageRendering: 'pixelated'}}
-            />
-          </figure>
-          <aside
-            className="flex-1 max-w-[120px] md:max-w-xs -translate-y-4 md:-translate-y-12 ml-0 md:ml-4"
-            role="status"
-            aria-live="polite"
-          >
-            <HealthBar
-              current={playerHP}
-              max={playerMaxHP}
-              label={playerPokemon.name}
-              side="player"
-              isDarkMode={isDarkMode}
-            />
-          </aside>
-        </footer>
-      </section>
+      </aside>
 
       {/* Attack instructions - centered in the middle */}
       {result === 'ongoing' && (

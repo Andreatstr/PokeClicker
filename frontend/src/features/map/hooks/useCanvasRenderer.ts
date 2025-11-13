@@ -92,6 +92,9 @@ export function useCanvasRenderer(params: {
       const tiles = visibleTilesRef.current;
       const cache = tileCacheRefLocal.current?.current ?? {};
 
+      // Small overlap to prevent gaps between tiles
+      const overlap = 0.5;
+
       for (let i = 0; i < tiles.length; i++) {
         const t = tiles[i];
         const key = `${t.x}_${t.y}`;
@@ -104,19 +107,19 @@ export function useCanvasRenderer(params: {
         ) {
           ctx.drawImage(
             entry.image,
-            Math.floor(t.screenX),
-            Math.floor(t.screenY),
-            tileSize,
-            tileSize
+            Math.round(t.screenX),
+            Math.round(t.screenY),
+            tileSize + overlap,
+            tileSize + overlap
           );
           entry.lastUsed = Date.now();
         } else {
           ctx.fillStyle = '#0f1720';
           ctx.fillRect(
-            Math.floor(t.screenX),
-            Math.floor(t.screenY),
-            tileSize,
-            tileSize
+            Math.round(t.screenX),
+            Math.round(t.screenY),
+            tileSize + overlap,
+            tileSize + overlap
           );
         }
       }
