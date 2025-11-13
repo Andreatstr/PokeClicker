@@ -2,6 +2,23 @@ import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {FocusTrap} from 'focus-trap-react';
 import {Button} from '@ui/pixelact';
+import {
+  Z_INDEX,
+  TIMING,
+  MODAL_STEP_TARGETS,
+  NAV_BUTTON_TARGETS,
+  RECT_DIFF_THRESHOLD_TIGHT,
+  POPUP_WIDTH,
+  DEFAULT_POPUP_HEIGHT,
+  MIN_VIEWPORT_MARGIN,
+  MIN_SPACING,
+  MAX_SPACING,
+  rectsAreDifferent,
+  isMobileDevice,
+  findVisibleOnboardingElement,
+  delay,
+  waitForRect,
+} from './onboardingUtils';
 
 type Page = 'pokedex' | 'clicker' | 'map' | 'profile' | 'ranks';
 
@@ -12,11 +29,10 @@ interface OnboardingStep {
   position: 'bottom' | 'top';
   page: Page;
   highlight?: boolean;
-  waitForTarget?: boolean; // If true, wait for user to trigger the target (e.g., open modal)
+  waitForTarget?: boolean;
 }
 
 const STEPS: OnboardingStep[] = [
-  // Pokedex Page - Steps 0-7
   {
     target: 'navbar',
     title: 'Welcome to PokeClicker!',
@@ -77,7 +93,6 @@ const STEPS: OnboardingStep[] = [
     page: 'pokedex',
     highlight: true,
   },
-  // Transition to Clicker - Step 8
   {
     target: 'clicker-nav',
     title: 'Now Visit the Clicker!',
@@ -86,7 +101,6 @@ const STEPS: OnboardingStep[] = [
     page: 'pokedex',
     highlight: true,
   },
-  // Clicker Page - Steps 9-10
   {
     target: 'clicker-area',
     title: 'Click to Earn Candy!',
@@ -103,7 +117,6 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // Transition to World - Step 11
   {
     target: 'world-nav',
     title: 'Explore the World!',
@@ -112,7 +125,6 @@ const STEPS: OnboardingStep[] = [
     page: 'clicker',
     highlight: true,
   },
-  // World/Map Page - Steps 12-13
   {
     target: 'movement-controls',
     title: 'Movement Controls',
@@ -130,7 +142,6 @@ const STEPS: OnboardingStep[] = [
     page: 'map',
     highlight: true,
   },
-  // Transition to Profile - Step 14
   {
     target: 'profile-button',
     title: 'Visit Your Profile!',
@@ -139,7 +150,6 @@ const STEPS: OnboardingStep[] = [
     page: 'map',
     highlight: true,
   },
-  // Profile Page - Step 15
   {
     target: 'pokemon-selection-and-tutorial',
     title: 'Choose Your Pokemon',
@@ -149,7 +159,6 @@ const STEPS: OnboardingStep[] = [
     page: 'profile',
     highlight: true,
   },
-  // Transition to Ranks - Step 16
   {
     target: 'ranks-nav',
     title: 'Check the Ranks!',
@@ -158,7 +167,6 @@ const STEPS: OnboardingStep[] = [
     page: 'profile',
     highlight: true,
   },
-  // Ranks Page - Step 17
   {
     target: 'league-buttons',
     title: 'Global Rankings',
@@ -203,46 +211,45 @@ export function OnboardingOverlay({
   const lastRectRef = useRef<DOMRect | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
   const pendingTimeoutsRef = useRef<number[]>([]);
+  const openedMobileMenuForStepRef = useRef<number | null>(null);
+  const skippedStepRef = useRef<number | null>(null);
+  const maxWaitTimeRef = useRef<number | undefined>(undefined);
+
   const clearPendingTimeouts = () => {
     for (const id of pendingTimeoutsRef.current) clearTimeout(id);
     pendingTimeoutsRef.current = [];
   };
-  const openedMobileMenuForStepRef = useRef<number | null>(null);
 
-  // After the popup becomes visible, re-render once to measure actual height
   useEffect(() => {
     if (isCardVisible) {
-      const id = setTimeout(() => setRepositionTick((t) => t + 1), 0);
+      const id = setTimeout(
+        () => setRepositionTick((t) => t + 1),
+        TIMING.REPOSITION_DELAY
+      );
       return () => clearTimeout(id);
     }
   }, [isCardVisible, targetRect, step]);
 
-  // Handle page navigation and auto-open modal when step changes
   useEffect(() => {
     if (!currentStep) return;
 
-    // Navigate to the correct page for this step
     if (previousStep && currentStep.page !== previousStep.page) {
       if (onNavigate) {
         onNavigate(currentStep.page);
       }
     }
 
-    // Auto-open the Pokemon modal for modal-target steps
-    // Add delay to ensure DOM is ready and card is clickable
     if (
-      ['pokemon-stats', 'pokemon-upgrade', 'pokemon-evolution'].includes(
-        currentStep.target
+      MODAL_STEP_TARGETS.includes(
+        currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
       ) &&
       onOpenFirstPokemon
     ) {
-      // Slightly longer delay on mobile to ensure modal is mount-ready
-      const coarse =
-        typeof window !== 'undefined' &&
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(pointer: coarse)').matches;
+      const isMobile = isMobileDevice();
       const openDelay =
-        coarse && currentStep.target === 'pokemon-stats' ? 350 : 200;
+        isMobile && currentStep.target === 'pokemon-stats'
+          ? TIMING.MODAL_OPEN_MOBILE
+          : TIMING.MODAL_OPEN_DEFAULT;
       const t = setTimeout(() => {
         onOpenFirstPokemon();
       }, openDelay);
@@ -250,24 +257,21 @@ export function OnboardingOverlay({
     }
   }, [currentStep, previousStep, onNavigate, onOpenFirstPokemon]);
 
-  // Ensure the detail modal closes when transitioning from a modal step to a non-modal step
   useEffect(() => {
     if (!currentStep || !previousStep) return;
-    const modalTargets = [
-      'pokemon-stats',
-      'pokemon-upgrade',
-      'pokemon-evolution',
-    ];
-    const wasModal = modalTargets.includes(previousStep.target);
-    const isNowModal = modalTargets.includes(currentStep.target);
-    // Do not close when intentionally skipping locked step after upgrade
+
+    const wasModal = MODAL_STEP_TARGETS.includes(
+      previousStep.target as (typeof MODAL_STEP_TARGETS)[number]
+    );
+    const isNowModal = MODAL_STEP_TARGETS.includes(
+      currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+    );
+
     const skippingLocked =
       skipLockedAfterUpgradeRef.current &&
       previousStep.target === 'pokemon-upgrade' &&
       currentStep.target === 'pokemon-card-locked';
 
-    // Only close modal when going from modal step to non-modal step
-    // AND not going backwards (previousStep.page check ensures forward navigation)
     const isGoingForward =
       previousStep &&
       currentStep &&
@@ -285,28 +289,9 @@ export function OnboardingOverlay({
     }
   }, [currentStep, previousStep, onClosePokemonModal]);
 
-  const skippedStepRef = useRef<number | null>(null);
-  const maxWaitTimeRef = useRef<number | undefined>(undefined);
-
-  // Helper to check if rects are significantly different (more than 5px in any dimension)
-  const rectsAreDifferent = (
-    rect1: DOMRect | null,
-    rect2: DOMRect | null,
-    threshold = 5
-  ) => {
-    if (!rect1 || !rect2) return true;
-    return (
-      Math.abs(rect1.top - rect2.top) > threshold ||
-      Math.abs(rect1.left - rect2.left) > threshold ||
-      Math.abs(rect1.width - rect2.width) > threshold ||
-      Math.abs(rect1.height - rect2.height) > threshold
-    );
-  };
-
   useEffect(() => {
     if (!currentStep) return;
 
-    // Reset loading state and found flag when step changes
     setIsLoading(true);
     setIsCardVisible(false);
     setTargetRect(null);
@@ -315,150 +300,79 @@ export function OnboardingOverlay({
     lastRectRef.current = null;
 
     const startTime = Date.now();
-    // Allow more time for mobile nav steps (needs burger open)
-    const navTargetsSet = new Set([
-      'clicker-nav',
-      'world-nav',
-      'ranks-nav',
-      'profile-button',
-    ]);
-    const MAX_WAIT_TIME = navTargetsSet.has(currentStep.target) ? 6000 : 3000;
+    const navTargetsSet = new Set(NAV_BUTTON_TARGETS);
+    const MAX_WAIT_TIME = navTargetsSet.has(
+      currentStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+    )
+      ? TIMING.MAX_WAIT_NAV
+      : TIMING.MAX_WAIT_DEFAULT;
 
-    const findAndScrollToTarget = () => {
-      // Use requestAnimationFrame for faster, more efficient DOM queries
-      requestAnimationFrame(() => {
-        if (foundElementRef.current) return; // Don't search if already found
+    const findAndScrollToTarget = async () => {
+      requestAnimationFrame(async () => {
+        if (foundElementRef.current) return;
 
-        const candidates = Array.from(
-          document.querySelectorAll(`[data-onboarding="${currentStep.target}"]`)
-        ) as HTMLElement[];
-        const isVisible = (el: HTMLElement) => {
-          const rect = el.getBoundingClientRect();
-          const style = window.getComputedStyle(el);
-          const hasSize = rect.width > 1 && rect.height > 1;
-          const visibleStyle =
-            style.display !== 'none' &&
-            style.visibility !== 'hidden' &&
-            (el.offsetParent !== null || style.position === 'fixed');
-          return hasSize && visibleStyle;
-        };
-        const targetElement = candidates.find(isVisible) ?? null;
+        const targetElement = findVisibleOnboardingElement(currentStep.target);
 
         if (targetElement) {
           foundElementRef.current = true;
 
-          // Scroll element into view if needed
-          const blockBehavior: ScrollLogicalPosition = [
-            'pokemon-stats',
-            'pokemon-upgrade',
-            'pokemon-evolution',
-          ].includes(currentStep.target)
-            ? 'start'
-            : 'center';
+          const blockBehavior: ScrollLogicalPosition =
+            MODAL_STEP_TARGETS.includes(
+              currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+            )
+              ? 'start'
+              : 'center';
           targetElement.scrollIntoView({
             behavior: 'smooth',
             block: blockBehavior,
           });
 
-          // Minimal delay to ensure layout is stable; longer on mobile for modals
-          const coarse =
-            typeof window !== 'undefined' &&
-            typeof window.matchMedia === 'function' &&
-            window.matchMedia('(pointer: coarse)').matches;
+          const isModalStep = MODAL_STEP_TARGETS.includes(
+            currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+          );
           const isStatsStep = currentStep.target === 'pokemon-stats';
-          // Longer initial delay on mobile specifically for the Stats modal (step 4)
-          const delay = isModalStep
-            ? coarse
-              ? isStatsStep
-                ? 700
-                : 320
-              : 140
-            : 0;
 
-          const t1 = window.setTimeout(() => {
-            const rect1 = targetElement.getBoundingClientRect();
-            lastRectRef.current = rect1;
-            setTargetRect(rect1);
-            setRectStep(step);
+          const rect = await waitForRect(
+            targetElement,
+            isModalStep,
+            isStatsStep
+          );
+          lastRectRef.current = rect;
+          setTargetRect(rect);
+          setRectStep(step);
+          setIsLoading(false);
 
-            if (isModalStep && coarse) {
-              // Extra settle pass on mobile for modal content
-              const settleDelay = isStatsStep ? 300 : 140;
-              const t2 = window.setTimeout(() => {
-                const rect2 = targetElement.getBoundingClientRect();
-                if (rectsAreDifferent(rect2, rect1, 2)) {
-                  lastRectRef.current = rect2;
-                  setTargetRect(rect2);
-                }
-                if (isStatsStep) {
-                  const t3 = window.setTimeout(() => {
-                    const rect3 = targetElement.getBoundingClientRect();
-                    if (rectsAreDifferent(rect3, rect2, 2)) {
-                      lastRectRef.current = rect3;
-                      setTargetRect(rect3);
-                    }
-                    setIsLoading(false);
-                    const t4 = window.setTimeout(
-                      () => setIsCardVisible(true),
-                      80
-                    );
-                    pendingTimeoutsRef.current.push(t4);
-                  }, 180);
-                  pendingTimeoutsRef.current.push(t3);
-                } else {
-                  setIsLoading(false);
-                  const t4 = window.setTimeout(
-                    () => setIsCardVisible(true),
-                    80
-                  );
-                  pendingTimeoutsRef.current.push(t4);
-                }
-              }, settleDelay);
-              pendingTimeoutsRef.current.push(t2);
-            } else {
-              setIsLoading(false);
-              const t5 = window.setTimeout(() => setIsCardVisible(true), 80);
-              pendingTimeoutsRef.current.push(t5);
-            }
-          }, delay);
-          pendingTimeoutsRef.current.push(t1);
+          await delay(TIMING.CARD_VISIBILITY_DELAY);
+          setIsCardVisible(true);
         } else {
-          // Mobile navbar: if highlighting a nav item, open burger menu first when closed
-          const navTargets = new Set([
-            'clicker-nav',
-            'world-nav',
-            'ranks-nav',
-            'profile-button',
-          ]);
-          let burgerBtn = document.querySelector(
-            'button[aria-label="Toggle mobile menu"]'
-          ) as HTMLButtonElement | null;
-          if (!burgerBtn) {
-            burgerBtn = document.querySelector(
+          const navTargets = new Set(NAV_BUTTON_TARGETS);
+          const burgerBtn =
+            document.querySelector<HTMLButtonElement>(
+              'button[aria-label="Toggle mobile menu"]'
+            ) ||
+            document.querySelector<HTMLButtonElement>(
               'section[aria-label="Mobile menu control"] button'
-            ) as HTMLButtonElement | null;
-          }
+            );
           const burgerClosed =
             burgerBtn?.getAttribute('aria-expanded') !== 'true';
           if (
-            navTargets.has(currentStep.target) &&
+            navTargets.has(
+              currentStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+            ) &&
             burgerBtn &&
             burgerClosed &&
             openedMobileMenuForStepRef.current !== step
           ) {
             openedMobileMenuForStepRef.current = step;
             window.scrollTo({top: 0, behavior: 'smooth'});
-            const tOpen = window.setTimeout(() => {
-              try {
-                burgerBtn.click();
-              } catch (e) {
-                // ignore best-effort click errors
-                void e;
-              }
-            }, 180);
-            pendingTimeoutsRef.current.push(tOpen);
+            await delay(TIMING.SCROLL_SMOOTH_DELAY);
+            try {
+              burgerBtn.click();
+            } catch (e) {
+              void e;
+            }
           }
-          // Check if max wait time exceeded
+
           if (Date.now() - startTime > MAX_WAIT_TIME) {
             setIsLoading(false);
             setTargetRect(null);
@@ -468,33 +382,24 @@ export function OnboardingOverlay({
       });
     };
 
-    // Start immediately
-    const timer = setTimeout(findAndScrollToTarget, 0);
+    const timer = setTimeout(() => findAndScrollToTarget(), 0);
 
-    // For modal-based steps (pokemon-stats, pokemon-upgrade, pokemon-evolution),
-    // keep polling until element appears
     const pollInterval: number = window.setInterval(() => {
       if (!foundElementRef.current) {
         findAndScrollToTarget();
       } else {
-        // Clear interval once element is found
-        if (pollInterval) clearInterval(pollInterval);
+        clearInterval(pollInterval);
       }
-    }, 16); // ~60fps polling
-    const isModalStep = [
-      'pokemon-stats',
-      'pokemon-upgrade',
-      'pokemon-evolution',
-    ].includes(currentStep.target);
+    }, TIMING.POLL_INTERVAL);
 
-    // Poll frequently until found, then stop
+    const isModalStep = MODAL_STEP_TARGETS.includes(
+      currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+    );
 
-    // Max wait timeout
     maxWaitTimeRef.current = setTimeout(() => {
       setIsLoading(false);
     }, MAX_WAIT_TIME);
 
-    // If on the locked-card step and target is missing, skip this step gracefully
     let skipTimer: number | undefined;
     if (
       currentStep.target === 'pokemon-card-locked' &&
@@ -512,32 +417,24 @@ export function OnboardingOverlay({
       }, 800);
     }
 
-    // Recalculate position on window resize/scroll
     const handleResize = () => {
       if (foundElementRef.current) {
-        // Reset found flag to allow recalculation on resize
         foundElementRef.current = false;
         findAndScrollToTarget();
       }
     };
+
     const handleScroll = () => {
-      const candidates = Array.from(
-        document.querySelectorAll(`[data-onboarding="${currentStep.target}"]`)
-      ) as HTMLElement[];
-      const isVisible = (el: HTMLElement) => {
-        const rect = el.getBoundingClientRect();
-        const style = window.getComputedStyle(el);
-        const hasSize = rect.width > 1 && rect.height > 1;
-        const visibleStyle =
-          style.display !== 'none' &&
-          style.visibility !== 'hidden' &&
-          (el.offsetParent !== null || style.position === 'fixed');
-        return hasSize && visibleStyle;
-      };
-      const el = candidates.find(isVisible) ?? null;
+      const el = findVisibleOnboardingElement(currentStep.target);
       if (el) {
         const rect = el.getBoundingClientRect();
-        if (rectsAreDifferent(rect, lastRectRef.current, 2)) {
+        if (
+          rectsAreDifferent(
+            rect,
+            lastRectRef.current,
+            RECT_DIFF_THRESHOLD_TIGHT
+          )
+        ) {
           lastRectRef.current = rect;
           setTargetRect(rect);
           setRectStep(step);
@@ -546,6 +443,7 @@ export function OnboardingOverlay({
         findAndScrollToTarget();
       }
     };
+
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleScroll, true);
 
@@ -562,18 +460,14 @@ export function OnboardingOverlay({
 
   if (!currentStep) return null;
 
-  // For modal steps, if target not found yet, show backdrop but wait for element
-  const isModalStep = [
-    'pokemon-stats',
-    'pokemon-upgrade',
-    'pokemon-evolution',
-  ].includes(currentStep.target);
+  const isModalStep = MODAL_STEP_TARGETS.includes(
+    currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
+  );
 
-  // Show only dark backdrop while waiting for target element (prevents white flash)
   if (isLoading || !targetRect || rectStep !== step || !isCardVisible) {
     return createPortal(
       <div
-        className={`fixed inset-0 bg-black/70 ${isModalStep ? 'z-[50000]' : 'z-[9998]'}`}
+        className={`fixed inset-0 bg-black/70 ${isModalStep ? `z-[${Z_INDEX.MODAL_BACKDROP}]` : `z-[${Z_INDEX.BACKDROP}]`}`}
         style={{pointerEvents: 'auto'}}
         aria-hidden="true"
       />,
@@ -581,74 +475,72 @@ export function OnboardingOverlay({
     );
   }
 
-  // Calculate popup position
   const calculatePopupPosition = () => {
-    const popupWidth = 350;
-    const popupHeight = popupRef.current?.offsetHeight ?? 200;
+    const popupHeight = popupRef.current?.offsetHeight ?? DEFAULT_POPUP_HEIGHT;
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight;
 
-    // Adaptive small spacing (non-hardcoded per-step): 6–10px based on target height
-    const spacing = Math.max(6, Math.min(10, targetRect.height * 0.1));
-    // Upward nudge based on popup height (~4% => ~8px for 200px height), clamped 6–10px
-    const nudgeUp = Math.max(6, Math.min(10, Math.round(popupHeight * 0.04)));
+    const spacing = Math.max(
+      MIN_SPACING,
+      Math.min(MAX_SPACING, targetRect.height * 0.1)
+    );
+    const nudgeUp = Math.max(
+      MIN_SPACING,
+      Math.min(MAX_SPACING, Math.round(popupHeight * 0.04))
+    );
 
-    // Respect desired position; apply upward nudge only for top-positioned cards
     let top =
       currentStep.position === 'bottom'
         ? targetRect.bottom + spacing
         : targetRect.top - popupHeight - (spacing + nudgeUp);
 
-    // Center horizontally relative to target and clamp
-    let left = targetRect.left + targetRect.width / 2 - popupWidth / 2;
-    left = Math.max(16, Math.min(left, viewportW - popupWidth - 16));
+    let left = targetRect.left + targetRect.width / 2 - POPUP_WIDTH / 2;
+    left = Math.max(
+      MIN_VIEWPORT_MARGIN,
+      Math.min(left, viewportW - POPUP_WIDTH - MIN_VIEWPORT_MARGIN)
+    );
 
-    // Clamp vertical position to viewport while keeping general intent
-    top = Math.max(16, Math.min(top, viewportH - popupHeight - 16));
+    top = Math.max(
+      MIN_VIEWPORT_MARGIN,
+      Math.min(top, viewportH - popupHeight - MIN_VIEWPORT_MARGIN)
+    );
 
     return {top, left, position: currentStep.position};
   };
 
   const popupPosition = calculatePopupPosition();
 
-  // Calculate arrow position
   const calculateArrowPosition = () => {
-    const popupWidth = 350;
     const targetCenter = targetRect.left + targetRect.width / 2;
     const popupLeft = popupPosition.left;
 
-    // Arrow position relative to popup
     let arrowLeft = targetCenter - popupLeft;
-    arrowLeft = Math.max(30, Math.min(arrowLeft, popupWidth - 30));
+    arrowLeft = Math.max(30, Math.min(arrowLeft, POPUP_WIDTH - 30));
 
     return arrowLeft;
   };
 
   return createPortal(
     <>
-      {/* Transparent backdrop; blocks app interaction but does not cancel onboarding */}
       <div
-        className={`fixed inset-0 ${isModalStep ? 'z-[50000]' : 'z-[9998]'}`}
+        className={`fixed inset-0 ${isModalStep ? `z-[${Z_INDEX.MODAL_BACKDROP}]` : `z-[${Z_INDEX.BACKDROP}]`}`}
         style={{pointerEvents: 'auto', background: 'transparent'}}
         aria-hidden="true"
       />
 
-      {/* Spotlight on target element */}
       <div
-        className={`fixed ${isModalStep ? 'z-[50001]' : 'z-[9999]'} border-4 border-yellow-400 rounded-lg pointer-events-none`}
+        className={`fixed ${isModalStep ? `z-[${Z_INDEX.MODAL_SPOTLIGHT}]` : `z-[${Z_INDEX.SPOTLIGHT}]`} border-4 border-yellow-400 rounded-lg pointer-events-none`}
         style={{
           top: targetRect.top - 8,
           left: targetRect.left - 8,
           width: targetRect.width + 16,
           height: targetRect.height + 16,
-          // Giant outer shadow creates a dark backdrop with a rounded cutout matching this box
           boxShadow:
             '0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.8)',
           animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         }}
       />
 
-      {/* Popup with FocusTrap */}
       <FocusTrap
         active={true}
         focusTrapOptions={{
@@ -662,7 +554,7 @@ export function OnboardingOverlay({
       >
         <div
           ref={popupRef}
-          className={`fixed ${isModalStep ? 'z-[50002]' : 'z-[9999]'} border-4 p-4 max-w-[350px] pixel-font pointer-events-auto`}
+          className={`fixed ${isModalStep ? `z-[${Z_INDEX.MODAL_POPUP}]` : `z-[${Z_INDEX.POPUP}]`} border-4 p-4 max-w-[350px] pixel-font pointer-events-auto`}
           style={{
             top: isCardVisible ? `${popupPosition.top}px` : '-9999px',
             left: isCardVisible ? `${popupPosition.left}px` : '-9999px',
@@ -676,7 +568,6 @@ export function OnboardingOverlay({
           aria-labelledby="onboarding-title"
           aria-describedby="onboarding-description"
         >
-          {/* Step indicator */}
           <header className="flex justify-between items-center mb-2">
             <span
               className="text-xs"
@@ -716,24 +607,11 @@ export function OnboardingOverlay({
                 variant="secondary"
                 aria-label="Previous step"
                 onClick={() => {
-                  const modalTargets = [
-                    'pokemon-stats',
-                    'pokemon-upgrade',
-                    'pokemon-evolution',
-                  ];
-
-                  const navButtonTargets = [
-                    'clicker-nav',
-                    'world-nav',
-                    'profile-button',
-                    'ranks-nav',
-                  ];
-
-                  // Helper function to open mobile nav menu if needed
                   const openMobileMenuIfNeeded = () => {
-                    const menuButton = document.querySelector(
-                      '[data-nav-menu-toggle="true"]'
-                    ) as HTMLButtonElement;
+                    const menuButton =
+                      document.querySelector<HTMLButtonElement>(
+                        '[data-nav-menu-toggle="true"]'
+                      );
                     if (menuButton) {
                       const isExpanded =
                         menuButton.getAttribute('aria-expanded') === 'true';
@@ -743,37 +621,35 @@ export function OnboardingOverlay({
                     }
                   };
 
-                  // Get previous step target
                   const prevTarget = STEPS[step - 1]?.target;
 
-                  // If going back to a nav button, open the mobile menu first
-                  if (prevTarget && navButtonTargets.includes(prevTarget)) {
+                  if (
+                    prevTarget &&
+                    NAV_BUTTON_TARGETS.includes(
+                      prevTarget as (typeof NAV_BUTTON_TARGETS)[number]
+                    )
+                  ) {
                     openMobileMenuIfNeeded();
                   }
 
-                  // Special case: navigation transitions that need page changes
                   if (currentStep.target === 'clicker-nav') {
-                    // Going back from clicker-nav (step 8) when locked-card (step 7) might have been skipped
                     const prevPrevTarget = STEPS[step - 2]?.target;
 
                     if (
                       prevTarget === 'pokemon-card-locked' &&
                       prevPrevTarget === 'pokemon-evolution'
                     ) {
-                      // Check if locked card exists
                       const hasLockedCard = document.querySelector(
                         '[data-onboarding="pokemon-card-locked"]'
                       );
                       if (!hasLockedCard) {
-                        // Navigate to pokedex page first
                         if (onNavigate) {
                           onNavigate('pokedex');
                         }
-                        // Skip locked-card and go directly to evolution, open modal
                         setTimeout(() => {
-                          onPrevious(); // to locked
+                          onPrevious();
                           setTimeout(() => {
-                            onPrevious(); // to evolution
+                            onPrevious();
                             if (onOpenFirstPokemon) {
                               setTimeout(() => {
                                 onOpenFirstPokemon();
@@ -783,7 +659,6 @@ export function OnboardingOverlay({
                         }, 100);
                         return;
                       } else {
-                        // If locked card exists, just navigate to pokedex
                         if (onNavigate) {
                           onNavigate('pokedex');
                         }
@@ -795,11 +670,9 @@ export function OnboardingOverlay({
                     }
                   }
 
-                  // Going back from world-nav to upgrade-panel (clicker page)
                   if (currentStep.target === 'world-nav') {
                     const prevTarget = STEPS[step - 1]?.target;
                     if (prevTarget === 'upgrade-panel') {
-                      // Navigate back to clicker page
                       if (onNavigate) {
                         onNavigate('clicker');
                       }
@@ -810,11 +683,9 @@ export function OnboardingOverlay({
                     }
                   }
 
-                  // Going back from profile-button to map-canvas (map page)
                   if (currentStep.target === 'profile-button') {
                     const prevTarget = STEPS[step - 1]?.target;
                     if (prevTarget === 'map-canvas') {
-                      // Navigate back to map page
                       if (onNavigate) {
                         onNavigate('map');
                       }
@@ -825,20 +696,19 @@ export function OnboardingOverlay({
                     }
                   }
 
-                  const isCurrentModal = modalTargets.includes(
-                    currentStep.target
+                  const isCurrentModal = MODAL_STEP_TARGETS.includes(
+                    currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
                   );
                   const isPrevModal = prevTarget
-                    ? modalTargets.includes(prevTarget)
+                    ? MODAL_STEP_TARGETS.includes(
+                        prevTarget as (typeof MODAL_STEP_TARGETS)[number]
+                      )
                     : false;
 
-                  // If going from modal to non-modal (backwards), close the modal
                   if (isCurrentModal && !isPrevModal && onClosePokemonModal) {
                     onClosePokemonModal();
-                    // Small delay to allow UI to update before going back
                     setTimeout(() => onPrevious(), 150);
                   } else {
-                    // If staying within modal steps or going from non-modal, just go back
                     onPrevious();
                   }
                 }}
@@ -849,18 +719,10 @@ export function OnboardingOverlay({
             <Button
               size="sm"
               onClick={() => {
-                const navButtonTargets = [
-                  'clicker-nav',
-                  'world-nav',
-                  'profile-button',
-                  'ranks-nav',
-                ];
-
-                // Helper function to close mobile nav menu if open
                 const closeMobileMenuIfOpen = () => {
-                  const menuButton = document.querySelector(
+                  const menuButton = document.querySelector<HTMLButtonElement>(
                     '[data-nav-menu-toggle="true"]'
-                  ) as HTMLButtonElement;
+                  );
                   if (menuButton) {
                     const isExpanded =
                       menuButton.getAttribute('aria-expanded') === 'true';
@@ -870,16 +732,17 @@ export function OnboardingOverlay({
                   }
                 };
 
-                // Check if next step is a nav button - if so, need to open the menu
                 const nextStep = STEPS[step + 1];
                 const nextIsNavButton =
-                  nextStep && navButtonTargets.includes(nextStep.target);
+                  nextStep &&
+                  NAV_BUTTON_TARGETS.includes(
+                    nextStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+                  );
 
-                // If going TO a nav button, open the mobile menu
                 if (nextIsNavButton) {
-                  const menuButton = document.querySelector(
+                  const menuButton = document.querySelector<HTMLButtonElement>(
                     '[data-nav-menu-toggle="true"]'
-                  ) as HTMLButtonElement;
+                  );
                   if (menuButton) {
                     const isExpanded =
                       menuButton.getAttribute('aria-expanded') === 'true';
@@ -889,27 +752,26 @@ export function OnboardingOverlay({
                   }
                 }
 
-                // If leaving a nav button step, close the mobile menu and navigate/advance
-                if (navButtonTargets.includes(currentStep.target)) {
+                if (
+                  NAV_BUTTON_TARGETS.includes(
+                    currentStep.target as (typeof NAV_BUTTON_TARGETS)[number]
+                  )
+                ) {
                   closeMobileMenuIfOpen();
 
-                  // Check if next step is on a different page and navigate if needed
                   if (
                     nextStep &&
                     nextStep.page !== currentStep.page &&
                     onNavigate
                   ) {
                     onNavigate(nextStep.page);
-                    // Wait for page to load, menu to close, then advance step
                     setTimeout(() => {
-                      // Ensure menu is still closed after page change
                       closeMobileMenuIfOpen();
                       setTimeout(() => {
                         executeNextStep();
                       }, 100);
                     }, 200);
                   } else {
-                    // Wait for menu to close before advancing
                     setTimeout(() => {
                       executeNextStep();
                     }, 100);
@@ -917,25 +779,21 @@ export function OnboardingOverlay({
                   return;
                 }
 
-                // Check if next step is on a different page and navigate if needed
                 if (
                   nextStep &&
                   nextStep.page !== currentStep.page &&
                   onNavigate
                 ) {
                   onNavigate(nextStep.page);
-                  // Wait for page to load before advancing step
                   setTimeout(() => {
                     executeNextStep();
                   }, 200);
                   return;
                 }
 
-                // Execute the next step logic immediately if no page change needed
                 executeNextStep();
 
                 function executeNextStep() {
-                  // If moving from Upgrade to Evolution, skip the intermediate locked-card step
                   if (currentStep.target === 'pokemon-upgrade') {
                     const next = STEPS[step + 1]?.target;
                     const next2 = STEPS[step + 2]?.target;
@@ -944,8 +802,7 @@ export function OnboardingOverlay({
                       next2 === 'pokemon-evolution'
                     ) {
                       skipLockedAfterUpgradeRef.current = true;
-                      onNext(); // to locked
-                      // Immediately advance to evolution and keep modal open
+                      onNext();
                       setTimeout(() => {
                         onNext();
                         skipLockedAfterUpgradeRef.current = false;
@@ -954,20 +811,16 @@ export function OnboardingOverlay({
                     }
                   }
 
-                  const modalTargets = [
-                    'pokemon-stats',
-                    'pokemon-upgrade',
-                    'pokemon-evolution',
-                  ];
-                  const isCurrentModal = modalTargets.includes(
-                    currentStep.target
+                  const isCurrentModal = MODAL_STEP_TARGETS.includes(
+                    currentStep.target as (typeof MODAL_STEP_TARGETS)[number]
                   );
                   const nextTarget = STEPS[step + 1]?.target;
                   const isNextModal = nextTarget
-                    ? modalTargets.includes(nextTarget)
+                    ? MODAL_STEP_TARGETS.includes(
+                        nextTarget as (typeof MODAL_STEP_TARGETS)[number]
+                      )
                     : false;
 
-                  // Special case: going forward from evolution when locked-card was skipped
                   if (
                     currentStep.target === 'pokemon-evolution' &&
                     nextTarget === 'pokemon-card-locked'
@@ -976,21 +829,19 @@ export function OnboardingOverlay({
                       '[data-onboarding="pokemon-card-locked"]'
                     );
                     if (!hasLockedCard) {
-                      // Close modal first
                       if (onClosePokemonModal) {
                         onClosePokemonModal();
                       }
 
-                      // Skip locked-card and go directly to clicker-nav
-                      onNext(); // to locked
+                      onNext();
                       setTimeout(() => {
-                        onNext(); // to clicker-nav
+                        onNext();
 
-                        // Open mobile menu after advancing to clicker-nav (which is a nav button)
                         setTimeout(() => {
-                          const menuButton = document.querySelector(
-                            '[data-nav-menu-toggle="true"]'
-                          ) as HTMLButtonElement;
+                          const menuButton =
+                            document.querySelector<HTMLButtonElement>(
+                              '[data-nav-menu-toggle="true"]'
+                            );
                           if (menuButton) {
                             const isExpanded =
                               menuButton.getAttribute('aria-expanded') ===
@@ -1005,10 +856,8 @@ export function OnboardingOverlay({
                     }
                   }
 
-                  // If leaving a modal step to a non-modal step, close the modal first
                   if (isCurrentModal && !isNextModal && onClosePokemonModal) {
                     onClosePokemonModal();
-                    // Small delay to allow UI to update before advancing step
                     setTimeout(() => onNext(), 150);
                   } else {
                     onNext();
@@ -1022,7 +871,6 @@ export function OnboardingOverlay({
             </Button>
           </footer>
 
-          {/* Animated Arrow pointing to element */}
           <div
             className="absolute w-0 h-0"
             style={{
@@ -1042,7 +890,6 @@ export function OnboardingOverlay({
         </div>
       </FocusTrap>
 
-      {/* Add keyframe animations */}
       <style>
         {`
           @keyframes pulse {

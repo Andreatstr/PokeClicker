@@ -45,6 +45,10 @@ const RanksPage = lazy(() =>
   }))
 );
 
+const ONBOARDING_MODAL_STEPS = [3, 4, 6];
+const POKEMON_CARD_POLL_INTERVAL_MS = 150;
+const POKEMON_CARD_MAX_ATTEMPTS = 20;
+
 function App() {
   const {isDarkMode, toggleTheme} = useTheme();
   const {currentPage, setCurrentPage} = usePageNavigation();
@@ -61,8 +65,8 @@ function App() {
   const {step, isActive, nextStep, previousStep, skipTutorial} =
     useOnboarding();
 
-  // Check if onboarding is on a modal step (pokemon-stats, pokemon-upgrade, pokemon-evolution)
-  const isOnboardingModalStep = isActive && [3, 4, 6].includes(step);
+  const isOnboardingModalStep =
+    isActive && ONBOARDING_MODAL_STEPS.includes(step);
 
   // Ensure onboarding always starts from the Pokédex page for consistency
   useEffect(() => {
@@ -93,31 +97,24 @@ function App() {
     }
   }, [isMapFullscreen]);
 
-  // Function to programmatically open the first Pokemon modal for tutorial
   const handleOpenFirstPokemon = () => {
     const tryClick = () => {
-      // Find the container with the onboarding marker
       const container = document.querySelector(
         '[data-onboarding="pokemon-card"]'
       );
 
       if (container) {
-        // The container wraps the <aside> which is the clickable card
         const card = container.querySelector<HTMLElement>('aside');
-
-        if (card && card.click) {
-          console.log('🎯 Clicking pokemon card for tutorial');
+        if (card) {
           card.click();
           return true;
         }
       }
 
-      // Fallback: find any pokemon card (aside with cursor-pointer and onClick)
       const anyCard = document.querySelector<HTMLElement>(
         'aside.cursor-pointer'
       );
-      if (anyCard && anyCard.click) {
-        console.log('🎯 Clicking fallback pokemon card');
+      if (anyCard) {
         anyCard.click();
         return true;
       }
@@ -125,25 +122,15 @@ function App() {
       return false;
     };
 
-    // Try immediately
     if (tryClick()) return;
 
-    // If not found, poll with retries
     let attempts = 0;
-    const maxAttempts = 20;
     const interval = setInterval(() => {
       attempts += 1;
-      if (tryClick() || attempts >= maxAttempts) {
-        if (attempts >= maxAttempts) {
-          console.warn(
-            '⚠️ Could not find pokemon card after',
-            maxAttempts,
-            'attempts'
-          );
-        }
+      if (tryClick() || attempts >= POKEMON_CARD_MAX_ATTEMPTS) {
         clearInterval(interval);
       }
-    }, 150);
+    }, POKEMON_CARD_POLL_INTERVAL_MS);
   };
 
   const getMainClassName = () => {
