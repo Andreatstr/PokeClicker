@@ -19,10 +19,10 @@ test.describe("Smoke Tests", () => {
 
     if (await login.isOnLoginPage()) {
       await login.loginAsGuest();
-      await page.waitForTimeout(1000);
+      // Wait for search box to appear after login instead of arbitrary timeout
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
       expect(await login.isOnLoginPage()).toBe(false);
-      await expect(page.getByPlaceholder(/search/i)).toBeVisible();
     }
   });
 
@@ -35,17 +35,16 @@ test.describe("Smoke Tests", () => {
 
     if (await login.isOnLoginPage()) {
       await login.quickRegister();
-      await page.waitForTimeout(1000);
+      // Wait for search box to appear after registration
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
 
     await navbar.navigateToPokedex();
-    await page.waitForTimeout(500);
-    await expect(page.getByPlaceholder(/search/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
     await navbar.navigateToClicker();
-    await page.waitForTimeout(500);
     // Check for global candy counter overlay instead of local "Rare Candy" text
-    await expect(page.locator('[data-onboarding="candy-counter"]')).toBeVisible();
+    await expect(page.locator('[data-onboarding="candy-counter"]')).toBeVisible({ timeout: 5000 });
   });
 
   test("clicker game displays and works", async ({ page }) => {
@@ -58,11 +57,13 @@ test.describe("Smoke Tests", () => {
 
     if (await login.isOnLoginPage()) {
       await login.quickRegister();
-      await page.waitForTimeout(1000);
+      // Wait for search box to appear after registration
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
 
     await navbar.navigateToClicker();
-    await page.waitForTimeout(500);
+    // Wait for candy counter to be visible before checking count
+    await expect(page.locator('[data-onboarding="candy-counter"]')).toBeVisible({ timeout: 5000 });
 
     const candyCount = await clicker.getCandyCount();
     expect(candyCount).toBeGreaterThanOrEqual(0);

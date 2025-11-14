@@ -17,14 +17,16 @@ test.describe("Clicker Game", () => {
 
     if (await login.isOnLoginPage()) {
       await login.quickRegister();
-      await page.waitForTimeout(2000); // Wait longer for login to complete
+      // Wait for search box to appear after registration
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
 
     // Ensure we're on the clicker page
     const isOnClicker = await navbar.isOnClicker();
     if (!isOnClicker) {
       await navbar.navigateToClicker();
-      await page.waitForTimeout(500);
+      // Wait for candy counter to appear after navigation
+      await clicker.candyCount.waitFor({ state: "visible", timeout: 5000 });
     }
 
     // Wait for page to be fully interactive
@@ -45,10 +47,12 @@ test.describe("Clicker Game", () => {
   }) => {
     const initialCandy = await clicker.getCandyCount();
     await clicker.clickPokemon();
-    await page.waitForTimeout(500);
 
-    const newCandy = await clicker.getCandyCount();
-    expect(newCandy).toBeGreaterThan(initialCandy);
+    // Wait for candy count to update by polling
+    await expect(async () => {
+      const newCandy = await clicker.getCandyCount();
+      expect(newCandy).toBeGreaterThan(initialCandy);
+    }).toPass({ timeout: 2000 });
   });
 
   test("should work on mobile viewport", async ({ page }) => {

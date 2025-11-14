@@ -14,7 +14,8 @@ test.describe("Navigation", () => {
 
     if (await login.isOnLoginPage()) {
       await login.quickRegister();
-      await page.waitForTimeout(1000);
+      // Wait for search box to appear after registration
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
   });
 
@@ -24,13 +25,12 @@ test.describe("Navigation", () => {
 
   test("should navigate between Clicker and Pokédex", async ({ page }) => {
     await navbar.navigateToPokedex();
-    await page.waitForTimeout(500);
     await expect(page.getByPlaceholder(/search/i)).toBeVisible({
       timeout: 5000,
     });
 
     await navbar.navigateToClicker();
-    await page.waitForTimeout(500);
-    await expect(page.getByText("Rare Candy")).toBeVisible({ timeout: 5000 });
+    // Wait for candy counter to appear after navigation
+    await expect(page.locator('[data-onboarding="candy-counter"]')).toBeVisible({ timeout: 5000 });
   });
 });
