@@ -16,7 +16,8 @@ export function usePokemonPurchaseHandler() {
 
   const handlePurchase = async (
     pokemonId: number,
-    onSuccess?: (pokemonId: number) => void
+    onSuccess?: (pokemonId: number) => void,
+    actualPrice?: string
   ) => {
     // Clear any existing error timeout to prevent race conditions
     if (errorTimeoutRef.current) {
@@ -26,8 +27,9 @@ export function usePokemonPurchaseHandler() {
 
     // Client-side validation: Check if user can afford the Pokemon
     // This prevents the optimistic response from flashing the unlocked state
-    const cost = getPokemonCost(pokemonId);
-    if (user && toDecimal(user.rare_candy).lt(cost)) {
+    // Use actual price from API if available, otherwise fallback to estimation
+    const cost = actualPrice ?? getPokemonCost(pokemonId).toString();
+    if (user && toDecimal(user.rare_candy).lt(toDecimal(cost))) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);

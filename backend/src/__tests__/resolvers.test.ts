@@ -619,103 +619,103 @@ describe('GraphQL Resolvers', () => {
     });
   });
 
-  // describe('Mutation.upgradeStat', () => {
-  //   it('should upgrade clickPower stat when user has enough candy', async () => {
-  //     const mockUser: UserDocument = {
-  //       _id: new ObjectId(),
-  //       username: 'testuser',
-  //       password_hash: 'hash',
-  //       created_at: new Date(),
-  //       rare_candy: '100',
-  //       stats: {
-  //         hp: 1,
-  //         attack: 1,
-  //         defense: 1,
-  //         spAttack: 1,
-  //         spDefense: 1,
-  //         speed: 1,
-  //         clickPower: 2,
-  //         autoclicker: 1,
-  //       },
-  //       owned_pokemon_ids: [1],
-  //     };
+  describe('Mutation.upgradeStat', () => {
+    it('should upgrade clickPower stat when user has enough candy', async () => {
+       const mockUser: UserDocument = {
+         _id: new ObjectId(),
+         username: 'testuser',
+         password_hash: 'hash',
+         created_at: new Date(),
+         rare_candy: '100',
+         stats: {
+           hp: 1,
+           attack: 1,
+           defense: 1,
+           spAttack: 1,
+           spDefense: 1,
+           speed: 1,
+           clickPower: 2,
+           autoclicker: 1,
+         },
+         owned_pokemon_ids: [1],
+       };
 
-  //     const upgradedUser = {
-  //       ...mockUser,
-  //       stats: {...mockUser.stats, clickPower: 3},
-  //       rare_candy: '72', // 100 - 28 (cost for level 2->3)
-  //     };
+       const upgradedUser = {
+         ...mockUser,
+         stats: {...mockUser.stats, clickPower: 3},
+         rare_candy: '72', // 100 - 28 (cost for level 2->3)
+       };
 
-  //     mockFindOne.mockResolvedValue(mockUser);
-  //     mockFindOneAndUpdate.mockResolvedValue(upgradedUser);
+       mockFindOne.mockResolvedValue(mockUser);
+       mockFindOneAndUpdate.mockResolvedValue(upgradedUser);
 
-  //     const context: AuthContext = {
-  //       user: {id: mockUser._id.toString(), username: 'testuser'},
-  //     };
+       const context: AuthContext = {
+         user: {id: mockUser._id.toString(), username: 'testuser'},
+       };
 
-  //     const result = await resolvers.Mutation.upgradeStat(
-  //       {},
-  //       {stat: 'clickPower'},
-  //       context
-  //     );
+       const result = await resolvers.Mutation.upgradeStat(
+         {},
+         {stat: 'clickPower'},
+         context
+       );
 
-  //     expect(result.stats.clickPower).toBe(3);
-  //     expect(result.rare_candy).toBe('72');
-  //   });
+       expect(result.stats.clickPower).toBe(3);
+       expect(result.rare_candy).toBe('72');
+     });
 
-  //   it('should throw error when stat is invalid', async () => {
-  //     const context: AuthContext = {
-  //       user: {id: new ObjectId().toString(), username: 'testuser'},
-  //     };
+     it('should throw error when stat is invalid', async () => {
+       const context: AuthContext = {
+         user: {id: new ObjectId().toString(), username: 'testuser'},
+       };
 
-  //     await expect(
-  //       resolvers.Mutation.upgradeStat({}, {stat: 'invalidStat'}, context)
-  //     ).rejects.toThrow('Invalid stat');
-  //   });
+       await expect(
+         resolvers.Mutation.upgradeStat({}, {stat: 'invalidStat'}, context)
+       ).rejects.toThrow('Invalid stat');
+     });
 
-  //   it('should throw error when user does not have enough candy', async () => {
-  //     const mockUser: UserDocument = {
-  //       _id: new ObjectId(),
-  //       username: 'testuser',
-  //       password_hash: 'hash',
-  //       created_at: new Date(),
-  //       rare_candy: '5', // Not enough for upgrade
-  //       stats: {
-  //         hp: 1,
-  //         attack: 1,
-  //         defense: 1,
-  //         spAttack: 1,
-  //         spDefense: 1,
-  //         speed: 1,
-  //         clickPower: 2,
-  //         autoclicker: 1,
-  //       },
-  //       owned_pokemon_ids: [1],
-  //     };
+     it('should throw error when user does not have enough candy', async () => {
+       const mockUser: UserDocument = {
+         _id: new ObjectId(),
+         username: 'testuser',
+         password_hash: 'hash',
+         created_at: new Date(),
+         rare_candy: '5', // Not enough for upgrade
+         stats: {
+           hp: 1,
+           attack: 1,
+           defense: 1,
+           spAttack: 1,
+           spDefense: 1,
+           speed: 1,
+           clickPower: 2,
+           autoclicker: 1,
+         },
+         owned_pokemon_ids: [1],
+       };
 
-  //     mockFindOne.mockResolvedValue(mockUser);
+       mockFindOne.mockResolvedValue(mockUser);
 
-  //     const context: AuthContext = {
-  //       user: {id: mockUser._id.toString(), username: 'testuser'},
-  //     };
+       const context: AuthContext = {
+         user: {id: mockUser._id.toString(), username: 'testuser'},
+       };
 
-  //     await expect(
-  //       resolvers.Mutation.upgradeStat({}, {stat: 'clickPower'}, context)
-  //     ).rejects.toThrow('Not enough rare candy');
-  //   });
+       await expect(
+         resolvers.Mutation.upgradeStat({}, {stat: 'clickPower'}, context)
+       ).rejects.toThrow('Not enough rare candy');
+     });
 
-  //   it('should throw error when user not found', async () => {
-  //     mockFindOne.mockResolvedValue(null);
+     it('should throw error when user not found', async () => {
+       mockFindOne.mockResolvedValue(null);
 
-  //     const context: AuthContext = {
-  //       user: {id: new ObjectId().toString(), username: 'testuser'},
-  //     };
+       const context: AuthContext = {
+         user: {id: new ObjectId().toString(), username: 'testuser'},
+       };
 
-  //     await expect(
-  //       resolvers.Mutation.upgradeStat({}, {stat: 'clickPower'}, context)
-  //     ).rejects.toThrow('User not found');
-  //   });
-  // });
+       await expect(
+         resolvers.Mutation.upgradeStat({}, {stat: 'clickPower'}, context)
+       ).rejects.toThrow('User not found');
+     });
+   });
 
   describe('Mutation.purchasePokemon', () => {
     it('should purchase Pokemon when user has enough candy', async () => {

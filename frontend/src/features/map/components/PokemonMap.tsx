@@ -272,21 +272,21 @@ export function PokemonMap({
         setBattleOpponent(opponent);
         setInBattle(true);
       } else {
-        // Fallback to Bulbasaur if favorite Pokemon not set
+        // Fallback to Wishiwashi-solo if favorite Pokemon not set
         const defaultPlayerPokemon: PokedexPokemon = {
-          id: 1,
-          name: 'Bulbasaur',
-          types: ['grass', 'poison'],
+          id: 746,
+          name: 'Wishiwashi',
+          types: ['water'],
           sprite:
-            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-          pokedexNumber: 1,
+            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/746.png',
+          pokedexNumber: 746,
           stats: {
             hp: 45,
-            attack: 49,
-            defense: 49,
-            spAttack: 65,
-            spDefense: 65,
-            speed: 45,
+            attack: 20,
+            defense: 20,
+            spAttack: 25,
+            spDefense: 25,
+            speed: 40,
           },
           isOwned: true,
         };

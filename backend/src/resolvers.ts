@@ -127,7 +127,7 @@ const authMutations = {
       created_at: new Date(),
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? '0',
       stats: DEFAULT_USER_STATS.stats,
-      owned_pokemon_ids: [1],
+      owned_pokemon_ids: [746], // Wishiwashi-solo - cheapest Pokemon
       showInRanks: true,
       isGuestUser: isGuestUser ?? false,
     };
@@ -216,40 +216,32 @@ async function getPokemonCost(pokemonId: number): Promise<Decimal> {
   const baseCost = new Decimal(150);
   const bst = await getBSTForPokemon(pokemonId);
 
-  // ABSOLUTELY INSANE exponential curve - Mewtwo costs QUINTILLIONS (Qi)!
-  // - BST < 600: EXTREME exponential growth (balanced for early game)
-  // - 600+ BST: ULTRA EXTREME exponential growth (legendaries)
+  // Doubling formula: Price doubles every 5 BST points
+  // Provides even distribution from 150 to 4.9E34
   //
-  // Formula:
-  // BST < 600: 150 * e^((bst - 200) / 33)
-  // BST ≥ 600: [Cost at 600] * e^((bst - 600) / 3.8)
+  // Formula: 150 * 2^((bst - 180) / 5)
   //
-  // Calculated costs (improved balance):
-  // 195 BST (Caterpie) → 128 candy (better early game)
-  // 200 BST (baseline) → 150 candy
-  // 251 BST (Pidgey) → 703 candy
-  // 318 BST (Bulbasaur) → 5.4K candy
-  // 405 BST (Ivysaur) → 429K candy
-  // 525 CST (Venusaur) → 638M candy
-  // 540 BST (Snorlax) → 4.5B candy
-  // 600 BST (Mew/Dragonite) → 27.6B candy [boundary]
-  // 680 BST (Mewtwo) → 38.3 QUINTILLION (Qi) candy!!!
-  // 720 BST (Arceus) → 1.43 SEXTILLION (Sx) candy!!!
+  // Sample costs:
+  // 180 BST (Magikarp) → 150
+  // 250 BST (Rattata) → 2.5E6
+  // 300 BST (Pidgey) → 2.5E9
+  // 350 BST (Pikachu) → 2.6E12
+  // 530 BST (Charizard) → 1.8E23
+  // 680 BST (Mewtwo) → 1.9E32
+  // 720 BST (Arceus) → 4.9E34
 
-  let cost: Decimal;
+  const baselineBST = 180; // Weakest Pokemon
+  const doublingInterval = 5; // Price doubles every 5 BST points
 
-  if (bst < 600) {
-    // All non-legendary Pokemon: Balanced exponential growth
-    const exponent = (bst - 200) / 33;
-    cost = baseCost.times(Decimal.exp(exponent));
-  } else {
-    // Legendary tier (600+ BST): ULTRA EXTREME exponential growth
-    const baseExponent = (600 - 200) / 33;
-    const costAt600 = baseCost.times(Decimal.exp(baseExponent));
-    const legendaryExponent = (bst - 600) / 3.8;
-    const legendaryMultiplier = Decimal.exp(legendaryExponent);
-    cost = costAt600.times(legendaryMultiplier);
-  }
+  // Calculate doublings: (bst - 180) / 5
+  const bstDifference = bst - baselineBST;
+  const doublings = bstDifference / doublingInterval;
+
+  // Cost = 150 * 2^doublings
+  // Using Decimal.js: cost = 150 * 2^doublings
+  const two = new Decimal(2);
+  const multiplier = two.pow(doublings);
+  const cost = baseCost.times(multiplier);
 
   return cost.floor();
 }
@@ -472,8 +464,9 @@ export const resolvers = {
         sort.types = sortOrder === 'asc' ? 1 : -1;
         sort.id = 1;
       } else if (sortBy === 'price') {
-        // Sort by stored price field (stored as string, but MongoDB handles it correctly)
-        sort.price = sortOrder === 'asc' ? 1 : -1;
+        // Sort by priceNumeric (log10 scale) for correct numeric ordering
+        // String-based sorting would incorrectly place "1000" before "200"
+        sort.priceNumeric = sortOrder === 'asc' ? 1 : -1;
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }

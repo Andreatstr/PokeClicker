@@ -61,8 +61,8 @@ export const PokemonCard = memo(function PokemonCard({
     preloadAssets();
   }, [pokemon.id, isOwned, primaryType]);
 
-  // Use price from API if available, otherwise fallback to '0'
-  const cost = pokemon.price ? Number(pokemon.price) : 0;
+  // Use price from API if available, otherwise fallback to '0' (keep as string for Decimal compatibility)
+  const cost = pokemon.price ?? '0';
 
   const handleClick = () => {
     onClick?.(pokemon);
@@ -77,7 +77,7 @@ export const PokemonCard = memo(function PokemonCard({
 
   const onPurchaseClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    handlePurchase(pokemon.id);
+    handlePurchase(pokemon.id, undefined, cost);
   };
 
   return (

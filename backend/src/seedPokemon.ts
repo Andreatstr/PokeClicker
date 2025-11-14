@@ -80,21 +80,20 @@ function calculateBST(
 
 /**
  * Calculate Pokemon purchase cost (matches backend formula in resolvers.ts)
+ * Doubling formula: Price doubles every 5 BST points
+ * Range: 150 (BST 180) to 4.9E34 (BST 720)
  */
 function calculatePokemonCost(bst: number): string {
   const baseCost = 150;
-  let cost: number;
+  const baselineBST = 180; // Magikarp-level (weakest Pokemon)
+  const doublingInterval = 5; // Price doubles every 5 BST points
 
-  if (bst < 600) {
-    const exponent = (bst - 200) / 33;
-    cost = Math.floor(baseCost * Math.exp(exponent));
-  } else {
-    const baseExponent = (600 - 200) / 33;
-    const costAt600 = baseCost * Math.exp(baseExponent);
-    const legendaryExponent = (bst - 600) / 3.8;
-    const legendaryMultiplier = Math.exp(legendaryExponent);
-    cost = Math.floor(costAt600 * legendaryMultiplier);
-  }
+  // Calculate how many doublings from baseline
+  const bstDifference = bst - baselineBST;
+  const doublings = bstDifference / doublingInterval;
+
+  // Price = baseCost * 2^doublings
+  const cost = baseCost * Math.pow(2, doublings);
 
   return cost.toString();
 }
@@ -115,6 +114,10 @@ async function fetchPokemonMetadata(id: number) {
     const bst = calculateBST(data.stats);
     const price = calculatePokemonCost(bst);
 
+    // Store log10(price) for correct numeric sorting in MongoDB
+    // Prices range from ~150 to 10^21, so log values range from ~2 to ~21
+    const priceNumeric = Math.log10(Number(price));
+
     return {
       id: data.id,
       name: data.name,
@@ -122,7 +125,8 @@ async function fetchPokemonMetadata(id: number) {
       generation: getGeneration(data.id),
       sprite,
       bst,
-      price,
+      price,          // String for display (supports Decimal.js formatting)
+      priceNumeric,   // Number for sorting (log scale)
     };
   } catch (error) {
     console.error(`Error fetching Pokemon ${id}:`, error);
@@ -179,6 +183,7 @@ async function seedPokemon() {
   await collection.createIndex({id: 1}, {unique: true});
   await collection.createIndex({bst: 1});
   await collection.createIndex({price: 1});
+  await collection.createIndex({priceNumeric: 1}); // Index for price sorting
 
   /**
    * Precompute static filter counts

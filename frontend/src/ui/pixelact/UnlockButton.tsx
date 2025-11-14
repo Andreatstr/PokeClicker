@@ -9,7 +9,7 @@ import {formatNumber} from '@/lib/formatNumber';
  */
 interface UnlockButtonProps {
   onClick: (e: React.MouseEvent) => void;
-  cost: number;
+  cost: number | string;
   error: string | null;
   pokemonName: string;
   size?: 'small' | 'large';

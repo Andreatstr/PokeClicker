@@ -2,7 +2,7 @@
  * Game Configuration Constants
  * Centralized location for all game balance and mechanics constants
  */
-import {POKEMON_BST, estimateBST} from './pokemonBST';
+import {estimateBST} from './pokemonBST';
 
 export const TILE_SIZE = 512;
 
@@ -62,20 +62,17 @@ export type GameConfigType = typeof GameConfig;
  */
 export function getPokemonCost(pokemonId: number): number {
   const baseCost = 150;
-  // Use actual BST data first, fall back to estimate only if not found
-  const bst = POKEMON_BST[pokemonId] ?? estimateBST(pokemonId);
+  const baselineBST = 180; // Weakest Pokemon
+  const doublingInterval = 5; // Price doubles every 5 BST points
 
-  // IMPROVED exponential curve - Mewtwo costs 38 QUINTILLIONS (Qi)!
-  if (bst < 600) {
-    // All non-legendary Pokemon: balanced exponential from BST 200
-    const exponent = (bst - 200) / 33;
-    return Math.floor(baseCost * Math.exp(exponent));
-  } else {
-    // Legendary tier: ULTRA EXTREME exponential growth - QUINTILLIONS!!!
-    const baseExponent = (600 - 200) / 33;
-    const costAt600 = baseCost * Math.exp(baseExponent);
-    const legendaryExponent = (bst - 600) / 3.8;
-    const legendaryMultiplier = Math.exp(legendaryExponent);
-    return Math.floor(costAt600 * legendaryMultiplier);
-  }
+  // Use estimated BST (actual prices come from API, this is just for fallback UI)
+  const bst = estimateBST(pokemonId);
+
+  // Doubling formula: Price doubles every 5 BST points
+  // Range: 150 (BST 180) to 4.9E34 (BST 720)
+  const bstDifference = bst - baselineBST;
+  const doublings = bstDifference / doublingInterval;
+
+  // Price = baseCost * 2^doublings
+  return Math.floor(baseCost * Math.pow(2, doublings));
 }

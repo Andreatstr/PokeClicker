@@ -119,10 +119,15 @@ export function BattleView({
     ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
     : '1';
 
-  // Base reward: clicks × candyPerClick × 10
-  const battleReward = toDecimal(finalClickCount)
-    .times(candyPerClick)
-    .times(10);
+  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 3)
+  const clickReward = toDecimal(finalClickCount).times(candyPerClick).times(2);
+
+  const opponentPrice = opponentPokemon.price
+    ? toDecimal(opponentPokemon.price)
+    : toDecimal(0);
+  const priceBonus = opponentPrice.dividedBy(3);
+
+  const battleReward = clickReward.plus(priceBonus);
   const rareCandyReward = battleReward.floor().toString();
 
   // Ready countdown state
