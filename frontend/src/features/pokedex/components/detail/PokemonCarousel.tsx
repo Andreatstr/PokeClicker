@@ -44,7 +44,7 @@ export function PokemonCarousel({
   // Debug: Log the initial index to verify it's correct
   useEffect(() => {
     logger.info(
-      `🎯 Carousel initializing with Pokemon ${currentPokemon.name} (ID: ${currentPokemon.id}) at index ${initialIndex} out of ${allPokemon.length}`,
+      `[CAROUSEL] Carousel initializing with Pokemon ${currentPokemon.name} (ID: ${currentPokemon.id}) at index ${initialIndex} out of ${allPokemon.length}`,
       'PokemonCarousel'
     );
     logger.info(

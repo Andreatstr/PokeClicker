@@ -88,7 +88,7 @@ function sanitizeUserForClient(
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
     selected_pokemon_id: userDoc.selected_pokemon_id,
     showInRanks: userDoc.showInRanks,
-    isGuestUser: userDoc.isGuestUser,
+    isGuestUser: userDoc.isGuestUser ?? false, // Default to false for old users
   };
 }
 

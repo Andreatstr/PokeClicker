@@ -28,6 +28,8 @@ export function ErrorDisplay() {
       'border-4 p-4 mb-4 relative animate-slide-in pixel-font shadow-[4px_4px_0px_rgba(0,0,0,1)]';
 
     switch (severity) {
+      case ErrorSeverity.SUCCESS:
+        return `${baseStyles} bg-green-100 border-green-600 text-green-900`;
       case ErrorSeverity.INFO:
         return `${baseStyles} bg-blue-100 border-blue-600 text-blue-900`;
       case ErrorSeverity.WARNING:
@@ -43,15 +45,30 @@ export function ErrorDisplay() {
 
   const getSeverityIcon = (severity: ErrorSeverity) => {
     switch (severity) {
+      case ErrorSeverity.SUCCESS:
+        return (
+          <svg
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-6 h-6"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 6h2v2h-2V6zm-2 4V8h2v2h-2zm-2 2v-2h2v2h-2zm-2 2h2v-2h-2v2zm-2 2h2v-2h-2v2zm-2 0v2h2v-2H8zm-2-2h2v2H6v-2zm0 0H4v-2h2v2z"
+              fill="currentColor"
+            />
+          </svg>
+        );
       case ErrorSeverity.INFO:
-        return 'ℹ️';
+        return <span className="font-bold">i</span>;
       case ErrorSeverity.WARNING:
-        return '⚠️';
+        return <span className="font-bold">!</span>;
       case ErrorSeverity.ERROR:
       case ErrorSeverity.CRITICAL:
-        return '❌';
+        return <span className="font-bold">X</span>;
       default:
-        return '❓';
+        return <span className="font-bold">?</span>;
     }
   };
 
@@ -66,14 +83,19 @@ export function ErrorDisplay() {
         <article key={error.id} className={getSeverityStyles(error.severity)}>
           <button
             onClick={() => removeError(error.id)}
-            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-black text-white hover:bg-gray-800 transition-colors"
+            className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-black text-white hover:bg-gray-800 transition-colors font-bold text-sm"
             aria-label="Dismiss error"
           >
-            ✕
+            X
           </button>
 
           <div className="flex items-start gap-3 pr-8">
-            <span className="text-2xl flex-shrink-0" aria-hidden="true">
+            <span
+              className={`shrink-0 flex items-center justify-center ${
+                error.severity === ErrorSeverity.SUCCESS ? '' : 'text-2xl'
+              }`}
+              aria-hidden="true"
+            >
               {getSeverityIcon(error.severity)}
             </span>
             <div className="flex-1">

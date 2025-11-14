@@ -152,10 +152,9 @@ export function BattleView({
     if (
       battleResult === 'victory' &&
       toDecimal(rareCandyReward).gt(0) &&
-      !candyAwarded &&
-      addCandy
+      !candyAwarded
     ) {
-      // Award candy via clicker's addCandy to maintain consistent batching
+      // Award candy via context (works with default implementation or PokeClicker's batched version)
       addCandy(rareCandyReward);
       setCandyAwarded(true);
     }

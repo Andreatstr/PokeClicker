@@ -4,6 +4,7 @@ import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 import {toDecimal} from '@/lib/decimal';
 import {useCandyOperations} from '@/contexts/CandyOperationsContext';
+import {useError} from '@/hooks/useError';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations
@@ -11,13 +12,15 @@ import {useCandyOperations} from '@/contexts/CandyOperationsContext';
 export function usePokemonPurchaseHandler() {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
-  const {localRareCandy, flushPendingCandy} = useCandyOperations();
+  const {getLocalRareCandy, flushPendingCandy} = useCandyOperations();
+  const {addSuccess} = useError();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
 
   const handlePurchase = async (
     pokemonId: number,
+    pokemonName?: string,
     onSuccess?: (pokemonId: number) => void
   ) => {
     // Clear any existing error timeout to prevent race conditions
@@ -27,8 +30,8 @@ export function usePokemonPurchaseHandler() {
     setError(null);
 
     // Client-side validation: Check if user can afford the Pokemon
-    // Use localRareCandy if available (most up-to-date), otherwise fall back to user.rare_candy
-    const currentCandy = localRareCandy || user?.rare_candy || '0';
+    // Use getLocalRareCandy() if available (most up-to-date), otherwise fall back to user.rare_candy
+    const currentCandy = getLocalRareCandy() || user?.rare_candy || '0';
     const cost = getPokemonCost(pokemonId);
     if (toDecimal(currentCandy).lt(cost)) {
       setError('Not enough Rare Candy!');
@@ -58,6 +61,13 @@ export function usePokemonPurchaseHandler() {
       // Apollo optimistic response already updated the UI immediately
       if (result.data?.purchasePokemon) {
         updateUser(result.data.purchasePokemon);
+      }
+
+      // Show success toast notification
+      if (pokemonName) {
+        const capitalizedName =
+          pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
+        addSuccess(`Successfully bought ${capitalizedName}!`);
       }
 
       onSuccess?.(pokemonId);
