@@ -45,6 +45,9 @@ export const ErrorType = {
 
 /**
  * Extract user-friendly error message from various error types
+ * Handles GraphQL errors, network errors, and generic Error objects
+ * @param error - The error to extract message from (can be any type)
+ * @returns A human-readable error message string
  */
 export function getUserFriendlyMessage(error: unknown): string {
   if (typeof error === 'string') {
@@ -83,6 +86,9 @@ export function getUserFriendlyMessage(error: unknown): string {
 
 /**
  * Classify error type based on error content
+ * Uses keyword matching in error messages to determine error category
+ * @param error - The error to classify
+ * @returns An ErrorType classification
  */
 export function classifyError(error: unknown): ErrorType {
   if (!error) return ErrorType.UNKNOWN;
@@ -128,6 +134,9 @@ export function classifyError(error: unknown): ErrorType {
 
 /**
  * Determine error severity based on error type and content
+ * Auth/permission errors are ERROR level, network is WARNING, validation/not-found is INFO
+ * @param error - The error to evaluate
+ * @returns The appropriate severity level for the error
  */
 export function determineErrorSeverity(error: unknown): ErrorSeverity {
   const errorType = classifyError(error);
@@ -153,6 +162,10 @@ export function determineErrorSeverity(error: unknown): ErrorSeverity {
 
 /**
  * Create a standardized AppError from any error type
+ * Generates unique ID, extracts message, determines severity and classification
+ * @param error - The raw error to wrap
+ * @param context - Optional context string to prepend to user message
+ * @returns A standardized AppError object
  */
 export function createAppError(error: unknown, context?: string): AppError {
   const userMessage = getUserFriendlyMessage(error);
@@ -172,7 +185,9 @@ export function createAppError(error: unknown, context?: string): AppError {
 
 /**
  * Log error to console with appropriate level
- * In production, this would send to a logging service
+ * Routes to console.info/warn/error based on severity
+ * In production, this would send to a logging service like Sentry
+ * @param error - The AppError to log
  */
 export function logError(error: AppError): void {
   const logMessage = `[${error.severity.toUpperCase()}] ${error.code || 'ERROR'} - ${error.message}`;
@@ -195,6 +210,10 @@ export function logError(error: AppError): void {
 
 /**
  * Main error handler - creates AppError, logs it, and returns it
+ * Central error handling function that combines creation and logging
+ * @param error - The error to handle
+ * @param context - Optional context for error message
+ * @returns The created AppError
  */
 export function handleError(error: unknown, context?: string): AppError {
   const appError = createAppError(error, context);
@@ -203,8 +222,11 @@ export function handleError(error: unknown, context?: string): AppError {
 }
 
 /**
- * Error handler for async operations
+ * Error handler for async operations that re-throws as AppError
+ * Returns a curried function suitable for .catch() chains
  * Usage: await someAsyncOperation().catch(handleAsyncError('context'))
+ * @param context - Optional context for error message
+ * @returns A function that handles the error and throws an AppError
  */
 export function handleAsyncError(context?: string) {
   return (error: unknown): never => {

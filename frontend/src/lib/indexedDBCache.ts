@@ -1,14 +1,27 @@
-import {logger} from '@/lib/logger';
-
 /**
- * IndexedDB wrapper for caching image blobs
- * Provides persistent storage that survives page refreshes
+ * IndexedDB Image Cache
+ *
+ * Provides persistent browser storage for image blobs using IndexedDB.
+ * Unlike in-memory caches, this survives page refreshes and browser restarts.
+ *
+ * Storage Strategy:
+ * - Stores raw Blob objects (binary data) rather than base64 (more efficient)
+ * - Uses URL as primary key for O(1) lookups
+ * - Tracks timestamp for automatic expiration after 7 days
+ * - Monitors blob size for cache statistics and cleanup decisions
+ *
+ * Performance Benefits:
+ * - Eliminates network requests for cached images across sessions
+ * - Faster than localStorage (no 5-10MB limits, no string serialization)
+ * - Asynchronous API doesn't block main thread
  */
+
+import {logger} from '@/lib/logger';
 
 const DB_NAME = 'PokemonImageCache';
 const DB_VERSION = 1;
 const STORE_NAME = 'images';
-const MAX_CACHE_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+const MAX_CACHE_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days - balances freshness vs storage
 
 interface CachedImage {
   url: string;
@@ -19,10 +32,14 @@ interface CachedImage {
 
 class IndexedDBCache {
   private db: IDBDatabase | null = null;
+  // Singleton pattern: ensures only one initialization happens even with concurrent calls
   private initPromise: Promise<void> | null = null;
 
   /**
    * Initialize the IndexedDB database
+   *
+   * Lazy initialization: DB is only opened when first needed, not on import.
+   * This avoids blocking app startup and handles environments without IndexedDB.
    */
   private async init(): Promise<void> {
     if (this.db) return;
@@ -44,11 +61,11 @@ class IndexedDBCache {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
 
-        // Create object store if it doesn't exist
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const objectStore = db.createObjectStore(STORE_NAME, {
-            keyPath: 'url',
+            keyPath: 'url', // URL serves as unique identifier for each image
           });
+          // Index on timestamp enables efficient cleanup queries
           objectStore.createIndex('timestamp', 'timestamp', {unique: false});
         }
       };
@@ -59,6 +76,10 @@ class IndexedDBCache {
 
   /**
    * Get an image blob from cache
+   *
+   * Implements automatic cache invalidation: expired entries are deleted
+   * on read to prevent serving stale images. This is simpler than background
+   * cleanup jobs and ensures users always get fresh content.
    */
   async get(url: string): Promise<Blob | null> {
     await this.init();
@@ -77,11 +98,10 @@ class IndexedDBCache {
           return;
         }
 
-        // Check if cache entry is too old
+        // Age-based invalidation ensures stale content is automatically purged
         const age = Date.now() - result.timestamp;
         if (age > MAX_CACHE_AGE) {
-          // Delete expired entry
-          this.delete(url);
+          this.delete(url); // Opportunistic cleanup on cache miss
           resolve(null);
           return;
         }
@@ -191,6 +211,10 @@ class IndexedDBCache {
 
   /**
    * Clean up old cache entries
+   *
+   * Batch cleanup operation using cursor iteration. Called on app startup
+   * to proactively free storage space. Uses the timestamp index for efficient
+   * scanning without loading all entries into memory.
    */
   async cleanup(): Promise<void> {
     await this.init();
@@ -211,7 +235,7 @@ class IndexedDBCache {
           const age = Date.now() - item.timestamp;
 
           if (age > MAX_CACHE_AGE) {
-            cursor.delete();
+            cursor.delete(); // In-place deletion during iteration
           }
 
           cursor.continue();
@@ -228,5 +252,8 @@ class IndexedDBCache {
   }
 }
 
-// Export singleton instance
+/**
+ * Singleton instance - ensures single database connection across the app
+ * Prevents connection overhead and potential race conditions
+ */
 export const indexedDBCache = new IndexedDBCache();

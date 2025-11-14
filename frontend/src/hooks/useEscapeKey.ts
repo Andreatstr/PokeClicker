@@ -1,8 +1,11 @@
 import {useEffect} from 'react';
 
 /**
- * Hook to handle Escape key press for closing modals
- * Adds keyboard event listener when modal is open
+ * Hook for handling Escape key press to close modals
+ * Adds/removes keyboard event listener based on modal open state
+ *
+ * @param isOpen - Whether modal is currently open
+ * @param onClose - Callback to invoke when Escape key pressed
  */
 export function useEscapeKey(isOpen: boolean, onClose: () => void) {
   useEffect(() => {

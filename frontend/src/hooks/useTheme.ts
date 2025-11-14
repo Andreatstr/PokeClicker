@@ -1,8 +1,20 @@
 import {useState, useEffect} from 'react';
 
 /**
- * Custom hook for theme management
- * Handles localStorage persistence and system preference detection
+ * Hook for theme management with dark/light mode toggle
+ *
+ * Features:
+ * - Persists theme preference to localStorage
+ * - Detects system preference on first load
+ * - Applies theme by adding/removing 'dark' class on document root
+ * - Initializes theme before first render to prevent flash
+ *
+ * Theme priority:
+ * 1. localStorage saved preference
+ * 2. System preference (prefers-color-scheme)
+ * 3. Light mode (default)
+ *
+ * @returns Current theme state and toggle function
  */
 export function useTheme() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
