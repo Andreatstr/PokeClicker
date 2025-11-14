@@ -124,7 +124,6 @@ class PreloadService {
       await Promise.all(tasks.map((task) => task()));
 
       this.updateProgress(100);
-      logger.info('All assets preloaded successfully');
     } catch (error) {
       logger.logError(error, 'PreloadAssets');
       throw error;
