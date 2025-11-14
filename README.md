@@ -2,7 +2,7 @@
 
 IT2810 Web Development - Group 26
 
-[Live Demo](https://it2810-26.idi.ntnu.no/project2/) (Requires eduroam VPN outside NTNU)
+[Live Demo](http://it2810-26.idi.ntnu.no/project2/) (Requires eduroam VPN outside NTNU)
 
 ## Documentation
 
