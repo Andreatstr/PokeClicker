@@ -204,10 +204,10 @@ export function FiltersAndCount({
                       <SelectValue placeholder="ID" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="price">Price</SelectItem>
                       <SelectItem value="id">ID</SelectItem>
                       <SelectItem value="name">Name</SelectItem>
                       <SelectItem value="type">Type</SelectItem>
-                      <SelectItem value="price">Price</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -295,13 +295,13 @@ export function FiltersAndCount({
                   onClick={() => {
                     setTempRegion(null);
                     setTempTypes([]);
-                    setTempSortBy('id');
+                    setTempSortBy('price');
                     setTempSortOrder('asc');
                     setTempOwnedOnly('all');
 
                     setSelectedRegion(null);
                     setSelectedTypes([]);
-                    setSortBy('id');
+                    setSortBy('price');
                     setSortOrder('asc');
                     setSelectedOwnedOnly('all');
                     setShowMobileFilters(false);
