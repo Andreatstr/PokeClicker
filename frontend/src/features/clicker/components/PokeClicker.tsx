@@ -90,7 +90,11 @@ export function PokeClicker({
 
   // Register candy operations with global context for other components to use
   useEffect(() => {
-    registerOperations({addCandy, flushPendingCandy, localRareCandy});
+    registerOperations({
+      addCandy,
+      flushPendingCandy,
+      getLocalRareCandy: () => localRareCandy,
+    });
   }, [registerOperations, addCandy, flushPendingCandy, localRareCandy]);
 
   const {isAnimating, candies, handleClick, handleUpgrade} = useClickerActions({

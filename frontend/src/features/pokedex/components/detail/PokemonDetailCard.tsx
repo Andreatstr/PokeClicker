@@ -6,7 +6,7 @@ import {
   usePurchasePokemon,
 } from '@features/pokedex';
 import {type User} from '@features/auth';
-import {useState, useRef} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
@@ -15,6 +15,7 @@ import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
 import {getPokemonCost} from '@/config';
+import {useError} from '@/hooks/useError';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -42,6 +43,7 @@ export function PokemonDetailCard({
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
+  const {addSuccess} = useError();
 
   // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
   // This ensures the UI updates when the cache updates
@@ -86,6 +88,11 @@ export function PokemonDetailCard({
           created_at: user.created_at,
         });
       }
+
+      // Show success toast notification at page level
+      const capitalizedName =
+        pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+      addSuccess(`Successfully bought ${capitalizedName}!`);
 
       onPurchaseComplete?.(pokemon.id);
       setIsAnimating(true);
@@ -149,6 +156,15 @@ export function PokemonDetailCard({
       }, 1200);
     }
   };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const evolutionIds = [pokemon.id, ...(pokemon.evolution ?? [])];
   const primaryType = pokemon.types[0];

@@ -34,6 +34,25 @@ export function usePurchasePokemon() {
       update(cache, {data}) {
         if (!data?.purchasePokemon) return;
 
+        // Ensure isGuestUser field is written to cache if missing from response
+        // This prevents Apollo cache errors when the backend doesn't include the field
+        if (data.purchasePokemon.isGuestUser === undefined) {
+          const userCacheId = cache.identify({
+            __typename: 'User',
+            _id: data.purchasePokemon._id,
+          });
+          if (userCacheId) {
+            cache.modify({
+              id: userCacheId,
+              fields: {
+                isGuestUser() {
+                  return false; // Default to false if missing
+                },
+              },
+            });
+          }
+        }
+
         // Get the ID of the purchased Pokemon (last item in owned_pokemon_ids array)
         const purchasedPokemonId =
           data.purchasePokemon.owned_pokemon_ids[
@@ -96,6 +115,7 @@ export function usePurchasePokemon() {
               favorite_pokemon_id: null,
               selected_pokemon_id: null,
               showInRanks: true,
+              isGuestUser: false,
               stats: {
                 __typename: 'UserStats',
                 hp: 1,
@@ -133,6 +153,7 @@ export function usePurchasePokemon() {
             favorite_pokemon_id: user.favorite_pokemon_id ?? null,
             selected_pokemon_id: user.selected_pokemon_id ?? null,
             showInRanks: user.showInRanks ?? true,
+            isGuestUser: user.isGuestUser ?? false,
             stats: user.stats
               ? {
                   __typename: 'UserStats',

@@ -107,10 +107,6 @@ class ImageCacheService {
     if (this.memoryCache.has(url)) {
       this.stats.hitCount++;
       this.updateStats();
-      logger.debug(
-        `Memory cache HIT for ${url.split('/').pop()}`,
-        'ImageCache'
-      );
       return this.memoryCache.get(url)!;
     }
 
@@ -120,10 +116,6 @@ class ImageCacheService {
       if (cachedBlob) {
         this.stats.hitCount++;
         this.updateStats();
-        logger.debug(
-          `IndexedDB cache HIT for ${url.split('/').pop()}`,
-          'ImageCache'
-        );
 
         const img = new Image() as CachedHTMLImageElement;
         img.src = URL.createObjectURL(cachedBlob);

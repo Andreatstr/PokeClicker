@@ -41,37 +41,15 @@ export function PokemonCarousel({
 }: PokemonCarouselProps) {
   const initialIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
 
-  // Debug: Log the initial index to verify it's correct
-  useEffect(() => {
-    logger.info(
-      `🎯 Carousel initializing with Pokemon ${currentPokemon.name} (ID: ${currentPokemon.id}) at index ${initialIndex} out of ${allPokemon.length}`,
-      'PokemonCarousel'
-    );
-    logger.info(
-      `Pokemon list: ${allPokemon
-        .slice(Math.max(0, initialIndex - 2), initialIndex + 3)
-        .map((p) => `${p.name}(${p.id})`)
-        .join(', ')}`,
-      'PokemonCarousel'
-    );
-  }, [currentPokemon.id, currentPokemon.name, initialIndex, allPokemon]);
-
   // Create stable ID list to prevent unnecessary preload triggers
   const pokemonIdList = useMemo(
     () => allPokemon.map((p) => p.id).join(','),
     [allPokemon]
   );
 
-  // Log cache stats and preload nearby Pokemon sprites
+  // Preload nearby Pokemon sprites (current ± 2)
   // Only runs when the Pokemon list actually changes, not on every render
   useEffect(() => {
-    const stats = pokemonSpriteCache.getCacheStats();
-    logger.info(
-      `🎠 Carousel loaded with ${allPokemon.length} Pokemon | Cache: ${stats.itemCount} items, ${Math.round(stats.hitRate * 100)}% hit rate`,
-      'PokemonCarousel'
-    );
-
-    // Preload nearby Pokemon sprites (current ± 2)
     const nearbyIndices = [
       initialIndex - 2,
       initialIndex - 1,
@@ -152,16 +130,6 @@ function LazyPokemonCard({
   // This prevents loading evolution chains for all Pokemon at once
   const renderWindow = 1;
   const shouldRender = Math.abs(currentIndex - index) <= renderWindow;
-
-  // Debug logging
-  useEffect(() => {
-    if (shouldRender) {
-      logger.info(
-        `📦 Rendering LazyPokemonCard for ${pokemon.name} (ID: ${pokemon.id}) at index ${index} (currentIndex: ${currentIndex})`,
-        'LazyPokemonCard'
-      );
-    }
-  }, [shouldRender, pokemon.name, pokemon.id, index, currentIndex]);
 
   if (!shouldRender) {
     return (
