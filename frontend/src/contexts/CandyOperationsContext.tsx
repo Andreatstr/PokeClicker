@@ -155,11 +155,16 @@ export function CandyOperationsProvider({children}: {children: ReactNode}) {
 
   // Stable wrapper functions that use the refs
   // These always work - either with default implementation or PokeClicker's optimized version
-  const addCandy = useCallback((amount: string) => {
-    if (addCandyRef.current) {
+  const addCandy = useCallback(
+    (amount: string) => {
+      // Ensure default implementation is set if not already initialized
+      if (!addCandyRef.current) {
+        addCandyRef.current = defaultAddCandy;
+      }
       addCandyRef.current(amount);
-    }
-  }, []);
+    },
+    [defaultAddCandy]
+  );
 
   const flushPendingCandy = useCallback(async () => {
     if (flushPendingCandyRef.current) {

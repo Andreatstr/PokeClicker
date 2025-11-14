@@ -37,6 +37,7 @@ import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getPlatformImage} from '../utils/platformMapping';
 import {toDecimal} from '@/lib/decimal';
 import {useCandyOperations} from '@/contexts/CandyOperationsContext';
+import {logger} from '@/lib/logger';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -155,8 +156,12 @@ export function BattleView({
       !candyAwarded
     ) {
       // Award candy via context (works with default implementation or PokeClicker's batched version)
-      addCandy(rareCandyReward);
-      setCandyAwarded(true);
+      try {
+        addCandy(rareCandyReward);
+        setCandyAwarded(true);
+      } catch (error) {
+        logger.logError(error, 'BattleReward');
+      }
     }
   }, [battleResult, rareCandyReward, candyAwarded, addCandy]);
 
