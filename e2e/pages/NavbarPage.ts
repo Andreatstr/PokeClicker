@@ -52,6 +52,12 @@ export class NavbarPage extends BasePage {
     await this.clickerTab.click();
   }
 
+  async navigateToMap() {
+    await this.openMobileMenuIfNeeded();
+    const mapButton = this.page.getByRole("button", { name: /^map$/i });
+    await mapButton.click();
+  }
+
   async toggleTheme() {
     await this.openMobileMenuIfNeeded();
 
@@ -93,5 +99,13 @@ export class NavbarPage extends BasePage {
       .isVisible()
       .catch(() => false);
     return rareCandyVisible || charizardVisible;
+  }
+
+  async isOnMap(): Promise<boolean> {
+    // Check if the map canvas is visible
+    return await this.page
+      .locator("canvas")
+      .isVisible()
+      .catch(() => false);
   }
 }

@@ -4,6 +4,7 @@ import {useAuth} from '@features/auth/hooks/useAuth';
 import {GameBoy} from './GameBoy';
 import {CandyCounterOverlay} from '@/components';
 import {TiledMapView} from './TiledMapView';
+import {HowToPlayModal} from './HowToPlayModal';
 import {BattleView} from '@features/battle';
 import {useCollisionMap} from '../hooks/useCollisionMap';
 import {useMapMovement} from '../hooks/useMapMovement';
@@ -96,6 +97,18 @@ export function PokemonMap({
   // How to Play modal state
   const [showHowToPlay, setShowHowToPlay] = useState(false);
 
+  // Welcome CTA state - show for new players
+  const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const dismissed = localStorage.getItem('welcomeCTADismissed');
+    if (dismissed) return false;
+    return user &&
+      'owned_pokemon_ids' in user &&
+      Array.isArray(user.owned_pokemon_ids)
+      ? user.owned_pokemon_ids.length <= 3
+      : false;
+  });
+
   // Responsive viewport for fitting GameBoy on mobile and web
   const [viewport, setViewport] = useState<{width: number; height: number}>(
     DEFAULT_VIEWPORT
@@ -106,6 +119,9 @@ export function PokemonMap({
   const [renderSize, setRenderSize] = useState<{width: number; height: number}>(
     DEFAULT_VIEWPORT
   );
+
+  // Detect if mobile for camera zoom
+  const isMobile = useMobileDetection(768);
 
   // Custom hooks for game logic
   const collisionMap = useCollisionMap();
@@ -320,9 +336,6 @@ export function PokemonMap({
     // No action when neither in battle nor near Pokemon - prevents unwanted map movement
   }, [inBattle, battleAttackFunction, pokemon.nearbyPokemon, startBattle]);
 
-  // Detect mobile device (unified hook)
-  const isMobile = useMobileDetection(768);
-
   // Handle fullscreen changes (for desktop browsers that support it)
   useEffect(() => {
     if (isMobile) return; // Skip for mobile, we'll use CSS fullscreen
@@ -370,9 +383,21 @@ export function PokemonMap({
       if (!isCurrentlyFullscreen) {
         // Request fullscreen with vendor prefixes
         await requestFullscreen(element);
+
+        // Verify fullscreen was successfully activated
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (!isFullscreenActive(document)) {
+          throw new Error('Fullscreen request failed - not activated');
+        }
       } else {
         // Exit fullscreen with vendor prefixes
         await exitFullscreen(document);
+
+        // Verify fullscreen was successfully exited
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        if (isFullscreenActive(document)) {
+          throw new Error('Fullscreen exit failed - still active');
+        }
       }
     } catch (error) {
       logger.logError(error, 'ToggleFullscreen');
@@ -461,6 +486,14 @@ export function PokemonMap({
           : undefined
       }
     >
+      {/* How to Play Modal - Completely outside GameBoy to avoid scaling */}
+      <HowToPlayModal
+        isOpen={showHowToPlay}
+        onClose={() => setShowHowToPlay(false)}
+        isDarkMode={isDarkMode}
+        isMobile={isMobile}
+      />
+
       <GameBoy
         onDirectionChange={movement.handleJoystickDirectionChange}
         onDirectionStart={movement.handleJoystickDirectionStart}
@@ -495,6 +528,9 @@ export function PokemonMap({
             }}
             className="absolute top-2 left-2 z-50 flex items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            aria-label={
+              isFullscreen ? 'Exit fullscreen mode' : 'Enter fullscreen mode'
+            }
             style={{
               WebkitTapHighlightColor: 'transparent',
               backgroundColor: 'rgba(59, 130, 246, 0.9)',
@@ -529,8 +565,210 @@ export function PokemonMap({
             </span>
           </button>
 
-          {/* Info / How to Play Button - Bottom Right */}
+          {/* Teleport Button - bottom left, same style as fullscreen button */}
           {!inBattle && (
+            <button
+              onClick={movement.teleportToRandomLocation}
+              disabled={movement.isTeleporting || movement.teleportCooldown > 0}
+              className="absolute bottom-3 left-2 z-50 flex items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+              title={
+                movement.isTeleporting
+                  ? 'Teleporting...'
+                  : movement.teleportCooldown > 0
+                    ? `Wait ${movement.teleportCooldown}s`
+                    : 'Teleport to random location'
+              }
+              aria-label={
+                movement.isTeleporting
+                  ? 'Teleporting to new location'
+                  : movement.teleportCooldown > 0
+                    ? `Teleport on cooldown: ${movement.teleportCooldown} seconds remaining`
+                    : 'Teleport to random location'
+              }
+              style={{
+                WebkitTapHighlightColor: 'transparent',
+                backgroundColor:
+                  movement.isTeleporting || movement.teleportCooldown > 0
+                    ? 'rgba(59, 130, 246, 0.85)'
+                    : 'rgba(59, 130, 246, 0.9)',
+                boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+                transform: 'translate(0, 0)',
+                transition: 'all 0.15s ease-in-out',
+              }}
+              onMouseEnter={(e) => {
+                if (
+                  !movement.isTeleporting &&
+                  movement.teleportCooldown === 0
+                ) {
+                  e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                  e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(37, 99, 235, 0.95)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+                e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.backgroundColor =
+                  movement.isTeleporting || movement.teleportCooldown > 0
+                    ? 'rgba(59, 130, 246, 0.85)'
+                    : 'rgba(59, 130, 246, 0.9)';
+              }}
+            >
+              <svg
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-4 h-4 text-white flex-shrink-0"
+              >
+                <path
+                  d="M7 2h10v2H7V2zM5 6V4h2v2H5zm0 8H3V6h2v8zm2 2H5v-2h2v2zm2 2H7v-2h2v2zm2 2H9v-2h2v2zm2 0v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm2-2v2h-2v-2h2zm0-8h2v8h-2V6zm0 0V4h-2v2h2zm-5 2h-4v4h4V8z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span className="pixel-font text-xs font-bold text-white">
+                {movement.isTeleporting
+                  ? ' Teleporting'
+                  : movement.teleportCooldown > 0
+                    ? ` Wait ${movement.teleportCooldown}s`
+                    : ' Teleport'}
+              </span>
+            </button>
+          )}
+
+          {/* Teleport Notification - top center */}
+          {!inBattle && movement.teleportLocation && (
+            <div
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none animate-fade-in"
+              role="status"
+              aria-live="polite"
+            >
+              <div
+                className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+                  isDarkMode
+                    ? 'bg-blue-500 text-white border-black'
+                    : 'bg-blue-500 text-white border-black'
+                }`}
+              >
+                <div className="pixel-font text-xs font-bold text-white">
+                  Teleported to {movement.teleportLocation}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Welcome CTA - shown for new players */}
+          {!inBattle && !pokemon.nearbyPokemon && showWelcomeCTA && (
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-auto max-w-[90%]">
+              <div
+                className={`pixel-font text-center px-4 py-3 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+                  isDarkMode
+                    ? 'bg-gray-800 text-white border-gray-600'
+                    : 'bg-white text-black border-black'
+                }`}
+              >
+                <div className="text-sm md:text-base font-bold mb-2">
+                  Wild Pokémon are out there!
+                </div>
+                <div className="text-xs md:text-sm opacity-90 mb-3">
+                  Explore, battle, and catch 'em all!
+                </div>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('welcomeCTADismissed', 'true');
+                    setShowWelcomeCTA(false);
+                  }}
+                  className={`px-4 py-1 text-xs font-bold border rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] ${
+                    isDarkMode
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500'
+                      : 'bg-blue-500 hover:bg-blue-400 text-white border-blue-400'
+                  }`}
+                  aria-label="OK"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Battle Prompt - bottom center, wider in fullscreen */}
+          {!inBattle && pokemon.nearbyPokemon && (
+            <div
+              className={`absolute left-1/2 transform -translate-x-1/2 z-40 ${
+                isFullscreen
+                  ? 'bottom-20 w-[94%] max-w-[600px]'
+                  : 'bottom-16 md:bottom-20 w-[94%] max-w-[400px]'
+              }`}
+              role="dialog"
+              aria-live="polite"
+              aria-label={`Wild ${pokemon.nearbyPokemon.pokemon.name} nearby`}
+            >
+              <div
+                className={`border-4 shadow-[6px_6px_0_rgba(0,0,0,1)] px-4 py-3 flex items-center gap-3 rounded-sm ${
+                  isDarkMode
+                    ? 'bg-gray-800/95 border-gray-600 text-white'
+                    : 'bg-white/95 border-black text-black'
+                }`}
+              >
+                <img
+                  src={pokemon.nearbyPokemon.pokemon.sprite}
+                  alt={pokemon.nearbyPokemon.pokemon.name}
+                  className="w-8 h-8 flex-shrink-0"
+                  style={{imageRendering: 'pixelated'}}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="pixel-font text-xs md:text-sm font-bold truncate">
+                    {pokemon.nearbyPokemon.pokemon.name} nearby!
+                  </p>
+                </div>
+                <button
+                  className={`pixel-font text-xs md:text-sm border-2 px-3 py-1.5 font-bold whitespace-nowrap touch-manipulation ${
+                    isDarkMode
+                      ? 'bg-red-700 border-gray-600 text-white'
+                      : 'bg-red-600 border-black text-white'
+                  }`}
+                  style={{
+                    boxShadow: isDarkMode
+                      ? '4px 4px 0px rgba(51,51,51,1)'
+                      : '4px 4px 0px rgba(0,0,0,1)',
+                    transform: 'translate(0, 0)',
+                    transition: 'all 0.15s ease-in-out',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  aria-label={`Battle wild ${pokemon.nearbyPokemon.pokemon.name}`}
+                  onClick={() =>
+                    startBattle(
+                      pokemon.nearbyPokemon!.pokemon,
+                      pokemon.nearbyPokemon!.spawnId
+                    )
+                  }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                    e.currentTarget.style.boxShadow = isDarkMode
+                      ? '6px 6px 0px rgba(51,51,51,1)'
+                      : '6px 6px 0px rgba(0,0,0,1)';
+                    e.currentTarget.style.backgroundColor = isDarkMode
+                      ? '#991b1b'
+                      : '#dc2626';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translate(0, 0)';
+                    e.currentTarget.style.boxShadow = isDarkMode
+                      ? '4px 4px 0px rgba(51,51,51,1)'
+                      : '4px 4px 0px rgba(0,0,0,1)';
+                    e.currentTarget.style.backgroundColor = isDarkMode
+                      ? '#b91c1c'
+                      : '#dc2626';
+                  }}
+                >
+                  Battle!
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Info / How to Play Button - Bottom Right (only in normal view) */}
+          {!inBattle && !isFullscreen && (
             <button
               onClick={() => setShowHowToPlay(true)}
               onTouchEnd={(e) => {
@@ -539,6 +777,7 @@ export function PokemonMap({
               }}
               className="absolute bottom-3 right-3 z-50 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
               title="How to play"
+              aria-label="How to play"
               style={{
                 WebkitTapHighlightColor: 'transparent',
                 backgroundColor: 'rgba(59, 130, 246, 0.9)',
@@ -583,29 +822,36 @@ export function PokemonMap({
               isFullscreen={isFullscreen}
             />
           ) : (
-            <TiledMapView
-              camera={movement.camera}
-              screenPos={movement.screenPos}
-              spritePos={movement.spritePos}
-              wildPokemon={pokemon.getVisiblePokemon(
-                movement.camera,
-                renderSize
-              )}
-              nearbyPokemon={pokemon.nearbyPokemon}
-              worldPosition={movement.worldPosition}
-              user={user}
-              collisionMapLoaded={collisionMap.collisionMapLoaded}
-              isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
-              teleportLocation={movement.teleportLocation}
-              isTeleporting={movement.isTeleporting}
-              teleportCooldown={movement.teleportCooldown}
-              viewportSize={renderSize}
-              isDarkMode={isDarkMode}
-              onStartBattle={startBattle}
-              showWorldInfo={showHowToPlay}
-              onCloseWorldInfo={() => setShowHowToPlay(false)}
-              onTeleport={movement.teleportToRandomLocation}
-            />
+            <>
+              <div
+                className={isFullscreen && !isMobile ? 'pixelated-zoom' : ''}
+                style={
+                  isFullscreen && !isMobile
+                    ? {
+                        width: '100%',
+                        height: '100%',
+                        transform: 'scale(1.25)', // zoom scale
+                        transformOrigin: 'center center',
+                      }
+                    : undefined
+                }
+              >
+                <TiledMapView
+                  camera={movement.camera}
+                  screenPos={movement.screenPos}
+                  spritePos={movement.spritePos}
+                  wildPokemon={pokemon.getVisiblePokemon(
+                    movement.camera,
+                    renderSize
+                  )}
+                  worldPosition={movement.worldPosition}
+                  collisionMapLoaded={collisionMap.collisionMapLoaded}
+                  isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
+                  viewportSize={renderSize}
+                  isDarkMode={isDarkMode}
+                />
+              </div>
+            </>
           )}
         </div>
       </GameBoy>
