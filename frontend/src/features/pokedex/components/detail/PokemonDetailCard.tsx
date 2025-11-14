@@ -14,7 +14,6 @@ import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
-import {getPokemonCost} from '@/config';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -158,7 +157,8 @@ export function PokemonDetailCard({
   const backgroundImageUrl = isOwned
     ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
-  const cost = getPokemonCost(pokemon.id);
+  // Use price from API if available, otherwise fallback to 0
+  const cost = pokemon.price ? Number(pokemon.price) : 0;
   const upgradeLevel = upgrade?.level || 1;
 
   return (

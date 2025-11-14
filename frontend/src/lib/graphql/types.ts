@@ -71,6 +71,8 @@ export interface PokedexPokemon {
   abilities?: string[] | null;
   evolution?: number[] | null;
   isOwned?: boolean;
+  bst?: number | null;
+  price?: string | null;
 }
 
 /** Faceted search metadata for filter counts */

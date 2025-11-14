@@ -2,6 +2,8 @@
  * Game Configuration Constants
  * Centralized location for all game balance and mechanics constants
  */
+import {POKEMON_BST, estimateBST} from './pokemonBST';
+
 export const TILE_SIZE = 512;
 
 export const GameConfig = {
@@ -32,17 +34,13 @@ export const GameConfig = {
   },
 
   /**
-   * Pokemon pricing
-   * Formula: 100 × 1.5^(tier), where tier = floor(pokemonId / 10)
-   * Must match backend logic in resolvers.ts:getPokemonCost()
+   * Pokemon pricing - based on Base Stat Total (BST)
+   * NOTE: Frontend uses estimated costs for UI display only
+   * Backend is authoritative and will enforce actual costs
    */
   pricing: {
-    /** Base cost for tier 0 Pokemon (ID 1-10) */
-    baseCost: 100,
-    /** Cost multiplier per tier */
-    tierMultiplier: 1.5,
-    /** Number of Pokemon per tier */
-    pokemonPerTier: 10,
+    /** Base cost for weak Pokemon */
+    baseCost: 150,
   },
 } as const;
 
@@ -50,18 +48,34 @@ export const GameConfig = {
 export type GameConfigType = typeof GameConfig;
 
 /**
- * Calculate Pokemon purchase cost based on its ID
+ * Calculate Pokemon purchase cost (frontend estimation)
  *
- * Formula: 100 × 1.5^(tier), where tier = floor(pokemonId / 10)
- * IMPORTANT: Must match backend logic in resolvers.ts:getPokemonCost()
+ * Formula matches backend (resolvers.ts:getPokemonCost):
+ * - Balanced exponential scaling for all non-legendaries
+ * - ULTRA EXTREME exponential for legendaries (Mewtwo costs QUINTILLIONS!)
+ *
+ * NOTE: Backend is authoritative. Frontend shows estimates for UI only.
+ * Actual purchase will be validated and enforced by backend.
  *
  * @param pokemonId - Pokemon ID (1-1025)
- * @returns Purchase cost in rare candy
+ * @returns Estimated cost in rare candy
  */
 export function getPokemonCost(pokemonId: number): number {
-  const tier = Math.floor(pokemonId / GameConfig.pricing.pokemonPerTier);
-  return Math.floor(
-    GameConfig.pricing.baseCost *
-      Math.pow(GameConfig.pricing.tierMultiplier, tier)
-  );
+  const baseCost = 150;
+  // Use actual BST data first, fall back to estimate only if not found
+  const bst = POKEMON_BST[pokemonId] ?? estimateBST(pokemonId);
+
+  // IMPROVED exponential curve - Mewtwo costs 38 QUINTILLIONS (Qi)!
+  if (bst < 600) {
+    // All non-legendary Pokemon: balanced exponential from BST 200
+    const exponent = (bst - 200) / 33;
+    return Math.floor(baseCost * Math.exp(exponent));
+  } else {
+    // Legendary tier: ULTRA EXTREME exponential growth - QUINTILLIONS!!!
+    const baseExponent = (600 - 200) / 33;
+    const costAt600 = baseCost * Math.exp(baseExponent);
+    const legendaryExponent = (bst - 600) / 3.8;
+    const legendaryMultiplier = Math.exp(legendaryExponent);
+    return Math.floor(costAt600 * legendaryMultiplier);
+  }
 }

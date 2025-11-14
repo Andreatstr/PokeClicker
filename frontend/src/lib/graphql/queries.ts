@@ -51,6 +51,8 @@ export const POKEDEX_QUERY = gql`
         abilities
         evolution
         isOwned
+        bst
+        price
       }
       total
       facets {

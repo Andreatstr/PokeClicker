@@ -63,11 +63,45 @@ interface PokeAPIPokemon {
       };
     };
   };
+  stats: {
+    base_stat: number;
+    stat: PokeAPIResource;
+  }[];
+}
+
+/**
+ * Calculate Base Stat Total from stats array
+ */
+function calculateBST(
+  stats: {base_stat: number; stat: PokeAPIResource}[]
+): number {
+  return stats.reduce((total, stat) => total + stat.base_stat, 0);
+}
+
+/**
+ * Calculate Pokemon purchase cost (matches backend formula in resolvers.ts)
+ */
+function calculatePokemonCost(bst: number): string {
+  const baseCost = 150;
+  let cost: number;
+
+  if (bst < 600) {
+    const exponent = (bst - 200) / 33;
+    cost = Math.floor(baseCost * Math.exp(exponent));
+  } else {
+    const baseExponent = (600 - 200) / 33;
+    const costAt600 = baseCost * Math.exp(baseExponent);
+    const legendaryExponent = (bst - 600) / 3.8;
+    const legendaryMultiplier = Math.exp(legendaryExponent);
+    cost = Math.floor(costAt600 * legendaryMultiplier);
+  }
+
+  return cost.toString();
 }
 
 /**
  * Fetches Pokemon metadata from PokéAPI
- * Extracts only the fields needed for the Pokedex browser
+ * Extracts fields needed for the Pokedex browser including BST and price
  */
 async function fetchPokemonMetadata(id: number) {
   try {
@@ -78,6 +112,8 @@ async function fetchPokemonMetadata(id: number) {
     const data = (await response.json()) as PokeAPIPokemon;
 
     const sprite = data.sprites.front_default || '';
+    const bst = calculateBST(data.stats);
+    const price = calculatePokemonCost(bst);
 
     return {
       id: data.id,
@@ -85,6 +121,8 @@ async function fetchPokemonMetadata(id: number) {
       types: data.types.map((t) => t.type.name),
       generation: getGeneration(data.id),
       sprite,
+      bst,
+      price,
     };
   } catch (error) {
     console.error(`Error fetching Pokemon ${id}:`, error);
@@ -139,6 +177,8 @@ async function seedPokemon() {
   await collection.createIndex({generation: 1});
   await collection.createIndex({types: 1});
   await collection.createIndex({id: 1}, {unique: true});
+  await collection.createIndex({bst: 1});
+  await collection.createIndex({price: 1});
 
   /**
    * Precompute static filter counts

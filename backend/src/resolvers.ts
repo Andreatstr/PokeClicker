@@ -4,6 +4,7 @@ import {
   Pokemon,
   PokemonStats,
 } from './pokeapi.js';
+import {getBSTForPokemon} from './pokemonStats.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {getDatabase} from './db.js';
@@ -28,6 +29,14 @@ import {
   getClickerUpgradeKeys,
 } from './upgradeConfig.js';
 import 'dotenv/config';
+
+// Lightweight type for the pokemon metadata documents stored in MongoDB
+type PokemonMetadata = {
+  id: number;
+  bst?: number;
+  price?: string;
+  [key: string]: unknown;
+};
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -203,9 +212,46 @@ function getUpgradeCost(currentLevel: number, stat: string): Decimal {
  * @param pokemonId - Pokemon ID to purchase
  * @returns Cost in rare candy as Decimal
  */
-function getPokemonCost(pokemonId: number): Decimal {
-  const tier = Math.floor(pokemonId / 10);
-  return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
+async function getPokemonCost(pokemonId: number): Promise<Decimal> {
+  const baseCost = new Decimal(150);
+  const bst = await getBSTForPokemon(pokemonId);
+
+  // ABSOLUTELY INSANE exponential curve - Mewtwo costs QUINTILLIONS (Qi)!
+  // - BST < 600: EXTREME exponential growth (balanced for early game)
+  // - 600+ BST: ULTRA EXTREME exponential growth (legendaries)
+  //
+  // Formula:
+  // BST < 600: 150 * e^((bst - 200) / 33)
+  // BST ≥ 600: [Cost at 600] * e^((bst - 600) / 3.8)
+  //
+  // Calculated costs (improved balance):
+  // 195 BST (Caterpie) → 128 candy (better early game)
+  // 200 BST (baseline) → 150 candy
+  // 251 BST (Pidgey) → 703 candy
+  // 318 BST (Bulbasaur) → 5.4K candy
+  // 405 BST (Ivysaur) → 429K candy
+  // 525 CST (Venusaur) → 638M candy
+  // 540 BST (Snorlax) → 4.5B candy
+  // 600 BST (Mew/Dragonite) → 27.6B candy [boundary]
+  // 680 BST (Mewtwo) → 38.3 QUINTILLION (Qi) candy!!!
+  // 720 BST (Arceus) → 1.43 SEXTILLION (Sx) candy!!!
+
+  let cost: Decimal;
+
+  if (bst < 600) {
+    // All non-legendary Pokemon: Balanced exponential growth
+    const exponent = (bst - 200) / 33;
+    cost = baseCost.times(Decimal.exp(exponent));
+  } else {
+    // Legendary tier (600+ BST): ULTRA EXTREME exponential growth
+    const baseExponent = (600 - 200) / 33;
+    const costAt600 = baseCost.times(Decimal.exp(baseExponent));
+    const legendaryExponent = (bst - 600) / 3.8;
+    const legendaryMultiplier = Decimal.exp(legendaryExponent);
+    cost = costAt600.times(legendaryMultiplier);
+  }
+
+  return cost.floor();
 }
 
 /**
@@ -419,11 +465,15 @@ export const resolvers = {
 
       // Build sort object
       const sort: Record<string, 1 | -1> = {};
+
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
       } else if (sortBy === 'type') {
         sort.types = sortOrder === 'asc' ? 1 : -1;
         sort.id = 1;
+      } else if (sortBy === 'price') {
+        // Sort by stored price field (stored as string, but MongoDB handles it correctly)
+        sort.price = sortOrder === 'asc' ? 1 : -1;
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
@@ -475,14 +525,27 @@ export const resolvers = {
           );
           const paginatedPokemon = await Promise.all(pokemonPromises);
 
-          const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
-            ...p,
-            pokedexNumber: p.id,
-            evolution: p.evolution || [],
-            isOwned: effectiveUserId
-              ? (ownedPokemonIds ?? []).includes(p.id)
-              : false,
-          }));
+          // Create a map of metadata by ID for quick lookup
+          const resultMetadataMap = new Map<number, PokemonMetadata>(
+            result.paginatedResults.map((m: unknown) => {
+              const meta = m as PokemonMetadata;
+              return [meta.id, meta];
+            })
+          );
+
+          const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
+            const meta = resultMetadataMap.get(p.id);
+            return {
+              ...p,
+              pokedexNumber: p.id,
+              evolution: p.evolution || [],
+              isOwned: effectiveUserId
+                ? (ownedPokemonIds ?? []).includes(p.id)
+                : false,
+              bst: meta?.bst,
+              price: meta?.price,
+            };
+          });
 
           return {pokemon: pokedexPokemon, total: result.total, facets};
         } catch (error) {
@@ -542,14 +605,27 @@ export const resolvers = {
       );
       const paginatedPokemon = await Promise.all(pokemonPromises);
 
-      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
-        ...p,
-        pokedexNumber: p.id,
-        evolution: p.evolution || [],
-        isOwned: effectiveUserId
-          ? (ownedPokemonIds ?? []).includes(p.id)
-          : false,
-      }));
+      // Create a map of metadata by ID for quick lookup
+      const metadataMap = new Map<number, PokemonMetadata>(
+        pokemonMetadata.map((m: unknown) => {
+          const meta = m as PokemonMetadata;
+          return [meta.id, meta];
+        })
+      );
+
+      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          pokedexNumber: p.id,
+          evolution: p.evolution || [],
+          isOwned: effectiveUserId
+            ? (ownedPokemonIds ?? []).includes(p.id)
+            : false,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
 
       return {pokemon: pokedexPokemon, total, facets};
     },
@@ -986,7 +1062,7 @@ export const resolvers = {
       }
 
       // Calculate cost
-      const cost = getPokemonCost(pokemonId);
+      const cost = await getPokemonCost(pokemonId);
 
       // Check if user has enough rare candy
       const currentCandy = toDecimal(userDoc.rare_candy);

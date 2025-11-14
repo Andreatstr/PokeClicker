@@ -8,7 +8,6 @@ import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {typeBackgroundCache} from '@/lib/typeBackgroundCache';
 import {usePokemonPurchaseHandler} from '../../hooks/usePokemonPurchaseHandler';
 import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
-import {getPokemonCost} from '@/config';
 
 interface PokemonCardProps {
   pokemon: PokedexPokemon;
@@ -62,7 +61,8 @@ export const PokemonCard = memo(function PokemonCard({
     preloadAssets();
   }, [pokemon.id, isOwned, primaryType]);
 
-  const cost = getPokemonCost(pokemon.id);
+  // Use price from API if available, otherwise fallback to '0'
+  const cost = pokemon.price ? Number(pokemon.price) : 0;
 
   const handleClick = () => {
     onClick?.(pokemon);
