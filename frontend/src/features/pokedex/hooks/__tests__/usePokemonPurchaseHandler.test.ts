@@ -36,14 +36,18 @@ vi.mock('@features/auth', () => ({
 }));
 
 vi.mock('@/lib/decimal', () => ({
-  toDecimal: (value: any) => ({
-    lt: (other: any) => {
-      const val = typeof value === 'number' ? value : parseFloat(String(value));
-      const otherVal =
-        typeof other === 'number' ? other : parseFloat(String(other));
-      return val < otherVal;
-    },
-  }),
+  toDecimal: (value: any) => {
+    const val = typeof value === 'number' ? value : parseFloat(String(value));
+    return {
+      lt: (other: any) => {
+        const otherVal =
+          typeof other === 'number' ? other : parseFloat(String(other));
+        return val < otherVal;
+      },
+      toString: () => String(val),
+      toNumber: () => val,
+    };
+  },
 }));
 
 vi.mock('@/config', () => ({

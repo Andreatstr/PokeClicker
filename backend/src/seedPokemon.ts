@@ -125,8 +125,8 @@ async function fetchPokemonMetadata(id: number) {
       generation: getGeneration(data.id),
       sprite,
       bst,
-      price,          // String for display (supports Decimal.js formatting)
-      priceNumeric,   // Number for sorting (log scale)
+      price, // String for display (supports Decimal.js formatting)
+      priceNumeric, // Number for sorting (log scale)
     };
   } catch (error) {
     console.error(`Error fetching Pokemon ${id}:`, error);
