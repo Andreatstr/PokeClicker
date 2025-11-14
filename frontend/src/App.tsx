@@ -1,3 +1,33 @@
+/**
+ * Main application component - entry point for the PokeClicker app.
+ *
+ * Architecture:
+ * - Conditional rendering for page routing (no React Router)
+ * - Lazy loading of heavy components with Suspense
+ * - Global state management via custom hooks
+ * - Centralized modal and onboarding orchestration
+ *
+ * Key features:
+ * - Multi-page navigation: Pokedex, Clicker, Map, Ranks, Profile, Login
+ * - Theme switching (dark/light mode)
+ * - Pokemon detail modal with purchase/upgrade
+ * - Interactive onboarding tutorial (20 steps)
+ * - Fullscreen mode support for map page
+ * - Background music player
+ * - Candy counter overlay
+ * - Global error display
+ *
+ * State management:
+ * - usePageNavigation: current page state
+ * - usePokemonModal: modal open/close, pokemon selection
+ * - useOnboarding: tutorial progress
+ * - useTheme: dark/light mode persistence
+ *
+ * Performance:
+ * - Lazy loaded routes reduce initial bundle size
+ * - usePreloading hook prefetches next likely page
+ * - Suspense boundaries prevent blocking renders
+ */
 import {Suspense, lazy, useState, useEffect} from 'react';
 import {
   Navbar,
@@ -16,7 +46,7 @@ import {
   useOnboarding,
 } from '@/hooks';
 
-// Lazy load heavy components
+// Lazy load heavy components to reduce initial bundle size
 const LoginScreen = lazy(() =>
   import('@features/auth').then((module) => ({default: module.LoginScreen}))
 );

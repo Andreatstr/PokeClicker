@@ -6,6 +6,10 @@ import {
   ErrorSeverity,
 } from '@/lib/errorHandler';
 
+/**
+ * Error context value shape
+ * Provides centralized error management across the application
+ */
 interface ErrorContextValue {
   errors: AppError[];
   addError: (error: unknown, context?: string) => void;
@@ -14,8 +18,13 @@ interface ErrorContextValue {
   hasErrors: boolean;
 }
 
-// ErrorContext - Export for use in hooks only
-// Use the useError hook from @/hooks/useError instead of consuming directly
+/**
+ * Global error context for application-wide error handling
+ *
+ * @remarks
+ * This context should not be consumed directly. Use the useError hook from @/hooks/useError instead.
+ * Provides a centralized error queue with automatic dismissal for non-critical errors.
+ */
 export const ErrorContext = createContext<ErrorContextValue | undefined>(
   undefined
 );
@@ -25,7 +34,23 @@ interface ErrorProviderProps {
   maxErrors?: number;
 }
 
-// ErrorProvider - Wrap your app with this to provide error handling
+/**
+ * Error provider component that manages application-wide error state
+ *
+ * @param children - Child components to wrap
+ * @param maxErrors - Maximum number of errors to keep in queue (default: 5)
+ *
+ * @remarks
+ * Features:
+ * - Maintains a FIFO queue of recent errors
+ * - Auto-dismisses INFO and WARNING errors after 5 seconds
+ * - Processes raw errors through the error handler utility
+ * - Keeps only the most recent errors to prevent memory issues
+ *
+ * Usage:
+ * Wrap your app root with this provider to enable global error handling.
+ * Access errors via the useError hook.
+ */
 export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
   const [errors, setErrors] = useState<AppError[]>([]);
 
@@ -38,21 +63,21 @@ export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
       const appError = handleErrorUtil(error, context);
 
       setErrors((prevErrors) => {
-        // Add new error at the beginning
+        // Add new error at the beginning for most-recent-first ordering
         const newErrors = [appError, ...prevErrors];
 
-        // Keep only the most recent errors up to maxErrors
+        // Keep only the most recent errors up to maxErrors to prevent unbounded growth
         return newErrors.slice(0, maxErrors);
       });
 
-      // Auto-dismiss non-critical errors after a delay
+      // Auto-dismiss non-critical errors to avoid cluttering the UI
       if (
         appError.severity === ErrorSeverity.INFO ||
         appError.severity === ErrorSeverity.WARNING
       ) {
         setTimeout(() => {
           removeError(appError.id);
-        }, 5000); // 5 seconds for info/warning
+        }, 5000);
       }
     },
     [maxErrors, removeError]
