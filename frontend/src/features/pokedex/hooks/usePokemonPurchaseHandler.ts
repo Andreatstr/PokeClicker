@@ -57,27 +57,39 @@ export function usePokemonPurchaseHandler() {
         variables: {pokemonId},
       });
 
-      // Update AuthContext with the server response
-      // Apollo optimistic response already updated the UI immediately
+      // Check for GraphQL errors first (Apollo's errorPolicy: 'all' returns both data and errors)
+      // This handles cases where server rejects the purchase (e.g., not enough candy)
+      if (result.errors && result.errors.length > 0) {
+        const errorMessage =
+          result.errors[0]?.message || 'Failed to purchase Pokémon';
+        setError(errorMessage);
+        errorTimeoutRef.current = setTimeout(() => {
+          setError(null);
+          errorTimeoutRef.current = null;
+        }, GameConfig.purchase.errorDisplayDuration);
+        return; // Don't show success or update UI if there are errors
+      }
+
+      // Only proceed if there are no errors and server confirmed the purchase
       if (result.data?.purchasePokemon) {
         updateUser(result.data.purchasePokemon);
+
+        // Show success toast notification only after server confirmation
+        if (pokemonName) {
+          const capitalizedName =
+            pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
+          addSuccess(`Successfully bought ${capitalizedName}!`);
+        }
+
+        onSuccess?.(pokemonId);
+
+        // Trigger animation after successful purchase
+        setIsAnimating(true);
+        setTimeout(
+          () => setIsAnimating(false),
+          GameConfig.purchase.successAnimationDuration
+        );
       }
-
-      // Show success toast notification
-      if (pokemonName) {
-        const capitalizedName =
-          pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
-        addSuccess(`Successfully bought ${capitalizedName}!`);
-      }
-
-      onSuccess?.(pokemonId);
-
-      // Trigger animation after successful purchase
-      setIsAnimating(true);
-      setTimeout(
-        () => setIsAnimating(false),
-        GameConfig.purchase.successAnimationDuration
-      );
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
