@@ -1,3 +1,11 @@
+/**
+ * Database health check and inspection utility
+ *
+ * Displays all users and their game progress
+ * Useful for debugging and verifying database state
+ *
+ * Run with: npm run check-db
+ */
 import {connectToDatabase, closeDatabaseConnection} from './db.js';
 import {Collection} from 'mongodb';
 import {UserDocument} from './types.js';

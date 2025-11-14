@@ -1,7 +1,11 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required but not set');
+}
 
 export interface JWTPayload {
   id: string;
@@ -33,12 +37,9 @@ export function authenticateToken(authHeader?: string): JWTPayload | undefined {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     return decoded;
-  } catch (error) {
-    // Token is invalid or expired
-    console.error(
-      'JWT verification failed:',
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+  } catch {
+    // Token is invalid or expired - silently return undefined
+    // Error details are logged at the GraphQL resolver level if needed
     return undefined;
   }
 }
