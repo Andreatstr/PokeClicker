@@ -15,6 +15,27 @@ interface CollisionMapState {
   isPositionSemiWalkable: (x: number, y: number) => boolean;
 }
 
+/**
+ * Hook managing collision detection system for map walkability
+ *
+ * Features:
+ * - Loads collision map image (webp) and extracts pixel data
+ * - Downscales by 4x for mobile memory efficiency (2640x1520 instead of 10560x6080)
+ * - Color-coded collision system:
+ *   - Magenta (255,0,255): Walkable areas
+ *   - Cyan (0,255,255): Semi-walkable (caves/houses with transparency)
+ *   - Other colors: Non-walkable obstacles
+ * - 3x3 neighborhood sampling for robust collision detection after scaling
+ * - Off-main-thread image decoding for better performance
+ * - Idle callback for pixel extraction to avoid blocking UI
+ *
+ * Performance optimizations:
+ * - Nearest-neighbor scaling to preserve crisp binary collision data
+ * - Ref-based storage for collision data to avoid re-renders
+ * - Color tolerance (±30) to handle compression artifacts
+ *
+ * @returns Collision state and position checking functions
+ */
 export function useCollisionMap(): CollisionMapState {
   const collisionPixelsRef = useRef<Uint8ClampedArray | null>(null);
   const [collisionMapLoaded, setCollisionMapLoaded] = useState(false);
@@ -96,7 +117,11 @@ export function useCollisionMap(): CollisionMapState {
     };
   }, []);
 
-  // Check if a position is walkable (magenta pixel on collision map)
+  /**
+   * Check if a world position is walkable
+   * Returns true for magenta or cyan pixels (with tolerance for compression)
+   * Uses 3x3 neighborhood sampling for robust detection after downscaling
+   */
   const isPositionWalkable = useCallback(
     (x: number, y: number): boolean => {
       if (!collisionPixelsRef.current || !collisionMapLoaded) {

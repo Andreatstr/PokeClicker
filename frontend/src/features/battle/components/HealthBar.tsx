@@ -6,6 +6,20 @@ interface HealthBarProps {
   isDarkMode?: boolean;
 }
 
+/**
+ * Animated health bar for battle screens.
+ *
+ * Features:
+ * - Color-coded health (green > 50%, yellow > 20%, red <= 20%)
+ * - Smooth transition animations on HP change
+ * - Text shadow outline for readability on any background
+ * - Flips text alignment based on player/opponent side
+ *
+ * Accessibility:
+ * - role="progressbar" with aria-valuenow/min/max
+ * - Readable HP text below bar
+ * - High contrast text with white outline
+ */
 export function HealthBar({
   current,
   max,

@@ -1,3 +1,30 @@
+/**
+ * Main Pokedex page component with browsing and filtering.
+ *
+ * Features:
+ * - Search Pokemon by name
+ * - Filter by region, type, owned status
+ * - Sort by ID, name, or type
+ * - Pagination (20 items per page)
+ * - Lazy-loaded filter UI for performance
+ * - Click Pokemon to view details/purchase/upgrade
+ *
+ * State management:
+ * - usePokedexFilters: centralized filter state
+ * - usePokedexQuery: GraphQL data fetching with filters
+ * - Debounced search (300ms delay)
+ * - Auto-scroll to top on page change
+ *
+ * Performance optimizations:
+ * - Lazy load SearchBar and FiltersAndCount
+ * - Memoized page change handler
+ * - Suspense boundaries for smooth loading
+ * - Server-side pagination (except unowned filter)
+ *
+ * Special handling:
+ * - "Unowned" filter fetches all Pokemon then filters client-side
+ *   (necessary because backend paginates before applying ownership filter)
+ */
 import {useEffect, Suspense, lazy, useCallback, useState} from 'react';
 import {useAuth} from '@features/auth';
 import {
@@ -19,7 +46,7 @@ const ME_QUERY = gql`
   }
 `;
 
-// Lazy load the heavy Pokedex components
+// Lazy load the heavy Pokedex components to reduce initial bundle
 const SearchBar = lazy(() =>
   import('@features/pokedex').then((module) => ({default: module.SearchBar}))
 );

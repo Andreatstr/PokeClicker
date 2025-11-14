@@ -1,3 +1,38 @@
+/**
+ * Interactive Pokemon world map with exploration and battles.
+ *
+ * Features:
+ * - Tiled map rendering with Phaser-like movement
+ * - WASD/Arrow key controls + on-screen joystick (mobile)
+ * - Wild Pokemon spawning and encounters
+ * - Real-time collision detection
+ * - Battle system integration
+ * - Fullscreen mode support
+ * - GameBoy-style wrapper interface
+ *
+ * Map mechanics:
+ * - Player moves tile-by-tile on key/joystick input
+ * - Collisions with walls/objects prevent movement
+ * - Wild Pokemon spawn randomly on grass tiles
+ * - Walking into Pokemon triggers battle
+ * - Victory rewards candy + catches Pokemon
+ *
+ * State management:
+ * - useMapMovement: player position, velocity, collision handling
+ * - usePokemonSpawning: wild Pokemon placement and encounters
+ * - useCollisionMap: collision layer data from tilemap
+ * - Player's favorite Pokemon used for battles
+ *
+ * Fullscreen:
+ * - Can enter/exit fullscreen mode
+ * - Hides global navbar and candy counter when fullscreen
+ * - Responsive viewport sizing (default 720x405, 16:9 aspect)
+ *
+ * Accessibility:
+ * - Keyboard navigation (WASD/arrows)
+ * - Touch controls for mobile
+ * - Focus indicators on controls
+ */
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
@@ -109,7 +144,7 @@ export function PokemonMap({
 
   // Custom hooks for game logic
   const collisionMap = useCollisionMap();
-  const movement = useMapMovement(collisionMap, renderSize);
+  const movement = useMapMovement(collisionMap, renderSize, inBattle);
   const pokemon = usePokemonSpawning(collisionMap, movement.worldPosition);
 
   // Responsive viewport calculation
@@ -593,7 +628,6 @@ export function PokemonMap({
               )}
               nearbyPokemon={pokemon.nearbyPokemon}
               worldPosition={movement.worldPosition}
-              user={user}
               collisionMapLoaded={collisionMap.collisionMapLoaded}
               isPositionSemiWalkable={collisionMap.isPositionSemiWalkable}
               teleportLocation={movement.teleportLocation}

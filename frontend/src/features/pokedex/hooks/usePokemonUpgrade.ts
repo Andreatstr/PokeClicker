@@ -11,6 +11,11 @@ import {
 // Re-export type for convenience
 export type {PokemonUpgrade};
 
+/**
+ * Hook for querying user's Pokemon upgrade level
+ * Returns upgrade data for a specific Pokemon ID
+ * Used to display current upgrade level and calculate upgrade costs
+ */
 export function usePokemonUpgrade(pokemonId: number | null) {
   const {data, loading, error, refetch} = useQuery<
     PokemonUpgradeData,
@@ -28,6 +33,11 @@ export function usePokemonUpgrade(pokemonId: number | null) {
   };
 }
 
+/**
+ * Hook for upgrading Pokemon mutation
+ * Increases Pokemon's upgrade level by 1, adding +1 to all stats
+ * Consumes Rare Candy based on exponential cost formula
+ */
 export function useUpgradePokemonMutation() {
   const [upgradePokemon, {loading, error}] = useMutation<UpgradePokemonData>(
     UPGRADE_POKEMON_MUTATION

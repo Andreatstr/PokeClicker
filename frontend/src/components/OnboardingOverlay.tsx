@@ -1,3 +1,27 @@
+/**
+ * Interactive onboarding overlay that guides new users through app features.
+ *
+ * Features:
+ * - 20-step tutorial covering all major features
+ * - Auto-scrolling and highlighting of target elements
+ * - Mobile-friendly: handles burger menu, viewport scrolling
+ * - Smart positioning: popup avoids viewport edges, arrow points to target
+ * - Page navigation: auto-navigates between pages for cross-page tours
+ * - Modal integration: opens Pokemon detail modal for relevant steps
+ * - Skip/Back navigation with state management
+ *
+ * State management:
+ * - Polls for target elements with timeout/retry logic
+ * - Tracks rect changes during scroll/resize for repositioning
+ * - Auto-skips steps if target unavailable (e.g., locked Pokemon card)
+ * - Handles mobile menu open/close for nav button steps
+ *
+ * Accessibility:
+ * - Focus trap keeps keyboard users within onboarding popup
+ * - ARIA dialog with labelledby/describedby
+ * - Spotlight overlay with pulsing yellow border
+ * - Backdrop prevents interaction with other elements during tour
+ */
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {FocusTrap} from 'focus-trap-react';

@@ -1,3 +1,32 @@
+/**
+ * Main clicker game component with GameBoy-style interface.
+ *
+ * Features:
+ * - Click to earn rare candy (attack + spAttack*0.5 per click)
+ * - Passive income system (autoclicker based on autoclicker stat)
+ * - 10 upgradeable stats with exponential costs
+ * - Real-time candy sync with backend
+ * - Asset preloading for smooth animations
+ * - Selected Pokemon display
+ *
+ * Game mechanics:
+ * - Click power: base attack + spAttack bonus
+ * - Autoclicker: generates candy per second
+ * - Lucky hit: chance for multiplied rewards
+ * - Click multiplier: amplifies all clicks
+ * - Pokedex bonus: bonus per owned Pokemon
+ *
+ * State management:
+ * - Local candy optimistic updates for responsiveness
+ * - Periodic backend sync to persist progress
+ * - Stats synced from user.stats in auth context
+ *
+ * Integration:
+ * - useGameMutations: GraphQL mutations for upgrades
+ * - useCandySync: local/remote candy synchronization
+ * - useAutoclicker: passive income generation
+ * - useClickerActions: click handling and upgrade logic
+ */
 import {useState, useEffect} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';

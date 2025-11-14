@@ -8,6 +8,21 @@ import {
 } from '@/lib/graphql';
 import {logger} from '@/lib/logger';
 
+/**
+ * Hook providing clicker game mutations for currency and stat management
+ *
+ * Features:
+ * - updateRareCandy: Updates user's Rare Candy balance (earned from clicking/passive income)
+ * - upgradeStat: Upgrades a specific stat (hp, attack, defense, etc.) using Rare Candy
+ * - Callbacks for updating local auth context after mutations complete
+ * - Combined loading and error states for both mutations
+ *
+ * Usage:
+ * - updateRareCandy called frequently to sync clicker state with server
+ * - upgradeStat called when user purchases stat upgrades in clicker UI
+ *
+ * @returns Mutation functions, loading state, and error state
+ */
 export function useGameMutations() {
   const [updateRareCandyMutation, {loading: updatingCandy, error: candyError}] =
     useMutation<UpdateRareCandyData>(UPDATE_RARE_CANDY_MUTATION);

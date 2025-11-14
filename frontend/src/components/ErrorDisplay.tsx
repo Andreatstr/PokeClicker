@@ -1,6 +1,21 @@
 import {useError} from '@/hooks/useError';
 import {ErrorSeverity} from '@/lib/errorHandler';
 
+/**
+ * Global error display component with toast-style notifications.
+ *
+ * Features:
+ * - Displays multiple errors stacked vertically
+ * - Color-coded by severity (info, warning, error, critical)
+ * - Dismissible with close button
+ * - Auto-animates slide-in from right
+ * - Retro pixel-art styling with shadow borders
+ *
+ * Accessibility:
+ * - role="alert" with aria-live="assertive" for screen readers
+ * - Distinct icons for each severity level
+ * - Error codes displayed for debugging
+ */
 export function ErrorDisplay() {
   const {errors, removeError} = useError();
 

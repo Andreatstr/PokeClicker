@@ -1,3 +1,31 @@
+/**
+ * Global leaderboards page showing top trainers.
+ *
+ * Features:
+ * - Two leagues: Candy (most rare candy) and Pokemon (most caught)
+ * - Tabbed interface to switch between leagues
+ * - Top 10 rankings by default (expandable to top 100)
+ * - Auto-refresh every 60 seconds
+ * - Manual refresh with 10-second cooldown
+ * - Opt-in checkbox for appearing in ranks
+ * - Current user's rank highlighted
+ *
+ * State management:
+ * - GraphQL query with polling for live updates
+ * - Stops polling on unmount to prevent memory leaks
+ * - Refresh cooldown timer to prevent spam
+ * - League tab state (candy vs pokemon)
+ *
+ * Ranks data:
+ * - Sorted descending by rare_candy or pokemon_count
+ * - Shows username, rank position, and stat value
+ * - Current user highlighted with different styling
+ *
+ * Accessibility:
+ * - data-onboarding="league-buttons" for tutorial targeting
+ * - Loading spinner with descriptive text
+ * - Error states displayed to user
+ */
 import {useEffect, useState} from 'react';
 import {useQuery, useMutation} from '@apollo/client';
 import {GET_RANKS, UPDATE_RANKS_PREFERENCE} from '@/lib/graphql';

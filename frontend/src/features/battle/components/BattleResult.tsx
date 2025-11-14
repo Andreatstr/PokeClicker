@@ -1,3 +1,24 @@
+/**
+ * Battle result screen showing victory/defeat and rewards.
+ *
+ * Features:
+ * - Victory: displays rare candy rewards and Pokemon caught
+ * - Defeat: shows encouraging message
+ * - 3-second countdown before continue button appears
+ * - Battle stats display (click count)
+ * - Responsive mobile and desktop layouts
+ *
+ * Visual design:
+ * - Victory: yellow/gold theme
+ * - Defeat: red theme
+ * - Pokemon sprite display
+ * - Rare candy icon with formatted reward amount
+ *
+ * Accessibility:
+ * - Proper semantic HTML (section, article, figure, dl)
+ * - aria-labelledby for screen readers
+ * - Auto-countdown prevents accidental skips
+ */
 import type {PokedexPokemon} from '@features/pokedex';
 import {Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';

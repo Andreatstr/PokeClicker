@@ -11,6 +11,22 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
+/**
+ * Main navigation bar component with responsive design.
+ *
+ * Features:
+ * - Desktop: Horizontal nav with all options visible
+ * - Mobile: Hamburger menu with dropdown navigation
+ * - Onboarding support: data-onboarding attributes for tutorial system
+ * - Theme toggle: Dark/light mode switching
+ * - Authentication: Shows user profile or login button
+ *
+ * Accessibility:
+ * - ARIA labels for all interactive elements
+ * - Keyboard navigation with Tab and Enter/Space
+ * - Proper landmark roles (header, nav)
+ * - Min touch target size of 44x44px
+ */
 export function Navbar({
   currentPage,
   onPageChange,
@@ -20,7 +36,7 @@ export function Navbar({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {isAuthenticated, user} = useAuth();
 
-  // Close mobile menu when page changes
+  // Close mobile menu when page changes to prevent navigation confusion
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [currentPage]);

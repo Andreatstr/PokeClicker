@@ -1,3 +1,33 @@
+/**
+ * Login and signup screen with modal-based forms.
+ *
+ * Features:
+ * - Landing page with hero section
+ * - Modal-based login/signup forms
+ * - Form validation with react-hook-form
+ * - GraphQL mutations for auth
+ * - Auto-redirect to Pokedex on success
+ * - Mobile-responsive layout
+ *
+ * Authentication flow:
+ * 1. User clicks Login or Sign Up button
+ * 2. Modal opens with appropriate form
+ * 3. Form validates input (username 3+ chars, password 6+ chars)
+ * 4. Mutation sent to backend
+ * 5. On success: token stored, user context updated, redirect to Pokedex
+ * 6. On error: error message displayed
+ *
+ * State management:
+ * - modalType: null | 'login' | 'signup'
+ * - useAuth: provides login function to set auth context
+ * - Form state managed by react-hook-form
+ *
+ * Accessibility:
+ * - Form labels with htmlFor
+ * - Error messages with appropriate styling
+ * - Loading states disable buttons
+ * - Keyboard-accessible modals
+ */
 import {useState, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {useMutation} from '@apollo/client';

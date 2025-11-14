@@ -3,6 +3,20 @@ import {useAuth} from '@features/auth';
 import {formatNumber} from '@/lib/formatNumber';
 import {subscribeToCandyUpdates} from '@/lib/candyEvents';
 
+/**
+ * Floating overlay that displays the user's current Rare Candy balance.
+ *
+ * Features:
+ * - Real-time candy updates via event subscription
+ * - Configurable position (bottom-left, bottom-right, top-right)
+ * - Number formatting for large values
+ * - Pointer-events disabled to prevent click blocking
+ *
+ * State management:
+ * - Syncs with user.rare_candy from auth context
+ * - Subscribes to candyEvents for immediate updates without re-renders
+ * - Initializes from user data on mount
+ */
 export function CandyCounterOverlay({
   position = 'bottom-right',
   strategy = 'fixed',
@@ -12,15 +26,18 @@ export function CandyCounterOverlay({
 }) {
   const {user} = useAuth();
 
+  // Store display value as string to prevent precision loss with large numbers
   const [displayCandy, setDisplayCandy] = useState<string>(() =>
     user?.rare_candy !== undefined ? String(user.rare_candy) : '0'
   );
 
+  // Sync with user context changes
   useEffect(() => {
     if (user?.rare_candy === undefined || user.rare_candy === null) return;
     setDisplayCandy(String(user.rare_candy));
   }, [user?.rare_candy]);
 
+  // Subscribe to real-time candy update events from clicker/battle systems
   useEffect(() => {
     const unsubscribe = subscribeToCandyUpdates((amount) => {
       setDisplayCandy(amount);
