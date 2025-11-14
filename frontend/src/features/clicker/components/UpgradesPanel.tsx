@@ -14,6 +14,7 @@ interface UpgradesPanelProps {
   isAuthenticated: boolean;
   onUpgrade: (stat: keyof UserStats) => void;
   ownedPokemonCount?: number;
+  onShowHelp?: () => void;
 }
 
 type UpgradeKey =
@@ -56,6 +57,7 @@ export function UpgradesPanel({
   isAuthenticated,
   onUpgrade,
   ownedPokemonCount = 0,
+  onShowHelp,
 }: UpgradesPanelProps) {
   return (
     <Card
@@ -72,7 +74,7 @@ export function UpgradesPanel({
       }}
     >
       <header
-        className="border-2 p-3 mb-4 shadow-inner"
+        className="border-2 p-3 mb-4 shadow-inner flex items-center justify-between gap-2"
         style={{
           background: isDarkMode
             ? 'linear-gradient(to right, #dc2626, #ea580c, #ca8a04)'
@@ -81,11 +83,52 @@ export function UpgradesPanel({
         }}
       >
         <h2
-          className="pixel-font text-base font-bold text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]"
+          className="pixel-font text-base font-bold text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] flex-1"
           style={{color: 'white'}}
         >
           POKEMON UPGRADES
         </h2>
+        {onShowHelp && (
+          <button
+            onClick={onShowHelp}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              onShowHelp();
+            }}
+            className="flex items-center justify-center border-2 border-black w-11 h-11 touch-manipulation flex-shrink-0"
+            title="Upgrade guide"
+            aria-label="Show upgrade guide"
+            style={{
+              WebkitTapHighlightColor: 'transparent',
+              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+              transform: 'translate(0, 0)',
+              transition: 'all 0.15s ease-in-out',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+            }}
+          >
+            <svg
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="w-5 h-5 text-white"
+            >
+              <path
+                d="M3 3h2v18H3V3zm16 0H5v2h14v14H5v2h16V3h-2zm-8 6h2V7h-2v2zm2 8h-2v-6h2v6z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
       </header>
       <section className="flex flex-col gap-3">
         {stats &&

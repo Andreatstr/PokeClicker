@@ -39,6 +39,7 @@ import {GameBoyConsole} from './GameBoyConsole';
 import {UpgradesPanel} from './UpgradesPanel';
 import {UnauthenticatedMessage} from './UnauthenticatedMessage';
 import {ErrorBanner} from '@/components';
+import {ClickerHelpModal} from './ClickerHelpModal';
 
 interface PokeClickerProps {
   isDarkMode?: boolean;
@@ -51,6 +52,7 @@ export function PokeClicker({
 }: PokeClickerProps) {
   const {user, isAuthenticated, updateUser} = useAuth();
   const {upgradeStat, loading} = useGameMutations();
+  const [showHelp, setShowHelp] = useState(false);
 
   const [stats, setStats] = useState(
     user?.stats || {
@@ -130,38 +132,47 @@ export function PokeClicker({
   }, [user]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
-      {displayError && (
-        <ErrorBanner
-          message={displayError}
-          onDismiss={() => setDisplayError(null)}
-          isDarkMode={isDarkMode}
-        />
-      )}
-
-      {!isAuthenticated && <UnauthenticatedMessage />}
-
-      <GameBoyConsole
+    <>
+      <ClickerHelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
         isDarkMode={isDarkMode}
-        isAuthenticated={isAuthenticated}
-        isAnimating={isAnimating}
-        candies={candies}
-        selectedPokemonId={user?.selected_pokemon_id || null}
-        onClickScreen={handleClick}
-        isOnboarding={isOnboarding}
       />
 
-      <div className="flex flex-col gap-6 w-full max-w-md lg:max-w-lg">
-        <UpgradesPanel
+      <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
+        {displayError && (
+          <ErrorBanner
+            message={displayError}
+            onDismiss={() => setDisplayError(null)}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
+        {!isAuthenticated && <UnauthenticatedMessage />}
+
+        <GameBoyConsole
           isDarkMode={isDarkMode}
-          stats={stats}
-          currentCandy={localRareCandy}
-          isLoading={loading}
           isAuthenticated={isAuthenticated}
-          onUpgrade={handleUpgrade}
-          ownedPokemonCount={user?.owned_pokemon_ids?.length || 0}
+          isAnimating={isAnimating}
+          candies={candies}
+          selectedPokemonId={user?.selected_pokemon_id || null}
+          onClickScreen={handleClick}
+          isOnboarding={isOnboarding}
         />
+
+        <div className="flex flex-col gap-6 w-full max-w-md lg:max-w-lg">
+          <UpgradesPanel
+            isDarkMode={isDarkMode}
+            stats={stats}
+            currentCandy={localRareCandy}
+            isLoading={loading}
+            isAuthenticated={isAuthenticated}
+            onUpgrade={handleUpgrade}
+            ownedPokemonCount={user?.owned_pokemon_ids?.length || 0}
+            onShowHelp={() => setShowHelp(true)}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

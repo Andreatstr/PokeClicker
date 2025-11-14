@@ -635,7 +635,7 @@ export function useMapMovement(
 
   // Calculate camera offset to center character in viewport
   const getCameraOffset = useCallback(() => {
-    // Try to center character in viewport
+    // Center camera on character
     let cameraX = worldPosition.x - renderSize.width / 2;
     let cameraY = worldPosition.y - renderSize.height / 2;
 
@@ -691,7 +691,7 @@ export function useMapMovement(
       return;
     }
 
-    // Start teleporting state
+    // Start teleporting state (shows loading indicator)
     setIsTeleporting(true);
 
     // Get random teleport point excluding the last teleported location
@@ -715,49 +715,53 @@ export function useMapMovement(
       setLastTeleportIndex(chosenIndex);
     }
 
-    setWorldPosition(walkablePosition);
-    setIsMoving(false);
-    setDirection('down');
-    setAnimationFrame(0);
-    keysPressed.current.clear();
-
-    // Wait a moment for tiles to load, then show notification
+    // Wait a moment, then change position and allow tiles to fully load
     setTimeout(() => {
-      setIsTeleporting(false);
+      // Now change the position (triggers tile loading)
+      setWorldPosition(walkablePosition);
+      setIsMoving(false);
+      setDirection('down');
+      setAnimationFrame(0);
+      keysPressed.current.clear();
 
-      // Show teleport notification
-      if (chosenPoint) {
-        setTeleportLocation(chosenPoint.name);
-        logger.info(`[MapMovement] Teleported to ${chosenPoint.name}`);
+      // Wait longer for tiles to load with full quality, then complete teleport
+      setTimeout(() => {
+        setIsTeleporting(false);
 
-        // Clear notification after 3 seconds
-        setTimeout(() => {
-          setTeleportLocation(null);
-        }, 3000);
-      }
+        // Show teleport notification
+        if (chosenPoint) {
+          setTeleportLocation(chosenPoint.name);
+          logger.info(`[MapMovement] Teleported to ${chosenPoint.name}`);
 
-      // Start 3-second cooldown AFTER teleportation is complete
-      setTeleportCooldown(3);
+          // Clear notification after 3 seconds
+          setTimeout(() => {
+            setTeleportLocation(null);
+          }, 3000);
+        }
 
-      // Clear any existing cooldown interval
-      if (teleportCooldownIntervalRef.current) {
-        clearInterval(teleportCooldownIntervalRef.current);
-      }
+        // Start 3-second cooldown AFTER teleportation is complete
+        setTeleportCooldown(3);
 
-      // Countdown interval
-      teleportCooldownIntervalRef.current = window.setInterval(() => {
-        setTeleportCooldown((prev) => {
-          if (prev <= 1) {
-            if (teleportCooldownIntervalRef.current) {
-              clearInterval(teleportCooldownIntervalRef.current);
-              teleportCooldownIntervalRef.current = null;
+        // Clear any existing cooldown interval
+        if (teleportCooldownIntervalRef.current) {
+          clearInterval(teleportCooldownIntervalRef.current);
+        }
+
+        // Countdown interval
+        teleportCooldownIntervalRef.current = window.setInterval(() => {
+          setTeleportCooldown((prev) => {
+            if (prev <= 1) {
+              if (teleportCooldownIntervalRef.current) {
+                clearInterval(teleportCooldownIntervalRef.current);
+                teleportCooldownIntervalRef.current = null;
+              }
+              return 0;
             }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }, 500); // Wait 500ms for tiles to load
+            return prev - 1;
+          });
+        }, 1000);
+      }, 1200); // Wait 1.2 seconds for tiles to load with full quality
+    }, 150); // Small delay before position change
   }, [
     teleportCooldown,
     collisionChecker.collisionMapLoaded,
