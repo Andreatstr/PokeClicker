@@ -1,5 +1,14 @@
+/**
+ * Calculates optimal text color (black or white) for a given background color
+ *
+ * Uses WCAG relative luminance formula to ensure proper contrast.
+ * Implements proper sRGB color space conversion for accurate luminance calculation.
+ *
+ * @param bgColor - Tailwind CSS background color class (e.g., 'bg-red-500')
+ * @returns Tailwind text color class ('text-white' or 'text-black')
+ */
 export function getContrastColor(bgColor: string): string {
-  // Map Tailwind color classes to their hex values
+  // Map Tailwind color classes to their hex values for luminance calculation
   const colorMap: Record<string, string> = {
     'bg-gray-400': '#9ca3af',
     'bg-gray-500': '#6b7280',
@@ -67,27 +76,36 @@ export function getContrastColor(bgColor: string): string {
 
   const hex = colorMap[bgColor] || '#000000';
 
-  // Convert hex to RGB
+  // Convert hex to RGB components
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
 
-  // Calculate relative luminance using proper sRGB formula
+  // Calculate relative luminance using proper sRGB formula (WCAG 2.0 standard)
   const toLinear = (c: number) => {
     const val = c / 255;
+    // Apply gamma correction for sRGB color space
     return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   };
 
+  // Weighted sum based on human perception (green most visible, blue least)
   const luminance =
     0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 
+  // Calculate contrast ratios with white and black text
   const contrastWithWhite = (1 + 0.05) / (luminance + 0.05);
   const contrastWithBlack = (luminance + 0.05) / (0 + 0.05);
 
-  // Return black for light backgrounds (luminance > 0.5 gives better contrast), white for dark
+  // Return color with better contrast ratio
   return contrastWithWhite >= contrastWithBlack ? 'text-white' : 'text-black';
 }
 
+/**
+ * Returns color scheme for stat bars in Pokemon detail views
+ *
+ * Each stat has a base color (lighter) and upgrade color (darker).
+ * Colors follow traditional Pokemon stat color associations.
+ */
 export function getStatBarColors() {
   return {
     hp: {color: 'bg-red-300', upgradeColor: 'bg-red-600'},
@@ -99,6 +117,12 @@ export function getStatBarColors() {
   };
 }
 
+/**
+ * Returns color scheme for unknown/unowned Pokemon cards
+ *
+ * @param isDarkMode - Whether dark mode is active
+ * @returns Object with badge, cardBg, cardBorder, and shadow colors
+ */
 export function getUnknownPokemonColors(isDarkMode: boolean) {
   return isDarkMode
     ? {
@@ -115,6 +139,16 @@ export function getUnknownPokemonColors(isDarkMode: boolean) {
       };
 }
 
+/**
+ * Returns complete color scheme for a Pokemon type
+ *
+ * Provides badge, card background, border, and shadow colors that adapt to dark mode.
+ * Each type has distinct colors matching official Pokemon styling.
+ *
+ * @param type - Pokemon type (fire, water, grass, etc.)
+ * @param isDarkMode - Whether dark mode is active
+ * @returns Object with badge, cardBg, cardBorder, and shadow colors
+ */
 export function getTypeColors(type: string, isDarkMode: boolean = false) {
   const lightModeColors: Record<
     string,
@@ -345,5 +379,6 @@ export function getTypeColors(type: string, isDarkMode: boolean = false) {
   };
 
   const colorMap = isDarkMode ? darkModeColors : lightModeColors;
+  // Fallback to normal type colors if type not found
   return colorMap[type] || colorMap.normal;
 }

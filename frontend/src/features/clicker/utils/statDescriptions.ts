@@ -12,6 +12,19 @@ interface StatDescription {
   unit: string;
 }
 
+/**
+ * Generates user-friendly descriptions of stat effects for upgrade tooltips
+ *
+ * Calculates current and next level values for display, with special handling for:
+ * - clickPower: Shows actual candy per click (with dynamic precision)
+ * - pokedexBonus: Displays as percentage bonus (e.g., 50% instead of 1.5x)
+ * - clickMultiplier: Converts to percentage (e.g., 1% instead of 0.01x)
+ *
+ * @param stat - Stat identifier (clickPower, pokedexBonus, etc.)
+ * @param stats - User's current stat levels
+ * @param ownedPokemonCount - Number of Pokemon owned (affects pokedexBonus calculation)
+ * @returns Stat description object or error string
+ */
 export function getStatDescription(
   stat: string,
   stats: UserStats,
@@ -25,6 +38,7 @@ export function getStatDescription(
 
   const currentLevel = (stats as unknown as Record<string, number>)[stat] || 1;
 
+  // Special handling for clickPower - show actual candy per click value
   if (stat === 'clickPower') {
     const currentCandy = parseFloat(
       calculateBaseCandyPerClick(stats, ownedPokemonCount)
@@ -35,6 +49,7 @@ export function getStatDescription(
       calculateBaseCandyPerClick(nextLevelStats, ownedPokemonCount)
     );
 
+    // Use 2 decimal places for small values, 1 decimal for larger values
     const currentRounded =
       currentCandy < 10
         ? parseFloat(currentCandy.toFixed(2))
@@ -50,7 +65,7 @@ export function getStatDescription(
     };
   }
 
-  // Special handling for pokedexBonus - show total multiplier based on owned pokemon
+  // Special handling for pokedexBonus - show as percentage bonus
   if (stat === 'pokedexBonus') {
     const current = config.formula(currentLevel, {
       pokemonCount: ownedPokemonCount,
@@ -70,6 +85,7 @@ export function getStatDescription(
     };
   }
 
+  // Generic stat calculation for all other stats
   const current = config.formula(currentLevel, {
     pokemonCount: ownedPokemonCount,
   });
@@ -80,6 +96,7 @@ export function getStatDescription(
   let currentDisplay = current;
   let nextDisplay = next;
 
+  // Convert clickMultiplier to percentage for better UX
   if (stat === 'clickMultiplier') {
     currentDisplay = current * 100;
     nextDisplay = next * 100;
@@ -92,6 +109,15 @@ export function getStatDescription(
   };
 }
 
+/**
+ * Calculates the cost to upgrade a stat to the next level
+ *
+ * Wraps the upgrade cost in Decimal for consistent large number handling.
+ *
+ * @param stat - Stat identifier
+ * @param currentLevel - Current stat level
+ * @returns Upgrade cost as string (supports arbitrarily large numbers)
+ */
 export function getUpgradeCost(stat: string, currentLevel: number): string {
   return new Decimal(getUpgradeCostFromConfig(stat, currentLevel)).toString();
 }

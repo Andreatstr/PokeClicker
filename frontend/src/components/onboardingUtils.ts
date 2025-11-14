@@ -1,35 +1,45 @@
+/**
+ * Z-index constants for onboarding overlay layers
+ * Ensures proper stacking order of tutorial elements
+ */
 export const Z_INDEX = {
-  BACKDROP: 9998,
-  SPOTLIGHT: 9999,
-  POPUP: 9999,
-  MODAL_BACKDROP: 50000,
-  MODAL_SPOTLIGHT: 50001,
-  MODAL_POPUP: 50002,
+  BACKDROP: 9998, // Darkened background
+  SPOTLIGHT: 9999, // Highlighted element overlay
+  POPUP: 9999, // Instruction popup box
+  MODAL_BACKDROP: 50000, // Modal dialog backdrop (above regular onboarding)
+  MODAL_SPOTLIGHT: 50001, // Modal spotlight (above modal backdrop)
+  MODAL_POPUP: 50002, // Modal popup (highest layer)
 } as const;
 
+/**
+ * Timing constants for onboarding animations and waits (in milliseconds)
+ * Tuned for smooth transitions across devices
+ */
 export const TIMING = {
-  POLL_INTERVAL: 16,
-  MAX_WAIT_NAV: 6000,
-  MAX_WAIT_DEFAULT: 3000,
-  MOBILE_MODAL_DELAY: 700,
-  MOBILE_MODAL_SETTLE: 320,
-  DESKTOP_MODAL_DELAY: 140,
-  STATS_STEP_EXTRA_SETTLE: 300,
-  STATS_STEP_FINAL_SETTLE: 180,
-  CARD_VISIBILITY_DELAY: 80,
-  BURGER_MENU_DELAY: 180,
-  REPOSITION_DELAY: 0,
-  SCROLL_SMOOTH_DELAY: 180,
-  MODAL_OPEN_MOBILE: 350,
-  MODAL_OPEN_DEFAULT: 200,
+  POLL_INTERVAL: 16, // ~60fps for DOM polling
+  MAX_WAIT_NAV: 6000, // Navigation transition timeout
+  MAX_WAIT_DEFAULT: 3000, // Default element appearance timeout
+  MOBILE_MODAL_DELAY: 700, // Mobile modal animation delay
+  MOBILE_MODAL_SETTLE: 320, // Mobile modal settling time
+  DESKTOP_MODAL_DELAY: 140, // Desktop modal animation delay
+  STATS_STEP_EXTRA_SETTLE: 300, // Stats step additional settling
+  STATS_STEP_FINAL_SETTLE: 180, // Stats step final settling
+  CARD_VISIBILITY_DELAY: 80, // Card visibility check delay
+  BURGER_MENU_DELAY: 180, // Mobile menu animation delay
+  REPOSITION_DELAY: 0, // Popup reposition delay (immediate)
+  SCROLL_SMOOTH_DELAY: 180, // Smooth scroll settling time
+  MODAL_OPEN_MOBILE: 350, // Mobile modal open animation
+  MODAL_OPEN_DEFAULT: 200, // Desktop modal open animation
 } as const;
 
+/** Onboarding steps that occur inside modal dialogs */
 export const MODAL_STEP_TARGETS = [
   'pokemon-stats',
   'pokemon-upgrade',
   'pokemon-evolution',
 ] as const;
 
+/** Navigation button targets for onboarding */
 export const NAV_BUTTON_TARGETS = [
   'clicker-nav',
   'world-nav',
@@ -37,14 +47,25 @@ export const NAV_BUTTON_TARGETS = [
   'ranks-nav',
 ] as const;
 
+/** Pixel threshold for detecting rect changes (standard) */
 export const RECT_DIFF_THRESHOLD = 5;
+/** Pixel threshold for detecting rect changes (tight tolerance for final checks) */
 export const RECT_DIFF_THRESHOLD_TIGHT = 2;
+/** Fixed width of instruction popup boxes */
 export const POPUP_WIDTH = 350;
+/** Default popup height (grows with content) */
 export const DEFAULT_POPUP_HEIGHT = 200;
+/** Minimum margin from viewport edges */
 export const MIN_VIEWPORT_MARGIN = 16;
+/** Minimum spacing between popup and target */
 export const MIN_SPACING = 6;
+/** Maximum spacing between popup and target */
 export const MAX_SPACING = 10;
 
+/**
+ * Checks if two DOMRects differ by more than the threshold
+ * Used to detect when element positions/sizes have finished animating
+ */
 export function rectsAreDifferent(
   rect1: DOMRect | null,
   rect2: DOMRect | null,
@@ -59,6 +80,10 @@ export function rectsAreDifferent(
   );
 }
 
+/**
+ * Checks if an element is actually visible on screen
+ * Considers both size and CSS visibility properties
+ */
 export function isElementVisible(el: HTMLElement): boolean {
   const rect = el.getBoundingClientRect();
   const style = window.getComputedStyle(el);
@@ -70,6 +95,10 @@ export function isElementVisible(el: HTMLElement): boolean {
   return hasSize && visibleStyle;
 }
 
+/**
+ * Detects mobile device via pointer type (touch vs mouse)
+ * More reliable than user agent sniffing
+ */
 export function isMobileDevice(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -78,6 +107,10 @@ export function isMobileDevice(): boolean {
   );
 }
 
+/**
+ * Finds the first visible element with matching onboarding data attribute
+ * Handles cases where multiple elements may have the same target (e.g., mobile/desktop)
+ */
 export function findVisibleOnboardingElement(
   target: string
 ): HTMLElement | null {
@@ -87,10 +120,15 @@ export function findVisibleOnboardingElement(
   return candidates.find(isElementVisible) ?? null;
 }
 
+/** Promise-based delay utility */
 export async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Waits for element rect to stabilize after animations
+ * Handles different timing needs for mobile/desktop and modal/non-modal contexts
+ */
 export async function waitForRect(
   targetElement: HTMLElement,
   isModalStep: boolean,
@@ -130,7 +168,10 @@ export async function waitForRect(
   return rect;
 }
 
-// Find the nearest scrollable ancestor (or return document.scrollingElement/window sentinel)
+/**
+ * Finds the nearest scrollable ancestor element
+ * Returns Document as sentinel if document/window is the scrollable container
+ */
 export function getScrollableAncestor(el: HTMLElement): HTMLElement | Document {
   const isScrollable = (node: HTMLElement) => {
     const style = window.getComputedStyle(node);
@@ -147,6 +188,10 @@ export function getScrollableAncestor(el: HTMLElement): HTMLElement | Document {
   return document;
 }
 
+/**
+ * Smoothly scrolls element into view with custom positioning
+ * Handles both container and window scrolling
+ */
 export function scrollElementIntoView(
   target: HTMLElement,
   position: 'start' | 'center' = 'center',
@@ -184,6 +229,10 @@ export function scrollElementIntoView(
   }
 }
 
+/**
+ * Checks if a rect is fully visible within the viewport
+ * Accounts for specified margins
+ */
 export function isRectInViewport(rect: DOMRect, margin = 16): boolean {
   const vw = window.innerWidth || document.documentElement.clientWidth;
   const vh = window.innerHeight || document.documentElement.clientHeight;
@@ -194,7 +243,10 @@ export function isRectInViewport(rect: DOMRect, margin = 16): boolean {
   return topOk && leftOk && rightOk && bottomOk;
 }
 
-// Compute target's offsetTop relative to a specific container (not the page)
+/**
+ * Computes target's offsetTop relative to a specific container
+ * Used for calculating scroll positions within scrollable containers
+ */
 export function getOffsetTopWithin(
   container: HTMLElement,
   target: HTMLElement
@@ -208,6 +260,10 @@ export function getOffsetTopWithin(
   return offset;
 }
 
+/**
+ * Smoothly scrolls element to top of its scrollable container
+ * Alternative to scrollElementIntoView when top positioning is needed
+ */
 export function scrollElementToTop(target: HTMLElement) {
   const container = getScrollableAncestor(target);
   if (container instanceof HTMLElement) {

@@ -1,5 +1,6 @@
 /**
- * Pokemon type options for filtering
+ * Complete list of Pokemon types for filtering and validation
+ * Covers all 18 types from Pokemon games
  */
 export const POKEMON_TYPES = [
   'normal',
@@ -23,7 +24,8 @@ export const POKEMON_TYPES = [
 ] as const;
 
 /**
- * Pokemon region options with their ID ranges
+ * Pokemon region options with their Pokedex ID ranges
+ * Used for filtering by generation in the Pokedex
  */
 export const POKEMON_REGIONS = [
   {value: 'kanto', label: 'Kanto (1-151)'},

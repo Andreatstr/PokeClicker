@@ -1,5 +1,11 @@
 import type {PokemonBasic} from '../hooks/usePokemonBasic';
 
+/**
+ * Display button for selected/favorite Pokemon in profile
+ *
+ * Shows Pokemon sprite and name when selected, or placeholder when empty.
+ * Supports priority loading for above-the-fold rendering.
+ */
 interface PokemonDisplayButtonProps {
   pokemon: PokemonBasic | null | undefined;
   onClick: () => void;
