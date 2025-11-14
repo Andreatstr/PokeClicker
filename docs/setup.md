@@ -13,15 +13,14 @@ This guide walks you through setting up the PokéClicker project for local devel
 - Download and install from [nodejs.org](https://nodejs.org/) (LTS version recommended)
 - Verify installation: `node --version`
 
-### pnpm
+### Package Manager
 
-This project uses pnpm for package management. Install it globally:
+This project supports both **npm** (included with Node.js) and **pnpm**.
 
+Optional - install pnpm for faster installs:
 ```bash
 npm install -g pnpm
 ```
-
-Verify installation: `pnpm --version`
 
 ### MongoDB
 
@@ -92,11 +91,11 @@ sudo systemctl status mongod
 git clone https://git.ntnu.no/IT2810-H25/T26-Project-2.git
 cd T26-Project-2
 
-# Install all dependencies (root + frontend + backend)
-pnpm install
+# Install all dependencies (use npm or pnpm)
+npm install
 ```
 
-This single command installs dependencies for both frontend and backend thanks to pnpm workspaces.
+This single command installs dependencies for both frontend and backend thanks to workspaces.
 
 ### 2. Populate Database (REQUIRED)
 
@@ -104,9 +103,7 @@ This step is **required** the first time you set up the project:
 
 ```bash
 # From root directory:
-cd backend
-pnpm run seed
-cd ..
+npm run seed --workspace=backend
 ```
 
 This fetches metadata for ~1024 Pokemon from PokéAPI and stores it in MongoDB. Takes approximately **1-2 minutes**. Progress is shown in the terminal.
@@ -133,7 +130,7 @@ Start both frontend and backend:
 
 ```bash
 # From root directory:
-pnpm run dev
+npm run dev
 ```
 
 This starts:
@@ -142,39 +139,23 @@ This starts:
 
 ### Running Tests
 
-Tests must be run from their respective directories:
-
 ```bash
+# E2E tests (from root):
+npm run test:e2e
+
 # Frontend tests:
-cd frontend
-pnpm test
+cd frontend && npm test
 
 # Backend tests:
-cd backend
-pnpm test
-
-# E2E tests (from root):
-pnpm run test:e2e
+cd backend && npm test
 ```
 
 ### Other Commands
 
 ```bash
 # From root directory:
-pnpm run build     # Build both frontend and backend
-pnpm run lint      # Lint both frontend and backend
-
-# From frontend directory:
-cd frontend
-pnpm run dev       # Start frontend only
-pnpm run build     # Build frontend
-pnpm run lint      # Lint frontend
-
-# From backend directory:
-cd backend
-pnpm run dev       # Start backend only
-pnpm run build     # Build backend
-pnpm run lint      # Lint backend
+npm run build     # Build both frontend and backend
+npm run lint      # Lint both frontend and backend
 ```
 
 ## Environment Variables

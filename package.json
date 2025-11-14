@@ -36,6 +36,9 @@
   "dependencies": {
     "break_infinity.js": "^2.2.0"
   },
+  "overrides": {
+    "parse5": "7.1.2"
+  },
   "pnpm": {
     "overrides": {
       "parse5": "7.1.2"
