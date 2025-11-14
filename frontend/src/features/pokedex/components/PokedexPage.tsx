@@ -64,7 +64,8 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
   const handlePageChange = useCallback(
     (page: number) => {
       setPaginationPage(page);
-      window.scrollTo({top: 0, behavior: 'smooth'});
+      // Scroll to top immediately for consistent behavior
+      window.scrollTo({top: 0, behavior: 'instant'});
     },
     [setPaginationPage]
   );
