@@ -266,62 +266,6 @@ describe('LoginScreen component', () => {
     expect(screen.getByLabelText('Password:')).toBeInTheDocument();
   });
 
-  it.skip('logs in with guest credentials and navigates to pokedex', async () => {
-    const user = userEvent.setup();
-    const mockUser = {
-      _id: '1',
-      username: 'guest_test-uuid',
-      rare_candy: 0,
-      created_at: new Date().toISOString(),
-      stats: {
-        hp: 1,
-        attack: 1,
-        defense: 1,
-        spAttack: 1,
-        spDefense: 1,
-        speed: 1,
-        clickPower: 1,
-        passiveIncome: 1,
-      },
-      owned_pokemon_ids: [1],
-      favorite_pokemon_id: null,
-      selected_pokemon_id: 1,
-      isGuestUser: true,
-    };
-
-    mockSignupMutation.mockResolvedValueOnce({
-      data: {
-        signup: {
-          token: 'test-token',
-          user: mockUser,
-        },
-      },
-    });
-
-    render(<LoginScreen onNavigate={mockOnNavigate} />);
-
-    const guestButton = screen.getByText('Guest user');
-    await user.click(guestButton);
-
-    await waitFor(
-      () => {
-        expect(mockSignupMutation).toHaveBeenCalled();
-      },
-      {timeout: 3000}
-    );
-
-    expect(mockSignupMutation).toHaveBeenCalledWith(
-      expect.objectContaining({
-        variables: expect.objectContaining({
-          isGuestUser: true,
-        }),
-      })
-    );
-
-    expect(mockLogin).toHaveBeenCalledWith('test-token', mockUser);
-    expect(mockOnNavigate).toHaveBeenCalledWith('pokedex');
-  });
-
   it('should show loading state during authentication', async () => {
     const user = userEvent.setup();
     render(<LoginScreen onNavigate={mockOnNavigate} />);
