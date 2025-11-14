@@ -1,10 +1,23 @@
 import React from 'react';
 
+/**
+ * Common props for all pixel icon components
+ */
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
   size?: number | string;
 }
 
+/**
+ * Factory function for creating pixel-style icon components
+ *
+ * Generates SVG-based icon components with consistent sizing and styling.
+ * All icons use 'currentColor' for fill, making them theme-aware.
+ *
+ * @param pathData - SVG path data defining the icon's pixel art shape
+ * @param viewBox - SVG viewBox coordinates (default: '0 0 24 24')
+ * @returns A forwardRef-enabled icon component
+ */
 const createIcon = (pathData: string, viewBox = '0 0 24 24') => {
   return React.forwardRef<SVGSVGElement, IconProps>(
     ({className = '', size = 16, ...props}, ref) => (

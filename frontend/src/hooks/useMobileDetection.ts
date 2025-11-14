@@ -1,8 +1,11 @@
 import {useState, useEffect} from 'react';
 
 /**
- * Custom hook for detecting mobile screen size
- * Handles window resize events and updates mobile state
+ * Hook for detecting mobile screen size with responsive breakpoint
+ * Listens to window resize events and updates state when crossing breakpoint
+ *
+ * @param breakpoint - Pixel width threshold for mobile detection (default: 768px)
+ * @returns Boolean indicating if current viewport width is at or below breakpoint
  */
 export function useMobileDetection(breakpoint: number = 768) {
   const [isMobile, setIsMobile] = useState(false);

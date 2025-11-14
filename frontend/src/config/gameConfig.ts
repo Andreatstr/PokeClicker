@@ -9,8 +9,6 @@ export const GameConfig = {
    * Clicker mechanics
    */
   clicker: {
-    /** Number of clicks before forcing a sync to server */
-    batchSyncClickThreshold: 50,
     /** Time in milliseconds before forcing a sync to server */
     batchSyncTimeThreshold: 10000, // 10 seconds
     /** Duration of candy float animation in milliseconds */
@@ -51,7 +49,12 @@ export type GameConfigType = typeof GameConfig;
 
 /**
  * Calculate Pokemon purchase cost based on its ID
- * Must match backend logic in resolvers.ts:getPokemonCost()
+ *
+ * Formula: 100 × 1.5^(tier), where tier = floor(pokemonId / 10)
+ * IMPORTANT: Must match backend logic in resolvers.ts:getPokemonCost()
+ *
+ * @param pokemonId - Pokemon ID (1-1025)
+ * @returns Purchase cost in rare candy
  */
 export function getPokemonCost(pokemonId: number): number {
   const tier = Math.floor(pokemonId / GameConfig.pricing.pokemonPerTier);

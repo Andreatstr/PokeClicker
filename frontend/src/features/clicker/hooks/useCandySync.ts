@@ -15,6 +15,27 @@ interface UseCandySyncProps {
 /**
  * Manages local candy state with batched server syncing
  * Implements optimistic updates with automatic retry on failure
+ *
+ * Sync strategy:
+ * - Maintains local candy count that updates immediately (optimistic)
+ * - Accumulates changes in unsyncedAmount buffer
+ * - Flushes to server when:
+ *   1. Time since last sync exceeds threshold (default: 10 seconds)
+ *   2. Component unmounts (navigating away from clicker page)
+ *
+ * Error handling:
+ * - If sync fails, adds amount back to unsynced buffer
+ * - Automatically retries on next flush trigger
+ * - Shows temporary error message to user
+ *
+ * Why batching?
+ * - Reduces server load (fewer API calls)
+ * - Improves performance (no waiting for server on each click)
+ * - Prevents race conditions with rapid clicking
+ *
+ * @param user - Current authenticated user
+ * @param isAuthenticated - Must be true to sync candy to server
+ * @param updateUser - Callback to update user context after successful sync
  */
 export function useCandySync({
   user,
@@ -42,14 +63,20 @@ export function useCandySync({
     emitCandyUpdate(nextValue);
   }, [user]);
 
+  /**
+   * Flushes accumulated candy changes to the server
+   * Called automatically by triggers or manually before upgrades
+   */
   const flushPendingCandy = useCallback(async () => {
     if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
 
+    // Snapshot the amount to sync and clear buffer immediately
     const amountToSync = unsyncedAmount;
     setUnsyncedAmount('0');
     unsyncedAmountRef.current = '0';
     lastSyncRef.current = Date.now();
 
+    // Clear any pending batch timer
     if (batchTimerRef.current) {
       clearTimeout(batchTimerRef.current);
       batchTimerRef.current = null;
@@ -58,6 +85,7 @@ export function useCandySync({
     try {
       await updateRareCandy(amountToSync, updateUser);
     } catch (err) {
+      // On failure, add the amount back to unsynced buffer for retry
       logger.logError(err, 'SyncCandy');
       setDisplayError('Failed to save progress. Will retry...');
       setUnsyncedAmount((prev) => {
@@ -72,19 +100,19 @@ export function useCandySync({
     }
   }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
 
+  // Auto-flush effect: Monitors unsynced amount and triggers flush based on time threshold
   useEffect(() => {
     if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
 
+    // Check if we should flush immediately based on time threshold
     const shouldFlush =
-      toDecimal(unsyncedAmount).gte(
-        GameConfig.clicker.batchSyncClickThreshold
-      ) ||
       Date.now() - lastSyncRef.current >=
-        GameConfig.clicker.batchSyncTimeThreshold;
+      GameConfig.clicker.batchSyncTimeThreshold; // Time threshold (10 seconds)
 
     if (shouldFlush) {
       flushPendingCandy();
     } else if (!batchTimerRef.current) {
+      // Schedule a flush for later if threshold not yet met
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
       }, GameConfig.clicker.batchSyncTimeThreshold);
@@ -103,7 +131,7 @@ export function useCandySync({
     flushPendingCandyRef.current = flushPendingCandy;
   }, [flushPendingCandy]);
 
-  // Flush when component unmounts (navigating away from clicker)
+  // Flush on unmount: Ensures candy is saved when navigating away from clicker
   // Empty deps - we want this to run ONLY on unmount, refs handle current values
   useEffect(() => {
     return () => {
@@ -113,10 +141,14 @@ export function useCandySync({
     };
   }, []);
 
+  /**
+   * Adds candy to local state and unsynced buffer
+   * Updates are optimistic - shown immediately to user
+   */
   const addCandy = useCallback((amount: string) => {
     setLocalRareCandy((prev) => {
       const next = toDecimal(prev).plus(amount).toString();
-      emitCandyUpdate(next);
+      emitCandyUpdate(next); // Notify other components of candy change
       return next;
     });
     setUnsyncedAmount((prev) => {
@@ -126,6 +158,10 @@ export function useCandySync({
     });
   }, []);
 
+  /**
+   * Deducts candy from local state immediately (for upgrades)
+   * Does NOT add to unsynced buffer since upgrades sync separately
+   */
   const deductCandy = useCallback((amount: string) => {
     setLocalRareCandy((prev) => {
       const next = toDecimal(prev).minus(amount).toString();

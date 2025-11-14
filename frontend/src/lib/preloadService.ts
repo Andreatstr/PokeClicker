@@ -1,3 +1,9 @@
+/**
+ * Asset Preloading Service
+ * Coordinates preloading of images and resources to improve performance
+ * Supports progress tracking and selective preloading by feature
+ */
+
 import {pokemonSpriteCache} from './pokemonSpriteCache';
 import {typeBackgroundCache} from './typeBackgroundCache';
 import {gameAssetsCache} from './gameAssetsCache';
@@ -18,6 +24,11 @@ class PreloadService {
   private preloadProgress = 0;
   private preloadCallbacks: Array<(progress: number) => void> = [];
 
+  /**
+   * Subscribe to preload progress updates
+   * @param callback - Function called with progress (0-100)
+   * @returns Unsubscribe function
+   */
   onProgress(callback: (progress: number) => void) {
     this.preloadCallbacks.push(callback);
     return () => {
@@ -33,6 +44,11 @@ class PreloadService {
     this.preloadCallbacks.forEach((callback) => callback(progress));
   }
 
+  /**
+   * Preload assets based on provided options
+   * Runs tasks in parallel for better performance
+   * @param options - Configuration for which assets to preload
+   */
   async preloadAll(options: PreloadOptions = {}): Promise<void> {
     if (this.isPreloading) {
       logger.warn('Preloading already in progress');
@@ -117,6 +133,10 @@ class PreloadService {
     }
   }
 
+  /**
+   * Preload assets needed for Pokedex feature
+   * Loads first page of Pokemon and common type backgrounds
+   */
   async preloadForPokedex(): Promise<void> {
     // Preload first page (20 Pokemon) + type backgrounds
     // Batched loading prevents rate limits while improving sustainability
@@ -129,6 +149,9 @@ class PreloadService {
     });
   }
 
+  /**
+   * Preload assets needed for Clicker game feature
+   */
   async preloadForClicker(): Promise<void> {
     await this.preloadAll({
       preloadCommonPokemon: false,
@@ -139,6 +162,9 @@ class PreloadService {
     });
   }
 
+  /**
+   * Preload assets needed for Map feature
+   */
   async preloadForMap(): Promise<void> {
     await this.preloadAll({
       preloadCommonPokemon: false,
@@ -149,6 +175,9 @@ class PreloadService {
     });
   }
 
+  /**
+   * Preload assets needed for Ranks/Leaderboard feature
+   */
   async preloadForRanks(): Promise<void> {
     await this.preloadAll({
       preloadCommonPokemon: false,
@@ -159,23 +188,39 @@ class PreloadService {
     });
   }
 
+  /**
+   * Preload Pokemon sprites for an evolution chain
+   * Used when viewing Pokemon details to prefetch evolutions
+   */
   async preloadPokemonEvolutionChain(pokemonIds: number[]): Promise<void> {
     await pokemonSpriteCache.preloadPokemonEvolutionChain(pokemonIds);
   }
 
+  /**
+   * Preload type background images for specific Pokemon types
+   */
   async preloadPokemonTypes(types: string[]): Promise<void> {
     await typeBackgroundCache.preloadTypeBackgrounds(types);
   }
 
+  /**
+   * Get current preload progress percentage (0-100)
+   */
   getProgress(): number {
     return this.preloadProgress;
   }
 
+  /**
+   * Check if preloading is currently in progress
+   */
   isPreloadingInProgress(): boolean {
     return this.isPreloading;
   }
 
-  // Get cache statistics from all services
+  /**
+   * Get cache statistics from all cache services
+   * Useful for debugging and monitoring cache performance
+   */
   getCacheStats() {
     return {
       pokemonSprites: pokemonSpriteCache.getCacheStats(),
@@ -184,7 +229,10 @@ class PreloadService {
     };
   }
 
-  // Clear all caches
+  /**
+   * Clear all cached assets
+   * Used when cache needs to be invalidated (e.g., after updates)
+   */
   clearAllCaches(): void {
     pokemonSpriteCache.clearPokemonCache();
     typeBackgroundCache.clearTypeCache();

@@ -33,9 +33,16 @@ const NUM_SPAWNS = 50;
 const MAX_POKEMON_ID = 1025; // Total Pokemon in database (Gen 1-9, Paldea)
 
 /**
- * Generate a Pokemon ID based on player progression
- * Uses bell curve distribution centered around (maxOwnedId - 5)
- * with 15% chance to spawn next-tier Pokemon
+ * Generate a Pokemon ID based on player progression using adaptive difficulty
+ *
+ * New players (maxOwnedId = 0): Only spawn Pokemon ID 1-20 (starter range)
+ *
+ * Experienced players: 85% familiar + 15% challenge distribution
+ * - 85%: Bell curve centered at (maxOwnedId - 5) with ±5 standard deviation
+ *   Uses Box-Muller transform for normal distribution
+ * - 15%: "Challenge Pokemon" 1-5 IDs ahead of highest owned
+ *
+ * This creates gradual difficulty progression while keeping encounters mostly familiar
  */
 function generateRandomPokemonId(maxOwnedId: number): number {
   // New players: spawn only ID 1-20
@@ -64,6 +71,27 @@ function generateRandomPokemonId(maxOwnedId: number): number {
   return Math.max(1, Math.min(MAX_POKEMON_ID, pokemonId));
 }
 
+/**
+ * Hook managing wild Pokemon spawning system with progression-based difficulty
+ *
+ * Features:
+ * - 50 Pokemon spawned across map at random walkable locations
+ * - User-specific spawn persistence in localStorage
+ * - Progression-based spawning (starter Pokemon for new players, scaled difficulty for experienced)
+ * - Proximity detection (80px radius) for battle encounters
+ * - Automatic respawn when Pokemon caught (maintains 50 active spawns)
+ * - Viewport culling for rendering performance
+ *
+ * Spawn mechanics:
+ * - Initial spawn: Uses progression algorithm to select appropriate Pokemon
+ * - Respawn on catch: Generates new Pokemon at same difficulty level
+ * - Position validation: Only spawns at walkable collision map locations
+ * - User isolation: Each user has separate spawn set that persists
+ *
+ * @param collisionChecker - Collision detection for spawn position validation
+ * @param playerPosition - Current player position for proximity checks
+ * @returns Wild Pokemon state and management functions
+ */
 export function usePokemonSpawning(
   collisionChecker: CollisionChecker & {collisionMapLoaded?: boolean},
   playerPosition: {x: number; y: number}

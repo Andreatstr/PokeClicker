@@ -1,3 +1,13 @@
+/**
+ * GraphQL Type Definitions
+ * Type-safe interfaces for all GraphQL queries and mutations
+ */
+
+// ============================================================================
+// CORE TYPES
+// ============================================================================
+
+/** Pokemon base stat structure */
 export interface PokemonStats {
   hp: number;
   attack: number;
@@ -7,6 +17,7 @@ export interface PokemonStats {
   speed: number;
 }
 
+/** User stat structure with clicker game stats */
 export interface UserStats {
   hp: number;
   attack: number;
@@ -22,12 +33,14 @@ export interface UserStats {
   pokedexBonus?: number;
 }
 
+/** Floating candy animation data */
 export interface Candy {
   id: number;
   x: number;
   amount: string;
 }
 
+/** Complete user profile structure */
 export interface User {
   _id: string;
   username: string;
@@ -45,6 +58,7 @@ export interface User {
 // POKEDEX TYPES
 // ============================================================================
 
+/** Pokemon data as returned from Pokedex query */
 export interface PokedexPokemon {
   id: number;
   name: string;
@@ -59,6 +73,7 @@ export interface PokedexPokemon {
   isOwned?: boolean;
 }
 
+/** Faceted search metadata for filter counts */
 export interface FilterFacets {
   byGeneration: Array<{generation: string; count: number}>;
   byType: Array<{type: string; count: number}>;

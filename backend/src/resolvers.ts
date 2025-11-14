@@ -36,6 +36,22 @@ if (!JWT_SECRET) {
 }
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 
+/**
+ * Sanitizes user document for client by removing sensitive data
+ * Ensures all stat fields exist with default values if missing
+ *
+ * Security:
+ * - Removes password_hash from response
+ * - Converts MongoDB ObjectId to string
+ *
+ * Data integrity:
+ * - Ensures all stats exist (battle stats + clicker upgrades)
+ * - Converts Date objects to ISO strings
+ * - Defaults missing fields to prevent client errors
+ *
+ * @param userDoc - Raw user document from MongoDB
+ * @returns Sanitized user object safe for client consumption
+ */
 function sanitizeUserForClient(
   userDoc: UserDocument
 ): Omit<UserDocument, 'password_hash' | 'created_at'> & {created_at: string} {
@@ -161,16 +177,54 @@ const authMutations = {
   },
 };
 
+/**
+ * Calculates cost to upgrade a stat from current level to next level
+ * Uses Decimal for arbitrary precision (handles very large numbers)
+ *
+ * @param currentLevel - Current level of the stat
+ * @param stat - Stat key (must exist in upgrade config)
+ * @returns Cost in rare candy as Decimal
+ */
 function getUpgradeCost(currentLevel: number, stat: string): Decimal {
   const cost = getUpgradeCostFromConfig(stat, currentLevel);
   return new Decimal(cost);
 }
 
+/**
+ * Calculates cost to purchase a Pokemon from the Pokedex
+ * Uses tier-based exponential scaling: 100 * (1.5 ^ tier)
+ * Tier is determined by ID: tier 0 = IDs 0-9, tier 1 = IDs 10-19, etc.
+ *
+ * Examples:
+ * - ID 1-9: tier 0 = 100 candy
+ * - ID 10-19: tier 1 = 150 candy
+ * - ID 20-29: tier 2 = 225 candy
+ *
+ * @param pokemonId - Pokemon ID to purchase
+ * @returns Cost in rare candy as Decimal
+ */
 function getPokemonCost(pokemonId: number): Decimal {
   const tier = Math.floor(pokemonId / 10);
   return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
 }
 
+/**
+ * Calculates cost to upgrade a Pokemon's level
+ * Scales based on both current level and Pokemon's base stats strength
+ *
+ * Formula: baseCostMultiplier * (2.5 ^ (currentLevel - 1))
+ * - baseCostMultiplier = max(25, totalBaseStats / 2)
+ * - Stronger Pokemon (higher base stats) cost more to upgrade
+ * - Exponential scaling (2.5x per level) makes high levels expensive
+ *
+ * Examples:
+ * - Weak Pokemon (200 base stats total): 100 * 2.5^(level-1)
+ * - Strong Pokemon (600 base stats total): 300 * 2.5^(level-1)
+ *
+ * @param currentLevel - Current upgrade level (1 = base level)
+ * @param pokemonStats - Pokemon's base stats from PokeAPI
+ * @returns Cost in rare candy as Decimal
+ */
 function getPokemonUpgradeCost(
   currentLevel: number,
   pokemonStats: PokemonStats
@@ -184,6 +238,7 @@ function getPokemonUpgradeCost(
     pokemonStats.spDefense +
     pokemonStats.speed;
 
+  // Minimum 25 cost, scales with strength (divide by 2 to keep costs reasonable)
   const baseCostMultiplier = Math.max(25, Math.floor(totalBaseStats / 2));
 
   return new Decimal(baseCostMultiplier)
@@ -531,6 +586,26 @@ export const resolvers = {
       };
     },
 
+    /**
+     * Retrieves ranked leaderboards for candy count and Pokemon collection
+     * Uses MongoDB aggregation with $facet for efficient parallel computation
+     *
+     * Returns:
+     * - Top players in candy league (sorted by rare candy)
+     * - Top players in Pokemon league (sorted by owned Pokemon count)
+     * - Current user's rank in both leagues (if authenticated)
+     * - Total player count
+     *
+     * Ranking mechanics:
+     * - Uses $setWindowFields for proper rank calculation with ties
+     * - Standard ranking: 1, 2, 2, 4 (ties share rank, next rank skips)
+     * - Pagination applied AFTER ranking to show correct positions
+     * - Only includes users with showInRanks=true (privacy setting)
+     *
+     * Performance:
+     * - $facet runs multiple pipelines in parallel (single DB roundtrip)
+     * - Indexes on showInRanks, rare_candy, owned_pokemon_ids improve speed
+     */
     getRanks: async (
       _: unknown,
       {input}: {input?: {limit?: number; offset?: number}},
@@ -1281,8 +1356,24 @@ export const resolvers = {
 };
 
 /**
- * Helper: Compute dynamic faceted counts using MongoDB aggregation
- * Returns paginated results, total count, and filter counts for generation and types
+ * Computes dynamic faceted filter counts using MongoDB aggregation
+ * Used for Pokedex filtering to show accurate counts per filter option
+ *
+ * Strategy:
+ * - Uses $facet to run multiple aggregations in parallel
+ * - Each facet applies all OTHER filters except the one being counted
+ * - This shows "if I select this filter, how many results will I have?"
+ *
+ * Example:
+ * - When counting types, applies generation + search filters (but not type filter)
+ * - This way, type counts reflect "results if I filter by this type"
+ *
+ * Performance considerations:
+ * - Can be slow on large datasets (controlled by DYNAMIC_FACET_THRESHOLD)
+ * - Falls back to static counts if dataset too large or query times out
+ * - Timeout protection prevents slow queries from blocking requests
+ *
+ * @returns Object containing paginated Pokemon, total count, and facet counts
  */
 async function computeDynamicFacets(
   metadataCollection: Collection,
@@ -1390,8 +1481,21 @@ async function computeDynamicFacets(
 }
 
 /**
- * Helper: Get precomputed static filter counts from database
+ * Retrieves precomputed static filter counts from database
  * Used as fallback when dynamic facets are too slow or dataset is too large
+ *
+ * Static counts:
+ * - Precomputed and stored in filter_counts collection
+ * - Updated when Pokemon metadata is seeded/changed
+ * - Fast but not context-aware (shows total counts, not filtered counts)
+ *
+ * Trade-offs:
+ * - Pro: Very fast, no computation needed
+ * - Con: Counts don't reflect other active filters
+ * - Con: Requires manual updates when data changes
+ *
+ * @param db - MongoDB database instance
+ * @returns Static counts object or null if not found
  */
 async function getStaticFilterCounts(db: Db) {
   const countsCollection = db.collection('filter_counts');

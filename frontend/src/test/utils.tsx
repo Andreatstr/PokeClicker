@@ -1,3 +1,8 @@
+/**
+ * Testing utilities
+ * Custom render function that wraps components with Auth and Apollo providers
+ */
+
 import {render as rtlRender, type RenderOptions} from '@testing-library/react';
 import {ApolloProvider} from '@apollo/client';
 import {AuthProvider} from '@features/auth';

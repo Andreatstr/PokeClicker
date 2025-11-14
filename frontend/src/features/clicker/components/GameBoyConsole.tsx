@@ -13,6 +13,28 @@ interface GameBoyConsoleProps {
   isOnboarding?: boolean;
 }
 
+/**
+ * GameBoy-style console component with clickable screen and controls.
+ *
+ * Visual features:
+ * - Authentic GameBoy Color appearance with retro styling
+ * - Dot matrix screen label with battery indicator
+ * - D-pad and A/B button controls (visual only, A/B trigger clicks)
+ * - Speaker holes at bottom
+ * - "Pretendo PLAY BOY" branding
+ *
+ * Interaction:
+ * - Click screen or press A/B buttons to earn candy
+ * - Pokemon sprite with idle bounce and walk animations
+ * - Floating candy text with float-up animation on click
+ * - Click animation: scale and brightness pulse
+ *
+ * Accessibility:
+ * - Keyboard clickable (A/B buttons)
+ * - Focus ring on screen
+ * - Disabled state when not authenticated
+ * - ARIA labels for interactive elements
+ */
 export function GameBoyConsole({
   isDarkMode,
   isAuthenticated,

@@ -3,6 +3,15 @@ import {useRef} from 'react';
 import {FocusTrap} from 'focus-trap-react';
 import {useModal} from '@/hooks/useModal';
 
+/**
+ * Reusable confirmation dialog with focus management
+ *
+ * Features:
+ * - Keyboard accessible with focus trap
+ * - Auto-focuses confirm button (most destructive action)
+ * - Handles escape key and backdrop clicks
+ * - Dark mode support
+ */
 interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;

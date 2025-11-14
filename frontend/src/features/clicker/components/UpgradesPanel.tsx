@@ -25,6 +25,30 @@ type UpgradeKey =
   | 'clickMultiplier'
   | 'pokedexBonus';
 
+/**
+ * Panel displaying all available stat upgrades for the clicker game.
+ *
+ * Features:
+ * - 6 upgradeable stats with individual colors and descriptions
+ * - Real-time cost calculation (exponential growth)
+ * - Current -> Next value preview with arrow
+ * - Disabled when insufficient candy
+ * - Loading state during mutations
+ *
+ * Upgrade stats:
+ * - Click Power: base candy per click
+ * - Autoclicker: passive income per second
+ * - Lucky Hit Chance: probability of bonus rewards
+ * - Lucky Hit Multiplier: bonus multiplier when lucky hit triggers
+ * - Click Multiplier: overall click amplification
+ * - Pokedex Bonus: bonus per owned Pokemon
+ *
+ * Visual design:
+ * - Gradient backgrounds with retro styling
+ * - Color-coded stat bars (from UPGRADES config)
+ * - Hover shadow effects
+ * - Level display (LV X format)
+ */
 export function UpgradesPanel({
   isDarkMode,
   stats,

@@ -10,6 +10,16 @@ interface PixelLabelProps
   asChild?: boolean;
 }
 
+/**
+ * Pixel-style label component
+ *
+ * Simple wrapper around primitive label with:
+ * - Pixel font applied by default
+ * - Bottom margin for spacing
+ * - Foreground color via CSS custom property
+ *
+ * Used for form inputs and accessibility labels.
+ */
 function Label({className, ...props}: PixelLabelProps) {
   return (
     <ShadcnLabel

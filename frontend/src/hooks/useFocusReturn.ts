@@ -1,8 +1,12 @@
 import {useEffect, useRef} from 'react';
 
 /**
- * Hook to manage focus return when a modal closes
- * Stores the previously focused element and returns focus to it when modal closes
+ * Hook for managing focus return when modal closes (accessibility feature)
+ * Captures currently focused element when modal opens, restores it when modal closes
+ * Prevents focus from being lost to document body after modal dismissal
+ *
+ * @param isOpen - Modal open state
+ * @returns Ref to previously active element
  */
 export function useFocusReturn(isOpen: boolean) {
   const previousActiveElement = useRef<HTMLElement | null>(null);

@@ -6,28 +6,38 @@ interface OnboardingProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Onboarding provider that manages the tutorial flow state
+ *
+ * @remarks
+ * Features:
+ * - 17-step tutorial (steps 0-16)
+ * - Different persistence strategies for guest vs. regular users
+ * - Guest users: sessionStorage (tutorial shows on new login, not on page reload)
+ * - Regular users: localStorage (tutorial shows once per user, persists across sessions)
+ * - Manual restart capability for demonstration purposes
+ *
+ * @param children - Child components to wrap
+ */
 export function OnboardingProvider({children}: OnboardingProviderProps) {
   const [step, setStep] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const {user} = useAuth();
 
-  // Check onboarding status on mount and when user changes
+  // Auto-activate onboarding for new users based on storage persistence
   useEffect(() => {
-    // Only check if user is set (not null)
     if (!user) return;
 
     const isGuest = user.username.toLowerCase() === 'guest';
 
-    // For guest users, check sessionStorage (persists during session, clears on new login)
-    // For other users, check localStorage (persists across sessions)
+    // Guest users use sessionStorage to show tutorial on each new login but not on page reloads
+    // Regular users use localStorage to show tutorial only once ever
     const storageKey = isGuest
       ? 'onboarding_completed_session'
       : 'onboarding_completed';
     const storage = isGuest ? sessionStorage : localStorage;
     const hasSeenTutorial = storage.getItem(storageKey);
 
-    // Always show onboarding for guest user on new login (sessionStorage is empty)
-    // For other users, only show if they haven't seen it
     if (!hasSeenTutorial && !isActive) {
       setStep(0);
       setIsActive(true);
@@ -35,7 +45,7 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
   }, [user, isActive]);
 
   const nextStep = () => {
-    // There are 17 steps (0-16), so if we're at step 16, finish the tutorial
+    // Tutorial has 17 steps (0-16), so reaching step 16 means completion
     if (step >= 16) {
       skipTutorial();
     } else {
@@ -49,8 +59,7 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
     setIsActive(false);
     const isGuest = user?.username.toLowerCase() === 'guest';
 
-    // For guest users, use sessionStorage (persists during session, clears on new login)
-    // For other users, use localStorage (persists across sessions)
+    // Persist completion status using appropriate storage for user type
     if (isGuest) {
       sessionStorage.setItem('onboarding_completed_session', 'true');
     } else {
@@ -58,11 +67,10 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
     }
   };
 
-  // Allow manual restart for demo purposes (for examiners)
   const restartTutorial = () => {
     const isGuest = user?.username.toLowerCase() === 'guest';
 
-    // Clear the appropriate storage based on user type
+    // Clear completion flags to allow tutorial replay
     if (isGuest) {
       sessionStorage.removeItem('onboarding_completed_session');
     } else {

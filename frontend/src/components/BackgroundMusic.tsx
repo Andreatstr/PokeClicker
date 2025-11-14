@@ -6,6 +6,28 @@ interface BackgroundMusicProps {
   isButton?: boolean;
 }
 
+/**
+ * Background music player component with playlist and controls.
+ *
+ * Features:
+ * - Auto-plays through a playlist of Pokemon music tracks
+ * - Minimizable UI (icon-only or full controls)
+ * - Volume controls with visual indicator
+ * - Previous/Next track navigation
+ * - Auto-advances to next track on error or completion
+ * - Random starting track on first play
+ *
+ * State management:
+ * - Persistent audio element to prevent resets on minimize/expand
+ * - Tracks play state independently of UI visibility
+ * - Auto-plays next track after current finishes
+ *
+ * Accessibility:
+ * - ARIA labels for all controls
+ * - Custom focus ring styling (keyboard navigation)
+ * - Disabled states for volume limits
+ * - Progress bar with aria-valuenow
+ */
 export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState(0.5);
@@ -79,6 +101,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
   }, [tracks.length]);
 
   // Attach event listeners once
+  // Set up audio element event listeners once
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;

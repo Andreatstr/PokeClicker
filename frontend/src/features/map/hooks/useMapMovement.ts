@@ -2,21 +2,23 @@ import {useState, useEffect, useCallback, useRef} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 
-// Constants
-const TILE_SIZE = 8; // Pixel size of each step (gentle speed increase)
-const SHEET_FRAME_CELL_W = 68;
-const SHEET_FRAME_CELL_H = 72;
+// Movement Constants
+const TILE_SIZE = 8; // Pixels per movement step - balanced for smooth gameplay without being too fast
+const MOVE_SPEED = 50; // Milliseconds between movement steps - determines how frequently position updates
+const ANIMATION_SPEED = 120; // Milliseconds between animation frames - slower for smoother walking animation
+const ANIMATION_FRAMES = 4; // Number of animation frames per direction in sprite sheet
 
-// desired on-screen size
-const SPRITE_WIDTH = 46;
-const SPRITE_HEIGHT = 48.70588;
-const ANIMATION_SPEED = 120; // ms between animation frames (slower for smoother look)
-const MOVE_SPEED = 50; // ms for movement transition
-const ANIMATION_FRAMES = 4; // Number of frames per direction
+// Sprite Sheet Constants (source dimensions from sprite sheet file)
+const SHEET_FRAME_CELL_W = 68; // Width of each frame in the sprite sheet (pixels)
+const SHEET_FRAME_CELL_H = 72; // Height of each frame in the sprite sheet (pixels)
 
-// Map dimensions
-const MAP_WIDTH = 10560;
-const MAP_HEIGHT = 6080;
+// Rendered Sprite Constants (display size on screen)
+const SPRITE_WIDTH = 46; // Desired on-screen width (pixels) - scaled from sheet for better visual size
+const SPRITE_HEIGHT = 48.70588; // Desired on-screen height (pixels) - maintains aspect ratio from sheet
+
+// Map Constants (world dimensions)
+const MAP_WIDTH = 10560; // Total map width in pixels (based on tilemap dimensions)
+const MAP_HEIGHT = 6080; // Total map height in pixels (based on tilemap dimensions)
 
 // Define multiple teleport points (safe spawn locations)
 const TELEPORT_POINTS = [
@@ -72,9 +74,33 @@ interface CameraInfo {
   spritePos: {backgroundPositionX: string; backgroundPositionY: string};
 }
 
+/**
+ * Hook managing player movement, collision detection, and camera positioning
+ *
+ * Features:
+ * - Keyboard (WASD/Arrow keys) and joystick movement support
+ * - Tile-based movement (8px steps at 50ms intervals for smooth gameplay)
+ * - Collision detection integration with collision map
+ * - 4-directional sprite animation (4 frames per direction at 120ms each)
+ * - User-specific position persistence in localStorage
+ * - Teleport system with 6 predefined locations and 3s cooldown
+ * - Camera follows player with map boundary clamping
+ *
+ * Movement mechanics:
+ * - Immediate response on key press (tap responsiveness)
+ * - Continuous movement while key held (interval-based)
+ * - Collision checked at character's feet position for natural feel
+ * - Position saved per-user to maintain location across sessions
+ *
+ * @param collisionChecker - Collision detection system with walkability checks
+ * @param renderSize - Viewport dimensions for camera calculations
+ * @param isMovementBlocked - Flag to disable movement (e.g., during battles)
+ * @returns Movement state, action handlers, and camera information
+ */
 export function useMapMovement(
   collisionChecker: CollisionChecker,
-  renderSize: {width: number; height: number}
+  renderSize: {width: number; height: number},
+  isMovementBlocked = false
 ): MovementState & MovementActions & CameraInfo {
   const {user} = useAuth();
 
@@ -155,7 +181,11 @@ export function useMapMovement(
     };
   }, []);
 
-  // Find nearest walkable point to a target (simple radial search)
+  /**
+   * Find nearest walkable position using radial search pattern
+   * Searches outward in TILE_SIZE steps up to 2400px radius
+   * Used for spawn points and teleport destinations to ensure valid placement
+   */
   const findNearestWalkable = useCallback(
     (targetX: number, targetY: number) => {
       // If map not loaded, assume current is ok (we'll re-validate later)
@@ -183,8 +213,8 @@ export function useMapMovement(
       }
 
       // Search outwards on a grid in TILE_SIZE steps along square rings
-      const MAX_RADIUS = 2400; // px (~100 tiles)
-      const STEP = TILE_SIZE; // px
+      const MAX_RADIUS = 2400; // Maximum search radius in pixels (~300 tiles) - large enough to find walkable space in most scenarios
+      const STEP = TILE_SIZE; // Step size for search grid - matches movement tile size for consistent spacing
 
       for (let r = STEP; r <= MAX_RADIUS; r += STEP) {
         // Top and bottom edges
@@ -442,8 +472,8 @@ export function useMapMovement(
   // Handle key down
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      // Block movement if collision map isn't loaded yet
-      if (!collisionChecker.collisionMapLoaded) {
+      // Block movement if collision map isn't loaded yet or movement is blocked (e.g., in battle)
+      if (!collisionChecker.collisionMapLoaded || isMovementBlocked) {
         return;
       }
 
@@ -490,7 +520,11 @@ export function useMapMovement(
         }
       }
     },
-    [calculateNewPosition, collisionChecker.collisionMapLoaded]
+    [
+      calculateNewPosition,
+      collisionChecker.collisionMapLoaded,
+      isMovementBlocked,
+    ]
   );
 
   // Handle key up
@@ -532,8 +566,8 @@ export function useMapMovement(
   // Joystick direction handling
   const handleJoystickDirectionStart = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right') => {
-      // Block movement if collision map isn't loaded yet
-      if (!collisionChecker.collisionMapLoaded) {
+      // Block movement if collision map isn't loaded yet or movement is blocked (e.g., in battle)
+      if (!collisionChecker.collisionMapLoaded || isMovementBlocked) {
         return;
       }
 
@@ -559,13 +593,17 @@ export function useMapMovement(
         setIsMoving(true);
       }
     },
-    [calculateNewPosition, collisionChecker.collisionMapLoaded]
+    [
+      calculateNewPosition,
+      collisionChecker.collisionMapLoaded,
+      isMovementBlocked,
+    ]
   );
 
   const handleJoystickDirectionChange = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right' | null) => {
-      // Block movement if collision map isn't loaded yet
-      if (!collisionChecker.collisionMapLoaded) {
+      // Block movement if collision map isn't loaded yet or movement is blocked (e.g., in battle)
+      if (!collisionChecker.collisionMapLoaded || isMovementBlocked) {
         return;
       }
 
@@ -587,7 +625,7 @@ export function useMapMovement(
         setIsMoving(false);
       }
     },
-    [collisionChecker.collisionMapLoaded]
+    [collisionChecker.collisionMapLoaded, isMovementBlocked]
   );
 
   const handleJoystickDirectionStop = useCallback(() => {

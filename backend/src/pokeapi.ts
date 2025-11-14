@@ -1,3 +1,15 @@
+/**
+ * PokeAPI integration module
+ * Handles fetching Pokemon data from the public PokeAPI service
+ *
+ * Features:
+ * - Caches API responses to reduce external API calls
+ * - Fetches Pokemon by ID, type, or generation
+ * - Resolves evolution chains for Pokemon relationships
+ * - Transforms PokeAPI format to application format
+ *
+ * API documentation: https://pokeapi.co/docs/v2
+ */
 import {getCachedPokemon, setCachedPokemon} from './cache.js';
 import fetch from 'node-fetch';
 
@@ -72,6 +84,10 @@ export interface Pokemon {
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
+/**
+ * Pokemon generation ranges (National Pokedex numbers)
+ * Used for filtering Pokemon by generation/region
+ */
 const GENERATION_RANGES: Record<string, {start: number; end: number}> = {
   kanto: {start: 1, end: 151},
   johto: {start: 152, end: 251},
@@ -84,6 +100,14 @@ const GENERATION_RANGES: Record<string, {start: number; end: number}> = {
   paldea: {start: 906, end: 1025},
 };
 
+/**
+ * Generic fetch wrapper for PokeAPI requests
+ * Handles error responses and JSON parsing
+ *
+ * @param url - Full API URL to fetch
+ * @returns Parsed JSON response
+ * @throws Error if request fails
+ */
 async function fetchFromAPI<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -92,11 +116,27 @@ async function fetchFromAPI<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+/**
+ * Extracts Pokemon ID from PokeAPI species URL
+ * Species URLs follow format: .../pokemon-species/{id}/
+ *
+ * @param url - PokeAPI species URL
+ * @returns Pokemon ID or 0 if parsing fails
+ */
 function extractPokemonIdFromUrl(url: string): number {
   const matches = url.match(/\/pokemon-species\/(\d+)\//);
   return matches ? parseInt(matches[1], 10) : 0;
 }
 
+/**
+ * Recursively parses evolution chain structure
+ * PokeAPI returns nested tree structure: base -> stage1 -> stage2, etc.
+ *
+ * Example: Bulbasaur (1) -> Ivysaur (2) -> Venusaur (3)
+ *
+ * @param chain - Root of evolution chain from PokeAPI
+ * @returns Flat array of Pokemon IDs in evolution chain
+ */
 function parseEvolutionChain(chain: EvolutionChainLink): number[] {
   const ids: number[] = [];
 
@@ -112,6 +152,14 @@ function parseEvolutionChain(chain: EvolutionChainLink): number[] {
   return ids;
 }
 
+/**
+ * Fetches evolution chain for a Pokemon
+ * Requires 2 API calls: species -> evolution_chain
+ * Results are cached to avoid repeated external API calls
+ *
+ * @param speciesUrl - URL to Pokemon species endpoint
+ * @returns Array of Pokemon IDs in evolution chain
+ */
 async function fetchEvolutionChain(speciesUrl: string): Promise<number[]> {
   try {
     const cacheKey = `evolution:${speciesUrl}`;
@@ -136,12 +184,22 @@ async function fetchEvolutionChain(speciesUrl: string): Promise<number[]> {
   }
 }
 
+/**
+ * Transforms PokeAPI data format to application format
+ * Normalizes stat names (e.g., "special-attack" -> "spAttack")
+ * Extracts relevant fields and discards unused data
+ *
+ * @param data - Raw Pokemon data from PokeAPI
+ * @param evolution - Array of related Pokemon IDs (from evolution chain)
+ * @returns Pokemon object in application format
+ */
 function transformPokemon(
   data: PokeAPIPokemon,
   evolution: number[] = []
 ): Pokemon {
   const sprite = data.sprites.front_default || '';
 
+  // Map PokeAPI stat names to our format
   const statsMap: Record<string, number> = {};
   data.stats.forEach((s) => {
     statsMap[s.stat.name] = s.base_stat;
@@ -167,6 +225,14 @@ function transformPokemon(
   };
 }
 
+/**
+ * Fetches a single Pokemon by National Pokedex ID
+ * Includes evolution chain data
+ * Results are cached to avoid repeated API calls
+ *
+ * @param id - National Pokedex number (1-1025)
+ * @returns Complete Pokemon data
+ */
 export async function fetchPokemonById(id: number): Promise<Pokemon> {
   const cacheKey = `pokemon:v2:${id}`;
   const cached = getCachedPokemon(cacheKey);
@@ -177,7 +243,7 @@ export async function fetchPokemonById(id: number): Promise<Pokemon> {
 
   const data = await fetchFromAPI<PokeAPIPokemon>(`${BASE_URL}/pokemon/${id}`);
   const evolutionChain = await fetchEvolutionChain(data.species.url);
-  // Filter out the current Pokemon from the evolution chain
+  // Filter out the current Pokemon from the evolution chain (show only related Pokemon)
   const evolution = evolutionChain.filter((evoId) => evoId !== id);
   const pokemon = transformPokemon(data, evolution);
 

@@ -17,6 +17,26 @@ interface TileCache {
   };
 }
 
+/**
+ * Hook managing canvas-based rendering for map tiles
+ *
+ * Features:
+ * - Hardware-accelerated canvas rendering with requestAnimationFrame loop
+ * - Device pixel ratio handling for sharp rendering on high-DPI displays
+ * - Tile cache integration for optimized image rendering
+ * - Desynchronized canvas context for better performance
+ * - Small overlap between tiles (0.5px) to prevent visual gaps
+ * - Fallback background color for unloaded tiles
+ *
+ * Performance optimizations:
+ * - Disabled image smoothing for crisp pixel art
+ * - Alpha disabled for faster compositing
+ * - Continuous render loop for smooth updates as tiles load
+ * - Refs for tile data to avoid unnecessary effect re-runs
+ *
+ * @param params - Configuration including container, tiles, cache, and viewport
+ * @returns Canvas reference for external access if needed
+ */
 export function useCanvasRenderer(params: {
   containerRef: React.RefObject<HTMLDivElement | null>;
   visibleTiles: VisibleTile[];

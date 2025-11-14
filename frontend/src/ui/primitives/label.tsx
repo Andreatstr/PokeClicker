@@ -3,6 +3,16 @@ import * as LabelPrimitive from '@radix-ui/react-label';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * Base label primitive
+ *
+ * Wraps Radix UI Label with accessibility features:
+ * - Automatic association with form controls
+ * - Disabled state handling via group-data and peer
+ * - Select-none for better UX
+ *
+ * Used as foundation for pixelact label component.
+ */
 function Label({
   className,
   ...props

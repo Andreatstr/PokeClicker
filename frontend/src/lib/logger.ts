@@ -13,6 +13,7 @@ interface LogConfig {
   includeContext: boolean;
 }
 
+// Numeric levels for minimum level filtering
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
@@ -23,6 +24,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 class Logger {
   private config: LogConfig = {
     enabled: true,
+    // Development shows debug logs, production only info and above
     minLevel: import.meta.env.DEV ? 'debug' : 'info',
     includeTimestamp: true,
     includeContext: true,
@@ -30,6 +32,7 @@ class Logger {
 
   /**
    * Configure the logger
+   * @param config - Partial configuration to merge with current config
    */
   configure(config: Partial<LogConfig>): void {
     this.config = {...this.config, ...config};
@@ -37,6 +40,7 @@ class Logger {
 
   /**
    * Check if a log level should be logged based on minimum level
+   * Uses numeric comparison (debug=0, info=1, warn=2, error=3)
    */
   private shouldLog(level: LogLevel): boolean {
     if (!this.config.enabled) return false;
@@ -44,7 +48,8 @@ class Logger {
   }
 
   /**
-   * Format log message with metadata
+   * Format log message with metadata (timestamp, level, context)
+   * Example output: "[2025-11-14T12:00:00.000Z] [INFO] [AuthService] User logged in"
    */
   private formatMessage(
     level: LogLevel,
@@ -105,7 +110,8 @@ class Logger {
   }
 
   /**
-   * Log error object with full details
+   * Log error object with full details including stack trace
+   * Extracts message and stack from Error objects
    */
   logError(error: unknown, context?: string): void {
     if (!this.shouldLog('error')) return;

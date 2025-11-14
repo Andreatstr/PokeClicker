@@ -3,6 +3,15 @@ import * as AvatarPrimitive from '@radix-ui/react-avatar';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * Base avatar component primitives
+ *
+ * Provides unstyled Radix UI Avatar components with minimal default styling.
+ * These primitives are wrapped by pixelact components for themed usage.
+ *
+ * Uses data-slot attributes for CSS targeting and component identification.
+ */
+
 function Avatar({
   className,
   ...props

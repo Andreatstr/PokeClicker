@@ -1,3 +1,30 @@
+/**
+ * Game Assets Cache
+ *
+ * Manages caching for game-specific assets used in the clicker and map features.
+ * Separates game assets from Pokemon sprites for better organization and preloading control.
+ *
+ * Asset Categories:
+ * 1. Clicker Game: Charizard sprite, candy image, rare candy icon, background
+ * 2. Map Feature: Ash sprite, map background, collision map
+ * 3. Rankings: Rare candy icon, candy image
+ *
+ * Preloading Strategy:
+ * - Feature-specific preload methods (preloadClickerAssets, preloadMapAssets)
+ * - Loads only assets needed for current feature to minimize initial bundle
+ * - Called when user navigates to specific features (lazy loading)
+ *
+ * Asset Sources:
+ * - Local files (public/ directory): Fast, bundled with app
+ * - PokeAPI GitHub CDN: Charizard sprite, rare candy icon
+ * - Mixed strategy balances bundle size vs external dependencies
+ *
+ * Performance:
+ * - Small WebP images for fast loading (~200KB total for clicker assets)
+ * - Collision map loaded only when entering map feature
+ * - Leverages imageCache two-tier system for persistence
+ */
+
 import {imageCache} from './imageCache';
 
 interface GameAssetUrls {
@@ -13,6 +40,7 @@ interface GameAssetUrls {
 class GameAssetsCache {
   private baseUrl = import.meta.env.BASE_URL;
   private gameAssets: Partial<GameAssetUrls> = {};
+  // Tracks which assets have been preloaded to avoid redundant loads
   private preloadedAssets = new Set<string>();
 
   private getGameAssetUrls(): GameAssetUrls {
@@ -67,6 +95,12 @@ class GameAssetsCache {
     return imageCache.getImage(urls.collisionMap);
   }
 
+  /**
+   * Preload all game assets
+   *
+   * Total size: ~500KB (all 7 assets)
+   * Use case: Offline PWA or ensuring all features work without network
+   */
   async preloadAllGameAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const assetUrls = Object.values(urls);
@@ -76,6 +110,13 @@ class GameAssetsCache {
     Object.keys(urls).forEach((asset) => this.preloadedAssets.add(asset));
   }
 
+  /**
+   * Preload clicker game assets
+   *
+   * Size: ~200KB (4 assets)
+   * Called when user enters clicker feature for instant visual feedback.
+   * Charizard sprite is critical for the clicking interaction.
+   */
   async preloadClickerAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const clickerAssets = [
@@ -97,6 +138,13 @@ class GameAssetsCache {
     });
   }
 
+  /**
+   * Preload map feature assets
+   *
+   * Size: ~300KB (3 assets, map background is largest)
+   * Called when user navigates to map feature.
+   * Collision map is critical for movement physics.
+   */
   async preloadMapAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const mapAssets = [urls.ashSprite, urls.mapBackground, urls.collisionMap];
@@ -108,6 +156,13 @@ class GameAssetsCache {
     });
   }
 
+  /**
+   * Preload rankings page assets
+   *
+   * Size: ~50KB (2 small icons)
+   * Called when user views leaderboard/rankings.
+   * Minimal size allows aggressive preloading.
+   */
   async preloadRanksAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const ranksAssets = [urls.rareCandyIcon, urls.candyImage];
@@ -119,34 +174,45 @@ class GameAssetsCache {
     });
   }
 
-  // Get cached asset URL without loading the image
+  /**
+   * Get asset URL without loading
+   *
+   * For components that manage their own loading or use img src directly
+   */
   getGameAssetUrl(assetName: keyof GameAssetUrls): string {
     return this.getGameAssetUrls()[assetName];
   }
 
-  // Check if an asset is preloaded
+  /**
+   * Check if asset has been preloaded
+   *
+   * Useful for conditional rendering or loading state management
+   */
   isAssetPreloaded(assetName: string): boolean {
     return this.preloadedAssets.has(assetName);
   }
 
-  // Get all preloaded assets
   getPreloadedAssets(): string[] {
     return Array.from(this.preloadedAssets);
   }
 
-  // Clear game assets cache
+  /**
+   * Clear URL cache and preload tracking
+   * Note: Doesn't clear actual images (use imageCache.clearCache for that)
+   */
   clearGameAssetsCache(): void {
     this.gameAssets = {};
     this.preloadedAssets.clear();
   }
 
-  // Get cache statistics
   getCacheStats() {
     return imageCache.getStats();
   }
 }
 
-// Export singleton instance
+/**
+ * Singleton instance - centralized game asset management
+ */
 export const gameAssetsCache = new GameAssetsCache();
 
 // Export types

@@ -8,6 +8,23 @@ import {
 import {toDecimal} from '@/lib/decimal';
 import {getPokemonCost} from '@/config';
 
+/**
+ * Hook for purchasing Pokemon with optimistic UI updates
+ *
+ * Features:
+ * - Mutation to unlock Pokemon using Rare Candy currency
+ * - Optimistic response for instant UI feedback (no loading flash)
+ * - Automatic cache update to reflect ownership across all Pokedex queries
+ * - Rare Candy deduction calculated client-side for immediate display
+ *
+ * Optimistic update strategy:
+ * - Immediately shows Pokemon as purchased before server confirms
+ * - Updates user's Rare Candy balance optimistically
+ * - Reverts automatically if mutation fails (Apollo built-in)
+ * - Cache update ensures isOwned field syncs across all queries
+ *
+ * @returns Mutation function with optimistic response configuration
+ */
 export function usePurchasePokemon() {
   const {user} = useAuth();
 
@@ -23,8 +40,8 @@ export function usePurchasePokemon() {
             data.purchasePokemon.owned_pokemon_ids.length - 1
           ];
 
-        // Update all cached pokedex queries by iterating through cache and updating
-        // the isOwned field for the matching Pokemon
+        // Update all cached pokedex queries to show Pokemon as owned
+        // Prevents need for refetch - UI updates instantly from cache
         cache.modify({
           fields: {
             pokedex(existingPokedexRef, {readField}) {
@@ -62,8 +79,10 @@ export function usePurchasePokemon() {
           },
         });
       },
+      // Optimistic response constructs expected server response before mutation completes
+      // This provides instant UI feedback while request is in flight
       optimisticResponse: (variables) => {
-        // Use actual user data from context instead of placeholder values
+        // Use actual user data from context for accurate optimistic state
         if (!user) {
           // Fallback to placeholder if no user (shouldn't happen in normal flow)
           return {

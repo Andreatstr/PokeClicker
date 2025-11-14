@@ -14,6 +14,18 @@ interface DialogSectionProps {
   className?: string;
 }
 
+/**
+ * Modal dialog component with accessibility features
+ *
+ * Features:
+ * - Portal rendering to document.body
+ * - Inert attribute on main content (prevents tab navigation behind modal)
+ * - Body scroll locking with position: fixed
+ * - Touch event handling for mobile
+ * - Click-outside to close
+ *
+ * Accessibility: Uses inert and aria-hidden to trap focus within modal.
+ */
 export function Dialog({open, onClose, children}: DialogProps) {
   // Make the main app content inert when modal is open
   // This prevents tabbing to elements behind the modal

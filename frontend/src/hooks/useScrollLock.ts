@@ -1,8 +1,17 @@
 import {useEffect} from 'react';
 
 /**
- * Custom hook for preventing page scrolling
- * Used for map page to prevent scrolling and enable touch controls
+ * Hook for preventing page scrolling and touch interactions
+ * Essential for map page to disable default scroll/refresh behaviors
+ *
+ * Features:
+ * - Prevents body/document scrolling
+ * - Disables pull-to-refresh on mobile
+ * - Blocks overscroll bounce effect
+ * - Prevents touchmove events (except in scrollable containers)
+ * - Sets viewport to fixed height for mobile
+ *
+ * @param isLocked - Whether scroll should be locked
  */
 export function useScrollLock(isLocked: boolean) {
   useEffect(() => {

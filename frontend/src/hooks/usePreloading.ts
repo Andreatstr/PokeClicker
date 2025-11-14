@@ -5,12 +5,24 @@ import {preloadService} from '@/lib/preloadService';
 type PageType = 'clicker' | 'ranks' | 'pokedex' | 'map' | 'login' | 'profile';
 
 /**
- * Custom hook for preloading assets based on current page
+ * Custom hook for intelligent page-based asset preloading
+ *
+ * Performance optimizations:
+ * - Uses requestIdleCallback to defer preloading until main thread is idle
+ * - Prevents preloading from blocking first paint (improves TBT metrics)
+ * - Preloads page-specific assets only (reduces unnecessary network requests)
+ * - Falls back to setTimeout for browsers without requestIdleCallback
+ *
+ * @param currentPage - Current active page to preload assets for
+ *
+ * @example
+ * usePreloading(currentPage);
  */
 export function usePreloading(currentPage: PageType) {
   useEffect(() => {
     const initializePreloading = async () => {
       try {
+        // Preload assets specific to the current page
         switch (currentPage) {
           case 'pokedex':
             await preloadService.preloadForPokedex();
@@ -25,6 +37,7 @@ export function usePreloading(currentPage: PageType) {
             await preloadService.preloadForMap();
             break;
           default:
+            // Preload common assets for other pages
             await preloadService.preloadAll({
               preloadCommonPokemon: true,
               preloadCommonTypes: true,
@@ -38,7 +51,7 @@ export function usePreloading(currentPage: PageType) {
     };
 
     // Use requestIdleCallback for non-critical preloading to avoid blocking the main thread
-    // This prevents preloading from competing with first paint and improves TBT
+    // This prevents preloading from competing with first paint and improves TBT (Total Blocking Time)
     const ric = (
       window as Window & {
         requestIdleCallback?: (cb: () => void) => number;
@@ -50,7 +63,7 @@ export function usePreloading(currentPage: PageType) {
         initializePreloading();
       });
     } else {
-      // Fallback to setTimeout if requestIdleCallback is not available
+      // Fallback to setTimeout for browsers without requestIdleCallback support
       setTimeout(() => {
         initializePreloading();
       }, 0);

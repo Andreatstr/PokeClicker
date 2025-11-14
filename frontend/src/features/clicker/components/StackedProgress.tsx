@@ -6,6 +6,16 @@ interface StackedProgressProps {
   upgradeColor?: string;
 }
 
+/**
+ * Two-layer progress bar showing base stats vs upgraded stats.
+ *
+ * Visual representation:
+ * - Base layer: lighter color showing Pokemon's natural stat
+ * - Upgrade layer: darker color showing additional stat from upgrades
+ * - Inset shadow for retro GameBoy feel
+ *
+ * Used in Pokemon detail modals to show stat improvements from upgrades.
+ */
 export function StackedProgress({
   baseValue,
   yourValue,

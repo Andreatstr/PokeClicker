@@ -10,7 +10,9 @@ import {
 } from '@/lib/graphql';
 
 /**
- * Hook to delete user account
+ * Hook to delete user account permanently
+ * Removes all user data including owned Pokemon, stats, and progress
+ * Should be followed by logout to clear auth state
  */
 export function useDeleteUser() {
   return useMutation<DeleteUserData>(DELETE_USER_MUTATION);
@@ -18,6 +20,8 @@ export function useDeleteUser() {
 
 /**
  * Hook to set user's favorite Pokemon
+ * Updates favorite_pokemon_id field displayed on profile
+ * Pass null to clear favorite
  */
 export function useSetFavoritePokemon() {
   return useMutation<SetFavoritePokemonData, PokemonIdVariables>(
@@ -26,7 +30,9 @@ export function useSetFavoritePokemon() {
 }
 
 /**
- * Hook to set user's selected Pokemon for clicker
+ * Hook to set user's selected Pokemon for clicker game
+ * Updates selected_pokemon_id used as active Pokemon in clicker
+ * Pass null to clear selection
  */
 export function useSetSelectedPokemon() {
   return useMutation<SetSelectedPokemonData, PokemonIdVariables>(

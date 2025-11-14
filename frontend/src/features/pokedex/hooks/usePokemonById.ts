@@ -24,6 +24,23 @@ interface UsePokemonByIdReturn {
 
 export type {PokemonStats, PokemonById};
 
+/**
+ * Hook for fetching single Pokemon with user-specific upgrade data
+ *
+ * Features:
+ * - Fetches base Pokemon data and user's upgrade level separately
+ * - Merges data to apply stat bonuses (+1 per stat per upgrade level)
+ * - Skips upgrade query if user not authenticated
+ * - Provides combined loading state and refresh function
+ *
+ * Stat calculation:
+ * - Base stats from Pokemon data
+ * - Bonus = max(0, upgradeLevel - 1) applied to all stats
+ * - Returns Pokemon with upgraded stats and upgradeLevel field
+ *
+ * @param id - Pokemon ID to fetch, null to skip query
+ * @returns Pokemon with upgraded stats, loading state, and refresh function
+ */
 export function usePokemonById(id: number | null): UsePokemonByIdReturn {
   const {isAuthenticated} = useAuth();
 

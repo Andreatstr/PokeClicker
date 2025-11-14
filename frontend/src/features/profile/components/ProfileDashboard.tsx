@@ -1,3 +1,29 @@
+/**
+ * User profile dashboard with Pokemon selection and account management.
+ *
+ * Features:
+ * - Display user stats (username, candy, Pokemon caught, join date)
+ * - Select favorite Pokemon for battles
+ * - Select clicker Pokemon for clicker game
+ * - Restart onboarding tutorial
+ * - Opt in/out of global ranks
+ * - Logout and delete account options
+ *
+ * State management:
+ * - useAuth: user data and authentication actions
+ * - usePokemonBasic: fetch Pokemon data for selections
+ * - useProfileHandlers: centralized handlers for all profile actions
+ * - Local state for modals and checkboxes
+ *
+ * User actions:
+ * - Select Pokemon: opens modal with owned Pokemon grid
+ * - Delete account: shows confirmation dialog, requires auth re-check
+ * - Ranks preference: persisted to backend immediately on toggle
+ * - Tutorial restart: resets onboarding state
+ *
+ * Data attributes:
+ * - data-onboarding="pokemon-selection" for tutorial targeting
+ */
 import {useState, useEffect} from 'react';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useOnboarding} from '@/hooks';

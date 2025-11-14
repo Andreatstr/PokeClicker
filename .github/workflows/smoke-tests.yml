@@ -71,8 +71,10 @@ jobs:
         run: |
           echo "VITE_GRAPHQL_URL=http://localhost:${{ env.BACKEND_PORT }}/" > frontend/.env.local
 
-      #- name: Run smoke tests
-      #  run: npx playwright test smoke.spec.ts --project=chromium
+      # Smoke tests temporarily disabled due to CI environment issues with onboarding modal
+      # TODO: Re-enable once onboarding modal blocking issue is resolved in CI
+      # - name: Run smoke tests
+      #   run: npx playwright test smoke.spec.ts --project=chromium
 
       - uses: actions/upload-artifact@v3
         if: failure()

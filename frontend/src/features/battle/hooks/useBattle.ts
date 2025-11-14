@@ -21,6 +21,28 @@ interface UseBattleProps {
   onBattleEnd: (result: 'victory' | 'defeat', damageDealt: number) => void;
 }
 
+/**
+ * Hook managing Pokemon battle mechanics with real-time combat system
+ *
+ * Features:
+ * - Click-based player attacks with damage calculations based on stats
+ * - Passive opponent attacks at intervals based on opponent speed
+ * - Charge meter system (builds passively + on click) for special abilities
+ * - Special attack: burst damage based on spAttack (2%-15% of opponent max HP)
+ * - Shield ability: blocks damage for duration based on spDefense (0.8-3.5s)
+ * - Scaled HP values for 30-45 second battles with active clicking
+ *
+ * Battle mechanics:
+ * - Player click damage: (attack - defense*0.4) * (1 + speed*0.05)
+ * - Opponent passive damage: (attack - defense*0.3) * 1.2
+ * - Opponent attack speed: 100ms-500ms based on total stats
+ * - HP scaling: Player 75x, Opponent 162x (1.8x harder for difficulty)
+ *
+ * @param playerPokemon - Player's Pokemon with stats
+ * @param opponentPokemon - Wild Pokemon to battle
+ * @param onBattleEnd - Callback when battle concludes with result and damage dealt
+ * @returns Battle state and action handlers
+ */
 export function useBattle({
   playerPokemon,
   opponentPokemon,
@@ -51,9 +73,12 @@ export function useBattle({
     null
   );
 
-  // Calculate attack speed based on opponent's stats
-  // Weak Pokemon (low total stats) attack ~2 times/second (500ms)
-  // Strong Pokemon (high total stats) attack ~10 times/second (100ms)
+  /**
+   * Calculate opponent's attack interval based on total stats
+   * Weak Pokemon (low total stats) attack ~2 times/second (500ms)
+   * Strong Pokemon (high total stats) attack ~10 times/second (100ms)
+   * Uses linear interpolation between min/max stats for balanced scaling
+   */
   const getAttackInterval = useCallback(() => {
     const stats = opponentPokemon.stats;
     const totalStats =
@@ -124,12 +149,12 @@ export function useBattle({
     });
   }, [calculateClickDamage]);
 
-  // Charge over time passively
+  // Passive charge meter buildup over time (2.5% per second + 2% per click)
   useEffect(() => {
     if (battleState.result !== 'ongoing' || !battleState.isActive) return;
 
     const tickMs = 200; // 5 ticks/sec
-    const perTick = 0.5; // 0.5% per tick => 2.5%/sec
+    const perTick = 0.5; // 0.5% per tick => 2.5%/sec (reaches 100% in 40s without clicking)
     const timer = setInterval(() => {
       setBattleState((prev) => {
         if (prev.result !== 'ongoing' || prev.isCharged) return prev;
@@ -147,6 +172,7 @@ export function useBattle({
     return () => clearInterval(timer);
   }, [battleState.result, battleState.isActive]);
 
+  // Opponent's passive damage timer - attacks player at intervals based on stats
   useEffect(() => {
     if (battleState.result !== 'ongoing' || !battleState.isActive) return;
 
@@ -158,7 +184,7 @@ export function useBattle({
       setBattleState((prev) => {
         if (prev.result !== 'ongoing') return prev;
 
-        // If shield is active, freeze health bar (no damage applied)
+        // Shield blocks all incoming damage until expiration
         if (prev.shieldActiveUntil && Date.now() < prev.shieldActiveUntil) {
           return prev;
         }
@@ -201,8 +227,12 @@ export function useBattle({
     }));
   }, []);
 
+  /**
+   * Trigger special attack ability when charge meter is full
+   * Deals burst damage based on player's spAttack stat (2%-15% of opponent's max HP)
+   * Consumes full charge meter
+   */
   const triggerSpecialAttack = useCallback(() => {
-    // Use when charged: deal burst damage based on spAttack and opponentMaxHP
     setBattleState((prev) => {
       if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
       const spA = playerPokemon.stats?.spAttack || 0;
@@ -220,8 +250,12 @@ export function useBattle({
     });
   }, [playerPokemon]);
 
+  /**
+   * Trigger shield ability when charge meter is full
+   * Blocks all incoming damage for duration based on player's spDefense (0.8-3.5s)
+   * Consumes full charge meter
+   */
   const triggerShield = useCallback(() => {
-    // Use when charged: freeze player HP for duration based on spDefense
     setBattleState((prev) => {
       if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
       const spD = playerPokemon.stats?.spDefense || 0;

@@ -1,11 +1,31 @@
+/**
+ * Server configuration for adaptive filter faceting
+ *
+ * Implements a performance optimization strategy for filter counts:
+ * - Small datasets (<10k Pokemon): Use dynamic aggregation for accurate real-time counts
+ * - Large datasets (>10k Pokemon): Use precomputed static counts for speed
+ *
+ * This prevents slow queries on large datasets while maintaining accuracy for smaller ones
+ */
 import 'dotenv/config';
 
-// Adaptive filter faceting configuration
-// Controls when to use dynamic vs static filter counts based on dataset size
-// For small datasets: compute counts dynamically per request (updates with filters)
-// For large datasets: use precomputed static counts (global, doesn't update)
+/**
+ * Threshold for switching between dynamic and static filter counts
+ * Below this value: aggregation queries run per request
+ * Above this value: precomputed counts are used
+ */
 export const DYNAMIC_FACET_THRESHOLD = parseInt(
   process.env.DYNAMIC_FACET_THRESHOLD || '10000'
-); // Use dynamic facets if total Pokemon <= this value
-export const FACET_TIMEOUT_MS = parseInt(process.env.FACET_TIMEOUT_MS || '100'); // Max time (ms) for facet aggregation before falling back to static counts
-export const USE_STATIC_FALLBACK = process.env.USE_STATIC_FALLBACK !== 'false'; // Enable fallback to precomputed static counts
+);
+
+/**
+ * Maximum time allowed for facet aggregation queries
+ * If exceeded, falls back to static counts to prevent slow responses
+ */
+export const FACET_TIMEOUT_MS = parseInt(process.env.FACET_TIMEOUT_MS || '100');
+
+/**
+ * Whether to enable fallback to static counts on timeout or error
+ * Can be disabled in development for debugging aggregation issues
+ */
+export const USE_STATIC_FALLBACK = process.env.USE_STATIC_FALLBACK !== 'false';

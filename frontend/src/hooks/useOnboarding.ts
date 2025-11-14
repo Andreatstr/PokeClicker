@@ -1,8 +1,21 @@
 import {useState, useEffect} from 'react';
 
 /**
- * Custom hook to manage the onboarding tutorial state
- * Shows tutorial on first visit, persists completion to localStorage
+ * Hook for managing onboarding tutorial state and progression
+ *
+ * Features:
+ * - Shows tutorial automatically on first visit
+ * - Persists completion to localStorage
+ * - Step-by-step progression (next/previous)
+ * - Skip functionality to dismiss tutorial
+ * - Manual restart for demo/testing purposes
+ *
+ * Tutorial flow:
+ * - Checks localStorage for 'onboarding_completed' flag
+ * - Activates tutorial if flag not present
+ * - Saves flag when tutorial skipped or completed
+ *
+ * @returns Tutorial state (step, isActive) and control functions
  */
 export function useOnboarding() {
   const [step, setStep] = useState(0);

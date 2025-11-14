@@ -1,3 +1,8 @@
+/**
+ * Test data factories
+ * Helper functions to create mock users, Pokemon, and Apollo responses for testing
+ */
+
 import type {User} from '@features/auth';
 import type {PokedexPokemon} from '@features/pokedex';
 

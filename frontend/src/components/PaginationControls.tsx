@@ -4,6 +4,17 @@ import {useMemo} from 'react';
 
 type PageItem = number | 'ellipsis';
 
+/**
+ * Generates smart truncated pagination with ellipsis.
+ *
+ * Logic:
+ * - Shows all pages if 9 or fewer
+ * - Near start (pages 1-4): shows 1-7, ..., last
+ * - Near end (last 4): shows 1, ..., last-6 to last
+ * - Middle: shows 1, ..., current±2, ..., last
+ *
+ * This provides maximum context while keeping UI compact.
+ */
 function generatePageNumbers(
   currentPage: number,
   totalPages: number
@@ -56,6 +67,26 @@ interface PaginationControlsProps {
   isDarkMode?: boolean;
 }
 
+/**
+ * Pagination controls with responsive design and smart page number display.
+ *
+ * Features:
+ * - Desktop: Full pagination with page numbers and ellipsis
+ * - Mobile: Simplified with just prev/next and page info
+ * - First/Last buttons shown only when needed
+ * - Loading state disables all buttons
+ * - Auto-blur after click to prevent focus ring persistence
+ *
+ * Performance:
+ * - Memoized focus handlers to avoid recreating functions
+ * - Efficient page number generation with ellipsis truncation
+ *
+ * Accessibility:
+ * - Custom focus ring styling (boxShadow-based)
+ * - aria-current for active page
+ * - aria-label for all buttons
+ * - Disabled states for boundaries
+ */
 export function PaginationControls({
   currentPage,
   totalPages,

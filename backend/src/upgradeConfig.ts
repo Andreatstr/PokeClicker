@@ -1,4 +1,9 @@
-// Formulas, costs, and upgrade behavior defined here
+/**
+ * Clicker game upgrade configuration
+ *
+ * Defines all upgrade types, their formulas, costs, and scaling behavior
+ * Each upgrade uses exponential cost growth to balance long-term progression
+ */
 
 export interface UpgradeConfig {
   key: string;
@@ -9,6 +14,16 @@ export interface UpgradeConfig {
   perPokemonBonus?: (level: number) => number;
 }
 
+/**
+ * Upgrade definitions with carefully balanced progression formulas
+ *
+ * Key design decisions:
+ * - clickPower & autoclicker: Exponential growth (1.0954^level) for consistent scaling
+ * - luckyHitChance: Logarithmic growth to prevent overpowered RNG
+ * - luckyHitMultiplier: Moderate exponential (1.2^level) since it's gated by chance
+ * - clickMultiplier: Linear growth (15% per level) as a multiplicative bonus
+ * - pokedexBonus: Scales with Pokemon collection, rewards exploration
+ */
 export const UPGRADES: Record<string, UpgradeConfig> = {
   clickPower: {
     key: 'clickPower',
@@ -60,6 +75,7 @@ export const BASE_UPGRADE_COST = 25;
 
 /**
  * Calculate upgrade cost for a given stat at a given level
+ * Uses exponential scaling: baseCost * multiplier^(level-1)
  */
 export function getUpgradeCost(statKey: string, currentLevel: number): number {
   const config = UPGRADES[statKey];

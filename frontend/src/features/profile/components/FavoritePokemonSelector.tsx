@@ -1,6 +1,15 @@
 import {Dialog, DialogBody} from '@ui/pixelact';
 import {usePokemonBasicBulk} from '../hooks/usePokemonBasic';
 
+/**
+ * Modal dialog for selecting a Pokemon from owned collection
+ *
+ * Features:
+ * - Efficient bulk query (fetches all owned Pokemon in single request)
+ * - Grid layout with responsive columns
+ * - Loading state handling
+ * - Dark mode support
+ */
 interface FavoritePokemonSelectorProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +25,7 @@ export function FavoritePokemonSelector({
   ownedPokemonIds,
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
-  // Fetch all owned Pokemon in a single query
+  // Fetch all owned Pokemon in a single query (only when dialog is open)
   const {data, loading} = usePokemonBasicBulk(isOpen ? ownedPokemonIds : []);
 
   const ownedPokemon = data?.pokemonByIds || [];

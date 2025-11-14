@@ -1,3 +1,8 @@
+/**
+ * GraphQL Schema Definition
+ * Complete type system for Pokemon clicker game API
+ */
+
 export const typeDefs = `#graphql
   type Query {
     health: HealthCheck!

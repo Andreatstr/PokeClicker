@@ -2,8 +2,21 @@ import {useState, useEffect} from 'react';
 import {type PokedexPokemon, usePokemonById} from '@features/pokedex';
 
 /**
- * Custom hook for managing Pokemon detail modal state
- * Handles modal open/close, selected Pokemon, and cross-region Pokemon fetching
+ * Hook for managing Pokemon detail modal state and interactions
+ *
+ * Features:
+ * - Modal open/close state management
+ * - Selected Pokemon tracking for detail view
+ * - Pokemon carousel (all Pokemon in current list)
+ * - Cross-region Pokemon fetching (when navigating to Pokemon outside current filter)
+ * - Purchase handler with optimistic UI update
+ *
+ * Navigation flow:
+ * - Opens with Pokemon from current list (carousel navigation works)
+ * - Fetches new data if navigating to Pokemon outside current list
+ * - Updates local state after purchase for immediate UI feedback
+ *
+ * @returns Modal state, selected Pokemon, and action handlers
  */
 export function usePokemonModal() {
   const [selectedPokemon, setSelectedPokemon] = useState<PokedexPokemon | null>(
@@ -17,7 +30,8 @@ export function usePokemonModal() {
 
   const {pokemon: crossRegionData} = usePokemonById(crossRegionPokemonId);
 
-  // Update selectedPokemon when cross-region data loads
+  // Update selectedPokemon when cross-region Pokemon data loads
+  // This handles navigation to Pokemon outside current filtered list
   useEffect(() => {
     if (crossRegionData) {
       // crossRegionData is already a PokedexPokemon, so use it directly

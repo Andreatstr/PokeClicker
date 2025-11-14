@@ -49,6 +49,29 @@ interface TileRendererState {
   isLoading: boolean;
 }
 
+/**
+ * Hook managing tile-based map rendering with viewport culling and caching
+ *
+ * Features:
+ * - Viewport-based tile culling (only loads/renders visible tiles + buffer)
+ * - Tile-based map system (330x190 tiles of 32px each = 10560x6080px total)
+ * - LRU cache with automatic cleanup (50 tile limit)
+ * - Priority loading: tiles sorted by distance from viewport center
+ * - Batched async loading (4 tiles at a time) for better mobile performance
+ * - Wild Pokemon positioning calculated in same cycle as tiles
+ * - Debounced updates (16ms) for smooth 60fps camera movement
+ *
+ * Performance optimizations:
+ * - Tiles loaded progressively as player moves
+ * - Cache prevents reloading recently viewed tiles
+ * - Non-blocking image loading with Promise.allSettled
+ * - Immediate tile state update when loaded (no wait for batch completion)
+ *
+ * @param camera - Current camera position in world coordinates
+ * @param viewportSize - Viewport dimensions for culling calculations
+ * @param wildPokemon - Array of spawned Pokemon for position calculations
+ * @returns Visible tiles, visible Pokemon, loading state, and tile cache ref
+ */
 export function useTileRenderer(
   camera: {x: number; y: number},
   viewportSize: {width: number; height: number},

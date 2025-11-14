@@ -4,8 +4,19 @@ import {isTokenExpired} from '@/lib/jwt';
 type PageType = 'pokedex' | 'ranks' | 'clicker' | 'map' | 'login' | 'profile';
 
 /**
- * Custom hook for page navigation with localStorage persistence
- * Handles initial page detection based on auth status and restores last visited page
+ * Custom hook for page navigation with localStorage persistence and authentication checks
+ *
+ * Features:
+ * - Validates authentication token on initial load
+ * - Restores last visited page for authenticated users
+ * - Automatically redirects to login for expired or missing tokens
+ * - Persists current page across sessions (except login page)
+ *
+ * @returns Object with currentPage state and setCurrentPage setter
+ *
+ * @example
+ * const { currentPage, setCurrentPage } = usePageNavigation();
+ * setCurrentPage('pokedex');
  */
 export function usePageNavigation() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
@@ -26,7 +37,7 @@ export function usePageNavigation() {
     return savedPage || 'pokedex';
   });
 
-  // Save current page to localStorage
+  // Save current page to localStorage (except login to avoid restoring login page on next visit)
   useEffect(() => {
     if (currentPage !== 'login') {
       localStorage.setItem('currentPage', currentPage);

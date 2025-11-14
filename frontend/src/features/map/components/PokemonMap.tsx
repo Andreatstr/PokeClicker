@@ -125,7 +125,7 @@ export function PokemonMap({
 
   // Custom hooks for game logic
   const collisionMap = useCollisionMap();
-  const movement = useMapMovement(collisionMap, renderSize);
+  const movement = useMapMovement(collisionMap, renderSize, inBattle);
   const pokemon = usePokemonSpawning(collisionMap, movement.worldPosition);
 
   // Responsive viewport calculation

@@ -3,6 +3,7 @@ import {GameConfig, getPokemonCost} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 import {toDecimal} from '@/lib/decimal';
+import {useCandyOperations} from '@/contexts/CandyOperationsContext';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations
@@ -10,6 +11,7 @@ import {toDecimal} from '@/lib/decimal';
 export function usePokemonPurchaseHandler() {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
+  const {localRareCandy, flushPendingCandy} = useCandyOperations();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
@@ -25,15 +27,26 @@ export function usePokemonPurchaseHandler() {
     setError(null);
 
     // Client-side validation: Check if user can afford the Pokemon
-    // This prevents the optimistic response from flashing the unlocked state
+    // Use localRareCandy if available (most up-to-date), otherwise fall back to user.rare_candy
+    const currentCandy = localRareCandy || user?.rare_candy || '0';
     const cost = getPokemonCost(pokemonId);
-    if (user && toDecimal(user.rare_candy).lt(cost)) {
+    if (toDecimal(currentCandy).lt(cost)) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
         errorTimeoutRef.current = null;
       }, GameConfig.purchase.errorDisplayDuration);
       return;
+    }
+
+    // Flush any pending candy to server before purchase to ensure server has latest amount
+    if (flushPendingCandy) {
+      try {
+        await flushPendingCandy();
+      } catch (err) {
+        // If flush fails, still attempt purchase - server will validate
+        console.warn('Failed to flush candy before purchase:', err);
+      }
     }
 
     try {

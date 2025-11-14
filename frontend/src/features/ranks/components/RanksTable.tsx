@@ -1,6 +1,15 @@
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {formatNumber} from '@/lib/formatNumber';
 
+/**
+ * Leaderboard table component with current user highlighting
+ *
+ * Features:
+ * - Responsive design (mobile-friendly column widths)
+ * - Current user row highlighting
+ * - Screen reader announcements for current user
+ * - Sticky footer showing user's rank
+ */
 interface RanksEntry {
   position: number;
   username: string;

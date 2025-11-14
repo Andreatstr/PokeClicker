@@ -1,34 +1,33 @@
+/**
+ * Database migration script for user stats initialization
+ *
+ * Purpose: Ensures backward compatibility when adding new upgrade types
+ * Initializes missing stats to level 1 for existing users
+ *
+ * Run with: npm run migrate-stats
+ *
+ * Why this is needed:
+ * When new upgrade types are added to upgradeConfig.ts, existing users
+ * don't have those stats in their database records. This migration ensures
+ * all users have all required stats, preventing null reference errors.
+ */
 import {connectToDatabase, closeDatabaseConnection} from './db.js';
 import {Collection} from 'mongodb';
 import {UserDocument} from './types.js';
 import {getClickerUpgradeKeys} from './upgradeConfig.js';
 
-/**
- * One-time migration script to initialize all clicker stats and showInRanks
- * for all existing users who don't have them.
- *
- * This ensures all users have:
- * - All stats defined in upgradeConfig.ts
- * - showInRanks field (defaults to true)
- *
- * Run with: npm run migrate-stats
- */
 async function migrateStats() {
   console.log('[MIGRATION] Starting stats migration...');
 
-  // Connect to database first
   const db = await connectToDatabase();
   const users = db.collection('users') as Collection<UserDocument>;
 
-  // Get all required clicker stats from config
   const requiredStats = getClickerUpgradeKeys();
   console.log(`[MIGRATION] Required stats: ${requiredStats.join(', ')}`);
 
-  // Count all users
   const totalUsers = await users.countDocuments();
   console.log(`[MIGRATION] Found ${totalUsers} total users`);
 
-  // Initialize missing stats for each user
   console.log('[MIGRATION] Initializing missing stats and showInRanks...');
 
   const allUsers = await users.find({}).toArray();
@@ -38,7 +37,7 @@ async function migrateStats() {
     const updates: Record<string, number | boolean> = {};
     let needsUpdate = false;
 
-    // Check and initialize stats
+    // Initialize any missing stats to level 1 (base level)
     for (const stat of requiredStats) {
       const statValue = (user.stats as Record<string, number | undefined>)[
         stat
@@ -49,7 +48,7 @@ async function migrateStats() {
       }
     }
 
-    // Check and initialize showInRanks
+    // Initialize showInRanks if missing (default: visible in leaderboards)
     if (user.showInRanks === undefined || user.showInRanks === null) {
       updates.showInRanks = true;
       needsUpdate = true;
@@ -69,12 +68,10 @@ async function migrateStats() {
   console.log(`[MIGRATION]   - Updated users: ${updatedCount}`);
   console.log(`[MIGRATION]   - Skipped users: ${totalUsers - updatedCount}`);
 
-  // Close database connection
   await closeDatabaseConnection();
   process.exit(0);
 }
 
-// Run the migration
 migrateStats().catch(async (err) => {
   console.error('[MIGRATION] Migration failed:', err);
   await closeDatabaseConnection();

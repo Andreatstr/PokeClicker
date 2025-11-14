@@ -1,3 +1,8 @@
+/**
+ * UI Primitives
+ * Radix UI wrappers with consistent styling and accessibility
+ */
+
 // Base Radix UI wrapper components
 export {Button} from './button';
 export {

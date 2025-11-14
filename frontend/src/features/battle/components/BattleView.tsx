@@ -1,7 +1,34 @@
+/**
+ * Pokemon battle view with turn-based combat mechanics.
+ *
+ * Features:
+ * - Click-based attack system (player clicks to deal damage)
+ * - Charge meter fills with clicks, enables special attack
+ * - Shield ability to reduce incoming damage
+ * - Responsive battle animations and visual feedback
+ * - Platform sprites based on Pokemon type
+ * - Victory rewards: rare candy based on clicks and opponent stats
+ * - Candy auto-awarded once per battle on victory
+ *
+ * Battle mechanics:
+ * - Player attacks on click based on their Pokemon's attack stat
+ * - Opponent auto-attacks at intervals based on speed stat
+ * - Charge attack: deals 3x damage when meter full
+ * - Shield: reduces damage by 75% temporarily
+ *
+ * State management:
+ * - useBattle hook manages HP, attacks, and win/loss detection
+ * - Candy calculations use player stats and click count
+ * - Awards synced to backend via updateRareCandy mutation
+ *
+ * Integration:
+ * - Accepts attack function callback for external controls (map keyboard)
+ * - Fullscreen mode support for map integration
+ * - Mobile-responsive layout
+ */
 import {useState, useEffect, useRef, useMemo} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
-import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
 import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
@@ -9,6 +36,7 @@ import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getPlatformImage} from '../utils/platformMapping';
 import {toDecimal} from '@/lib/decimal';
+import {useCandyOperations} from '@/contexts/CandyOperationsContext';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -27,8 +55,8 @@ export function BattleView({
   onAttackFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
-  const {user, updateUser} = useAuth();
-  const {updateRareCandy} = useGameMutations();
+  const {user} = useAuth();
+  const {addCandy} = useCandyOperations();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
 
@@ -124,19 +152,14 @@ export function BattleView({
     if (
       battleResult === 'victory' &&
       toDecimal(rareCandyReward).gt(0) &&
-      !candyAwarded
+      !candyAwarded &&
+      addCandy
     ) {
-      // Award candy immediately
-      updateRareCandy(rareCandyReward, updateUser);
+      // Award candy via clicker's addCandy to maintain consistent batching
+      addCandy(rareCandyReward);
       setCandyAwarded(true);
     }
-  }, [
-    battleResult,
-    rareCandyReward,
-    candyAwarded,
-    updateRareCandy,
-    updateUser,
-  ]);
+  }, [battleResult, rareCandyReward, candyAwarded, addCandy]);
 
   type LayoutPosition = {
     width: string;

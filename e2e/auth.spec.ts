@@ -21,10 +21,10 @@ test.describe("Authentication", () => {
     const password = "testpass123";
 
     await login.register(username, password);
-    await page.waitForTimeout(2000);
+    // Wait for search box to appear after registration
+    await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
     expect(await login.isOnLoginPage()).toBe(false);
-    await expect(page.getByText("search")).toBeVisible();
   });
 
   test("should login existing user", async ({ page }) => {
@@ -32,16 +32,19 @@ test.describe("Authentication", () => {
     const password = "testpass123";
 
     await login.register(username, password);
-    await page.waitForTimeout(2000);
+    // Wait for search box to appear after registration
+    await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.waitForLoadState("domcontentloaded");
-    await page.waitForTimeout(1000);
+    // Wait for login page to appear after reload
+    await expect(login.loginModalButton).toBeVisible({ timeout: 5000 });
 
     if (await login.isOnLoginPage()) {
       await login.login(username, password);
-      await page.waitForTimeout(2000);
+      // Wait for search box to appear after login
+      await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
       expect(await login.isOnLoginPage()).toBe(false);
     }
@@ -51,9 +54,9 @@ test.describe("Authentication", () => {
     await expect(login.guestButton).toBeVisible();
 
     await login.loginAsGuest();
-    await page.waitForTimeout(1000);
+    // Wait for search box to appear after guest login
+    await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
 
     expect(await login.isOnLoginPage()).toBe(false);
-    await expect(page.getByText(/search/i)).toBeVisible();
   });
 });

@@ -1,3 +1,27 @@
+/**
+ * Pokemon Sprite Cache
+ *
+ * Domain-specific caching layer for Pokemon sprites from PokeAPI's GitHub CDN.
+ * Wraps the generic imageCache with Pokemon-specific logic and URL management.
+ *
+ * Sprite Variants:
+ * - officialArtwork: High-quality artwork (used in Pokedex)
+ * - frontDefault: In-game front sprite (used in battles)
+ * - backDefault: In-game back sprite (player's Pokemon)
+ * - frontShiny: Shiny front sprite (rare variants)
+ * - backShiny: Shiny back sprite
+ *
+ * Performance Optimizations:
+ * - URL construction cache avoids string concatenation overhead
+ * - Preload strategies for common use cases (first page, evolution chains)
+ * - Leverages underlying two-tier imageCache for actual storage
+ *
+ * Rate Limit Considerations:
+ * - GitHub CDN: 60 requests/hour for unauthenticated users
+ * - Preloading is batched via imageCache to respect limits
+ * - Cache persistence reduces repeated API hits
+ */
+
 import {imageCache} from './imageCache';
 import {logger} from '@/lib/logger';
 
@@ -10,13 +34,15 @@ interface PokemonSpriteUrls {
 }
 
 class PokemonSpriteCache {
-  // Use PokeAPI's CDN instead of GitHub raw - better rate limits
   private baseUrl =
     'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
   private officialArtworkUrl =
     'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
 
-  // Cache for sprite URLs to avoid repeated URL construction
+  /**
+   * URL construction cache - prevents repeated string operations
+   * Maps Pokemon ID to all sprite variant URLs for O(1) lookup
+   */
   private spriteUrlCache = new Map<number, PokemonSpriteUrls>();
 
   private getSpriteUrls(pokemonId: number): PokemonSpriteUrls {
@@ -59,6 +85,13 @@ class PokemonSpriteCache {
     return imageCache.preloadImages(urls);
   }
 
+  /**
+   * Preload evolution chain sprites
+   *
+   * Optimizes the evolution modal experience by preloading all Pokemon
+   * in an evolution chain. When user clicks an evolution, the sprite
+   * loads instantly from cache.
+   */
   async preloadPokemonEvolutionChain(pokemonIds: number[]): Promise<void> {
     const allUrls: string[] = [];
 
@@ -70,14 +103,24 @@ class PokemonSpriteCache {
     await imageCache.preloadImages(allUrls);
   }
 
-  // Preload common Pokemon sprites (first 20 Pokemon - 1 page worth)
-  // Reduced to avoid GitHub rate limits
+  /**
+   * Preload first page of Pokemon
+   *
+   * Called on app startup to cache the initial Pokedex view.
+   * 20 Pokemon = 1 page worth of data for instant first-page load.
+   * Reduced from 151 to respect GitHub rate limits.
+   */
   async preloadCommonPokemon(): Promise<void> {
     const commonIds = Array.from({length: 20}, (_, i) => i + 1);
     await this.preloadPokemonSprites(commonIds, 'frontDefault');
   }
 
-  // Preload Pokemon sprites for a specific range
+  /**
+   * Preload Pokemon range (pagination support)
+   *
+   * Used for progressive loading as user scrolls through Pokedex.
+   * Preloads next page before user reaches it for smooth experience.
+   */
   async preloadPokemonRange(startId: number, endId: number): Promise<void> {
     const ids = Array.from(
       {length: endId - startId + 1},
@@ -86,7 +129,12 @@ class PokemonSpriteCache {
     await this.preloadPokemonSprites(ids, 'frontDefault');
   }
 
-  // Get cached sprite URL without loading the image
+  /**
+   * Get sprite URL without loading image
+   *
+   * Useful for components that need URLs for img src attributes
+   * without triggering cache logic (e.g., lazy loading with Intersection Observer)
+   */
   getPokemonSpriteUrl(
     pokemonId: number,
     variant: keyof PokemonSpriteUrls = 'frontDefault'
@@ -94,18 +142,22 @@ class PokemonSpriteCache {
     return this.getSpriteUrls(pokemonId)[variant];
   }
 
-  // Clear Pokemon-specific cache
+  /**
+   * Clear URL construction cache
+   * Note: Doesn't clear actual image cache (use imageCache.clearCache for that)
+   */
   clearPokemonCache(): void {
     this.spriteUrlCache.clear();
   }
 
-  // Get cache statistics
   getCacheStats() {
     return imageCache.getStats();
   }
 }
 
-// Export singleton instance
+/**
+ * Singleton instance - centralized Pokemon sprite management
+ */
 export const pokemonSpriteCache = new PokemonSpriteCache();
 
 // Export types

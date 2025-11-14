@@ -1,9 +1,27 @@
+/**
+ * Pokemon metadata seeding script
+ *
+ * Fetches Pokemon data from PokéAPI and populates the database
+ * Also precomputes static filter counts for performance optimization
+ *
+ * Run with: npm run seed
+ *
+ * Process:
+ * 1. Fetches all Pokemon (1-1025) from PokéAPI in batches
+ * 2. Stores name, types, generation, and sprite in database
+ * 3. Creates indexes for efficient querying
+ * 4. Precomputes static filter counts for type and generation filters
+ */
 import {connectToDatabase} from './db.js';
 import fetch from 'node-fetch';
 import {ObjectId} from 'mongodb';
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
+/**
+ * Pokemon generation ranges
+ * Used to classify Pokemon by their region/generation
+ */
 const GENERATION_RANGES: Record<string, {start: number; end: number}> = {
   kanto: {start: 1, end: 151},
   johto: {start: 152, end: 251},
@@ -47,6 +65,10 @@ interface PokeAPIPokemon {
   };
 }
 
+/**
+ * Fetches Pokemon metadata from PokéAPI
+ * Extracts only the fields needed for the Pokedex browser
+ */
 async function fetchPokemonMetadata(id: number) {
   try {
     const response = await fetch(`${BASE_URL}/pokemon/${id}`);
@@ -76,7 +98,6 @@ async function seedPokemon() {
   const db = await connectToDatabase();
   const collection = db.collection('pokemon_metadata');
 
-  // Check if already seeded
   const count = await collection.countDocuments();
   if (count > 0) {
     console.log(
@@ -92,6 +113,7 @@ async function seedPokemon() {
   const totalPokemon = 1025;
   const batchSize = 50;
 
+  // Fetch in batches to avoid overwhelming the API
   for (let i = 1; i <= totalPokemon; i += batchSize) {
     const endBatch = Math.min(i + batchSize - 1, totalPokemon);
     console.log(`Fetching Pokemon ${i}-${endBatch}...`);
@@ -105,21 +127,24 @@ async function seedPokemon() {
     const validPokemon = batch.filter((p) => p !== null);
     pokemonMetadata.push(...validPokemon);
 
-    // Small delay to avoid rate limiting
+    // Rate limiting: small delay between batches
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   console.log(`Inserting ${pokemonMetadata.length} Pokemon into database...`);
   await collection.insertMany(pokemonMetadata);
 
-  // Create indexes for efficient querying
   console.log('Creating indexes...');
   await collection.createIndex({name: 1});
   await collection.createIndex({generation: 1});
   await collection.createIndex({types: 1});
   await collection.createIndex({id: 1}, {unique: true});
 
-  // Compute and store static filter counts for large dataset fallback
+  /**
+   * Precompute static filter counts
+   * These are used as a fallback when dynamic aggregation is too slow
+   * See config.ts for when static vs dynamic counts are used
+   */
   console.log('Computing static filter counts...');
 
   const generationCounts = await collection
@@ -135,14 +160,13 @@ async function seedPokemon() {
 
   const countsCollection = db.collection('filter_counts');
 
-  // Drop existing filter_counts collection if it exists
   const existingCounts = await countsCollection.countDocuments();
   if (existingCounts > 0) {
     console.log('Dropping existing filter_counts collection...');
     await countsCollection.drop();
   }
 
-  // Insert new counts
+  // Store global counts for use in filter UI
   await countsCollection.insertOne({
     _id: 'global_counts' as unknown as ObjectId,
     byGeneration: Object.fromEntries(

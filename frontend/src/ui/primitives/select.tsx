@@ -4,6 +4,20 @@ import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from 'lucide-react';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * Base select dropdown primitives
+ *
+ * Wraps Radix UI Select with default styling:
+ * - Trigger with chevron icon
+ * - Portal-rendered dropdown content
+ * - Scroll buttons for long lists
+ * - Item selection indicators (checkmarks)
+ * - Size variants (sm, default)
+ * - Invalid state styling via aria-invalid
+ *
+ * All components use data-slot attributes for CSS targeting.
+ */
+
 function Select({...props}: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
