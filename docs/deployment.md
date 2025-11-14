@@ -1,61 +1,60 @@
-# Deployment-guide
+# Deployment Guide
 
-Denne guiden forklarer hvordan du deployer PokéClicker-applikasjonen til `http://it2810-26.idi.ntnu.no/project2/`
+This guide explains how to deploy the PokéClicker application to `https://it2810-26.idi.ntnu.no/project2/`
 
-## Oversikt
+## Overview
 
-- Frontend: Serveres via Apache på `/project2/`
-- Backend: GraphQL API proxyet gjennom Apache på `/project2/graphql`
-- Backend kjører på `localhost:3001` og er reverse-proxyet av Apache
+- Frontend: Served via Apache at `/project2/`
+- Backend: GraphQL API proxied through Apache at `/project2/graphql`
+- Backend runs on `localhost:3001` and is reverse-proxied by Apache
 
-## Forutsetninger
+## Prerequisites
 
-- Apache webserver med nødvendige moduler
-- Node.js og npm/pnpm installert
-- MongoDB-instans (valgfritt, appen kan kjøre uten database)
-- Tilgang til server med sudo-rettigheter
+- Apache webserver with necessary modules
+- Node.js and npm installed
+- MongoDB instance
+- Server access with sudo privileges
 
-## Rask deployment
+## Quick Deployment
 
-Kjør automatisert deployment-skript:
+Run the automated deployment script:
 
 ```bash
 ./deploy.sh
 ```
 
-Dette skriptet vil:
+This script will:
+1. Build frontend
+2. Build backend
+3. Deploy frontend to `/var/www/html/project2`
+4. Deploy backend to `~/project2-backend`
+5. Provide instructions for Apache configuration and backend setup
 
-1. Bygge frontend
-2. Bygge backend
-3. Deploye frontend til `/var/www/html/project2`
-4. Deploye backend til `~/project2-backend`
-5. Gi instruksjoner for Apache-konfigurasjon og backend-oppsett
+## Manual Deployment Steps
 
-## Manuelle deployment-steg
-
-### 1. Bygg frontend
+### 1. Build Frontend
 
 ```bash
-pnpm install
-pnpm run build
+npm install
+npm run build
 ```
 
-De bygde filene vil være i `dist/`-mappen.
+Built files will be in the `dist/` folder.
 
-### 2. Bygg backend
+### 2. Build Backend
 
 ```bash
 cd backend
-pnpm install
-pnpm run build
+npm install
+npm run build
 cd ..
 ```
 
-Den kompilerte backenden vil være i `backend/dist/`.
+Compiled backend will be in `backend/dist/`.
 
-### 3. Deploy frontend
+### 3. Deploy Frontend
 
-Kopier bygd frontend til Apache-mappe:
+Copy built frontend to Apache directory:
 
 ```bash
 sudo cp -r dist /var/www/html/project2
@@ -63,15 +62,15 @@ sudo chown -R www-data:www-data /var/www/html/project2
 sudo chmod -R 755 /var/www/html/project2
 ```
 
-### 4. Konfigurer Apache
+### 4. Configure Apache
 
-Aktiver nødvendige moduler:
+Enable necessary modules:
 
 ```bash
 sudo a2enmod proxy proxy_http headers rewrite
 ```
 
-Kopier Apache-konfigurasjonen:
+Copy Apache configuration:
 
 ```bash
 sudo cp apache-config.conf /etc/apache2/sites-available/project2.conf
@@ -79,9 +78,9 @@ sudo a2ensite project2
 sudo systemctl reload apache2
 ```
 
-### 5. Deploy backend
+### 5. Deploy Backend
 
-Kopier backend-filer:
+Copy backend files:
 
 ```bash
 mkdir -p ~/project2-backend
@@ -91,47 +90,41 @@ cp backend/package.json ~/project2-backend/
 cp backend/.env.example ~/project2-backend/.env
 ```
 
-Konfigurer miljøvariabler:
+Configure environment variables:
 
 ```bash
 cd ~/project2-backend
 nano .env
 ```
 
-Sett følgende variabler i `.env`:
+Set the following variables in `.env`:
 
 ```env
 PORT=3001
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB_NAME=pokeclicker_db
+JWT_SECRET=your_secure_secret_here
 ```
 
-Se [README - Miljøvariabler](../README.md#environment-variables) for detaljer.
+See [Setup Guide](./setup.md#environment-variables) for details.
 
-### 6. Start backend-tjeneste
+### 6. Start Backend Service
 
-For utvikling/testing:
-
-```bash
-cd ~/project2-backend
-pnpm start
-```
-
-For produksjon (med PM2):
+For production (with PM2):
 
 ```bash
-pnpm install -g pm2
+npm install -g pm2
 cd ~/project2-backend
 pm2 start dist/index.js --name project2-backend
 pm2 save
-pm2 startup  # Følg instruksjonene for å aktivere oppstart ved boot
+pm2 startup  # Follow instructions to enable startup on boot
 ```
 
-## Konfigurasjonsdetaljer
+## Configuration Details
 
-### Vite-konfigurasjon
+### Vite Configuration
 
-`vite.config.ts` har allerede base path konfigurert:
+`vite.config.ts` has base path configured:
 
 ```typescript
 export default defineConfig({
@@ -140,79 +133,76 @@ export default defineConfig({
 });
 ```
 
-### Apollo Client-konfigurasjon
+### Apollo Client Configuration
 
-Apollo Client i `src/lib/apolloClient.ts` bruker automatisk:
+Apollo Client in `src/lib/apolloClient.ts` automatically uses:
+- Production: `/project2/graphql` (proxied by Apache)
+- Development: `http://localhost:3001/` (direct connection)
 
-- Produksjon: `/project2/graphql` (proxyet av Apache)
-- Utvikling: `http://localhost:3001/` (direkte tilkobling)
+### Apache Configuration
 
-### Apache-konfigurasjon
+The `apache-config.conf` file configures:
+- Frontend serving at `/project2/`
+- SPA routing (all routes serve `index.html`)
+- GraphQL proxy from `/project2/graphql` to `http://localhost:3001/`
+- CORS headers for frontend-backend communication
 
-`apache-config.conf`-filen konfigurerer:
+## Testing Deployment
 
-- Frontend-serving på `/project2/`
-- SPA-routing (alle ruter server `index.html`)
-- GraphQL-proxy fra `/project2/graphql` til `http://localhost:3001/`
-- CORS-headers for frontend-backend-kommunikasjon
+After deployment, test the following:
 
-## Testing
-
-Etter deployment, test følgende:
-
-1. **Frontend tilgjengelig**: `http://it2810-26.idi.ntnu.no/project2/`
-2. **GraphQL-endepunkt**:
+1. **Frontend accessible**: `https://it2810-26.idi.ntnu.no/project2/`
+2. **GraphQL endpoint**:
    ```bash
-   curl http://it2810-26.idi.ntnu.no/project2/graphql \
+   curl https://it2810-26.idi.ntnu.no/project2/graphql \
      -H "Content-Type: application/json" \
      -d '{"query":"{ health { status timestamp } }"}'
    ```
-3. **SPA-routing**: Naviger til `http://it2810-26.idi.ntnu.no/project2/pokedex` og refresh
-4. **Backend-kommunikasjon**: Prøv å hente Pokémon-data gjennom frontend
+3. **SPA routing**: Navigate to `https://it2810-26.idi.ntnu.no/project2/pokedex` and refresh
+4. **Backend communication**: Try fetching Pokémon data through frontend
 
-For GraphQL API-referanse, se [GRAPHQL.md](./GRAPHQL.md)
+[GraphQL API Reference](./GRAPHQL.md)
 
-## Feilsøking
+## Troubleshooting
 
-### Frontend viser 404 ved refresh
+### Frontend shows 404 on refresh
 
-Sørg for at Apache rewrite-regler er aktivert og konfigurasjonen er korrekt.
+Ensure Apache rewrite rules are enabled and configuration is correct.
 
-### Backend ikke tilgjengelig
+### Backend not accessible
 
-Sjekk at:
+Check that:
+- Backend service is running: `pm2 status` or `ps aux | grep node`
+- Backend is listening on port 3001: `netstat -tulpn | grep 3001`
+- Apache proxy modules are enabled: `apache2ctl -M | grep proxy`
 
-- Backend-tjeneste kjører: `pm2 status` eller `ps aux | grep node`
-- Backend lytter på port 3001: `netstat -tulpn | grep 3001`
-- Apache proxy-moduler er aktivert: `apache2ctl -M | grep proxy`
+### CORS errors
 
-### CORS-feil
+Verify that Apache configuration includes CORS headers for both frontend directory and GraphQL location.
 
-Verifiser at Apache-konfigurasjonen inkluderer CORS-headers for både frontend-mappen og GraphQL-lokasjonen.
+### Frontend cannot connect to backend
 
-### Frontend kan ikke koble til backend
+Check browser console for GraphQL endpoint URL. It should be `/project2/graphql` in production.
 
-Sjekk nettleserkonsollet for GraphQL-endepunkt-URL. Det skal være `/project2/graphql` i produksjon.
+## Monitoring
 
-## Monitorering
-
-Monitorér backend-tjenesten:
+Monitor backend service:
 
 ```bash
-# Med PM2
+# With PM2
 pm2 logs project2-backend
 pm2 monit
 
-# Sjekk Apache-logger
+# Check Apache logs
 sudo tail -f /var/log/apache2/project2-error.log
 sudo tail -f /var/log/apache2/project2-access.log
 ```
 
-## Oppdatere deployment
+## Updating Deployment
 
-For å oppdatere etter endringer:
+To update after changes:
 
-1. Pull siste endringer: `git pull`
-2. Kjør deployment-skript: `./deploy.sh`
+1. Pull latest changes: `git pull`
+2. Run deployment script: `./deploy.sh`
 3. Restart backend: `pm2 restart project2-backend`
 4. Reload Apache: `sudo systemctl reload apache2`
