@@ -6,6 +6,7 @@ import type {User} from '@/lib/graphql/types';
 // Mock dependencies
 const mockPurchasePokemon = vi.fn();
 const mockUpdateUser = vi.fn();
+const mockFlushPendingCandy = vi.fn();
 let mockUser: User = {
   _id: '1',
   username: 'testuser',
@@ -32,6 +33,15 @@ vi.mock('@features/auth', () => ({
   useAuth: () => ({
     user: mockUser,
     updateUser: mockUpdateUser,
+  }),
+}));
+
+vi.mock('@/contexts/CandyOperationsContext', () => ({
+  useCandyOperations: () => ({
+    localRareCandy: String(mockUser.rare_candy),
+    flushPendingCandy: mockFlushPendingCandy,
+    addCandy: vi.fn(),
+    registerOperations: vi.fn(),
   }),
 }));
 
@@ -63,6 +73,7 @@ describe('usePokemonPurchaseHandler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockFlushPendingCandy.mockResolvedValue(undefined);
     mockUser = {
       _id: '1',
       username: 'testuser',

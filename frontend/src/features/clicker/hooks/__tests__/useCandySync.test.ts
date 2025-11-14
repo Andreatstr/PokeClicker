@@ -140,37 +140,30 @@ describe('useCandySync', () => {
     });
   });
 
-  describe('batching - click threshold', () => {
-    it('should flush when click threshold reached', async () => {
-      mockUpdateRareCandy.mockResolvedValue(undefined);
-      const {result} = renderHook(() => useCandySync(mockProps));
-
-      // Add candies to reach threshold (50 by default in GameConfig)
-      await act(async () => {
-        for (let i = 0; i < 50; i++) {
-          result.current.addCandy(1);
-        }
-        // The effect should trigger immediately when threshold is reached
-        await vi.runAllTimersAsync();
-      });
-
-      // Flush should have been called immediately (no timer needed)
-      expect(mockUpdateRareCandy).toHaveBeenCalledWith(
-        '50',
-        mockProps.updateUser
-      );
-      expect(result.current.unsyncedAmount).toBe('0');
-    });
-
-    it('should not flush below threshold', () => {
+  describe('batching - no amount threshold', () => {
+    it('should not flush immediately regardless of amount', () => {
       const {result} = renderHook(() => useCandySync(mockProps));
 
       act(() => {
-        result.current.addCandy(10);
+        result.current.addCandy(1000); // Large amount
+      });
+
+      // Should not flush immediately - only time-based flushing now
+      expect(mockUpdateRareCandy).not.toHaveBeenCalled();
+      expect(result.current.unsyncedAmount).toBe('1000');
+    });
+
+    it('should accumulate large amounts without immediate flush', () => {
+      const {result} = renderHook(() => useCandySync(mockProps));
+
+      act(() => {
+        result.current.addCandy(100);
+        result.current.addCandy(500);
+        result.current.addCandy(1000);
       });
 
       expect(mockUpdateRareCandy).not.toHaveBeenCalled();
-      expect(result.current.unsyncedAmount).toBe('10');
+      expect(result.current.unsyncedAmount).toBe('1600');
     });
   });
 

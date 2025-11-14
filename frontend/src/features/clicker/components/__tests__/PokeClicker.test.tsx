@@ -71,6 +71,16 @@ vi.mock('@/lib/gameAssetsCache', () => ({
   },
 }));
 
+// Mock CandyOperationsContext
+vi.mock('@/contexts/CandyOperationsContext', () => ({
+  useCandyOperations: () => ({
+    localRareCandy: '1000',
+    flushPendingCandy: vi.fn(),
+    addCandy: vi.fn(),
+    registerOperations: vi.fn(),
+  }),
+}));
+
 describe('PokeClicker component', () => {
   beforeEach(() => {
     vi.clearAllMocks();

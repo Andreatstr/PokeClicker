@@ -29,7 +29,6 @@
 import {useState, useEffect, useRef, useMemo} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
-import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
 import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
@@ -37,6 +36,7 @@ import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getPlatformImage} from '../utils/platformMapping';
 import {toDecimal} from '@/lib/decimal';
+import {useCandyOperations} from '@/contexts/CandyOperationsContext';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -55,8 +55,8 @@ export function BattleView({
   onAttackFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
-  const {user, updateUser} = useAuth();
-  const {updateRareCandy} = useGameMutations();
+  const {user} = useAuth();
+  const {addCandy} = useCandyOperations();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
 
@@ -152,19 +152,14 @@ export function BattleView({
     if (
       battleResult === 'victory' &&
       toDecimal(rareCandyReward).gt(0) &&
-      !candyAwarded
+      !candyAwarded &&
+      addCandy
     ) {
-      // Award candy immediately
-      updateRareCandy(rareCandyReward, updateUser);
+      // Award candy via clicker's addCandy to maintain consistent batching
+      addCandy(rareCandyReward);
       setCandyAwarded(true);
     }
-  }, [
-    battleResult,
-    rareCandyReward,
-    candyAwarded,
-    updateRareCandy,
-    updateUser,
-  ]);
+  }, [battleResult, rareCandyReward, candyAwarded, addCandy]);
 
   type LayoutPosition = {
     width: string;
