@@ -1,5 +1,12 @@
 import {formatNumber} from '@/lib/formatNumber';
 
+/**
+ * Props for the unlock button component
+ *
+ * @param error - Error message to display (triggers red error state with shake animation)
+ * @param pokemonName - Used for accessible button label
+ * @param isDarkMode - Controls focus ring colors
+ */
 interface UnlockButtonProps {
   onClick: (e: React.MouseEvent) => void;
   cost: number;
@@ -9,6 +16,18 @@ interface UnlockButtonProps {
   isDarkMode?: boolean;
 }
 
+/**
+ * Specialized button for unlocking Pokemon with candy cost display
+ *
+ * Features:
+ * - Golden gradient background with shimmer animation
+ * - Error state with red background and shake animation
+ * - Embedded cost display with candy icon
+ * - Pixel-style shadow that lifts on hover
+ * - Theme-aware focus rings
+ *
+ * Used in the clicker game for stat upgrades and Pokemon unlocks.
+ */
 export function UnlockButton({
   onClick,
   cost,

@@ -2,6 +2,22 @@ import * as React from 'react';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * Base card component primitives
+ *
+ * Provides unstyled card structure with semantic sections:
+ * - Card: Container with rounded corners and border
+ * - CardHeader: Title and action area with grid layout
+ * - CardTitle: Heading element
+ * - CardDescription: Subtitle element
+ * - CardAction: Action buttons area (right-aligned)
+ * - CardContent: Main content area
+ * - CardFooter: Bottom actions/info area
+ *
+ * Uses data-slot attributes for CSS targeting.
+ * Container queries (@container/card-header) enable responsive header layouts.
+ */
+
 function Card({className, ...props}: React.ComponentProps<'div'>) {
   return (
     <div

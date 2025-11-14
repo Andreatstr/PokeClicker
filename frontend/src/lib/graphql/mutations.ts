@@ -25,6 +25,10 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
+/**
+ * Mutation to register a new user account
+ * Supports optional guest mode for temporary accounts
+ */
 export const SIGNUP_MUTATION = gql`
   ${USER_FRAGMENT}
   mutation Signup(
@@ -155,6 +159,9 @@ export const SET_SELECTED_POKEMON_MUTATION = gql`
   }
 `;
 
+/**
+ * Mutation to toggle user's visibility in public leaderboards
+ */
 export const UPDATE_RANKS_PREFERENCE = gql`
   ${USER_FRAGMENT}
   mutation UpdateRanksPreference($showInRanks: Boolean!) {

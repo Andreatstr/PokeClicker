@@ -5,6 +5,19 @@ import {cn} from '@lib/utils';
 import {menubarVariants} from './menubar-variants';
 import '@ui/pixelact/styles/styles.css';
 
+/**
+ * Pixel-style menubar component collection
+ *
+ * Wraps Radix UI Menubar primitives with GameBoy-inspired styling:
+ * - Dashed border focus indicators (instead of solid backgrounds)
+ * - Custom pixel-art icons (chevrons, checkmarks)
+ * - Pixel box shadows
+ * - Font variant support (normal or pixel)
+ * - GameBoy-style background colors (#e8e8d0)
+ *
+ * Focus states use dashed borders to maintain pixel aesthetic.
+ */
+
 function MenubarMenu({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {

@@ -5,11 +5,27 @@ import {CheckIcon} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import './checkbox.css';
 
+/**
+ * Props for pixel-style checkbox
+ *
+ * @param isDarkMode - Controls focus ring color (white vs blue)
+ */
 interface CheckboxProps
   extends React.ComponentProps<typeof CheckboxPrimitive.Root> {
   isDarkMode?: boolean;
 }
 
+/**
+ * Pixel-style checkbox component
+ *
+ * Features:
+ * - Extended touch target (44px minimum via CSS)
+ * - Theme-aware focus rings
+ * - Smooth check icon transition
+ * - Invalid state styling via aria-invalid
+ *
+ * Uses Radix UI Checkbox primitive for accessibility.
+ */
 function Checkbox({className, isDarkMode = false, ...props}: CheckboxProps) {
   return (
     <CheckboxPrimitive.Root

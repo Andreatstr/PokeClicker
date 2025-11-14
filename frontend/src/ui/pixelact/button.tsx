@@ -5,6 +5,20 @@ import {Button as ShadcnButton} from '@ui/primitives';
 import '@ui/pixelact/styles/styles.css';
 import './button.css';
 
+/**
+ * Variant configuration for pixel-style buttons
+ *
+ * All sizes enforce 44px minimum height for accessibility (touch targets).
+ * Variants use pixel-style shadows defined in button.css via custom CSS classes.
+ *
+ * Variants:
+ * - default: Primary action (blue background)
+ * - secondary: Secondary action (gray background)
+ * - warning: Warning action (yellow background)
+ * - success: Success action (green background)
+ * - destructive: Destructive action (red background)
+ * - link: Text link style (no background, underlined)
+ */
 const pixelButtonVariants = cva(
   'pixel__button pixel-font cursor-pointer rounded-none w-fit items-center justify-center whitespace-nowrap text-sm transition-colors transition-all duration-100 select-none outline-none [-webkit-tap-highlight-color:transparent]',
   {
@@ -38,6 +52,19 @@ export interface PixelButtonProps
   isDarkMode?: boolean;
 }
 
+/**
+ * Pixel-style button component with GameBoy-inspired design
+ *
+ * Features:
+ * - Custom background colors via bgColor prop
+ * - Automatic inner border darkening for depth effect
+ * - Theme-aware focus rings
+ * - Pixel font by default
+ * - All interactive states use pixel-style shadows
+ *
+ * @param bgColor - Optional custom background color (hex format)
+ * @param isDarkMode - Controls focus ring color scheme
+ */
 const Button = React.forwardRef<
   React.ComponentRef<typeof ShadcnButton>,
   PixelButtonProps
@@ -55,7 +82,7 @@ const Button = React.forwardRef<
     },
     ref
   ) => {
-    // Function to darken a hex color
+    // Function to darken a hex color for inner border effect
     const darkenColor = (color: string, percent: number = 30): string => {
       // Remove # if present
       const hex = color.replace('#', '');

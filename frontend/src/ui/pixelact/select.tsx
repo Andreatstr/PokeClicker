@@ -19,6 +19,19 @@ import {
 import '@ui/pixelact/styles/styles.css';
 import {inputVariants} from './select-variants';
 
+/**
+ * Pixel-style select dropdown components
+ *
+ * Wraps Radix UI Select primitives with GameBoy-inspired styling:
+ * - Pixel box shadows
+ * - Hover transitions with opacity
+ * - Custom keyboard navigation (Tab key support in items)
+ * - Theme-aware colors via CSS custom properties
+ * - 44px minimum touch targets
+ *
+ * SelectItem implements custom Tab key handling to navigate between options.
+ */
+
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement>,
     VariantProps<typeof inputVariants> {
@@ -123,6 +136,12 @@ function SelectLabel({
   return <ShadcnSelectLabel className={cn(className)} {...props} />;
 }
 
+/**
+ * Select option item with enhanced keyboard navigation
+ *
+ * Handles Tab key to move between options (preventing default browser behavior).
+ * Hover styling applied via inline styles to work with theme CSS variables.
+ */
 function SelectItem({
   className,
   children,

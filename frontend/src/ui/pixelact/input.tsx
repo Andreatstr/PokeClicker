@@ -1,6 +1,11 @@
 import * as React from 'react';
 import '@ui/pixelact/styles/styles.css';
 
+/**
+ * Props for pixel-style input component
+ *
+ * @param isDarkMode - Controls focus ring color scheme
+ */
 export interface PixelInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   disabled?: boolean;
@@ -8,6 +13,18 @@ export interface PixelInputProps
   isDarkMode?: boolean;
 }
 
+/**
+ * Pixel-style text input component
+ *
+ * Features:
+ * - Pixel font by default
+ * - Pixel-style box shadow (defined via CSS custom property)
+ * - Theme-aware styling via CSS custom properties
+ * - 44px minimum height for accessibility
+ * - Focus ring with offset for visibility
+ *
+ * Styling uses var(--input) and var(--foreground) for theme support.
+ */
 const Input = React.forwardRef<HTMLInputElement, PixelInputProps>(
   ({className, disabled, isDarkMode = false, ...props}, ref) => {
     return (

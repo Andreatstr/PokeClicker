@@ -15,6 +15,16 @@ import {
 import '@ui/pixelact/styles/styles.css';
 import {cardVariants} from './card-variants';
 
+/**
+ * Pixel-style card component collection
+ *
+ * Wraps primitive card components with retro styling:
+ * - Rounded corners removed (rounded-none)
+ * - Pixel-style box shadow via CSS custom property
+ * - Font variant support (normal or pixel font)
+ * - Used throughout the app for Pokemon cards and content containers
+ */
+
 export interface CardProps
   extends React.ComponentProps<'div'>,
     VariantProps<typeof cardVariants> {

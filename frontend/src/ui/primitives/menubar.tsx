@@ -4,6 +4,20 @@ import {CheckIcon, ChevronRightIcon, CircleIcon} from 'lucide-react';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * Base menubar component primitives
+ *
+ * Wraps Radix UI Menubar with default styling:
+ * - Menu items with focus/hover states
+ * - Checkbox and radio items with indicators
+ * - Submenu support with chevron icons
+ * - Keyboard navigation
+ * - Portal rendering for dropdowns
+ *
+ * All components use data-slot attributes for CSS targeting.
+ * Destructive variant supported for delete/remove actions.
+ */
+
 function Menubar({
   className,
   ...props

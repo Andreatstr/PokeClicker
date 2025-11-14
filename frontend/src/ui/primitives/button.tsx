@@ -5,6 +5,14 @@ import {type VariantProps} from 'class-variance-authority';
 import {cn} from '@/lib/utils';
 import {buttonVariants} from './button-variants';
 
+/**
+ * Base button primitive with variant support
+ *
+ * Provides unstyled button foundation using class-variance-authority.
+ * Supports Radix UI Slot pattern via asChild for composition.
+ *
+ * This primitive is wrapped by pixelact button for themed usage.
+ */
 function Button({
   className,
   variant,

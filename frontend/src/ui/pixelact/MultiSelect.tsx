@@ -2,6 +2,12 @@ import {useState, useRef, useEffect} from 'react';
 import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from 'lucide-react';
 import {cn} from '@lib/utils';
 
+/**
+ * Props for multi-select dropdown component
+ *
+ * @param counts - Optional count display per option (e.g., "Fire (15)")
+ * @param isDarkMode - Theme-aware focus ring colors
+ */
 type MultiSelectProps = {
   options: string[];
   selected: string[];
@@ -12,6 +18,19 @@ type MultiSelectProps = {
   isDarkMode?: boolean;
 };
 
+/**
+ * Multi-select dropdown with pixel-style design
+ *
+ * Features:
+ * - Checkbox-based multi-selection
+ * - Auto-scrolling on hover over scroll indicators
+ * - "Clear all" option when selections exist
+ * - Optional item counts display
+ * - Click-outside detection with event capture for reliability
+ * - Theme-aware styling via CSS custom properties
+ *
+ * Accessibility: 44px minimum touch targets, keyboard support via native inputs
+ */
 export function MultiSelect({
   options,
   selected,
@@ -90,6 +109,7 @@ export function MultiSelect({
     }
   };
 
+  // Auto-scroll when hovering over scroll indicators
   const startScrolling = (direction: 'up' | 'down') => {
     if (scrollIntervalRef.current !== null) {
       clearInterval(scrollIntervalRef.current);

@@ -2,6 +2,11 @@ import * as React from 'react';
 import {cn} from '@/lib/utils';
 import {ArrowLeftIcon, ArrowRightIcon} from './icons';
 
+/**
+ * Context value for carousel state management
+ *
+ * Provides navigation controls and state tracking across carousel components.
+ */
 interface CarouselContextValue {
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
@@ -15,6 +20,12 @@ interface CarouselContextValue {
 
 const CarouselContext = React.createContext<CarouselContextValue | null>(null);
 
+/**
+ * Hook to access carousel context
+ *
+ * Must be used within a Carousel component.
+ * Provides access to navigation state and controls.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useCarousel() {
   const context = React.useContext(CarouselContext);
@@ -29,6 +40,16 @@ interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
   initialIndex?: number;
 }
 
+/**
+ * Carousel container component with pixel-style navigation
+ *
+ * Provides horizontal scrolling with:
+ * - Touch/swipe gestures on mobile
+ * - Navigation buttons with pixel art styling
+ * - Dynamic index tracking for external control (e.g., Pokemon detail modal)
+ *
+ * @param initialIndex - Starting slide index (updates trigger re-sync)
+ */
 export function Carousel({
   children,
   className,
@@ -96,6 +117,16 @@ interface CarouselContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
+/**
+ * Carousel content wrapper with swipe gesture support
+ *
+ * Handles:
+ * - Touch gestures for mobile swiping
+ * - Smooth CSS transitions between slides
+ * - Automatic item counting
+ *
+ * Touch interaction requires minimum 50px swipe distance to trigger navigation.
+ */
 export function CarouselContent({
   children,
   className,

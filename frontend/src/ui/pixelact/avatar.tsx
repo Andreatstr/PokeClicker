@@ -5,6 +5,14 @@ import {cva} from 'class-variance-authority';
 import {cn} from '@lib/utils';
 import '@ui/pixelact/styles/styles.css';
 
+/**
+ * Variant configuration for pixel-style avatars
+ *
+ * Supports multiple display styles:
+ * - font: Controls text rendering (normal or pixel font)
+ * - variant: Shape style (default, square with pixel shadow, or round with pixel border)
+ * - size: Dimensions (small: 32px, medium: 48px, large: 64px)
+ */
 const avatarVariants = cva('', {
   variants: {
     font: {
@@ -29,6 +37,17 @@ const avatarVariants = cva('', {
   },
 });
 
+/**
+ * Pixel-style avatar component
+ *
+ * Wraps Radix UI Avatar with retro/pixel aesthetic.
+ * For round variant, renders custom pixel-art border using positioned divs
+ * to create a circular outline that matches the GameBoy-style design system.
+ *
+ * @param font - Font style (normal or pixel)
+ * @param variant - Shape style (default, square, or round with pixel border)
+ * @param size - Avatar dimensions (small, medium, or large)
+ */
 const Avatar = forwardRef<
   React.ComponentRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
@@ -41,6 +60,7 @@ const Avatar = forwardRef<
 
   return (
     <div className={cn('relative size-max', className)}>
+      {/* Pixel art border overlay for round variant */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{zIndex: 10}}

@@ -195,8 +195,13 @@ export const HEALTH_QUERY = gql`
 `;
 
 // ============================================================================
-// LEADERBOARD
+// LEADERBOARD QUERIES
 // ============================================================================
+
+/**
+ * Query to fetch leaderboard rankings for both candy and Pokemon leagues
+ * Includes user's personal ranks
+ */
 export const GET_RANKS = gql`
   query GetRanks($input: RanksInput!) {
     getRanks(input: $input) {
