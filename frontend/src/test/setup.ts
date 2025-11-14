@@ -1,3 +1,8 @@
+/**
+ * Vitest global test setup
+ * Mocks browser APIs (localStorage, matchMedia, IntersectionObserver, Audio, IndexedDB)
+ */
+
 import {global} from '@apollo/client/utilities/globals';
 import '@testing-library/jest-dom';
 import {vi} from 'vitest';

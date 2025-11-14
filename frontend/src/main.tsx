@@ -1,3 +1,8 @@
+/**
+ * Application entry point
+ * Sets up provider hierarchy: Error > Auth > Apollo > Onboarding > App
+ */
+
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ApolloProvider} from '@apollo/client';

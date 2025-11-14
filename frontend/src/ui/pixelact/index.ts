@@ -1,3 +1,8 @@
+/**
+ * Pixelact UI Component Library
+ * Custom GameBoy-style UI components with retro aesthetics
+ */
+
 // Core components
 export {Button} from './button';
 export {Card} from './card';

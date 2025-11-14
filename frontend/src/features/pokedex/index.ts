@@ -1,3 +1,8 @@
+/**
+ * Pokedex feature module
+ * Complete Pokemon browsing system with search, filters, pagination, and details
+ */
+
 // Contexts
 export {PokedexFilterProvider} from './contexts/PokedexFilterContext';
 export type {PokedexFilterContextValue} from './contexts/PokedexFilterContextDefinition';

@@ -1,5 +1,11 @@
 import {ObjectId} from 'mongodb';
 
+/**
+ * Backend Type Definitions
+ * Database models and API types for MongoDB and GraphQL
+ */
+
+// NOTE: Legacy User interface - kept for reference during migration
 // export interface User {
 //   _id?: ObjectId;
 //   username: string;
@@ -17,6 +23,7 @@ import {ObjectId} from 'mongodb';
 //   owned_pokemon_ids: number[];
 // }
 
+/** User statistics and game state (subset of UserDocument) */
 export interface UserStats {
   rare_candy: string;
   stats: {
@@ -40,6 +47,7 @@ export interface UserStats {
   showInRanks?: boolean;
 }
 
+/** Complete user document as stored in MongoDB */
 export interface UserDocument extends UserStats {
   _id: ObjectId;
   username: string;
@@ -49,6 +57,7 @@ export interface UserDocument extends UserStats {
   isGuestUser?: boolean;
 }
 
+/** Authentication response with JWT token and user data */
 export interface AuthResponse {
   token: string;
   user: Omit<UserDocument, 'password_hash' | 'created_at'> & {
@@ -63,6 +72,7 @@ export interface PokemonQueryArgs {
   offset?: number;
 }
 
+/** Initial stats for new users - all stats start at level 1 */
 export const DEFAULT_USER_STATS = {
   rare_candy: '0',
   stats: {
@@ -83,7 +93,7 @@ export const DEFAULT_USER_STATS = {
   owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
 };
 
-// Per-Pokemon upgrade document
+/** Per-Pokemon upgrade document tracking individual Pokemon power-ups */
 export interface PokemonUpgradeDocument {
   _id?: ObjectId;
   user_id: ObjectId;
