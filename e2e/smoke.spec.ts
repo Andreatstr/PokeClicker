@@ -4,6 +4,13 @@ import { LoginPage } from "./pages/LoginPage";
 import { ClickerPage } from "./pages/ClickerPage";
 
 test.describe("Smoke Tests", () => {
+  // Disable onboarding for all smoke tests by setting flag before page loads
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('onboarding_completed', 'true');
+    });
+  });
+
   test("application loads successfully", async ({ page }) => {
     const navbar = new NavbarPage(page);
     await navbar.goto("/");
@@ -40,13 +47,6 @@ test.describe("Smoke Tests", () => {
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
     }
 
-    // Dismiss any onboarding overlay that might be blocking clicks
-    const skipButton = page.getByRole("button", { name: /skip|dismiss|close|got it/i });
-    if (await skipButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await skipButton.click();
-      await page.waitForTimeout(500); // Wait for overlay to disappear
-    }
-
     await navbar.navigateToPokedex();
     await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
 
@@ -68,13 +68,6 @@ test.describe("Smoke Tests", () => {
       await login.quickRegister();
       // Wait for search box to appear after registration
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
-    }
-
-    // Dismiss any onboarding overlay that might be blocking clicks
-    const skipButton = page.getByRole("button", { name: /skip|dismiss|close|got it/i });
-    if (await skipButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await skipButton.click();
-      await page.waitForTimeout(500); // Wait for overlay to disappear
     }
 
     await navbar.navigateToClicker();
