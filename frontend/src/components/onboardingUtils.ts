@@ -3,12 +3,12 @@
  * Ensures proper stacking order of tutorial elements
  */
 export const Z_INDEX = {
-  BACKDROP: 9998, // Darkened background
-  SPOTLIGHT: 9999, // Highlighted element overlay
-  POPUP: 9999, // Instruction popup box
-  MODAL_BACKDROP: 50000, // Modal dialog backdrop (above regular onboarding)
-  MODAL_SPOTLIGHT: 50001, // Modal spotlight (above modal backdrop)
-  MODAL_POPUP: 50002, // Modal popup (highest layer)
+  BACKDROP: 9998,
+  SPOTLIGHT: 9999,
+  POPUP: 9999,
+  MODAL_BACKDROP: 100000,
+  MODAL_SPOTLIGHT: 100001,
+  MODAL_POPUP: 100002,
 } as const;
 
 /**
