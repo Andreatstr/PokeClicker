@@ -6,7 +6,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 2,
   workers: process.env.CI ? 1 : 4,
-  timeout: 60000, // Increase timeout to 60s due to slow app loading
+  timeout: 30000, // 30s timeout - reduced from 60s
   reporter: [
     ['html'],
     ['list'],
