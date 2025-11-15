@@ -467,6 +467,9 @@ export const resolvers = {
         // Sort by priceNumeric (log10 scale) for correct numeric ordering
         // String-based sorting would incorrectly place "1000" before "200"
         sort.priceNumeric = sortOrder === 'asc' ? 1 : -1;
+      } else if (sortBy === 'stats') {
+        // Sort by BST (Base Stat Total) stored in database
+        sort.bst = sortOrder === 'asc' ? 1 : -1;
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }

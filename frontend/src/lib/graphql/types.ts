@@ -139,6 +139,7 @@ export interface PokemonBasic {
   name: string;
   sprite: string;
   types: string[];
+  stats?: PokemonStats;
 }
 
 export interface PokemonByIdBasicData {
