@@ -42,6 +42,7 @@ import {
 } from '@/lib/graphql';
 import {logger} from '@/lib/logger';
 import {useMobileDetection} from '@/hooks';
+import {generateUUID} from '@/lib/utils';
 
 type Props = {
   onNavigate: (page: 'pokedex' | 'clicker' | 'login') => void;
@@ -122,8 +123,8 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
 
   async function loginAsGuest() {
     try {
-      const guestUsername = `g_${crypto.randomUUID().slice(0, 8)}`;
-      const guestPassword = crypto.randomUUID();
+      const guestUsername = `g_${generateUUID().slice(0, 8)}`;
+      const guestPassword = generateUUID();
 
       console.log('Creating guest user:', guestUsername);
 

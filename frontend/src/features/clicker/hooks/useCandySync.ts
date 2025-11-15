@@ -62,7 +62,12 @@ export function useCandySync({
     setLocalRareCandy(nextValue);
     setUnsyncedAmount('0');
     unsyncedAmountRef.current = '0';
-    emitCandyUpdate(nextValue);
+
+    // Defer event emission to avoid updating other components during render
+    // This prevents "Cannot update a component while rendering a different component" error
+    queueMicrotask(() => {
+      emitCandyUpdate(nextValue);
+    });
   }, [user]);
 
   /**
@@ -152,7 +157,10 @@ export function useCandySync({
   const addCandy = useCallback((amount: string) => {
     setLocalRareCandy((prev) => {
       const next = toDecimal(prev).plus(amount).toString();
-      emitCandyUpdate(next); // Notify other components of candy change
+      // Defer event emission to avoid updating other components during render
+      queueMicrotask(() => {
+        emitCandyUpdate(next);
+      });
       return next;
     });
     setUnsyncedAmount((prev) => {
@@ -169,7 +177,10 @@ export function useCandySync({
   const deductCandy = useCallback((amount: string) => {
     setLocalRareCandy((prev) => {
       const next = toDecimal(prev).minus(amount).toString();
-      emitCandyUpdate(next);
+      // Defer event emission to avoid updating other components during render
+      queueMicrotask(() => {
+        emitCandyUpdate(next);
+      });
       return next;
     });
   }, []);

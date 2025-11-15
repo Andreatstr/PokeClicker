@@ -6,7 +6,7 @@ import {
   usePurchasePokemon,
 } from '@features/pokedex';
 import {type User} from '@features/auth';
-import {useState, useRef} from 'react';
+import {useState, useRef, useEffect} from 'react';
 import {formatNumber} from '@/lib/formatNumber';
 import '@ui/pixelact/styles/animations.css';
 import {getTypeColors, getUnknownPokemonColors} from '../../utils/typeColors';
@@ -41,6 +41,7 @@ export function PokemonDetailCard({
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
+  const {addSuccess} = useError();
 
   // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
   // This ensures the UI updates when the cache updates
@@ -77,18 +78,36 @@ export function PokemonDetailCard({
         variables: {pokemonId: pokemon.id},
       });
 
-      // Immediately update AuthContext with the server response
+      // Check for GraphQL errors first (Apollo's errorPolicy: 'all' returns both data and errors)
+      // This handles cases where server rejects the purchase (e.g., not enough candy)
+      if (result.errors && result.errors.length > 0) {
+        const errorMessage =
+          result.errors[0]?.message || 'Failed to purchase Pokémon';
+        setError(errorMessage);
+        errorTimeoutRef.current = setTimeout(() => {
+          setError(null);
+          errorTimeoutRef.current = null;
+        }, 1200);
+        return; // Don't show success or update UI if there are errors
+      }
+
+      // Only proceed if there are no errors and server confirmed the purchase
       if (result.data?.purchasePokemon && user) {
         updateUser({
           ...user, // Keep existing user data (stats, etc.)
           ...result.data.purchasePokemon, // Only update fields that changed (rare_candy, owned_pokemon_ids)
           created_at: user.created_at,
         });
-      }
 
-      onPurchaseComplete?.(pokemon.id);
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 800);
+        // Show success toast notification only after server confirmation
+        const capitalizedName =
+          pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+        addSuccess(`Successfully bought ${capitalizedName}!`);
+
+        onPurchaseComplete?.(pokemon.id);
+        setIsAnimating(true);
+        setTimeout(() => setIsAnimating(false), 800);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to purchase Pokémon';
@@ -152,6 +171,15 @@ export function PokemonDetailCard({
       }, 1200);
     }
   };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const evolutionIds = [pokemon.id, ...(pokemon.evolution ?? [])];
   const primaryType = pokemon.types[0];

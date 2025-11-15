@@ -97,7 +97,7 @@ function sanitizeUserForClient(
     favorite_pokemon_id: userDoc.favorite_pokemon_id,
     selected_pokemon_id: userDoc.selected_pokemon_id,
     showInRanks: userDoc.showInRanks,
-    isGuestUser: userDoc.isGuestUser,
+    isGuestUser: userDoc.isGuestUser ?? false, // Default to false for old users
   };
 }
 
@@ -689,7 +689,22 @@ export const resolvers = {
         const result = await usersCollection
           .aggregate([
             // First, match only users who are visible in ranks
-            {$match: {showInRanks: {$ne: false}}},
+            // Exclude e2e test users (e2etest* and test* patterns)
+            // Exclude guest users EXCEPT the current viewing user
+            {
+              $match: {
+                showInRanks: {$ne: false},
+                username: {
+                  $not: {$regex: '^(e2etest|test\\d)'},
+                },
+                $or: [
+                  {isGuestUser: {$ne: true}}, // Include all non-guest users
+                  ...(context.user?.id
+                    ? [{_id: new ObjectId(context.user.id)}] // Include current user even if guest
+                    : []),
+                ],
+              },
+            },
 
             // Run multiple pipelines in parallel using $facet
             {
@@ -699,7 +714,9 @@ export const resolvers = {
                   // Add fields for sorting and ranking
                   {
                     $addFields: {
-                      candyScore: {$ifNull: ['$rare_candy', 0]},
+                      candyScore: {
+                        $toDouble: {$ifNull: ['$rare_candy', '0']},
+                      },
                     },
                   },
                   // Sort by candy (desc), then by _id for consistency with ties
@@ -776,7 +793,9 @@ export const resolvers = {
                         // Add computed fields
                         {
                           $addFields: {
-                            candyScore: {$ifNull: ['$rare_candy', 0]},
+                            candyScore: {
+                              $toDouble: {$ifNull: ['$rare_candy', '0']},
+                            },
                             pokemonCount: {
                               $size: {$ifNull: ['$owned_pokemon_ids', []]},
                             },
@@ -791,12 +810,24 @@ export const resolvers = {
                               userPokemon: '$pokemonCount',
                             },
                             pipeline: [
-                              {$match: {showInRanks: {$ne: false}}},
+                              {
+                                $match: {
+                                  showInRanks: {$ne: false},
+                                  username: {
+                                    $not: {$regex: '^(e2etest|test\\d)'},
+                                  },
+                                  isGuestUser: {$ne: true},
+                                },
+                              },
                               {
                                 $addFields: {
                                   hasBetterCandy: {
                                     $gt: [
-                                      {$ifNull: ['$rare_candy', 0]},
+                                      {
+                                        $toDouble: {
+                                          $ifNull: ['$rare_candy', '0'],
+                                        },
+                                      },
                                       '$$userCandy',
                                     ],
                                   },

@@ -4,9 +4,15 @@
  */
 
 // Error severity levels
-export type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
+export type ErrorSeverity =
+  | 'success'
+  | 'info'
+  | 'warning'
+  | 'error'
+  | 'critical';
 
 export const ErrorSeverity = {
+  SUCCESS: 'success' as ErrorSeverity,
   INFO: 'info' as ErrorSeverity,
   WARNING: 'warning' as ErrorSeverity,
   ERROR: 'error' as ErrorSeverity,

@@ -124,6 +124,32 @@ export const apolloClient = new ApolloClient({
               return String(incoming);
             },
           },
+          isGuestUser: {
+            /**
+             * Custom read function for isGuestUser field
+             *
+             * Provides a default value of false when the field is missing.
+             * This prevents Apollo cache errors when reading from cache.
+             */
+            read(existing) {
+              return existing ?? false;
+            },
+            /**
+             * Custom merge function for isGuestUser field
+             *
+             * Defaults to false if the field is missing from the response.
+             * This ensures the field always has a value when merging cache updates.
+             * The merge function is called during cache writes, so this handles
+             * missing fields in mutation responses.
+             */
+            merge(_existing, incoming) {
+              // If incoming is explicitly undefined or null, default to false
+              // This handles cases where the backend doesn't include the field
+              return incoming !== undefined && incoming !== null
+                ? incoming
+                : false;
+            },
+          },
         },
       },
     },

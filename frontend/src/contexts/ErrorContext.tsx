@@ -12,7 +12,8 @@ import {
  */
 interface ErrorContextValue {
   errors: AppError[];
-  addError: (error: unknown, context?: string) => void;
+  addError: (error: unknown | AppError, context?: string) => void;
+  addSuccess: (message: string) => void;
   removeError: (errorId: string) => void;
   clearErrors: () => void;
   hasErrors: boolean;
@@ -43,6 +44,7 @@ interface ErrorProviderProps {
  * @remarks
  * Features:
  * - Maintains a FIFO queue of recent errors
+ * - Auto-dismisses SUCCESS messages after 3 seconds
  * - Auto-dismisses INFO and WARNING errors after 5 seconds
  * - Processes raw errors through the error handler utility
  * - Keeps only the most recent errors to prevent memory issues
@@ -59,8 +61,19 @@ export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
   }, []);
 
   const addError = useCallback(
-    (error: unknown, context?: string) => {
-      const appError = handleErrorUtil(error, context);
+    (error: unknown | AppError, context?: string) => {
+      // If error is already an AppError, use it directly (preserves custom severity like SUCCESS)
+      // Otherwise, process it through the error handler
+      const appError: AppError =
+        typeof error === 'object' &&
+        error !== null &&
+        'severity' in error &&
+        'id' in error &&
+        'message' in error &&
+        'userMessage' in error &&
+        'timestamp' in error
+          ? (error as AppError)
+          : handleErrorUtil(error, context);
 
       setErrors((prevErrors) => {
         // Add new error at the beginning for most-recent-first ordering
@@ -70,15 +83,45 @@ export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
         return newErrors.slice(0, maxErrors);
       });
 
-      // Auto-dismiss non-critical errors to avoid cluttering the UI
+      // Auto-dismiss non-critical errors and success messages to avoid cluttering the UI
       if (
+        appError.severity === ErrorSeverity.SUCCESS ||
         appError.severity === ErrorSeverity.INFO ||
         appError.severity === ErrorSeverity.WARNING
       ) {
+        // SUCCESS messages dismiss after 3 seconds, others after 5 seconds
+        const dismissDelay =
+          appError.severity === ErrorSeverity.SUCCESS ? 3000 : 5000;
         setTimeout(() => {
           removeError(appError.id);
-        }, 5000);
+        }, dismissDelay);
       }
+    },
+    [maxErrors, removeError]
+  );
+
+  const addSuccess = useCallback(
+    (message: string) => {
+      const successError: AppError = {
+        id: `success-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        message,
+        severity: ErrorSeverity.SUCCESS,
+        timestamp: new Date(),
+        userMessage: message,
+      };
+
+      setErrors((prevErrors) => {
+        // Add new success at the beginning for most-recent-first ordering
+        const newErrors = [successError, ...prevErrors];
+
+        // Keep only the most recent errors up to maxErrors to prevent unbounded growth
+        return newErrors.slice(0, maxErrors);
+      });
+
+      // Auto-dismiss SUCCESS messages after 3 seconds
+      setTimeout(() => {
+        removeError(successError.id);
+      }, 3000);
     },
     [maxErrors, removeError]
   );
@@ -91,7 +134,14 @@ export function ErrorProvider({children, maxErrors = 5}: ErrorProviderProps) {
 
   return (
     <ErrorContext.Provider
-      value={{errors, addError, removeError, clearErrors, hasErrors}}
+      value={{
+        errors,
+        addError,
+        addSuccess,
+        removeError,
+        clearErrors,
+        hasErrors,
+      }}
     >
       {children}
     </ErrorContext.Provider>

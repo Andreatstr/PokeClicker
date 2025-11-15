@@ -11,8 +11,6 @@ export const GameConfig = {
    * Clicker mechanics
    */
   clicker: {
-    /** Number of clicks before forcing a sync to server */
-    batchSyncClickThreshold: 500,
     /** Time in milliseconds before forcing a sync to server */
     batchSyncTimeThreshold: 30000, // 30 seconds
     /** Duration of candy float animation in milliseconds */
