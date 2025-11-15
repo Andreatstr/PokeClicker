@@ -128,6 +128,8 @@ export const typeDefs = `#graphql
     stats: PokemonStats
     height: Int
     weight: Int
+    bst: Int
+    price: String
     abilities: [String!]
     evolution: [Int!]
     isOwned: Boolean!

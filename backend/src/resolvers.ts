@@ -4,6 +4,7 @@ import {
   Pokemon,
   PokemonStats,
 } from './pokeapi.js';
+import {getBSTForPokemon} from './pokemonStats.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {getDatabase} from './db.js';
@@ -28,6 +29,14 @@ import {
   getClickerUpgradeKeys,
 } from './upgradeConfig.js';
 import 'dotenv/config';
+
+// Lightweight type for the pokemon metadata documents stored in MongoDB
+type PokemonMetadata = {
+  id: number;
+  bst?: number;
+  price?: string;
+  [key: string]: unknown;
+};
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -118,7 +127,7 @@ const authMutations = {
       created_at: new Date(),
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? '0',
       stats: DEFAULT_USER_STATS.stats,
-      owned_pokemon_ids: [1],
+      owned_pokemon_ids: [746], // Wishiwashi-solo - cheapest Pokemon
       showInRanks: true,
       isGuestUser: isGuestUser ?? false,
     };
@@ -203,9 +212,38 @@ function getUpgradeCost(currentLevel: number, stat: string): Decimal {
  * @param pokemonId - Pokemon ID to purchase
  * @returns Cost in rare candy as Decimal
  */
-function getPokemonCost(pokemonId: number): Decimal {
-  const tier = Math.floor(pokemonId / 10);
-  return new Decimal(100).times(new Decimal(1.5).pow(tier)).floor();
+async function getPokemonCost(pokemonId: number): Promise<Decimal> {
+  const baseCost = new Decimal(150);
+  const bst = await getBSTForPokemon(pokemonId);
+
+  // Doubling formula: Price doubles every 5 BST points
+  // Provides even distribution from 150 to 4.9E34
+  //
+  // Formula: 150 * 2^((bst - 180) / 5)
+  //
+  // Sample costs:
+  // 180 BST (Magikarp) → 150
+  // 250 BST (Rattata) → 2.5E6
+  // 300 BST (Pidgey) → 2.5E9
+  // 350 BST (Pikachu) → 2.6E12
+  // 530 BST (Charizard) → 1.8E23
+  // 680 BST (Mewtwo) → 1.9E32
+  // 720 BST (Arceus) → 4.9E34
+
+  const baselineBST = 180; // Weakest Pokemon
+  const doublingInterval = 5; // Price doubles every 5 BST points
+
+  // Calculate doublings: (bst - 180) / 5
+  const bstDifference = bst - baselineBST;
+  const doublings = bstDifference / doublingInterval;
+
+  // Cost = 150 * 2^doublings
+  // Using Decimal.js: cost = 150 * 2^doublings
+  const two = new Decimal(2);
+  const multiplier = two.pow(doublings);
+  const cost = baseCost.times(multiplier);
+
+  return cost.floor();
 }
 
 /**
@@ -419,11 +457,16 @@ export const resolvers = {
 
       // Build sort object
       const sort: Record<string, 1 | -1> = {};
+
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
       } else if (sortBy === 'type') {
         sort.types = sortOrder === 'asc' ? 1 : -1;
         sort.id = 1;
+      } else if (sortBy === 'price') {
+        // Sort by priceNumeric (log10 scale) for correct numeric ordering
+        // String-based sorting would incorrectly place "1000" before "200"
+        sort.priceNumeric = sortOrder === 'asc' ? 1 : -1;
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
@@ -475,14 +518,27 @@ export const resolvers = {
           );
           const paginatedPokemon = await Promise.all(pokemonPromises);
 
-          const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
-            ...p,
-            pokedexNumber: p.id,
-            evolution: p.evolution || [],
-            isOwned: effectiveUserId
-              ? (ownedPokemonIds ?? []).includes(p.id)
-              : false,
-          }));
+          // Create a map of metadata by ID for quick lookup
+          const resultMetadataMap = new Map<number, PokemonMetadata>(
+            result.paginatedResults.map((m: unknown) => {
+              const meta = m as PokemonMetadata;
+              return [meta.id, meta];
+            })
+          );
+
+          const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
+            const meta = resultMetadataMap.get(p.id);
+            return {
+              ...p,
+              pokedexNumber: p.id,
+              evolution: p.evolution || [],
+              isOwned: effectiveUserId
+                ? (ownedPokemonIds ?? []).includes(p.id)
+                : false,
+              bst: meta?.bst,
+              price: meta?.price,
+            };
+          });
 
           return {pokemon: pokedexPokemon, total: result.total, facets};
         } catch (error) {
@@ -542,14 +598,27 @@ export const resolvers = {
       );
       const paginatedPokemon = await Promise.all(pokemonPromises);
 
-      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => ({
-        ...p,
-        pokedexNumber: p.id,
-        evolution: p.evolution || [],
-        isOwned: effectiveUserId
-          ? (ownedPokemonIds ?? []).includes(p.id)
-          : false,
-      }));
+      // Create a map of metadata by ID for quick lookup
+      const metadataMap = new Map<number, PokemonMetadata>(
+        pokemonMetadata.map((m: unknown) => {
+          const meta = m as PokemonMetadata;
+          return [meta.id, meta];
+        })
+      );
+
+      const pokedexPokemon = paginatedPokemon.map((p: Pokemon) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          pokedexNumber: p.id,
+          evolution: p.evolution || [],
+          isOwned: effectiveUserId
+            ? (ownedPokemonIds ?? []).includes(p.id)
+            : false,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
 
       return {pokemon: pokedexPokemon, total, facets};
     },
@@ -1017,7 +1086,7 @@ export const resolvers = {
       }
 
       // Calculate cost
-      const cost = getPokemonCost(pokemonId);
+      const cost = await getPokemonCost(pokemonId);
 
       // Check if user has enough rare candy
       const currentCandy = toDecimal(userDoc.rare_candy);

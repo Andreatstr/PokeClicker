@@ -140,7 +140,7 @@ export function GameBoyConsole({
               ))}
 
               <img
-                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedPokemonId || 1}.png`}
+                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${selectedPokemonId || 746}.png`}
                 alt="Pokemon"
                 className={`w-3/5 h-3/5 object-contain transition-all duration-150 ${
                   isAnimating ? 'scale-110 brightness-110' : 'scale-100'

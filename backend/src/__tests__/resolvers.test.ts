@@ -6,6 +6,7 @@ import {
   beforeAll,
   vi,
   afterEach,
+  type MockedFunction,
 } from 'vitest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -40,6 +41,11 @@ vi.mock('../pokeapi.js', () => ({
   fetchPokemonById: vi.fn(),
 }));
 
+// Mock pokemonStats to return predictable BST for testing
+vi.mock('../pokemonStats.js', () => ({
+  getBSTForPokemon: vi.fn(),
+}));
+
 beforeAll(() => {
   process.env.JWT_SECRET = 'testsecret';
   process.env.JWT_EXPIRES = '1h';
@@ -47,6 +53,7 @@ beforeAll(() => {
 
 import {resolvers} from '../resolvers';
 import {fetchPokemon, fetchPokemonById} from '../pokeapi';
+import {getBSTForPokemon} from '../pokemonStats';
 import type {AuthContext} from '../auth';
 import type {UserDocument} from '../types';
 
@@ -55,6 +62,10 @@ describe('GraphQL Resolvers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup getBSTForPokemon to return Pikachu's BST (350 → ~5.7K candy cost)
+    (
+      getBSTForPokemon as MockedFunction<typeof getBSTForPokemon>
+    ).mockResolvedValue(350);
   });
 
   afterEach(() => {
@@ -713,7 +724,7 @@ describe('GraphQL Resolvers', () => {
         username: 'testuser',
         password_hash: 'hash',
         created_at: new Date(),
-        rare_candy: '1000',
+        rare_candy: '1e100', // Plenty of candy for exponential pricing
         stats: {
           hp: 1,
           attack: 1,
@@ -734,7 +745,6 @@ describe('GraphQL Resolvers', () => {
       const updatedUser = {
         ...mockUser,
         owned_pokemon_ids: [1, 25],
-        rare_candy: '900', // Assuming 100 candy cost
       };
 
       mockFindOne.mockResolvedValue(mockUser);

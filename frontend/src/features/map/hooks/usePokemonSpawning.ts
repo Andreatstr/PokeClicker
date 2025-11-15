@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useMemo} from 'react';
 import {logger} from '@/lib/logger';
 import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
@@ -33,42 +33,60 @@ const NUM_SPAWNS = 50;
 const MAX_POKEMON_ID = 1025; // Total Pokemon in database (Gen 1-9, Paldea)
 
 /**
- * Generate a Pokemon ID based on player progression using adaptive difficulty
+ * Generate a target BST based on player's owned Pokemon strength
  *
- * New players (maxOwnedId = 0): Only spawn Pokemon ID 1-20 (starter range)
+ * New players (no owned Pokemon): Spawn weak Pokemon (BST 180-250)
  *
- * Experienced players: 85% familiar + 15% challenge distribution
- * - 85%: Bell curve centered at (maxOwnedId - 5) with ±5 standard deviation
- *   Uses Box-Muller transform for normal distribution
- * - 15%: "Challenge Pokemon" 1-5 IDs ahead of highest owned
+ * Experienced players: Spawn based on average BST of owned Pokemon
+ * - 70%: Around player's average BST (±30 BST variance)
+ * - 20%: Slightly stronger (average + 20 to 50 BST)
+ * - 10%: Challenge Pokemon (average + 50 to 100 BST)
  *
- * This creates gradual difficulty progression while keeping encounters mostly familiar
+ * Uses Box-Muller transform for normal distribution around player level
  */
-function generateRandomPokemonId(maxOwnedId: number): number {
-  // New players: spawn only ID 1-20
-  if (maxOwnedId === 0) {
-    return Math.floor(Math.random() * 20) + 1;
+function generateTargetBST(ownedPokemon: PokedexPokemon[]): number {
+  // New players: spawn weak Pokemon (180-250 BST range)
+  if (ownedPokemon.length === 0) {
+    return Math.floor(Math.random() * 71) + 180; // 180-250
   }
 
-  // 15% chance: "Challenge Pokemon" (next tier, ID maxOwnedId+1 to maxOwnedId+5)
-  if (Math.random() < 0.15) {
-    const jump = Math.floor(Math.random() * 5) + 1;
-    return Math.min(MAX_POKEMON_ID, maxOwnedId + jump);
+  // Calculate average BST of owned Pokemon
+  const validBSTs = ownedPokemon
+    .map((p) => p.bst)
+    .filter((bst): bst is number => bst !== null && bst !== undefined);
+
+  if (validBSTs.length === 0) {
+    // Fallback if no BST data available
+    return Math.floor(Math.random() * 71) + 180;
   }
 
-  // 85% chance: Bell curve centered at (maxOwnedId - 5)
-  const center = Math.max(1, maxOwnedId - 5);
-  const stdDev = 5; // Standard deviation
+  const averageBST =
+    validBSTs.reduce((sum, bst) => sum + bst, 0) / validBSTs.length;
+
+  // 10% chance: Challenge Pokemon (+50 to +100 BST)
+  if (Math.random() < 0.1) {
+    const boost = Math.floor(Math.random() * 51) + 50;
+    return Math.min(720, Math.floor(averageBST + boost));
+  }
+
+  // 20% chance: Slightly stronger (+20 to +50 BST)
+  if (Math.random() < 0.2) {
+    const boost = Math.floor(Math.random() * 31) + 20;
+    return Math.min(720, Math.floor(averageBST + boost));
+  }
+
+  // 70% chance: Around player's level (±30 BST variance)
+  const stdDev = 30; // Standard deviation for variance
 
   // Box-Muller transform for normal distribution
   const u1 = Math.random();
   const u2 = Math.random();
   const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
 
-  const pokemonId = Math.round(center + z * stdDev);
+  const targetBST = Math.round(averageBST + z * stdDev);
 
-  // Clamp to valid range (1 to MAX_POKEMON_ID)
-  return Math.max(1, Math.min(MAX_POKEMON_ID, pokemonId));
+  // Clamp to valid BST range (180 minimum, 720 maximum)
+  return Math.max(180, Math.min(720, targetBST));
 }
 
 /**
@@ -106,8 +124,12 @@ export function usePokemonSpawning(
     ? `${POKEMON_STORAGE_KEY}_${user._id}`
     : POKEMON_STORAGE_KEY;
 
-  // Get player's highest caught Pokemon ID for progression-based spawning
-  const maxOwnedId = Math.max(...(user?.owned_pokemon_ids || [0]));
+  // Get player's owned Pokemon for BST-based spawning
+  // Memoize to prevent dependency changes on every render
+  const ownedPokemonIds = useMemo(
+    () => user?.owned_pokemon_ids || [],
+    [user?.owned_pokemon_ids]
+  );
 
   // Fetch a large pool of Pokemon to spawn from (based on progression)
   const [allPokemon, setAllPokemon] = useState<PokedexPokemon[]>([]);
@@ -135,11 +157,10 @@ export function usePokemonSpawning(
     }
   }, [user?._id, userStorageKey]);
 
-  // Determine how many Pokemon to fetch based on player progression
-  const fetchLimit = Math.min(Math.max(100, maxOwnedId + 50), MAX_POKEMON_ID);
-
+  // Fetch all Pokemon to have access to full BST range
+  // We need all Pokemon available since spawning is BST-based, not ID-based
   const {data: pokemonData} = usePokedexQuery({
-    limit: fetchLimit,
+    limit: MAX_POKEMON_ID,
     offset: 0,
   });
 
@@ -190,15 +211,25 @@ export function usePokemonSpawning(
     ) {
       const placedPokemon: PokemonSpawn[] = [];
 
-      // Generate 50 Pokemon using progression-based selection
-      for (let i = 0; i < NUM_SPAWNS; i++) {
-        const targetId = generateRandomPokemonId(maxOwnedId);
+      // Get owned Pokemon data for BST calculation
+      const ownedPokemon = allPokemon.filter((p) =>
+        ownedPokemonIds.includes(p.id)
+      );
 
-        // Find Pokemon closest to target ID (or random if not found)
-        const pokemon =
-          allPokemon.find((p) => p.id === targetId) ||
-          allPokemon.find((p) => Math.abs(p.id - targetId) <= 5) ||
-          allPokemon[Math.floor(Math.random() * allPokemon.length)];
+      // Generate 50 Pokemon using BST-based selection
+      for (let i = 0; i < NUM_SPAWNS; i++) {
+        const targetBST = generateTargetBST(ownedPokemon);
+
+        // Find Pokemon with BST closest to target
+        const pokemon = allPokemon.reduce((closest, current) => {
+          if (!current.bst) return closest;
+          if (!closest || !closest.bst) return current;
+
+          const currentDiff = Math.abs(current.bst - targetBST);
+          const closestDiff = Math.abs(closest.bst - targetBST);
+
+          return currentDiff < closestDiff ? current : closest;
+        }, allPokemon[0]);
 
         if (pokemon) {
           const position = getRandomWalkablePosition();
@@ -217,7 +248,7 @@ export function usePokemonSpawning(
     allPokemon,
     getRandomWalkablePosition,
     wildPokemon.length,
-    maxOwnedId,
+    ownedPokemonIds,
     collisionChecker.collisionMapLoaded,
     user?._id,
   ]);
@@ -229,15 +260,26 @@ export function usePokemonSpawning(
         // Remove the caught Pokemon by its unique spawn ID
         const filtered = current.filter((spawn) => spawn.spawnId !== spawnId);
 
-        // Spawn a new Pokemon based on player progression
+        // Spawn a new Pokemon based on player's current BST level
         if (allPokemon.length > 0) {
-          // Generate new ID based on current progression
-          const newId = generateRandomPokemonId(maxOwnedId);
+          // Get current owned Pokemon for BST calculation
+          const ownedPokemon = allPokemon.filter((p) =>
+            ownedPokemonIds.includes(p.id)
+          );
 
-          // Find Pokemon with this ID or closest available
-          const newPokemon =
-            allPokemon.find((p) => p.id === newId) ||
-            allPokemon[Math.floor(Math.random() * allPokemon.length)];
+          // Generate new target BST based on current progression
+          const targetBST = generateTargetBST(ownedPokemon);
+
+          // Find Pokemon with BST closest to target
+          const newPokemon = allPokemon.reduce((closest, current) => {
+            if (!current.bst) return closest;
+            if (!closest || !closest.bst) return current;
+
+            const currentDiff = Math.abs(current.bst - targetBST);
+            const closestDiff = Math.abs(closest.bst - targetBST);
+
+            return currentDiff < closestDiff ? current : closest;
+          }, allPokemon[0]);
 
           const position = getRandomWalkablePosition();
 
@@ -252,7 +294,7 @@ export function usePokemonSpawning(
         return filtered;
       });
     },
-    [allPokemon, getRandomWalkablePosition, maxOwnedId]
+    [allPokemon, getRandomWalkablePosition, ownedPokemonIds]
   );
 
   // Check proximity to nearest wild Pokémon

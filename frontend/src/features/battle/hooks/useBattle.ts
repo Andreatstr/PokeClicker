@@ -75,9 +75,9 @@ export function useBattle({
 
   /**
    * Calculate opponent's attack interval based on total stats
-   * Weak Pokemon (low total stats) attack ~2 times/second (500ms)
+   * Weak Pokemon (low total stats) attack ~4 times/second (250ms)
    * Strong Pokemon (high total stats) attack ~10 times/second (100ms)
-   * Uses linear interpolation between min/max stats for balanced scaling
+   * Uses exponential curve for smoother scaling - slow ramp at low stats, faster increase at high stats
    */
   const getAttackInterval = useCallback(() => {
     const stats = opponentPokemon.stats;
@@ -89,16 +89,20 @@ export function useBattle({
       (stats?.spDefense || 0) +
       (stats?.speed || 0);
 
-    const minInterval = 100;
-    const maxInterval = 500; // 2 attacks/second for weakest Pokemon
+    const minInterval = 100; // Fast Pokemon: 10 attacks/second
+    const maxInterval = 250; // Slow Pokemon: 4 attacks/second
     const minStats = 200;
     const maxStats = 600;
 
+    // Normalize stats to 0-1 range
     const normalizedStats = Math.min(Math.max(totalStats, minStats), maxStats);
-    const interval =
-      maxInterval -
-      ((normalizedStats - minStats) / (maxStats - minStats)) *
-        (maxInterval - minInterval);
+    const progress = (normalizedStats - minStats) / (maxStats - minStats);
+
+    // Apply exponential curve (power of 1.5) for non-linear scaling
+    // Weak Pokemon increase slowly, strong Pokemon ramp up faster
+    const curvedProgress = Math.pow(progress, 1.5);
+
+    const interval = maxInterval - curvedProgress * (maxInterval - minInterval);
 
     return Math.round(interval);
   }, [opponentPokemon]);

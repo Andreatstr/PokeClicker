@@ -63,11 +63,44 @@ interface PokeAPIPokemon {
       };
     };
   };
+  stats: {
+    base_stat: number;
+    stat: PokeAPIResource;
+  }[];
+}
+
+/**
+ * Calculate Base Stat Total from stats array
+ */
+function calculateBST(
+  stats: {base_stat: number; stat: PokeAPIResource}[]
+): number {
+  return stats.reduce((total, stat) => total + stat.base_stat, 0);
+}
+
+/**
+ * Calculate Pokemon purchase cost (matches backend formula in resolvers.ts)
+ * Doubling formula: Price doubles every 5 BST points
+ * Range: 150 (BST 180) to 4.9E34 (BST 720)
+ */
+function calculatePokemonCost(bst: number): string {
+  const baseCost = 150;
+  const baselineBST = 180; // Magikarp-level (weakest Pokemon)
+  const doublingInterval = 5; // Price doubles every 5 BST points
+
+  // Calculate how many doublings from baseline
+  const bstDifference = bst - baselineBST;
+  const doublings = bstDifference / doublingInterval;
+
+  // Price = baseCost * 2^doublings
+  const cost = baseCost * Math.pow(2, doublings);
+
+  return cost.toString();
 }
 
 /**
  * Fetches Pokemon metadata from PokéAPI
- * Extracts only the fields needed for the Pokedex browser
+ * Extracts fields needed for the Pokedex browser including BST and price
  */
 async function fetchPokemonMetadata(id: number) {
   try {
@@ -78,6 +111,12 @@ async function fetchPokemonMetadata(id: number) {
     const data = (await response.json()) as PokeAPIPokemon;
 
     const sprite = data.sprites.front_default || '';
+    const bst = calculateBST(data.stats);
+    const price = calculatePokemonCost(bst);
+
+    // Store log10(price) for correct numeric sorting in MongoDB
+    // Prices range from ~150 to 10^21, so log values range from ~2 to ~21
+    const priceNumeric = Math.log10(Number(price));
 
     return {
       id: data.id,
@@ -85,6 +124,9 @@ async function fetchPokemonMetadata(id: number) {
       types: data.types.map((t) => t.type.name),
       generation: getGeneration(data.id),
       sprite,
+      bst,
+      price, // String for display (supports Decimal.js formatting)
+      priceNumeric, // Number for sorting (log scale)
     };
   } catch (error) {
     console.error(`Error fetching Pokemon ${id}:`, error);
@@ -139,6 +181,9 @@ async function seedPokemon() {
   await collection.createIndex({generation: 1});
   await collection.createIndex({types: 1});
   await collection.createIndex({id: 1}, {unique: true});
+  await collection.createIndex({bst: 1});
+  await collection.createIndex({price: 1});
+  await collection.createIndex({priceNumeric: 1}); // Index for price sorting
 
   /**
    * Precompute static filter counts

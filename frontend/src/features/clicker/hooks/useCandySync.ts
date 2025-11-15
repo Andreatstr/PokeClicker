@@ -13,25 +13,27 @@ interface UseCandySyncProps {
 }
 
 /**
- * Manages local candy state with batched server syncing
+ * Manages local candy state with time-based batched server syncing
  * Implements optimistic updates with automatic retry on failure
  *
  * Sync strategy:
  * - Maintains local candy count that updates immediately (optimistic)
  * - Accumulates changes in unsyncedAmount buffer
  * - Flushes to server when:
- *   1. Time since last sync exceeds threshold (default: 10 seconds)
+ *   1. Time threshold reached (default: 30 seconds after first candy addition)
  *   2. Component unmounts (navigating away from clicker page)
+ *   3. Manual flush before upgrades (to ensure sufficient candy)
  *
  * Error handling:
  * - If sync fails, adds amount back to unsynced buffer
  * - Automatically retries on next flush trigger
  * - Shows temporary error message to user
  *
- * Why batching?
- * - Reduces server load (fewer API calls)
+ * Why time-based batching?
+ * - Predictable sync intervals prevent rate limiting
+ * - Reduces server load (max 2 requests/minute)
  * - Improves performance (no waiting for server on each click)
- * - Prevents race conditions with rapid clicking
+ * - Prevents race conditions with rapid clicking and autoclicker
  *
  * @param user - Current authenticated user
  * @param isAuthenticated - Must be true to sync candy to server
@@ -105,21 +107,23 @@ export function useCandySync({
     }
   }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
 
-  // Auto-flush effect: Monitors unsynced amount and triggers flush based on time threshold
+  // Auto-flush effect: Time-based batching only (no click threshold)
+  // Timer starts when first candy is added, flushes after time threshold
   useEffect(() => {
-    if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
+    if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) {
+      // Clear timer if no candy to sync
+      if (batchTimerRef.current) {
+        clearTimeout(batchTimerRef.current);
+        batchTimerRef.current = null;
+      }
+      return;
+    }
 
-    // Check if we should flush immediately based on time threshold
-    const shouldFlush =
-      Date.now() - lastSyncRef.current >=
-      GameConfig.clicker.batchSyncTimeThreshold; // Time threshold (10 seconds)
-
-    if (shouldFlush) {
-      flushPendingCandy();
-    } else if (!batchTimerRef.current) {
-      // Schedule a flush for later if threshold not yet met
+    // Only start timer if not already running
+    if (!batchTimerRef.current) {
       batchTimerRef.current = setTimeout(() => {
         flushPendingCandy();
+        batchTimerRef.current = null;
       }, GameConfig.clicker.batchSyncTimeThreshold);
     }
 

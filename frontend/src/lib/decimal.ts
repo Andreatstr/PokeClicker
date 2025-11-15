@@ -38,46 +38,6 @@ export function decimalToString(value: Decimal | string | number): string {
 }
 
 /**
- * Number suffix notation for large values
- * Each suffix represents 10^(index * 3)
- * K=thousand, M=million, B=billion, T=trillion, Qa=quadrillion, etc.
- */
-const SUFFIXES = [
-  '',
-  'K',
-  'M',
-  'B',
-  'T',
-  'Qa',
-  'Qi',
-  'Sx',
-  'Sp',
-  'Oc',
-  'No',
-  'Dc',
-  'UDc',
-  'DDc',
-  'TDc',
-  'QaDc',
-  'QiDc',
-  'SxDc',
-  'SpDc',
-  'OcDc',
-  'NoDc',
-  'Vg',
-  'UVg',
-  'DVg',
-  'TVg',
-  'QaVg',
-  'QiVg',
-  'SxVg',
-  'SpVg',
-  'OcVg',
-  'NoVg',
-  'Tg',
-];
-
-/**
  * Format a number with magnitude suffixes for display
  *
  * Algorithm:
@@ -116,8 +76,11 @@ export function formatNumber(
   // Each suffix represents 3 orders of magnitude (1000x)
   const suffixIndex = Math.floor(exponent / 3);
 
-  // Use suffix notation if we have a suffix for it
-  if (suffixIndex < SUFFIXES.length && suffixIndex > 0) {
+  // Use K, M, B, T notation for smaller numbers (up to trillion)
+  // After T, switch to E-notation (scientific notation)
+  const shortSuffixes = ['', 'K', 'M', 'B', 'T'];
+
+  if (suffixIndex < shortSuffixes.length && suffixIndex > 0) {
     const divisor = Decimal.pow(10, suffixIndex * 3);
     const mantissa = decimal.dividedBy(divisor);
 
@@ -125,10 +88,11 @@ export function formatNumber(
     const baseValue = mantissa.toNumber();
     const decimals = baseValue >= 100 ? 0 : baseValue >= 10 ? 1 : 2;
 
-    return `${mantissa.toFixed(decimals)}${SUFFIXES[suffixIndex]}`;
+    return `${mantissa.toFixed(decimals)}${shortSuffixes[suffixIndex]}`;
   }
 
-  // Fall back to scientific notation for extremely large numbers
+  // Use E-notation for everything beyond trillion
+  // Examples: 1.50e+15, 2.57e+23, 1.90e+32
   return decimal.toExponential(2);
 }
 

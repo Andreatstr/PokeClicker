@@ -140,30 +140,30 @@ describe('useCandySync', () => {
     });
   });
 
-  describe('batching - no amount threshold', () => {
-    it('should not flush immediately regardless of amount', () => {
+  describe('batching - time-based only', () => {
+    it('should not flush immediately regardless of candy amount', async () => {
+      mockUpdateRareCandy.mockResolvedValue(undefined);
       const {result} = renderHook(() => useCandySync(mockProps));
 
-      act(() => {
-        result.current.addCandy(1000); // Large amount
+      // Add large amount of candy (previously would trigger click threshold)
+      await act(async () => {
+        result.current.addCandy('500');
       });
 
-      // Should not flush immediately - only time-based flushing now
+      // Should NOT flush immediately - time-based batching only
       expect(mockUpdateRareCandy).not.toHaveBeenCalled();
-      expect(result.current.unsyncedAmount).toBe('1000');
+      expect(result.current.unsyncedAmount).toBe('500');
     });
 
-    it('should accumulate large amounts without immediate flush', () => {
+    it('should accumulate candy without flushing', () => {
       const {result} = renderHook(() => useCandySync(mockProps));
 
       act(() => {
-        result.current.addCandy(100);
-        result.current.addCandy(500);
-        result.current.addCandy(1000);
+        result.current.addCandy('10');
       });
 
       expect(mockUpdateRareCandy).not.toHaveBeenCalled();
-      expect(result.current.unsyncedAmount).toBe('1600');
+      expect(result.current.unsyncedAmount).toBe('10');
     });
   });
 
@@ -173,14 +173,14 @@ describe('useCandySync', () => {
       const {result} = renderHook(() => useCandySync(mockProps));
 
       await act(async () => {
-        result.current.addCandy(10);
+        result.current.addCandy('10');
       });
 
       expect(mockUpdateRareCandy).not.toHaveBeenCalled();
 
-      // Advance time to trigger flush (10000ms by default)
+      // Advance time to trigger flush (30000ms configured in GameConfig)
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(10000);
+        await vi.advanceTimersByTimeAsync(30000);
       });
 
       // Flush should have been called after timer expires
@@ -207,7 +207,7 @@ describe('useCandySync', () => {
 
       // Timer should not trigger another flush
       await act(async () => {
-        vi.advanceTimersByTime(10000);
+        vi.advanceTimersByTime(30000);
       });
 
       expect(mockUpdateRareCandy).toHaveBeenCalledTimes(1);

@@ -40,7 +40,6 @@ import {UpgradesPanel} from './UpgradesPanel';
 import {UnauthenticatedMessage} from './UnauthenticatedMessage';
 import {ErrorBanner} from '@/components';
 import {ClickerHelpModal} from './ClickerHelpModal';
-import {useCandyOperations} from '@/contexts/CandyOperationsContext';
 
 interface PokeClickerProps {
   isDarkMode?: boolean;
@@ -54,7 +53,6 @@ export function PokeClicker({
   const {user, isAuthenticated, updateUser} = useAuth();
   const {upgradeStat, loading} = useGameMutations();
   const [showHelp, setShowHelp] = useState(false);
-  const {registerOperations} = useCandyOperations();
 
   const [stats, setStats] = useState(
     user?.stats || {
@@ -87,15 +85,6 @@ export function PokeClicker({
     deductCandy,
     flushPendingCandy,
   } = useCandySync({user, isAuthenticated, updateUser});
-
-  // Register candy operations with global context for other components to use
-  useEffect(() => {
-    registerOperations({
-      addCandy,
-      flushPendingCandy,
-      getLocalRareCandy: () => localRareCandy,
-    });
-  }, [registerOperations, addCandy, flushPendingCandy, localRareCandy]);
 
   const {isAnimating, candies, handleClick, handleUpgrade} = useClickerActions({
     stats,

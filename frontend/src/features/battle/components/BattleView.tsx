@@ -29,6 +29,7 @@
 import {useState, useEffect, useRef, useMemo} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
+import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
 import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
@@ -36,8 +37,6 @@ import {useBattle} from '../hooks/useBattle';
 import {calculateCandyPerClick} from '@/lib/calculateCandyPerClick';
 import {getPlatformImage} from '../utils/platformMapping';
 import {toDecimal} from '@/lib/decimal';
-import {useCandyOperations} from '@/contexts/CandyOperationsContext';
-import {logger} from '@/lib/logger';
 
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
@@ -56,8 +55,8 @@ export function BattleView({
   onAttackFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
-  const {user} = useAuth();
-  const {addCandy} = useCandyOperations();
+  const {user, updateUser} = useAuth();
+  const {updateRareCandy} = useGameMutations();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
 
@@ -120,10 +119,15 @@ export function BattleView({
     ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
     : '1';
 
-  // Base reward: clicks × candyPerClick × 10
-  const battleReward = toDecimal(finalClickCount)
-    .times(candyPerClick)
-    .times(10);
+  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 3)
+  const clickReward = toDecimal(finalClickCount).times(candyPerClick).times(2);
+
+  const opponentPrice = opponentPokemon.price
+    ? toDecimal(opponentPokemon.price)
+    : toDecimal(0);
+  const priceBonus = opponentPrice.dividedBy(3);
+
+  const battleReward = clickReward.plus(priceBonus);
   const rareCandyReward = battleReward.floor().toString();
 
   // Ready countdown state
@@ -155,15 +159,17 @@ export function BattleView({
       toDecimal(rareCandyReward).gt(0) &&
       !candyAwarded
     ) {
-      // Award candy via context (works with default implementation or PokeClicker's batched version)
-      try {
-        addCandy(rareCandyReward);
-        setCandyAwarded(true);
-      } catch (error) {
-        logger.logError(error, 'BattleReward');
-      }
+      // Award candy immediately
+      updateRareCandy(rareCandyReward, updateUser);
+      setCandyAwarded(true);
     }
-  }, [battleResult, rareCandyReward, candyAwarded, addCandy]);
+  }, [
+    battleResult,
+    rareCandyReward,
+    candyAwarded,
+    updateRareCandy,
+    updateUser,
+  ]);
 
   type LayoutPosition = {
     width: string;

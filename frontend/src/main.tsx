@@ -1,6 +1,6 @@
 /**
  * Application entry point
- * Sets up provider hierarchy: Error > Auth > Apollo > Onboarding > CandyOperations > App
+ * Sets up provider hierarchy: Error > Auth > Apollo > Onboarding > App
  */
 
 import {StrictMode} from 'react';
@@ -12,7 +12,6 @@ import {apolloClient} from '@lib/apolloClient';
 import {AuthProvider} from '@features/auth';
 import {ErrorProvider} from '@/contexts/ErrorContext';
 import {OnboardingProvider} from '@/contexts/OnboardingContext';
-import {CandyOperationsProvider} from '@/contexts/CandyOperationsContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,9 +19,7 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <ApolloProvider client={apolloClient}>
           <OnboardingProvider>
-            <CandyOperationsProvider>
-              <App />
-            </CandyOperationsProvider>
+            <App />
           </OnboardingProvider>
         </ApolloProvider>
       </AuthProvider>

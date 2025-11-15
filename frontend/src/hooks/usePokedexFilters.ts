@@ -11,7 +11,9 @@ export function usePokedexFilters(): PokedexFilterContextValue {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'id' | 'name' | 'type'>('id');
+  const [sortBy, setSortBy] = useState<'id' | 'name' | 'type' | 'price'>(
+    'price'
+  );
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedOwnedOnly, setSelectedOwnedOnly] = useState<
     'all' | 'owned' | 'unowned'
@@ -45,7 +47,7 @@ export function usePokedexFilters(): PokedexFilterContextValue {
   const handleClearFilters = () => {
     setSelectedRegion(null);
     setSelectedTypes([]);
-    setSortBy('id');
+    setSortBy('price');
     setSortOrder('asc');
     setSelectedOwnedOnly('all');
     setTempOwnedOnly('all');

@@ -23,8 +23,8 @@ export interface PokedexFilterContextValue {
   setSelectedRegion: (value: string | null) => void;
   selectedTypes: string[];
   setSelectedTypes: (value: string[]) => void;
-  sortBy: 'id' | 'name' | 'type';
-  setSortBy: (value: 'id' | 'name' | 'type') => void;
+  sortBy: 'id' | 'name' | 'type' | 'price';
+  setSortBy: (value: 'id' | 'name' | 'type' | 'price') => void;
   sortOrder: 'asc' | 'desc';
   setSortOrder: (value: 'asc' | 'desc') => void;
   selectedOwnedOnly: 'all' | 'owned' | 'unowned';
@@ -43,8 +43,8 @@ export interface PokedexFilterContextValue {
   setTempRegion: (value: string | null) => void;
   tempTypes: string[];
   setTempTypes: (value: string[]) => void;
-  tempSortBy: 'id' | 'name' | 'type';
-  setTempSortBy: (value: 'id' | 'name' | 'type') => void;
+  tempSortBy: 'id' | 'name' | 'type' | 'price';
+  setTempSortBy: (value: 'id' | 'name' | 'type' | 'price') => void;
   tempSortOrder: 'asc' | 'desc';
   setTempSortOrder: (value: 'asc' | 'desc') => void;
   tempOwnedOnly: 'all' | 'owned' | 'unowned';

@@ -14,7 +14,6 @@ import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
-import {getPokemonCost} from '@/config';
 import {useError} from '@/hooks/useError';
 
 interface PokemonDetailCardProps {
@@ -66,7 +65,7 @@ export function PokemonDetailCard({
 
     // Client-side validation: Check if user can afford the Pokemon
     // This prevents the optimistic response from flashing the unlocked state
-    if (user && toDecimal(user.rare_candy).lt(cost)) {
+    if (user && toDecimal(user.rare_candy).lt(toDecimal(cost))) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
@@ -132,7 +131,11 @@ export function PokemonDetailCard({
 
     // Client-side validation: Check if user can afford the upgrade
     // This prevents the optimistic response from causing UI inconsistencies
-    if (user && upgrade && toDecimal(user.rare_candy).lt(upgrade.cost)) {
+    if (
+      user &&
+      upgrade &&
+      toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
+    ) {
       setError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
@@ -187,7 +190,8 @@ export function PokemonDetailCard({
   const backgroundImageUrl = isOwned
     ? `${import.meta.env.BASE_URL}pokemon-type-bg/${pokemon.types[0]}.webp`
     : `${import.meta.env.BASE_URL}pokemon-type-bg/unknown.webp`;
-  const cost = getPokemonCost(pokemon.id);
+  // Use price from API if available, otherwise fallback to '0' (keep as string for Decimal compatibility)
+  const cost = pokemon.price ?? '0';
   const upgradeLevel = upgrade?.level || 1;
 
   return (
@@ -294,7 +298,9 @@ export function PokemonDetailCard({
               onClick={handleUpgrade}
               disabled={
                 upgrading ||
-                !!(user && toDecimal(user.rare_candy).lt(upgrade.cost))
+                !!(
+                  user && toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
+                )
               }
               className="w-full pixel-font text-xs md:text-sm font-bold py-6 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               bgColor={isDarkMode ? '#3472d7ff' : '#3c77b3ff'}
