@@ -14,6 +14,7 @@ import {PokemonTypeBadges} from '../shared/PokemonTypeBadges';
 import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
+import {useError} from '@/hooks/useError';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
