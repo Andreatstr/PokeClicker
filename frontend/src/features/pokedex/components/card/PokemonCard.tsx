@@ -77,7 +77,7 @@ export const PokemonCard = memo(function PokemonCard({
 
   const onPurchaseClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    handlePurchase(pokemon.id, undefined, cost);
+    handlePurchase(pokemon.id, undefined, cost, pokemon.name);
   };
 
   return (

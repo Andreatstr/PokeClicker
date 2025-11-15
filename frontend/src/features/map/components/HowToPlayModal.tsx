@@ -64,7 +64,7 @@ export function HowToPlayModal({
         >
           {/* Close Button */}
           <button
-            className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+            className="absolute top-2 right-2 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center text-sm bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
             onClick={onClose}
             aria-label="Exit"
           >
@@ -561,7 +561,7 @@ export function HowToPlayModal({
             {/* Got it! Button */}
             <div className="mt-4 md:mt-5 flex justify-end">
               <button
-                className="pixel-font text-xs font-bold border-2 px-4 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+                className="pixel-font text-xs font-bold border-2 px-4 min-h-[44px] shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
                 onClick={onClose}
                 style={{
                   backgroundColor: '#11873cff',

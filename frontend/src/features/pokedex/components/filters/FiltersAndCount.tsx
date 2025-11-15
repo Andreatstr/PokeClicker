@@ -193,7 +193,9 @@ export function FiltersAndCount({
                   <Select
                     value={tempSortBy}
                     onValueChange={(v) =>
-                      setTempSortBy(v as 'id' | 'name' | 'type' | 'price')
+                      setTempSortBy(
+                        v as 'id' | 'name' | 'type' | 'price' | 'stats'
+                      )
                     }
                   >
                     <SelectTrigger
@@ -205,6 +207,7 @@ export function FiltersAndCount({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="price">Price</SelectItem>
+                      <SelectItem value="stats">Stats</SelectItem>
                       <SelectItem value="id">ID</SelectItem>
                       <SelectItem value="name">Name</SelectItem>
                       <SelectItem value="type">Type</SelectItem>

@@ -74,7 +74,7 @@ export function ErrorDisplay() {
 
   return (
     <aside
-      className="fixed top-20 right-4 z-50 max-w-md space-y-2"
+      className="fixed top-20 right-4 z-[9999] max-w-md space-y-2"
       role="alert"
       aria-live="assertive"
       aria-atomic="true"

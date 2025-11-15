@@ -58,7 +58,18 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
   const {data, loading, error, refetch, stopPolling} = useQuery(GET_RANKS, {
     variables: {input: {limit}},
     pollInterval: POLL_INTERVAL_MS,
+    fetchPolicy: 'network-only', // Always fetch fresh data from the server
   });
+
+  // Refetch data when component mounts with small delay
+  // Delay allows candy flush from PokeClicker to complete (race condition fix)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refetch();
+    }, 300); // 300ms delay to let async flush complete
+
+    return () => clearTimeout(timer);
+  }, [refetch]);
 
   // Cleanup: Stop polling when component unmounts
   useEffect(() => {
