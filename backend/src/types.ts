@@ -91,6 +91,8 @@ export const DEFAULT_USER_STATS = {
     pokedexBonus: 1,
   },
   owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
+  favorite_pokemon_id: 746, // Wishiwashi for battles
+  selected_pokemon_id: 746, // Wishiwashi for clicker
 };
 
 /** Per-Pokemon upgrade document tracking individual Pokemon power-ups */

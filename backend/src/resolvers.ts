@@ -128,6 +128,8 @@ const authMutations = {
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? '0',
       stats: DEFAULT_USER_STATS.stats,
       owned_pokemon_ids: [746], // Wishiwashi-solo - cheapest Pokemon
+      favorite_pokemon_id: 746, // Default battle Pokemon
+      selected_pokemon_id: 746, // Default clicker Pokemon
       showInRanks: true,
       isGuestUser: isGuestUser ?? false,
     };
