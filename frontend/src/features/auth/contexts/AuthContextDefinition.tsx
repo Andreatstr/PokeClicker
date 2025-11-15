@@ -12,8 +12,8 @@ interface AuthContextType {
   token: string | null;
   /** Log in with a token and user data */
   login: (token: string, user: User) => Promise<void>;
-  /** Log out and clear authentication state */
-  logout: () => Promise<void>;
+  /** Log out and clear authentication state. Pass clearOnboarding=true when deleting account */
+  logout: (clearOnboarding?: boolean) => Promise<void>;
   /** Update the current user data in state and storage */
   updateUser: (user: User) => void;
   /** Convenience flag indicating if a user is currently authenticated */
