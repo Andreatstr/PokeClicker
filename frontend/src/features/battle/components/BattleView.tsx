@@ -41,7 +41,8 @@ import {toDecimal} from '@/lib/decimal';
 interface BattleViewProps {
   playerPokemon: PokedexPokemon;
   opponentPokemon: PokedexPokemon;
-  onBattleComplete: (result: 'victory' | 'defeat') => void;
+  onBattleComplete: () => void;
+  onBattleEnd?: (result: 'victory' | 'defeat') => void;
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
   isFullscreen?: boolean;
@@ -51,6 +52,7 @@ export function BattleView({
   playerPokemon,
   opponentPokemon,
   onBattleComplete,
+  onBattleEnd,
   isDarkMode = false,
   onAttackFunctionReady,
   isFullscreen = false,
@@ -119,27 +121,27 @@ export function BattleView({
     ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
     : '1';
 
-  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 3)
+  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 4)
   const clickReward = toDecimal(finalClickCount).times(candyPerClick).times(2);
 
   const opponentPrice = opponentPokemon.price
     ? toDecimal(opponentPokemon.price)
     : toDecimal(0);
-  const priceBonus = opponentPrice.dividedBy(3);
+  const priceBonus = opponentPrice.dividedBy(4);
 
   const battleReward = clickReward.plus(priceBonus);
   const rareCandyReward = battleReward.floor().toString();
 
   // Ready countdown state
-  const [readyCount, setReadyCount] = useState(5);
+  const [readyCount, setReadyCount] = useState(3);
 
   useEffect(() => {
     // Begin a short countdown then start the battle
     if (result !== 'ongoing') return;
     if (isActive) return; // already started
 
-    setReadyCount(5);
-    let count = 5;
+    setReadyCount(3);
+    let count = 3;
     const timer = setInterval(() => {
       count -= 1;
       setReadyCount(count);
@@ -147,12 +149,12 @@ export function BattleView({
         clearInterval(timer);
         startBattle();
       }
-    }, 800);
+    }, 1000);
 
     return () => clearInterval(timer);
   }, [result, isActive, startBattle]);
 
-  // Auto-award candy when battle is won
+  // Auto-award candy when battle is won and trigger immediate battle end callback
   useEffect(() => {
     if (
       battleResult === 'victory' &&
@@ -162,6 +164,9 @@ export function BattleView({
       // Award candy immediately
       updateRareCandy(rareCandyReward, updateUser);
       setCandyAwarded(true);
+
+      // Trigger immediate battle end callback (removes Pokemon from map)
+      onBattleEnd?.(battleResult);
     }
   }, [
     battleResult,
@@ -169,6 +174,7 @@ export function BattleView({
     candyAwarded,
     updateRareCandy,
     updateUser,
+    onBattleEnd,
   ]);
 
   type LayoutPosition = {
@@ -404,7 +410,7 @@ export function BattleView({
         opponentPokemon={opponentPokemon}
         clickCount={finalClickCount}
         rareCandyReward={rareCandyReward}
-        onContinue={() => onBattleComplete(battleResult)}
+        onContinue={onBattleComplete}
         isDarkMode={isDarkMode}
       />
     );
@@ -523,6 +529,54 @@ export function BattleView({
           isDarkMode={isDarkMode}
         />
       </aside>
+
+      {/* Run Button - top left corner, below fullscreen */}
+      {result === 'ongoing' && isActive && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onBattleComplete();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBattleComplete();
+          }}
+          className="absolute top-11 md:top-12 left-2 z-30 flex items-center gap-1 active:bg-red-700 border-2 border-black px-2 py-1 touch-manipulation"
+          title="Run from battle"
+          aria-label="Run from battle"
+          style={{
+            WebkitTapHighlightColor: 'transparent',
+            backgroundColor: 'rgba(239, 68, 68, 0.9)',
+            boxShadow: '4px 4px 0px rgba(0,0,0,1)',
+            transform: 'translate(0, 0)',
+            transition: 'all 0.15s ease-in-out',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translate(-2px, -2px)';
+            e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translate(0, 0)';
+            e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.9)';
+          }}
+        >
+          <svg
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-4 h-4 text-white"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+              fill="currentColor"
+            />
+          </svg>
+          <span className="pixel-font text-xs font-bold text-white">RUN</span>
+        </button>
+      )}
 
       {/* Attack instructions - centered in the middle */}
       {result === 'ongoing' && (
