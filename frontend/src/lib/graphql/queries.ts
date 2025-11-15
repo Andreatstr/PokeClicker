@@ -114,12 +114,16 @@ export const POKEMON_BY_ID_BASIC = gql`
  * Bulk query for multiple Pokemon (selector dialogs)
  */
 export const POKEMON_BY_IDS = gql`
+  ${POKEMON_STATS_FRAGMENT}
   query PokemonByIds($ids: [Int!]!) {
     pokemonByIds(ids: $ids) {
       id
       name
       sprite
       types
+      stats {
+        ...PokemonStatsFields
+      }
     }
   }
 `;

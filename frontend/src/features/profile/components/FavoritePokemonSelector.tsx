@@ -6,6 +6,7 @@ import {usePokemonBasicBulk} from '../hooks/usePokemonBasic';
  *
  * Features:
  * - Efficient bulk query (fetches all owned Pokemon in single request)
+ * - Sorted by total stats (BST) in descending order (strongest first)
  * - Grid layout with responsive columns
  * - Loading state handling
  * - Dark mode support
@@ -28,7 +29,47 @@ export function FavoritePokemonSelector({
   // Fetch all owned Pokemon in a single query (only when dialog is open)
   const {data, loading} = usePokemonBasicBulk(isOpen ? ownedPokemonIds : []);
 
-  const ownedPokemon = data?.pokemonByIds || [];
+  // Sort Pokemon by total stats (BST) in descending order
+  const ownedPokemon = (data?.pokemonByIds || []).slice().sort((a, b) => {
+    // Calculate BST from stats
+    const bstA = a.stats
+      ? a.stats.hp +
+        a.stats.attack +
+        a.stats.defense +
+        a.stats.spAttack +
+        a.stats.spDefense +
+        a.stats.speed
+      : 0;
+    const bstB = b.stats
+      ? b.stats.hp +
+        b.stats.attack +
+        b.stats.defense +
+        b.stats.spAttack +
+        b.stats.spDefense +
+        b.stats.speed
+      : 0;
+    return bstB - bstA; // Descending order (highest stats first)
+  });
+
+  // Helper to calculate total stats for display
+  const calculateTotalStat = (stats?: {
+    hp: number;
+    attack: number;
+    defense: number;
+    spAttack: number;
+    spDefense: number;
+    speed: number;
+  }) => {
+    if (!stats) return 0;
+    return (
+      stats.hp +
+      stats.attack +
+      stats.defense +
+      stats.spAttack +
+      stats.spDefense +
+      stats.speed
+    );
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -49,7 +90,7 @@ export function FavoritePokemonSelector({
               id="pokemon-selector-heading"
               className="text-lg sm:text-xl font-bold mb-4"
             >
-              SELECT FAVORITE POKEMON
+              SELECT YOUR POKEMON
             </h2>
           </header>
 
@@ -57,13 +98,14 @@ export function FavoritePokemonSelector({
             <p className="text-center py-8">Loading Pokemon...</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {ownedPokemon?.map(
-                (pokemon: {id: number; name: string; sprite: string}) => (
+              {ownedPokemon?.map((pokemon) => {
+                const totalStat = calculateTotalStat(pokemon.stats);
+                return (
                   <button
                     key={pokemon.id}
                     onClick={() => onSelect(pokemon.id)}
                     className="p-3 border-2"
-                    aria-label={`Select ${pokemon.id}`}
+                    aria-label={`Select ${pokemon.name} (Total stat: ${totalStat})`}
                     style={{
                       borderColor: isDarkMode ? '#333333' : 'black',
                       backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f1e8',
@@ -103,9 +145,16 @@ export function FavoritePokemonSelector({
                     >
                       #{pokemon.id}
                     </p>
+                    <p
+                      className="text-[9px] sm:text-[10px] text-center font-bold mt-1"
+                      style={{color: isDarkMode ? '#4ade80' : '#16a34a'}}
+                      title="Total Stat"
+                    >
+                      Total stat: {totalStat}
+                    </p>
                   </button>
-                )
-              )}
+                );
+              })}
             </div>
           )}
 
