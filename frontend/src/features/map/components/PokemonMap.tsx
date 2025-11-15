@@ -97,18 +97,6 @@ export function PokemonMap({
   // How to Play modal state
   const [showHowToPlay, setShowHowToPlay] = useState(false);
 
-  // Welcome CTA state - show for new players
-  const [showWelcomeCTA, setShowWelcomeCTA] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const dismissed = localStorage.getItem('welcomeCTADismissed');
-    if (dismissed) return false;
-    return user &&
-      'owned_pokemon_ids' in user &&
-      Array.isArray(user.owned_pokemon_ids)
-      ? user.owned_pokemon_ids.length <= 3
-      : false;
-  });
-
   // Responsive viewport for fitting GameBoy on mobile and web
   const [viewport, setViewport] = useState<{width: number; height: number}>(
     DEFAULT_VIEWPORT
@@ -299,8 +287,8 @@ export function PokemonMap({
     [favoritePokemon, refreshStats]
   );
 
-  // Battle complete handler
-  const handleBattleComplete = useCallback(
+  // Handle battle end (immediately when battle result is determined)
+  const handleBattleEnd = useCallback(
     async (result: 'victory' | 'defeat') => {
       if (result === 'victory' && battleOpponent && battleSpawnId) {
         try {
@@ -311,21 +299,26 @@ export function PokemonMap({
             });
           }
 
-          // Remove the caught Pokemon from the map and spawn a new one
+          // Remove the caught Pokemon from the map immediately
+          // This ensures Pokemon is removed even if user switches views before clicking Continue
           pokemon.removePokemon(battleSpawnId);
         } catch (error) {
           logger.logError(error, 'AwardBattleRewards');
         }
       }
-
-      setInBattle(false);
-      setBattleOpponent(null);
-      setPlayerPokemon(null);
-      setBattleSpawnId(null);
-      setBattleAttackFunction(null);
     },
     [battleOpponent, battleSpawnId, catchPokemon, pokemon]
   );
+
+  // Battle complete handler (called when user clicks "Continue" on result screen)
+  const handleBattleComplete = useCallback(() => {
+    // Clean up battle state
+    setInBattle(false);
+    setBattleOpponent(null);
+    setPlayerPokemon(null);
+    setBattleSpawnId(null);
+    setBattleAttackFunction(null);
+  }, []);
 
   const handleAButtonClick = useCallback(() => {
     if (inBattle && battleAttackFunction) {
@@ -657,54 +650,20 @@ export function PokemonMap({
             </div>
           )}
 
-          {/* Welcome CTA - shown for new players */}
-          {!inBattle && !pokemon.nearbyPokemon && showWelcomeCTA && (
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-auto max-w-[90%]">
-              <div
-                className={`pixel-font text-center px-4 py-3 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
-                  isDarkMode
-                    ? 'bg-gray-800 text-white border-gray-600'
-                    : 'bg-white text-black border-black'
-                }`}
-              >
-                <div className="text-sm md:text-base font-bold mb-2">
-                  Wild Pokémon are out there!
-                </div>
-                <div className="text-xs md:text-sm opacity-90 mb-3">
-                  Explore, battle, and catch 'em all!
-                </div>
-                <button
-                  onClick={() => {
-                    localStorage.setItem('welcomeCTADismissed', 'true');
-                    setShowWelcomeCTA(false);
-                  }}
-                  className={`px-4 py-1 text-xs font-bold border rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] ${
-                    isDarkMode
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500'
-                      : 'bg-blue-500 hover:bg-blue-400 text-white border-blue-400'
-                  }`}
-                  aria-label="OK"
-                >
-                  OK
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Battle Prompt - bottom center, wider in fullscreen */}
           {!inBattle && pokemon.nearbyPokemon && (
             <div
               className={`absolute left-1/2 transform -translate-x-1/2 z-40 ${
                 isFullscreen
-                  ? 'bottom-20 w-[94%] max-w-[600px]'
-                  : 'bottom-16 md:bottom-20 w-[94%] max-w-[400px]'
+                  ? 'bottom-8 w-[94%] max-w-[600px]'
+                  : 'bottom-12 md:bottom-8 w-[94%] max-w-[400px]'
               }`}
               role="dialog"
               aria-live="polite"
               aria-label={`Wild ${pokemon.nearbyPokemon.pokemon.name} nearby`}
             >
               <div
-                className={`border-4 shadow-[6px_6px_0_rgba(0,0,0,1)] px-4 py-3 flex items-center gap-3 rounded-sm ${
+                className={`border-2 shadow-[4px_4px_0_rgba(0,0,0,1)] px-2 py-1.5 md:px-3 md:py-2 flex items-center gap-2 rounded-sm ${
                   isDarkMode
                     ? 'bg-gray-800/95 border-gray-600 text-white'
                     : 'bg-white/95 border-black text-black'
@@ -713,16 +672,16 @@ export function PokemonMap({
                 <img
                   src={pokemon.nearbyPokemon.pokemon.sprite}
                   alt={pokemon.nearbyPokemon.pokemon.name}
-                  className="w-8 h-8 flex-shrink-0"
+                  className="w-10 h-10 md:w-12 md:h-12 shrink-0"
                   style={{imageRendering: 'pixelated'}}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="pixel-font text-xs md:text-sm font-bold truncate">
+                  <p className="pixel-font text-[10px] md:text-xs font-bold wrap-break-word">
                     {pokemon.nearbyPokemon.pokemon.name} nearby!
                   </p>
                 </div>
                 <button
-                  className={`pixel-font text-xs md:text-sm border-2 px-3 py-1.5 font-bold whitespace-nowrap touch-manipulation ${
+                  className={`pixel-font text-xs md:text-sm border-2 px-2 py-1 md:px-3 md:py-1.5 font-bold whitespace-nowrap touch-manipulation ${
                     isDarkMode
                       ? 'bg-red-700 border-gray-600 text-white'
                       : 'bg-red-600 border-black text-white'
@@ -817,6 +776,7 @@ export function PokemonMap({
               playerPokemon={playerPokemon}
               opponentPokemon={battleOpponent}
               onBattleComplete={handleBattleComplete}
+              onBattleEnd={handleBattleEnd}
               isDarkMode={isDarkMode}
               onAttackFunctionReady={setBattleAttackFunctionWrapper}
               isFullscreen={isFullscreen}

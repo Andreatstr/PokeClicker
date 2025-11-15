@@ -48,9 +48,7 @@ export function PokemonDetailCard({
   // This ensures the UI updates when the cache updates
   const isOwned = ownedPokemonIds.includes(pokemon.id);
 
-  const {upgrade, refetch: refetchUpgrade} = usePokemonUpgrade(
-    isOwned ? pokemon.id : null
-  );
+  const {upgrade} = usePokemonUpgrade(isOwned ? pokemon.id : null);
   const [upgradePokemonMutation, {loading: upgrading}] =
     useUpgradePokemonMutation();
 
@@ -103,7 +101,12 @@ export function PokemonDetailCard({
         // Show success toast notification only after server confirmation
         const capitalizedName =
           pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+        console.log(
+          'About to call addSuccess with:',
+          `Successfully bought ${capitalizedName}!`
+        );
         addSuccess(`Successfully bought ${capitalizedName}!`);
+        console.log('addSuccess called');
 
         onPurchaseComplete?.(pokemon.id);
         setIsAnimating(true);
@@ -158,7 +161,7 @@ export function PokemonDetailCard({
         });
       }
 
-      await refetchUpgrade();
+      // No need to manually refetch - mutation handles it via refetchQueries
 
       setIsAnimating(true);
       setTimeout(() => setIsAnimating(false), 800);

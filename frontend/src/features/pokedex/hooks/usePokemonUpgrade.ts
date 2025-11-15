@@ -40,7 +40,13 @@ export function usePokemonUpgrade(pokemonId: number | null) {
  */
 export function useUpgradePokemonMutation() {
   const [upgradePokemon, {loading, error}] = useMutation<UpgradePokemonData>(
-    UPGRADE_POKEMON_MUTATION
+    UPGRADE_POKEMON_MUTATION,
+    {
+      // Refetch all POKEMON_UPGRADE_QUERY queries to prevent race conditions
+      // This ensures any component querying upgrade data gets fresh data
+      refetchQueries: ['PokemonUpgrade'],
+      awaitRefetchQueries: true,
+    }
   );
 
   return [upgradePokemon, {loading, error}] as const;
