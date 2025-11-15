@@ -35,6 +35,13 @@ vi.mock('@features/auth', () => ({
   }),
 }));
 
+vi.mock('@/hooks/useError', () => ({
+  useError: () => ({
+    addSuccess: vi.fn(),
+    addError: vi.fn(),
+  }),
+}));
+
 vi.mock('@/lib/decimal', () => ({
   toDecimal: (value: any) => {
     const val = typeof value === 'number' ? value : parseFloat(String(value));

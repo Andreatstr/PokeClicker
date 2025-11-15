@@ -3,6 +3,7 @@ import {GameConfig, getPokemonCost} from '@/config';
 import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 import {toDecimal} from '@/lib/decimal';
+import {useError} from '@/hooks/useError';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations
@@ -10,6 +11,7 @@ import {toDecimal} from '@/lib/decimal';
 export function usePokemonPurchaseHandler() {
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
+  const {addSuccess} = useError();
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
@@ -17,7 +19,8 @@ export function usePokemonPurchaseHandler() {
   const handlePurchase = async (
     pokemonId: number,
     onSuccess?: (pokemonId: number) => void,
-    actualPrice?: string
+    actualPrice?: string,
+    pokemonName?: string
   ) => {
     // Clear any existing error timeout to prevent race conditions
     if (errorTimeoutRef.current) {
@@ -47,6 +50,12 @@ export function usePokemonPurchaseHandler() {
       // Apollo optimistic response already updated the UI immediately
       if (result.data?.purchasePokemon) {
         updateUser(result.data.purchasePokemon);
+
+        // Show success notification
+        const displayName = pokemonName
+          ? pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1)
+          : `Pokemon #${pokemonId}`;
+        addSuccess(`Successfully bought ${displayName}!`);
       }
 
       onSuccess?.(pokemonId);
