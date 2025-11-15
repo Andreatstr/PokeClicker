@@ -28,7 +28,7 @@ interface UseBattleProps {
  * - Click-based player attacks with damage calculations based on stats
  * - Passive opponent attacks at intervals based on opponent speed
  * - Charge meter system (builds passively + on click) for special abilities
- * - Special attack: burst damage based on spAttack (2%-15% of opponent max HP)
+ * - Special attack: burst damage based on spAttack (4%-30% of opponent max HP)
  * - Shield ability: blocks damage for duration based on spDefense (0.8-3.5s)
  * - Scaled HP values for 30-45 second battles with active clicking
  *
@@ -233,14 +233,14 @@ export function useBattle({
 
   /**
    * Trigger special attack ability when charge meter is full
-   * Deals burst damage based on player's spAttack stat (2%-15% of opponent's max HP)
+   * Deals burst damage based on player's spAttack stat (4%-30% of opponent's max HP)
    * Consumes full charge meter
    */
   const triggerSpecialAttack = useCallback(() => {
     setBattleState((prev) => {
       if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
       const spA = playerPokemon.stats?.spAttack || 0;
-      const scale = Math.min(0.15, 0.02 + spA / 5000); // 2%..15%
+      const scale = Math.min(0.3, 0.04 + spA / 2500); // 4%..30% (2x damage)
       const burst = Math.max(1, Math.floor(prev.opponentMaxHP * scale));
       const newOpp = Math.max(0, prev.opponentHP - burst);
       return {
