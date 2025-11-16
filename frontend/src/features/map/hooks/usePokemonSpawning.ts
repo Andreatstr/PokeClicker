@@ -2,10 +2,22 @@ import {useState, useEffect, useCallback, useMemo} from 'react';
 import {logger} from '@/lib/logger';
 import {usePokedexQuery, type PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
+import {
+  usePokemonBasicBulk,
+  type PokemonBasic,
+} from '../../profile/hooks/usePokemonBasic';
 
 // Map dimensions
 const MAP_WIDTH = 10560;
 const MAP_HEIGHT = 6080;
+
+// Starter Pokémon pool (weak BST range 180–250)
+// Adjust IDs to match your pokedex schema
+const STARTER_POKEMON_IDS = [
+  746, 191, 824, 872, 298, 401, 10, 265, 13, 280, 664, 129, 789, 349, 266, 11,
+  268, 172, 14, 194,
+];
+// Wishiwashi, Sunkern, Blisbug, Snom, Azurill, Kricketot, Caterpie, Wurmple, Weedle, Ralts, Scatterbug, Magikarp, Cosmog, Feebas, Silcoon, Metapod, Cascoon, Pichu, Kakuna, Wooper
 
 interface CollisionChecker {
   isPositionWalkable: (x: number, y: number) => boolean;
@@ -89,6 +101,24 @@ function generateTargetBST(ownedPokemon: PokedexPokemon[]): number {
   return Math.max(180, Math.min(720, targetBST));
 }
 
+function normalizeBasicToPokedex(p: PokemonBasic): PokedexPokemon {
+  return {
+    id: p.id,
+    name: p.name,
+    types: p.types,
+    sprite: p.sprite,
+    pokedexNumber: p.id, // fallback: use id as pokedexNumber
+    stats: p.stats ?? null,
+    height: null,
+    weight: null,
+    abilities: null,
+    evolution: null,
+    isOwned: false,
+    bst: null,
+    price: null,
+  };
+}
+
 /**
  * Hook managing wild Pokemon spawning system with progression-based difficulty
  *
@@ -157,6 +187,9 @@ export function usePokemonSpawning(
     }
   }, [user?._id, userStorageKey]);
 
+  // Fetch starter Pokemon first
+  const {data, loading} = usePokemonBasicBulk(STARTER_POKEMON_IDS);
+
   // Fetch all Pokemon to have access to full BST range
   // We need all Pokemon available since spawning is BST-based, not ID-based
   const {data: pokemonData} = usePokedexQuery({
@@ -198,6 +231,47 @@ export function usePokemonSpawning(
       localStorage.setItem(userStorageKey, JSON.stringify(wildPokemon));
     }
   }, [wildPokemon, userStorageKey]);
+
+  // Spawn starter Pokémon once pokedex data is available
+  useEffect(() => {
+    const starterPokemon = data?.pokemonByIds || [];
+
+    if (
+      !loading &&
+      starterPokemon.length > 0 &&
+      wildPokemon.length === 0 &&
+      collisionChecker.collisionMapLoaded
+    ) {
+      const startSpawns: PokemonSpawn[] = [];
+
+      for (let i = 0; i < NUM_SPAWNS; i++) {
+        const starterId =
+          STARTER_POKEMON_IDS[
+            Math.floor(Math.random() * STARTER_POKEMON_IDS.length)
+          ];
+
+        const pokemon = starterPokemon.find((p) => p.id === starterId);
+        if (!pokemon) continue; // skip if not found
+
+        const position = getRandomWalkablePosition();
+
+        startSpawns.push({
+          spawnId: `${pokemon.id}-${position.x}-${position.y}-${Date.now()}-${i}`,
+          pokemon: normalizeBasicToPokedex(pokemon),
+          x: position.x,
+          y: position.y,
+        });
+      }
+
+      setWildPokemon(startSpawns);
+    }
+  }, [
+    data?.pokemonByIds,
+    loading,
+    wildPokemon.length,
+    getRandomWalkablePosition,
+    collisionChecker.collisionMapLoaded,
+  ]);
 
   // Place Pokemon at random walkable locations when data loads
   useEffect(() => {

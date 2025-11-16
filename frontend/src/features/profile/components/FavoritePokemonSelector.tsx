@@ -146,11 +146,11 @@ export function FavoritePokemonSelector({
                       #{pokemon.id}
                     </p>
                     <p
-                      className="text-[9px] sm:text-[10px] text-center font-bold mt-1"
+                      className="text-[8px] sm:text-[9px] text-center font-bold mt-1"
                       style={{color: isDarkMode ? '#4ade80' : '#16a34a'}}
                       title="Total Stat"
                     >
-                      Total stat: {totalStat}
+                      Total base stat: {totalStat}
                     </p>
                   </button>
                 );
