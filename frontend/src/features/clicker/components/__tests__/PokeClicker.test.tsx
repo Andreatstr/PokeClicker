@@ -1,4 +1,5 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
+import '@testing-library/jest-dom';
 import {render, screen} from '../../../../test/utils';
 import {PokeClicker} from '../PokeClicker';
 import {createMockUser} from '../../../../test/factories';
@@ -64,7 +65,7 @@ vi.mock('../hooks/useAutoclicker', () => ({
 vi.mock('@/lib/gameAssetsCache', () => ({
   gameAssetsCache: {
     preloadClickerAssets: vi.fn().mockResolvedValue(undefined),
-    getCharizardSprite: vi.fn().mockResolvedValue(''),
+    getWishiWashiSprite: vi.fn().mockResolvedValue(''),
     getCandyImage: vi.fn().mockResolvedValue(''),
     getRareCandyIcon: vi.fn().mockResolvedValue(''),
     getPokemonBackground: vi.fn().mockResolvedValue(''),

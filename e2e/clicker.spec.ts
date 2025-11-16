@@ -42,7 +42,7 @@ test.describe("Clicker Game", () => {
     expect(candyCount).toBeGreaterThanOrEqual(0);
   });
 
-  test("should increment candy count when clicking Charizard", async ({
+  test("should increment candy count when clicking Wishiwashi", async ({
     page,
   }) => {
     const initialCandy = await clicker.getCandyCount();

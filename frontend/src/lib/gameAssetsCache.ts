@@ -5,7 +5,7 @@
  * Separates game assets from Pokemon sprites for better organization and preloading control.
  *
  * Asset Categories:
- * 1. Clicker Game: Charizard sprite, candy image, rare candy icon, background
+ * 1. Clicker Game: Wishiwashi-Solo sprite, candy image, rare candy icon, background
  * 2. Map Feature: Ash sprite, map background, collision map
  * 3. Rankings: Rare candy icon, candy image
  *
@@ -16,7 +16,7 @@
  *
  * Asset Sources:
  * - Local files (public/ directory): Fast, bundled with app
- * - PokeAPI GitHub CDN: Charizard sprite, rare candy icon
+ * - PokeAPI GitHub CDN: Wishiwashi-Solo sprite, rare candy icon
  * - Mixed strategy balances bundle size vs external dependencies
  *
  * Performance:
@@ -28,7 +28,7 @@
 import {imageCache} from './imageCache';
 
 interface GameAssetUrls {
-  charizardSprite: string;
+  wishiwashiSprite: string;
   candyImage: string;
   rareCandyIcon: string;
   pokemonBackground: string;
@@ -46,8 +46,8 @@ class GameAssetsCache {
   private getGameAssetUrls(): GameAssetUrls {
     if (Object.keys(this.gameAssets).length === 0) {
       this.gameAssets = {
-        charizardSprite:
-          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',
+        wishiwashiSprite:
+          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/746.png',
         candyImage: `${this.baseUrl}candy.webp`,
         rareCandyIcon:
           'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png',
@@ -60,9 +60,9 @@ class GameAssetsCache {
     return this.gameAssets as GameAssetUrls;
   }
 
-  async getCharizardSprite(): Promise<HTMLImageElement> {
+  async getWishiWashiSprite(): Promise<HTMLImageElement> {
     const urls = this.getGameAssetUrls();
-    return imageCache.getImage(urls.charizardSprite);
+    return imageCache.getImage(urls.wishiwashiSprite);
   }
 
   async getCandyImage(): Promise<HTMLImageElement> {
@@ -115,12 +115,12 @@ class GameAssetsCache {
    *
    * Size: ~200KB (4 assets)
    * Called when user enters clicker feature for instant visual feedback.
-   * Charizard sprite is critical for the clicking interaction.
+   * Wishiwashi sprite is critical for the clicking interaction.
    */
   async preloadClickerAssets(): Promise<void> {
     const urls = this.getGameAssetUrls();
     const clickerAssets = [
-      urls.charizardSprite,
+      urls.wishiwashiSprite,
       urls.candyImage,
       urls.rareCandyIcon,
       urls.pokemonBackground,
@@ -129,7 +129,7 @@ class GameAssetsCache {
     await imageCache.preloadImages(clickerAssets);
 
     [
-      'charizardSprite',
+      'wishiwashiSprite',
       'candyImage',
       'rareCandyIcon',
       'pokemonBackground',

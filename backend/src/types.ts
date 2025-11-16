@@ -90,7 +90,7 @@ export const DEFAULT_USER_STATS = {
     clickMultiplier: 1,
     pokedexBonus: 1,
   },
-  owned_pokemon_ids: [1], // Start with Bulbasaur (PokéAPI ID: 1)
+  owned_pokemon_ids: [746], // Start with Wishiwashi (PokéAPI ID: 746)
   favorite_pokemon_id: 746, // Wishiwashi for battles
   selected_pokemon_id: 746, // Wishiwashi for clicker
 };

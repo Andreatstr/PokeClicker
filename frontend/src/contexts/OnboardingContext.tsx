@@ -43,8 +43,7 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
       setStep(0);
       setIsActive(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, isActive]);
 
   const nextStep = () => {
     // Tutorial has 17 steps (0-16), so reaching step 16 means completion

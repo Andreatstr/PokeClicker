@@ -113,7 +113,7 @@ export function PokeClicker({
       try {
         await gameAssetsCache.preloadClickerAssets();
         await Promise.all([
-          gameAssetsCache.getCharizardSprite(),
+          gameAssetsCache.getWishiWashiSprite(),
           gameAssetsCache.getCandyImage(),
           gameAssetsCache.getRareCandyIcon(),
           gameAssetsCache.getPokemonBackground(),
