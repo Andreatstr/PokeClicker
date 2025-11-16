@@ -111,7 +111,7 @@ export function FiltersAndCount({
                 <button
                   onClick={() => setShowMobileFilters(false)}
                   aria-label="Close filter dialog"
-                  className="min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
                 >
                   <span className="text-xl">×</span>
                 </button>

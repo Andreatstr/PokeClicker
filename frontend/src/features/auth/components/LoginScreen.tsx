@@ -247,7 +247,7 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
                 <button
                   onClick={() => setModalType(null)}
                   onKeyDown={handleCloseButtonKey}
-                  className="absolute top-3 right-4 text-xl font-bold text-red-600 focus:outline-red"
+                  className="absolute top-3 right-4 text-xl font-bold cursor-pointer text-red-600 focus:outline-red"
                   aria-label="Close modal"
                 >
                   x
@@ -349,7 +349,7 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
 
                   <button
                     type="button"
-                    className="text-xs text-blue-700 underline mt-2"
+                    className="text-xs text-blue-700 underline mt-2 cursor-pointer"
                     aria-label={`${modalType === 'login' ? "Don't have a user? Sign up here" : 'Already have an account? Log in here'}`}
                     onClick={() =>
                       setModalType(modalType === 'login' ? 'signup' : 'login')

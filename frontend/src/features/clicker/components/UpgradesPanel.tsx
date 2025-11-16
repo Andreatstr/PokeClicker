@@ -95,7 +95,7 @@ export function UpgradesPanel({
               e.preventDefault();
               onShowHelp();
             }}
-            className="flex items-center justify-center border-2 border-black w-11 h-11 touch-manipulation flex-shrink-0"
+            className="flex items-center cursor-pointer justify-center border-2 border-black w-11 h-11 touch-manipulation flex-shrink-0"
             title="Upgrade guide"
             aria-label="Show upgrade guide"
             style={{

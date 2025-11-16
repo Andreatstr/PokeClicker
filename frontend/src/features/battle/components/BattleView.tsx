@@ -542,7 +542,7 @@ export function BattleView({
             e.stopPropagation();
             onBattleComplete();
           }}
-          className="absolute top-11 md:top-12 left-2 z-30 flex items-center gap-1 active:bg-red-700 border-2 border-black px-2 py-1 touch-manipulation"
+          className="absolute top-11 md:top-12 left-2 z-30 flex cursor-pointer items-center gap-1 active:bg-red-700 border-2 border-black px-2 py-1 touch-manipulation"
           title="Run from battle"
           aria-label="Run from battle"
           style={{
@@ -632,7 +632,7 @@ export function BattleView({
             aria-label="Battle special moves"
           >
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs cursor-pointer border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
@@ -679,7 +679,7 @@ export function BattleView({
               </span>
             </button>
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs cursor-pointer border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'

@@ -233,7 +233,7 @@ export function PokemonDetailCard({
 
         {/* Close Button */}
         <button
-          className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+          className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 cursor-pointer text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
           onClick={onClose}
           aria-label="Exit"
         >

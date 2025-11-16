@@ -218,7 +218,7 @@ export function ProfileDashboard({
             </h2>
             <label
               htmlFor="profile-show-in-ranks"
-              className="flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 text-sm cursor-pointer"
               style={{color: 'var(--foreground)'}}
             >
               <Checkbox
@@ -326,7 +326,7 @@ export function ProfileDashboard({
                 restartTutorial();
               }, 500);
             }}
-            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all text-sm focus-visible:outline-none"
+            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all cursor-pointer text-sm focus-visible:outline-none"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
               backgroundColor: '#10845dff',
@@ -369,7 +369,7 @@ export function ProfileDashboard({
         >
           <button
             onClick={handleLogout}
-            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base focus-visible:outline-none"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all cursor-pointer text-sm sm:text-base focus-visible:outline-none"
             aria-label="Log out"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',
@@ -408,7 +408,7 @@ export function ProfileDashboard({
           <button
             onClick={() => setDeleteDialogOpen(true)}
             disabled={deleting}
-            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all text-sm sm:text-base focus-visible:outline-none"
+            className="flex-1 px-4 sm:px-6 py-2 sm:py-3 font-bold border-4 transition-all cursor-pointer text-sm sm:text-base focus-visible:outline-none"
             aria-label="Delete account"
             style={{
               borderColor: isDarkMode ? '#333333' : 'black',

@@ -519,7 +519,7 @@ export function PokemonMap({
               e.preventDefault();
               toggleFullscreen();
             }}
-            className="absolute top-2 left-2 z-50 flex items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
+            className="absolute top-2 left-2 z-50 flex cursor-pointer items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             aria-label={
               isFullscreen ? 'Exit fullscreen mode' : 'Enter fullscreen mode'
@@ -563,7 +563,7 @@ export function PokemonMap({
             <button
               onClick={movement.teleportToRandomLocation}
               disabled={movement.isTeleporting || movement.teleportCooldown > 0}
-              className="absolute bottom-3 left-2 z-50 flex items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+              className="absolute bottom-3 left-2 z-50 flex cursor-pointer items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               title={
                 movement.isTeleporting
                   ? 'Teleporting...'
@@ -681,7 +681,7 @@ export function PokemonMap({
                   </p>
                 </div>
                 <button
-                  className={`pixel-font text-xs md:text-sm border-2 px-2 py-1 md:px-3 md:py-1.5 font-bold whitespace-nowrap touch-manipulation ${
+                  className={`pixel-font text-xs md:text-sm cursor-pointer border-2 px-2 py-1 md:px-3 md:py-1.5 font-bold whitespace-nowrap touch-manipulation ${
                     isDarkMode
                       ? 'bg-red-700 border-gray-600 text-white'
                       : 'bg-red-600 border-black text-white'
@@ -734,7 +734,7 @@ export function PokemonMap({
                 e.preventDefault();
                 setShowHowToPlay(true);
               }}
-              className="absolute bottom-3 right-3 z-50 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
+              className="absolute bottom-3 right-3 z-50 flex cursor-pointer items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
               title="How to play"
               aria-label="How to play"
               style={{
