@@ -68,8 +68,12 @@ export function BattleResult({
       <article
         className={`text-center space-y-1 md:space-y-2 p-2 md:p-3 border-4 rounded-lg shadow-2xl w-full max-w-[90%] ${
           isVictory
-            ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-            : 'border-red-400 bg-red-50 dark:bg-red-900/20'
+            ? isDarkMode
+              ? 'border-yellow-500 bg-gradient-to-b from-yellow-400/20 to-yellow-400/70'
+              : 'border-yellow-600 bg-gradient-to-b from-yellow-100 to-yellow-500'
+            : isDarkMode
+              ? 'border-red-500 bg-gradient-to-b from-red-600/10 to-red-600/60'
+              : 'border-red-600 bg-gradient-to-b from-red-100 to-red-400'
         }`}
       >
         {/* Result Title */}
@@ -77,14 +81,20 @@ export function BattleResult({
           <h2
             id="battle-result-title"
             className={`pixel-font text-sm md:text-lg font-bold mb-0.5 ${
-              isVictory ? 'text-yellow-600' : 'text-red-600'
+              isDarkMode
+                ? isVictory
+                  ? 'text-yellow-500'
+                  : 'text-red-500'
+                : isVictory
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
             }`}
           >
             {isVictory ? 'Victory!' : 'Defeat!'}
           </h2>
           <p
             className={`pixel-font text-[9px] md:text-[10px] ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              isDarkMode ? 'text-gray-200' : 'text-gray-800'
             }`}
           >
             {isVictory
@@ -141,7 +151,7 @@ export function BattleResult({
 
             <div
               className={`pixel-font text-[8px] md:text-[9px] ${
-                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
               }`}
             >
               {opponentPokemon.isOwned
@@ -154,7 +164,7 @@ export function BattleResult({
         {/* Stats */}
         <dl
           className={`text-[9px] md:text-[10px] pixel-font ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            isDarkMode ? 'text-gray-200' : 'text-gray-800'
           }`}
         >
           <div>
@@ -175,7 +185,7 @@ export function BattleResult({
           </Button>
         ) : (
           <div
-            className={`pixel-font text-lg md:text-xl font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
+            className={`pixel-font text-lg md:text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}
           >
             {countdown}
           </div>

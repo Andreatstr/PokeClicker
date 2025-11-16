@@ -100,7 +100,7 @@ export function UpgradesPanel({
             aria-label="Show upgrade guide"
             style={{
               WebkitTapHighlightColor: 'transparent',
-              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              backgroundColor: 'rgba(37, 99, 235, 0.95)',
               boxShadow: '4px 4px 0px rgba(0,0,0,1)',
               transform: 'translate(0, 0)',
               transition: 'all 0.15s ease-in-out',
@@ -108,12 +108,12 @@ export function UpgradesPanel({
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translate(-2px, -2px)';
               e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+              e.currentTarget.style.backgroundColor = 'rgba(29, 78, 216, 1)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translate(0, 0)';
               e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
             }}
           >
             <svg

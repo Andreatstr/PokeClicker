@@ -547,7 +547,7 @@ export function BattleView({
           aria-label="Run from battle"
           style={{
             WebkitTapHighlightColor: 'transparent',
-            backgroundColor: 'rgba(239, 68, 68, 0.9)',
+            backgroundColor: '#b91c1c',
             boxShadow: '4px 4px 0px rgba(0,0,0,1)',
             transform: 'translate(0, 0)',
             transition: 'all 0.15s ease-in-out',
@@ -555,12 +555,12 @@ export function BattleView({
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translate(-2px, -2px)';
             e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)';
+            e.currentTarget.style.backgroundColor = '#991b1b';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translate(0, 0)';
             e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.9)';
+            e.currentTarget.style.backgroundColor = '#b91c1c';
           }}
         >
           <svg
@@ -647,6 +647,7 @@ export function BattleView({
               }}
               disabled={!isCharged}
               tabIndex={0}
+              aria-label="Special attack ability"
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -664,12 +665,16 @@ export function BattleView({
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
-                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                  isDarkMode
+                    ? !isCharged
+                      ? 'text-gray-300'
+                      : 'text-white drop-shadow-lg'
+                    : !isCharged
+                      ? 'text-gray-700'
+                      : 'text-black drop-shadow-lg'
                 }`}
               >
-                <span className="md:hidden" aria-label="Special attack">
-                  Sp.Att
-                </span>
+                <span className="md:hidden">Sp.Att</span>
                 <span className="hidden md:inline">Special Attack</span>
               </span>
             </button>
@@ -689,6 +694,7 @@ export function BattleView({
               }}
               disabled={!isCharged}
               tabIndex={0}
+              aria-label="Shield ability to reduce incoming damage"
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -706,9 +712,14 @@ export function BattleView({
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
-                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                  isDarkMode
+                    ? !isCharged
+                      ? 'text-gray-300'
+                      : 'text-white drop-shadow-lg'
+                    : !isCharged
+                      ? 'text-gray-700'
+                      : 'text-black drop-shadow-lg'
                 }`}
-                aria-label="Shield"
               >
                 Shield
               </span>
