@@ -27,7 +27,7 @@
  * - useAutoclicker: passive income generation
  * - useClickerActions: click handling and upgrade logic
  */
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '../hooks/useGameMutations';
@@ -130,6 +130,56 @@ export function PokeClicker({
       setStats(user.stats);
     }
   }, [user]);
+
+  // Handle keyboard input for A and B buttons
+  const handleClickRef = useRef(handleClick);
+
+  useEffect(() => {
+    handleClickRef.current = handleClick;
+  }, [handleClick]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const pressedKeys = new Set<string>();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+
+      if ((key === 'a' || key === 'b') && !pressedKeys.has(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        pressedKeys.add(key);
+        handleClickRef.current();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key === 'a' || key === 'b') {
+        pressedKeys.delete(key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, {
+      capture: true,
+      passive: false,
+    });
+    window.addEventListener('keyup', handleKeyUp, {capture: true});
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, {capture: true});
+      window.removeEventListener('keyup', handleKeyUp, {capture: true});
+    };
+  }, [isAuthenticated]);
 
   return (
     <>
