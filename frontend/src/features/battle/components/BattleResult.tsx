@@ -90,11 +90,11 @@ export function BattleResult({
 
   return (
     <section
-      className="relative w-full h-full flex flex-col items-center justify-center p-2 md:p-3 select-none"
+      className="relative w-full h-full flex flex-col items-center justify-center p-1 md:p-2 select-none"
       aria-labelledby="battle-result-title"
     >
       <article
-        className={`text-center space-y-1 md:space-y-2 p-2 md:p-3 border-4 rounded-lg shadow-2xl w-full max-w-[90%] ${
+        className={`text-center space-y-0.5 md:space-y-1 p-1.5 md:p-2 border-4 rounded-lg shadow-2xl w-full max-w-[90%] ${
           isVictory
             ? isDarkMode
               ? 'border-yellow-500 bg-gradient-to-b from-yellow-400/20 to-yellow-400/70'
@@ -136,7 +136,7 @@ export function BattleResult({
           <img
             src={opponentPokemon.sprite}
             alt={opponentPokemon.name}
-            className="w-12 h-12 md:w-16 md:h-16 image-pixelated"
+            className="w-10 h-10 md:w-12 md:h-12 image-pixelated"
             decoding="async"
             style={{imageRendering: 'pixelated'}}
           />
@@ -145,7 +145,7 @@ export function BattleResult({
         {/* Rewards (Victory only) */}
         {isVictory && (
           <section
-            className={`space-y-1 md:space-y-1.5 p-1.5 md:p-2 border-2 rounded ${
+            className={`space-y-0.5 md:space-y-1 p-1 md:p-1.5 border-2 rounded ${
               isDarkMode
                 ? 'border-gray-600 bg-gray-800/50'
                 : 'border-gray-300 bg-white/50'
@@ -154,7 +154,7 @@ export function BattleResult({
           >
             <h3
               id="rewards-heading"
-              className="pixel-font text-[10px] md:text-xs font-bold text-green-600"
+              className="pixel-font text-[9px] md:text-[10px] font-bold text-green-600"
             >
               Rewards
             </h3>
@@ -163,13 +163,13 @@ export function BattleResult({
               <img
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png"
                 alt="Rare Candy"
-                className="w-4 h-4 md:w-5 md:h-5"
+                className="w-3 h-3 md:w-4 md:h-4"
                 loading="lazy"
                 decoding="async"
                 style={{imageRendering: 'pixelated'}}
               />
               <span
-                className={`pixel-font text-[9px] md:text-[10px] ${
+                className={`pixel-font text-[8px] md:text-[9px] ${
                   isDarkMode ? 'text-white' : 'text-black'
                 }`}
               >
@@ -180,17 +180,17 @@ export function BattleResult({
             {/* New Pokemon Caught Section */}
             {isNewCatch && (
               <div
-                className={`mt-2 p-1.5 md:p-2 border-2 rounded ${
+                className={`mt-1 p-1 md:p-1.5 border-2 rounded ${
                   isDarkMode
                     ? 'border-green-500 bg-green-900/30'
                     : 'border-green-500 bg-green-100'
                 }`}
               >
-                <div className="pixel-font text-[10px] md:text-xs font-bold text-green-600 mb-1">
+                <div className="pixel-font text-[9px] md:text-[10px] font-bold text-green-600 mb-0.5">
                   New Pokemon Caught!
                 </div>
                 <div
-                  className={`pixel-font text-[8px] md:text-[9px] ${
+                  className={`pixel-font text-[7px] md:text-[8px] ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}
                 >
@@ -202,7 +202,7 @@ export function BattleResult({
             {/* Already owned message */}
             {!isNewCatch && (
               <div
-                className={`pixel-font text-[8px] md:text-[9px] ${
+                className={`pixel-font text-[7px] md:text-[8px] ${
                   isDarkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}
               >
