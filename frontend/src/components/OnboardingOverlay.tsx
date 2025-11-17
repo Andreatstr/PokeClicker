@@ -181,7 +181,7 @@ const STEPS: OnboardingStep[] = [
     highlight: true,
   },
   {
-    target: 'pokemon-selection',
+    target: 'pokemon-and-tutorial',
     title: 'Choose Your Pokemon',
     description:
       'Pick your Battle and Clicker Pokemon. Restart this tutorial anytime.',

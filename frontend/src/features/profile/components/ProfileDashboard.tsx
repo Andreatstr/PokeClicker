@@ -233,134 +233,138 @@ export function ProfileDashboard({
           </section>
         )}
 
-        {/* Pokemon Selection Sections */}
-        <section
-          data-onboarding="pokemon-selection"
-          aria-label="Pokemon selection options"
-        >
-          {/* Battle Pokemon Section (renamed from Favorite) */}
+        {/* Pokemon and Tutorial Sections Container */}
+        <div data-onboarding="pokemon-and-tutorial">
+          {/* Pokemon Selection Sections */}
           <section
-            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
-            style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-            aria-labelledby="battle-pokemon-heading"
+            data-onboarding="pokemon-selection"
+            aria-label="Pokemon selection options"
           >
-            <header className="flex-1">
-              <h2
-                id="battle-pokemon-heading"
-                className="text-lg sm:text-xl font-bold"
-              >
-                BATTLE POKEMON
-              </h2>
-              <p className="text-xs opacity-70 mt-1">
-                This Pokemon is used in battles in the World
-              </p>
-            </header>
-            <PokemonDisplayButton
-              pokemon={favoritePokemonData?.pokemonById}
-              onClick={() => setShowFavoriteSelector(true)}
-              disabled={user.owned_pokemon_ids.length === 0}
-              title="Click to change battle Pokemon"
-              emptyTitle={
-                user.owned_pokemon_ids.length === 0
-                  ? 'Catch a Pokemon first!'
-                  : 'Click to select battle Pokemon'
-              }
-              isDarkMode={isDarkMode}
-              isFirstRender={true}
-            />
+            {/* Battle Pokemon Section (renamed from Favorite) */}
+            <section
+              className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+              style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+              aria-labelledby="battle-pokemon-heading"
+            >
+              <header className="flex-1">
+                <h2
+                  id="battle-pokemon-heading"
+                  className="text-lg sm:text-xl font-bold"
+                >
+                  BATTLE POKEMON
+                </h2>
+                <p className="text-xs opacity-70 mt-1">
+                  This Pokemon is used in battles in the World
+                </p>
+              </header>
+              <PokemonDisplayButton
+                pokemon={favoritePokemonData?.pokemonById}
+                onClick={() => setShowFavoriteSelector(true)}
+                disabled={user.owned_pokemon_ids.length === 0}
+                title="Click to change battle Pokemon"
+                emptyTitle={
+                  user.owned_pokemon_ids.length === 0
+                    ? 'Catch a Pokemon first!'
+                    : 'Click to select battle Pokemon'
+                }
+                isDarkMode={isDarkMode}
+                isFirstRender={true}
+              />
+            </section>
+
+            {/* Clicker Pokemon Section */}
+            <section
+              className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+              style={{borderColor: isDarkMode ? '#333333' : 'black'}}
+              aria-labelledby="clicker-pokemon-heading"
+            >
+              <header className="flex-1">
+                <h2
+                  id="clicker-pokemon-heading"
+                  className="text-lg sm:text-xl font-bold"
+                >
+                  CLICKER POKEMON
+                </h2>
+                <p className="text-xs opacity-70 mt-1">
+                  This Pokemon appears in the Clicker game
+                </p>
+              </header>
+              <PokemonDisplayButton
+                pokemon={selectedPokemonData?.pokemonById}
+                onClick={() => setShowSelectedSelector(true)}
+                disabled={user.owned_pokemon_ids.length === 0}
+                title="Click to change clicker Pokemon"
+                emptyTitle={
+                  user.owned_pokemon_ids.length === 0
+                    ? 'Catch a Pokemon first!'
+                    : 'Click to select clicker Pokemon'
+                }
+                isDarkMode={isDarkMode}
+              />
+            </section>
           </section>
 
-          {/* Clicker Pokemon Section */}
+          {/* Tutorial Section */}
           <section
-            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+            className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
             style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-            aria-labelledby="clicker-pokemon-heading"
+            aria-labelledby="tutorial-heading"
+            data-onboarding="tutorial-section"
           >
-            <header className="flex-1">
-              <h2
-                id="clicker-pokemon-heading"
-                className="text-lg sm:text-xl font-bold"
-              >
-                CLICKER POKEMON
-              </h2>
-              <p className="text-xs opacity-70 mt-1">
-                This Pokemon appears in the Clicker game
-              </p>
-            </header>
-            <PokemonDisplayButton
-              pokemon={selectedPokemonData?.pokemonById}
-              onClick={() => setShowSelectedSelector(true)}
-              disabled={user.owned_pokemon_ids.length === 0}
-              title="Click to change clicker Pokemon"
-              emptyTitle={
-                user.owned_pokemon_ids.length === 0
-                  ? 'Catch a Pokemon first!'
-                  : 'Click to select clicker Pokemon'
-              }
-              isDarkMode={isDarkMode}
-            />
+            <h2 id="tutorial-heading" className="text-lg sm:text-xl mb-2">
+              TUTORIAL
+            </h2>
+            <p className="text-xs sm:text-sm mb-3 opacity-70">
+              Need help? Restart the interactive tutorial to learn how to use
+              all features.
+            </p>
+            <button
+              aria-label="Restart tutorial"
+              onClick={() => {
+                window.scrollTo({top: 0, behavior: 'instant'});
+                if (onNavigate) {
+                  onNavigate('pokedex');
+                }
+                setTimeout(() => {
+                  restartTutorial();
+                }, 500);
+              }}
+              className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all cursor-pointer text-sm focus-visible:outline-none"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: '#10845dff',
+                color: 'white',
+                boxShadow: isDarkMode
+                  ? '4px 4px 0px rgba(51,51,51,1)'
+                  : '4px 4px 0px rgba(0,0,0,1)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '6px 6px 0px rgba(51,51,51,1)'
+                  : '6px 6px 0px rgba(0,0,0,1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translate(0, 0)';
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '4px 4px 0px rgba(51,51,51,1)'
+                  : '4px 4px 0px rgba(0,0,0,1)';
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
+                e.currentTarget.style.zIndex = '10';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.boxShadow = isDarkMode
+                  ? '4px 4px 0px rgba(51,51,51,1)'
+                  : '4px 4px 0px rgba(0,0,0,1)';
+                e.currentTarget.style.zIndex = '';
+              }}
+            >
+              RESTART TUTORIAL
+            </button>
           </section>
-        </section>
-
-        {/* Tutorial Section */}
-        <section
-          className="mb-4 sm:mb-6 p-3 sm:p-4 border-4"
-          style={{borderColor: isDarkMode ? '#333333' : 'black'}}
-          aria-labelledby="tutorial-heading"
-        >
-          <h2 id="tutorial-heading" className="text-lg sm:text-xl mb-2">
-            TUTORIAL
-          </h2>
-          <p className="text-xs sm:text-sm mb-3 opacity-70">
-            Need help? Restart the interactive tutorial to learn how to use all
-            features.
-          </p>
-          <button
-            aria-label="Restart tutorial"
-            onClick={() => {
-              window.scrollTo({top: 0, behavior: 'instant'});
-              if (onNavigate) {
-                onNavigate('pokedex');
-              }
-              setTimeout(() => {
-                restartTutorial();
-              }, 500);
-            }}
-            className="w-full sm:w-auto px-4 py-2 font-bold border-4 transition-all cursor-pointer text-sm focus-visible:outline-none"
-            style={{
-              borderColor: isDarkMode ? '#333333' : 'black',
-              backgroundColor: '#10845dff',
-              color: 'white',
-              boxShadow: isDarkMode
-                ? '4px 4px 0px rgba(51,51,51,1)'
-                : '4px 4px 0px rgba(0,0,0,1)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translate(-2px, -2px)';
-              e.currentTarget.style.boxShadow = isDarkMode
-                ? '6px 6px 0px rgba(51,51,51,1)'
-                : '6px 6px 0px rgba(0,0,0,1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = isDarkMode
-                ? '4px 4px 0px rgba(51,51,51,1)'
-                : '4px 4px 0px rgba(0,0,0,1)';
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
-              e.currentTarget.style.zIndex = '10';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.boxShadow = isDarkMode
-                ? '4px 4px 0px rgba(51,51,51,1)'
-                : '4px 4px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.zIndex = '';
-            }}
-          >
-            RESTART TUTORIAL
-          </button>
-        </section>
+        </div>
 
         {/* Action Buttons */}
         <footer
