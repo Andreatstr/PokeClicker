@@ -637,11 +637,10 @@ export function PokemonMap({
               aria-live="polite"
             >
               <div
-                className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
-                  isDarkMode
-                    ? 'bg-blue-500 text-white border-black'
-                    : 'bg-blue-500 text-white border-black'
-                }`}
+                className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white border-black`}
+                style={{
+                  backgroundColor: `rgb(37, 99, 235)`,
+                }}
               >
                 <div className="pixel-font text-xs font-bold text-white">
                   Teleported to {movement.teleportLocation}
