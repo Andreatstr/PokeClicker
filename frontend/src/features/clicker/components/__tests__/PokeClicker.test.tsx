@@ -34,10 +34,10 @@ vi.mock('../hooks/useGameMutations', () => ({
   }),
 }));
 
-// Mock candy sync hook
-vi.mock('../hooks/useCandySync', () => ({
-  useCandySync: () => ({
-    localRareCandy: 1000,
+// Mock global candy context (replaces useCandySync and useAutoclicker)
+vi.mock('@/contexts/CandyContext', () => ({
+  useCandyContext: () => ({
+    localRareCandy: '1000',
     displayError: null,
     setDisplayError: vi.fn(),
     addCandy: vi.fn(),
@@ -54,11 +54,6 @@ vi.mock('../hooks/useClickerActions', () => ({
     handleClick: vi.fn(),
     handleUpgrade: vi.fn(),
   }),
-}));
-
-// Mock autoclicker hook
-vi.mock('../hooks/useAutoclicker', () => ({
-  useAutoclicker: () => {},
 }));
 
 // Mock game assets cache

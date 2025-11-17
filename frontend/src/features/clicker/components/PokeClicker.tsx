@@ -3,7 +3,7 @@
  *
  * Features:
  * - Click to earn rare candy (attack + spAttack*0.5 per click)
- * - Passive income system (autoclicker based on autoclicker stat)
+ * - Passive income system (autoclicker based on autoclicker stat) - now global
  * - 10 upgradeable stats with exponential costs
  * - Real-time candy sync with backend
  * - Asset preloading for smooth animations
@@ -11,28 +11,26 @@
  *
  * Game mechanics:
  * - Click power: base attack + spAttack bonus
- * - Autoclicker: generates candy per second
+ * - Autoclicker: generates candy per second (global via CandyContext)
  * - Lucky hit: chance for multiplied rewards
  * - Click multiplier: amplifies all clicks
  * - Pokedex bonus: bonus per owned Pokemon
  *
  * State management:
- * - Local candy optimistic updates for responsiveness
- * - Periodic backend sync to persist progress
+ * - Global candy context (CandyContext) provides candy state and actions
+ * - Candy sync and autoclicker now run globally across all pages
  * - Stats synced from user.stats in auth context
  *
  * Integration:
  * - useGameMutations: GraphQL mutations for upgrades
- * - useCandySync: local/remote candy synchronization
- * - useAutoclicker: passive income generation
+ * - useCandyContext: global candy state (replaces local useCandySync & useAutoclicker)
  * - useClickerActions: click handling and upgrade logic
  */
 import {useState, useEffect, useRef} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '../hooks/useGameMutations';
-import {useCandySync} from '../hooks/useCandySync';
-import {useAutoclicker} from '../hooks/useAutoclicker';
+import {useCandyContext} from '@/contexts/CandyContext';
 import {useClickerActions} from '../hooks/useClickerActions';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
 import {GameBoyConsole} from './GameBoyConsole';
@@ -77,6 +75,7 @@ export function PokeClicker({
     }
   }, [user?.stats]);
 
+  // Use global candy context (now includes autoclicker)
   const {
     localRareCandy,
     displayError,
@@ -84,7 +83,7 @@ export function PokeClicker({
     addCandy,
     deductCandy,
     flushPendingCandy,
-  } = useCandySync({user, isAuthenticated, updateUser});
+  } = useCandyContext();
 
   const {isAnimating, candies, handleClick, handleUpgrade} = useClickerActions({
     stats,
@@ -98,14 +97,6 @@ export function PokeClicker({
     upgradeStat,
     updateUser,
     ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
-  });
-
-  useAutoclicker({
-    stats,
-    isAuthenticated,
-    onAutoClick: addCandy,
-    ownedPokemonCount: user?.owned_pokemon_ids?.length || 0,
-    isOnboarding,
   });
 
   useEffect(() => {
