@@ -112,13 +112,21 @@ export const PokemonCard = memo(function PokemonCard({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       onFocus={(e) => {
-        const focusColor = isDarkMode ? 'white' : '#0066ff';
-        e.currentTarget.style.boxShadow = `0 0 0 2px ${isDarkMode ? '#1a1a1a' : 'white'}, 0 0 0 6px ${focusColor}`;
+        // Only show focus ring if the card itself receives focus, not a child element
+        if (e.target === e.currentTarget) {
+          const focusColor = isDarkMode ? 'white' : '#0066ff';
+          e.currentTarget.style.boxShadow = `0 0 0 2px ${isDarkMode ? '#1a1a1a' : 'white'}, 0 0 0 6px ${focusColor}`;
+        }
       }}
       onBlur={(e) => {
-        e.currentTarget.style.boxShadow = isDarkMode
-          ? '4px 4px 0px rgba(51,51,51,1)'
-          : '4px 4px 0px rgba(0,0,0,1)';
+        // Remove focus ring when focus moves away from card, even to a child element
+        const relatedTarget = e.relatedTarget as Node;
+        // Always reset to default shadow unless staying on the card itself
+        if (relatedTarget !== e.currentTarget) {
+          e.currentTarget.style.boxShadow = isDarkMode
+            ? '4px 4px 0px rgba(51,51,51,1)'
+            : '4px 4px 0px rgba(0,0,0,1)';
+        }
       }}
       tabIndex={0}
       aria-label={`View details for ${pokemon.name}`}

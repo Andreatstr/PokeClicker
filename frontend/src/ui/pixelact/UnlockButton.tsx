@@ -47,7 +47,19 @@ export function UnlockButton({
 
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      onKeyDown={(e) => {
+        // Stop propagation to prevent parent card from handling keyboard events
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          // Manually trigger click for keyboard events by creating a synthetic mouse event
+          onClick(e as unknown as React.MouseEvent);
+        }
+      }}
       className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:outline-none transition-all duration-150 relative overflow-hidden ${
         error
           ? 'bg-red-500 text-white animate-shake'
