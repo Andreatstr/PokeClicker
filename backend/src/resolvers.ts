@@ -410,6 +410,70 @@ export const resolvers = {
         };
       });
     },
+    pokemonByBSTRange: async (
+      _: unknown,
+      {
+        minBST,
+        maxBST,
+        limit = 100,
+      }: {minBST: number; maxBST: number; limit?: number},
+      context: AuthContext
+    ) => {
+      const db = getDatabase();
+
+      // Query metadata collection for Pokemon in BST range
+      const metadataCollection =
+        db.collection<PokemonMetadata>('pokemon_metadata');
+      const pokemonMetadata = await metadataCollection
+        .find({
+          bst: {$gte: minBST, $lte: maxBST},
+        })
+        .limit(limit)
+        .toArray();
+
+      // Extract Pokemon IDs
+      const pokemonIds = pokemonMetadata.map((m) => m.id);
+
+      if (pokemonIds.length === 0) {
+        return [];
+      }
+
+      // Fetch full Pokemon data from PokeAPI
+      const pokemonPromises = pokemonIds.map((id) => fetchPokemonById(id));
+      const pokemon = await Promise.all(pokemonPromises);
+
+      // Create metadata map for quick lookup
+      const metadataMap = new Map(
+        pokemonMetadata.map((m) => [m.id, {bst: m.bst, price: m.price}])
+      );
+
+      // Check ownership
+      let ownedPokemonIds: number[] = [];
+      if (context.user?.id) {
+        try {
+          const users = db.collection('users');
+          const user = await users.findOne({
+            _id: new ObjectId(context.user.id),
+          });
+          if (user && user.owned_pokemon_ids) {
+            ownedPokemonIds = user.owned_pokemon_ids;
+          }
+        } catch (error) {
+          console.error('Error fetching user owned Pokemon:', error);
+        }
+      }
+
+      return pokemon.filter(Boolean).map((p) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          isOwned: ownedPokemonIds.includes(p.id),
+          pokedexNumber: p.id,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
+    },
     pokedex: async (
       _: unknown,
       args: {

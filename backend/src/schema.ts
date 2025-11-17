@@ -29,6 +29,7 @@ export const typeDefs = `#graphql
     ): PokedexResponse!
     pokemonUpgrade(pokemonId: Int!): PokemonUpgrade
     getRanks(input: RanksInput): RanksResponse!
+    pokemonByBSTRange(minBST: Int!, maxBST: Int!, limit: Int): [PokedexPokemon!]!
   }
 
   type HealthCheck {

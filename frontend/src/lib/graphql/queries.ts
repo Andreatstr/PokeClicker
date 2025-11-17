@@ -130,6 +130,33 @@ export const POKEMON_BY_IDS = gql`
   }
 `;
 
+/**
+ * Query Pokemon by BST (Base Stat Total) range
+ * Used for efficient spawn matching in map system
+ */
+export const POKEMON_BY_BST_RANGE = gql`
+  ${POKEMON_STATS_FRAGMENT}
+  query PokemonByBSTRange($minBST: Int!, $maxBST: Int!, $limit: Int) {
+    pokemonByBSTRange(minBST: $minBST, maxBST: $maxBST, limit: $limit) {
+      id
+      name
+      sprite
+      types
+      pokedexNumber
+      bst
+      price
+      isOwned
+      stats {
+        ...PokemonStatsFields
+      }
+      abilities
+      evolution
+      height
+      weight
+    }
+  }
+`;
+
 // ============================================================================
 // POKEMON UPGRADE QUERIES
 // ============================================================================

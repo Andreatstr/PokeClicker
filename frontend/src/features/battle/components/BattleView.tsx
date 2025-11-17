@@ -124,14 +124,14 @@ export function BattleView({
       setTimeout(() => setOpponentHit(false), 300);
     }
 
-    // Calculate damage and show hit effect
+    // Calculate damage and show hit effect using same formula as useBattle.ts (lines 119-129)
     const playerStats = playerPokemon.stats;
     const opponentStats = opponentPokemon.stats;
     if (playerStats && opponentStats) {
       const baseDamage =
         (playerStats.attack - opponentStats.defense * 0.4) *
         (1 + playerStats.speed * 0.05);
-      const damage = Math.max(1, Math.floor(baseDamage));
+      const damage = Math.max(2, Math.floor(baseDamage));
 
       // Create hit effect at randomized position above opponent
       const hitId = Date.now();
@@ -186,14 +186,13 @@ export function BattleView({
     setSpecialAttackActive(true);
     triggerSpecialAttack();
 
-    // Calculate special attack damage and show hit effect
+    // Calculate special attack damage using same formula as useBattle.ts (lines 239-244)
+    // Deals 4%-30% of opponent's max HP based on player's spAttack stat
     const playerStats = playerPokemon.stats;
-    const opponentStats = opponentPokemon.stats;
-    if (playerStats && opponentStats) {
-      const spAttackDamage =
-        (playerStats.spAttack * 2 - opponentStats.spDefense * 0.5) *
-        (1 + playerStats.speed * 0.1);
-      const damage = Math.max(1, Math.floor(spAttackDamage));
+    if (playerStats && opponentMaxHP) {
+      const spA = playerStats.spAttack || 0;
+      const scale = Math.min(0.3, 0.04 + spA / 2500); // 4%..30%
+      const burst = Math.max(1, Math.floor(opponentMaxHP * scale));
 
       // Create hit effect at randomized position above opponent
       const hitId = Date.now();
@@ -204,7 +203,7 @@ export function BattleView({
 
       setHitEffects((prev) => [
         ...prev,
-        {id: hitId, damage: damage.toString(), x: randomX, y: randomY},
+        {id: hitId, damage: burst.toString(), x: randomX, y: randomY},
       ]);
 
       setTimeout(() => {
