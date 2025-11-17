@@ -48,22 +48,23 @@ const NUM_SPAWNS = 50;
 /**
  * Generate a target BST based on player's owned Pokemon strength
  *
- * New players (no owned Pokemon): Spawn weak Pokemon (BST 175-215)
+ * New players (no owned Pokemon): Spawn weak Pokemon (BST 175-190)
+ * - Very narrow range to prevent exponential price jumps
  * - Matches starter Pokemon BST (175) for gentle difficulty curve
  *
  * Experienced players: Spawn based on average BST of owned Pokemon
- * - 70%: Around player's average BST (±30 BST variance)
- * - 20%: Slightly stronger (average + 20 to 50 BST)
- * - 10%: Challenge Pokemon (average + 25 to 50 BST)
+ * - 70%: Around player's average BST (±15 BST variance)
+ * - 20%: Slightly stronger (average + 10 to 25 BST)
+ * - 10%: Challenge Pokemon (average + 15 to 30 BST)
  *
  * Uses Box-Muller transform for normal distribution around player level
- * Balance improvements: Reduced challenge variance to prevent exponential price jumps
+ * Balance improvements: Dramatically reduced variance to prevent exponential price jumps
  */
 function generateTargetBST(ownedPokemon: PokedexPokemon[]): number {
-  // New players: spawn weak Pokemon (175-215 BST range)
-  // This matches the starter Pokemon BST (175) and provides gentle difficulty curve
+  // New players: spawn weak Pokemon (175-190 BST range)
+  // Extremely narrow range to keep prices affordable (BST doubles in price every ~5 points)
   if (ownedPokemon.length === 0) {
-    return Math.floor(Math.random() * 41) + 175; // 175-215
+    return Math.floor(Math.random() * 16) + 175; // 175-190
   }
 
   // Calculate average BST of owned Pokemon
@@ -73,27 +74,27 @@ function generateTargetBST(ownedPokemon: PokedexPokemon[]): number {
 
   if (validBSTs.length === 0) {
     // Fallback if no BST data available - use same range as new players
-    return Math.floor(Math.random() * 41) + 175;
+    return Math.floor(Math.random() * 16) + 175;
   }
 
   const averageBST =
     validBSTs.reduce((sum, bst) => sum + bst, 0) / validBSTs.length;
 
-  // 10% chance: Challenge Pokemon (+25 to +50 BST)
-  // Reduced from +50-100 to prevent exponential price jumps
+  // 10% chance: Challenge Pokemon (+15 to +30 BST)
+  // Extremely reduced to prevent exponential price jumps
   if (Math.random() < 0.1) {
-    const boost = Math.floor(Math.random() * 26) + 25;
+    const boost = Math.floor(Math.random() * 16) + 15;
     return Math.min(720, Math.floor(averageBST + boost));
   }
 
-  // 20% chance: Slightly stronger (+20 to +50 BST)
+  // 20% chance: Slightly stronger (+10 to +25 BST)
   if (Math.random() < 0.2) {
-    const boost = Math.floor(Math.random() * 31) + 20;
+    const boost = Math.floor(Math.random() * 16) + 10;
     return Math.min(720, Math.floor(averageBST + boost));
   }
 
-  // 70% chance: Around player's level (±30 BST variance)
-  const stdDev = 30; // Standard deviation for variance
+  // 70% chance: Around player's level (±15 BST variance)
+  const stdDev = 15; // Reduced standard deviation for tighter variance
 
   // Box-Muller transform for normal distribution
   const u1 = Math.random();
@@ -299,18 +300,18 @@ export function usePokemonSpawning(
 
     if (validBSTs.length === 0) {
       // Fallback to starter range (matches new player spawn range)
-      return {minBST: 175, maxBST: 215};
+      return {minBST: 175, maxBST: 190};
     }
 
     const averageBST =
       validBSTs.reduce((sum, bst) => sum + bst, 0) / validBSTs.length;
 
     // Logarithmic BST range scaling to prevent exponential price jumps
-    // - 70%: average ± 30 BST
-    // - 20%: average + 20 to 50 BST
-    // - 10%: average + 25 to 50 BST (reduced from +50-100)
-    // Range grows logarithmically: min 30, max 60 based on progression
-    const bstRange = Math.min(60, 20 + Math.log10(averageBST) * 10);
+    // - 70%: average ± 15 BST
+    // - 20%: average + 10 to 25 BST
+    // - 10%: average + 15 to 30 BST
+    // Range grows logarithmically: min 15, max 30 based on progression
+    const bstRange = Math.min(30, 10 + Math.log10(averageBST) * 5);
     const minBST = Math.max(180, Math.floor(averageBST - bstRange));
     const maxBST = Math.min(720, Math.floor(averageBST + bstRange));
 
