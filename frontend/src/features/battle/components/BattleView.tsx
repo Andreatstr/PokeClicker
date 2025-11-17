@@ -139,7 +139,7 @@ export function BattleView({
       const baseX = 75; // More to the right (opponent is on right side)
       const baseY = 10; // Above opponent sprite (higher up)
       const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance horizontally
-      const randomY = baseY + (Math.random() * 10); // 0-10% variance vertically (only downward)
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically (only downward)
 
       setHitEffects((prev) => [
         ...prev,
@@ -200,7 +200,7 @@ export function BattleView({
       const baseX = 75; // Opponent position
       const baseY = 10; // Above opponent sprite
       const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance
-      const randomY = baseY + (Math.random() * 10); // 0-10% variance vertically
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically
 
       setHitEffects((prev) => [
         ...prev,
@@ -651,7 +651,9 @@ export function BattleView({
           ...(() => {
             const style = createPositionStyle(layoutConfig.playerSprite);
             // Remove scaleX from transform and apply it to inner img instead
-            const transformWithoutScale = style.transform?.replace(/scaleX\([^)]*\)\s*/g, '').trim();
+            const transformWithoutScale = style.transform
+              ?.replace(/scaleX\([^)]*\)\s*/g, '')
+              .trim();
             return {
               ...style,
               transform: transformWithoutScale || undefined,
@@ -685,7 +687,8 @@ export function BattleView({
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
-            transform: `${createPositionStyle(layoutConfig.playerSprite).transform || ''} translateY(-30%)`.trim(),
+            transform:
+              `${createPositionStyle(layoutConfig.playerSprite).transform || ''} translateY(-30%)`.trim(),
           }}
         >
           <div
