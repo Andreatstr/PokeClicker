@@ -8,14 +8,14 @@ This document describes the testing strategy, test suite, and how to run tests f
 
 ## Test Suite Overview
 
-The project includes a comprehensive test suite with **211 passing tests** covering:
+The project includes a comprehensive test suite with **403 passing tests** covering:
 
-- **Frontend tests**: 107 tests
+- **Frontend tests**: 351 tests
   - Utility functions and type utilities
   - Custom hooks (useAuth, useGameMutations, usePokedexQuery, etc.)
   - Component tests (LoginScreen, PokeClicker)
   - Integration tests with Apollo Client mocking
-- **Backend tests**: 104 tests
+- **Backend tests**: 52 tests
   - GraphQL resolvers
   - Authentication module (JWT and bcrypt)
   - Database operations
@@ -81,7 +81,8 @@ frontend/src/
 ├── test/                      # Test utilities and setup
 │   ├── setup.ts               # Global test configuration
 │   ├── utils.tsx              # Custom render with providers
-│   └── factories.ts           # Mock data factories
+│   ├── factories.ts           # Mock data factories
+│   └── vitest.d.ts            # Vitest type augmentation for Testing Library matchers
 ├── lib/__tests__/             # Library utility tests
 └── features/*/__tests__/      # Feature-specific tests
     ├── components/__tests__/  # Component tests
@@ -94,8 +95,7 @@ frontend/src/
 backend/src/
 └── __tests__/                 # All backend tests
     ├── resolvers.test.ts      # GraphQL resolver tests
-    ├── auth.test.ts           # Authentication tests
-    └── db.test.ts             # Database operation tests
+    └── auth.test.ts           # Authentication tests
 ```
 
 ## Writing Tests

@@ -22,6 +22,56 @@ Users earn "rare candy" by clicking on Pokémon in a GameBoy-inspired interface.
 
 The game mechanics provide a natural motivation for users to explore the Pokédex and interact with the system over time.
 
+## Images of the Most Important Pages
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+  <div style="flex: 1; min-width: 600px;">
+    <h3>Login Page</h3>
+    <img src="docs/images/Login.png" width="100%">
+    <h4>Log in, sign up or use a guest user</h4>
+  </div>
+
+  <div style="flex: 1; min-width: 600px;">
+    <h3>Pokedex Page</h3>
+    <img src="docs/images/PokeDex.png" width="100%">
+    <h4>View, filter, search, purchase, and upgrade Pokémon. Watch your personal collection grow!</h4>
+  </div>
+
+  <div style="flex: 1; min-width: 600px;">
+    <h3>Pokeclicker Page</h3>
+    <img src="docs/images/PokeClicker.png" width="100%">
+    <h4>Click to earn Rare Candy and use upgrades to boost earnings and efficiency.</h4>
+  </div>
+
+  <div style="flex: 1; min-width: 600px;">
+    <h3>World Page</h3>
+    <img src="docs/images/World.png" width="100%">
+    <h4>Explore the map and battle wild Pokémon. Win to gain Rare Candy and new Pokémon.</h4>
+  </div>
+</div>
+
+## Before and After Photos of the Map
+
+<div>
+  <h3>The map we started with</h3>
+  <img src="docs/images/startMap.webp" width="600">
+  <h4>The initial map contained many missing or corrupted tiles, visual artifacts, and inconsistent layering, making navigation and gameplay testing difficult. This version served as the baseline for our cleanup,
+  collision mapping, and redesign.</h4>
+</div>
+
+<div>
+  <h3>Our redesign of the map</h3>
+  <img src="docs/images/map.webp" width="600">
+  <h4>We rebuilt the map by filling missing tiles, removing visual artifacts, and re-layering elements for consistent visuals and proper overlap. The result improves navigation and gameplay, making the map feel
+  complete and seamless.</h4>
+</div>
+
+<div>
+  <h3>Walkable places</h3>
+  <img src="docs/images/map-collision.webp" width="600">
+  <h4>We mapped the areas where the player can walk and where Pokémon can spawn. We also added a transparency effect when the player moves through caves, houses, and trees.</h4>
+</div>
+
 ## Quick Start
 
 ```bash
@@ -47,15 +97,15 @@ See [Setup Guide](./docs/setup.md) for MongoDB installation and environment conf
 
 ### Functionality
 
-| Requirement                    | Implementation                                                                     |
-| ------------------------------ | ---------------------------------------------------------------------------------- |
-| **Search capability**          | Search field with debouncing (300ms) for case-insensitive Pokémon name search     |
-| **List-based presentation**    | Grid view with "Load More" pagination (20 Pokémon per page)                        |
-| **Detail view**                | Modal with extended information about stats, evolutions, habitat, abilities        |
-| **Sorting and filtering**      | Filtering by region (Kanto/Johto/Hoenn) and type, sorting by ID/name/type         |
-| **User-generated data**        | User accounts with personal Pokémon collections and upgrade progression            |
-| **Universal design**           | ARIA-labels, keyboard navigation, semantic HTML, high contrast                     |
-| **Sustainable web development**| Debounced search, lazy loading, optimized rendering, efficient data transfer       |
+| Requirement                    | Implementation                                                                                                                    |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------|
+| **Search capability**          | Search field with debouncing (300ms) for case-insensitive Pokémon name search                                                     |
+| **List-based presentation**    | Grid view with page pagination (20 Pokémon per page)                                                                              |
+| **Detail view**                | Modal with extended information about stats, evolutions, type, abilities                                                          |
+| **Sorting and filtering**      | Filtering by region (Kanto/Johto/Hoenn) and type, sorting by price/stats/id/name/type, filter order and what to filter on          |
+| **User-generated data**        | User accounts with personal Pokémon collections and upgrade progression                                                           |
+| **Universal design**           | ARIA-labels, keyboard navigation, semantic HTML, high contrast                                                                    |
+| **Sustainable web development**| Debounced search, lazy loading, optimized rendering, efficient data transfer                                                      |
 
 ### Technology
 
@@ -64,7 +114,7 @@ See [Setup Guide](./docs/setup.md) for MongoDB installation and environment conf
 - **Styling**: Tailwind CSS + Radix UI components
 - **Backend**: GraphQL API (Node.js + TypeScript)
 - **Database**: MongoDB on VM
-- **Testing**: Vitest + React Testing Library + Playwright (452 unit tests + E2E)
+- **Testing**: Vitest + React Testing Library + Playwright (403 unit tests + E2E)
 
 ## Key Features
 
@@ -109,9 +159,9 @@ Read more: [Architecture](./docs/architecture.md) | [Security](./docs/security.m
 
 ## Testing
 
-**452 unit tests** + E2E tests with Playwright:
-- 348 frontend tests (hooks, components, integration)
-- 104 backend tests (resolvers, auth, database)
+**403 unit tests** + E2E tests with Playwright:
+- 351 frontend tests (hooks, components, integration)
+- 52 backend tests (resolvers, auth, database)
 
 ```bash
 # Run all tests

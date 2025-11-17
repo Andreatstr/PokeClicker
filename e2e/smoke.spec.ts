@@ -9,6 +9,8 @@ test.describe("Smoke Tests", () => {
     await page.addInitScript(() => {
       localStorage.setItem('onboarding_completed', 'true');
     });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
   });
 
   test("application loads successfully", async ({ page }) => {
@@ -47,6 +49,20 @@ test.describe("Smoke Tests", () => {
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
     }
 
+    // Check if the onboarding overlay is active and click "Skip"
+    const skipButton = page.locator('button[aria-label="Skip tutorial"]');
+    if (await skipButton.isVisible()) {
+      await skipButton.click({ force: true });
+    } else {
+      console.warn('Skip button not found or not visible, removing overlay...');
+      await page.evaluate(() => {
+        const overlay = document.querySelector('[role="dialog"]');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
+    }
+
     await navbar.navigateToPokedex();
     await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
 
@@ -68,6 +84,20 @@ test.describe("Smoke Tests", () => {
       await login.quickRegister();
       // Wait for search box to appear after registration
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 10000 });
+    }
+
+    // Check if the onboarding overlay is active and click "Skip"
+    const skipButton = page.locator('button[aria-label="Skip tutorial"]');
+    if (await skipButton.isVisible()) {
+      await skipButton.click({ force: true });
+    } else {
+      console.warn('Skip button not found or not visible, removing overlay...');
+      await page.evaluate(() => {
+        const overlay = document.querySelector('[role="dialog"]');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
     }
 
     await navbar.navigateToClicker();
