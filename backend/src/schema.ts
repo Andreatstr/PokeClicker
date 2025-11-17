@@ -103,6 +103,8 @@ export const typeDefs = `#graphql
     evolution: [Int!]!
     isOwned: Boolean!
     pokedexNumber: Int!
+    bst: Int
+    price: String
   }
 
   type PokemonStats {

@@ -319,9 +319,26 @@ export const resolvers = {
       if (!pokemon) return null;
 
       let isOwned = false;
+      let bst: number | undefined;
+      let price: string | undefined;
+
+      const db = getDatabase();
+
+      // Fetch metadata for bst and price
+      try {
+        const metadataCollection = db.collection('pokemon_metadata');
+        const metadata = await metadataCollection.findOne({id});
+        if (metadata) {
+          bst = metadata.bst;
+          price = metadata.price;
+        }
+      } catch (error) {
+        console.error('Error fetching Pokemon metadata:', error);
+      }
+
+      // Check ownership
       if (context.user?.id) {
         try {
-          const db = getDatabase();
           const users = db.collection('users');
           const user = await users.findOne({
             _id: new ObjectId(context.user.id),
@@ -338,6 +355,8 @@ export const resolvers = {
         ...pokemon,
         isOwned,
         pokedexNumber: pokemon.id,
+        bst,
+        price,
       };
     },
     pokemonByIds: async (
@@ -349,9 +368,25 @@ export const resolvers = {
       const pokemon = await Promise.all(pokemonPromises);
 
       let ownedPokemonIds: number[] = [];
+      const db = getDatabase();
+
+      // Fetch metadata for all Pokemon
+      let metadataMap = new Map<number, {bst?: number; price?: string}>();
+      try {
+        const metadataCollection = db.collection('pokemon_metadata');
+        const metadataList = await metadataCollection
+          .find({id: {$in: ids}})
+          .toArray();
+        metadataMap = new Map(
+          metadataList.map((m) => [m.id, {bst: m.bst, price: m.price}])
+        );
+      } catch (error) {
+        console.error('Error fetching Pokemon metadata:', error);
+      }
+
+      // Check ownership
       if (context.user?.id) {
         try {
-          const db = getDatabase();
           const users = db.collection('users');
           const user = await users.findOne({
             _id: new ObjectId(context.user.id),
@@ -364,11 +399,16 @@ export const resolvers = {
         }
       }
 
-      return pokemon.filter(Boolean).map((p) => ({
-        ...p,
-        isOwned: ownedPokemonIds.includes(p.id),
-        pokedexNumber: p.id,
-      }));
+      return pokemon.filter(Boolean).map((p) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          isOwned: ownedPokemonIds.includes(p.id),
+          pokedexNumber: p.id,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
     },
     pokedex: async (
       _: unknown,
