@@ -7,6 +7,7 @@
  * - 3-second countdown before continue button appears
  * - Battle stats display (click count)
  * - Responsive mobile and desktop layouts
+ * - "Play with Pokemon" button to set newly caught Pokemon as battle Pokemon
  *
  * Visual design:
  * - Victory: yellow/gold theme
@@ -23,6 +24,8 @@ import type {PokedexPokemon} from '@features/pokedex';
 import {Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
 import {useState, useEffect} from 'react';
+import {useSetFavoritePokemon} from '@features/profile/hooks/useProfileMutations';
+import {useAuth} from '@features/auth';
 
 interface BattleResultProps {
   result: 'victory' | 'defeat';
@@ -44,6 +47,12 @@ export function BattleResult({
   const isVictory = result === 'victory';
   const [showButton, setShowButton] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const [isSettingPokemon, setIsSettingPokemon] = useState(false);
+
+  const {user, updateUser} = useAuth();
+  const [setFavoritePokemon] = useSetFavoritePokemon();
+
+  const isNewCatch = isVictory && !opponentPokemon.isOwned;
 
   useEffect(() => {
     const countdownInterval = setInterval(() => {
@@ -59,6 +68,25 @@ export function BattleResult({
 
     return () => clearInterval(countdownInterval);
   }, []);
+
+  const handlePlayWithPokemon = async () => {
+    setIsSettingPokemon(true);
+    try {
+      const result = await setFavoritePokemon({
+        variables: {pokemonId: opponentPokemon.id},
+      });
+      if (result.data?.setFavoritePokemon && user) {
+        updateUser({
+          ...user,
+          favorite_pokemon_id: opponentPokemon.id,
+        });
+      }
+      onContinue();
+    } catch (error) {
+      console.error('Failed to set favorite Pokemon:', error);
+      setIsSettingPokemon(false);
+    }
+  };
 
   return (
     <section
@@ -117,7 +145,7 @@ export function BattleResult({
         {/* Rewards (Victory only) */}
         {isVictory && (
           <section
-            className={`space-y-0.5 md:space-y-1 p-1.5 md:p-2 border-2 rounded ${
+            className={`space-y-1 md:space-y-1.5 p-1.5 md:p-2 border-2 rounded ${
               isDarkMode
                 ? 'border-gray-600 bg-gray-800/50'
                 : 'border-gray-300 bg-white/50'
@@ -149,15 +177,38 @@ export function BattleResult({
               </span>
             </div>
 
-            <div
-              className={`pixel-font text-[8px] md:text-[9px] ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}
-            >
-              {opponentPokemon.isOwned
-                ? `You already own ${opponentPokemon.name}!`
-                : `${opponentPokemon.name} added to collection!`}
-            </div>
+            {/* New Pokemon Caught Section */}
+            {isNewCatch && (
+              <div
+                className={`mt-2 p-1.5 md:p-2 border-2 rounded ${
+                  isDarkMode
+                    ? 'border-green-500 bg-green-900/30'
+                    : 'border-green-500 bg-green-100'
+                }`}
+              >
+                <div className="pixel-font text-[10px] md:text-xs font-bold text-green-600 mb-1">
+                  New Pokemon Caught!
+                </div>
+                <div
+                  className={`pixel-font text-[8px] md:text-[9px] ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}
+                >
+                  {opponentPokemon.name} added to your Pokedex!
+                </div>
+              </div>
+            )}
+
+            {/* Already owned message */}
+            {!isNewCatch && (
+              <div
+                className={`pixel-font text-[8px] md:text-[9px] ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                You already own {opponentPokemon.name}!
+              </div>
+            )}
           </section>
         )}
 
@@ -173,16 +224,39 @@ export function BattleResult({
           </div>
         </dl>
 
-        {/* Continue Button */}
+        {/* Continue Button(s) */}
         {showButton ? (
-          <Button
-            onClick={onContinue}
-            className="w-full text-[10px] md:text-xs py-1 md:py-1.5"
-            aria-label={`${isVictory ? 'Continue' : 'Return to Map'}`}
-            isDarkMode={isDarkMode}
-          >
-            {isVictory ? 'Continue' : 'Return to Map'}
-          </Button>
+          isNewCatch ? (
+            <div className="w-full flex flex-col md:flex-row gap-1">
+              <Button
+                onClick={handlePlayWithPokemon}
+                className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
+                disabled={isSettingPokemon}
+                isDarkMode={isDarkMode}
+              >
+                {isSettingPokemon
+                  ? 'Setting...'
+                  : `Play with ${opponentPokemon.name}`}
+              </Button>
+              <Button
+                onClick={onContinue}
+                className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
+                variant="secondary"
+                isDarkMode={isDarkMode}
+              >
+                Continue
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={onContinue}
+              className="w-full text-[10px] md:text-xs py-1 md:py-1.5"
+              aria-label={`${isVictory ? 'Continue' : 'Return to Map'}`}
+              isDarkMode={isDarkMode}
+            >
+              {isVictory ? 'Continue' : 'Return to Map'}
+            </Button>
+          )
         ) : (
           <div
             className={`pixel-font text-lg md:text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}
