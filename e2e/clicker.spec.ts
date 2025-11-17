@@ -21,6 +21,11 @@ test.describe("Clicker Game", () => {
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
 
+    // Check if the onboarding overlay is active and click "Skip"
+    const skipButton = page.locator('button[aria-label="Skip tutorial"]');
+    console.log('Is Skip button visible:', await skipButton.isVisible());
+    await skipButton.click({ force: true });
+
     // Ensure we're on the clicker page
     const isOnClicker = await navbar.isOnClicker();
     if (!isOnClicker) {
