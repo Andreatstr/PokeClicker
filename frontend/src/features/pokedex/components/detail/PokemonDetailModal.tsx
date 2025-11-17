@@ -7,7 +7,7 @@ import {FocusTrap} from 'focus-trap-react';
 import {useModal} from '@/hooks/useModal';
 import {PokemonDetailCard} from './PokemonDetailCard';
 import {PokemonCarousel} from './PokemonCarousel';
-import {useEffect} from 'react';
+import {useRef, useEffect} from 'react';
 
 const ME_QUERY = gql`
   query Me {
@@ -42,27 +42,21 @@ export function PokemonDetailModal({
   const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const {data: userData} = useQuery(ME_QUERY);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useModal(isOpen, onClose);
 
-  // Set initial focus to close button when modal opens
+  // Auto-focus the close button when modal opens
+  // This ensures consistent focus behavior regardless of carousel state
   useEffect(() => {
-    if (isOpen) {
-      // Wait for carousel to fully initialize before setting focus
-      // This prevents focus from interfering with carousel initialization
-      const timeoutId = setTimeout(() => {
-        // Find the close button within the modal and focus it
-        const closeButton = document.querySelector(
-          '[aria-label="Exit"]'
-        ) as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.focus();
-        }
-      }, 200);
-
-      return () => clearTimeout(timeoutId);
+    if (isOpen && closeButtonRef.current && !disableFocusTrap) {
+      // Small delay to ensure DOM is fully ready
+      const timer = setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, pokemon?.id]); // Include pokemon.id to refocus when Pokemon changes
+  }, [isOpen, disableFocusTrap]);
 
   if (!pokemon) return null;
 
@@ -75,10 +69,14 @@ export function PokemonDetailModal({
         focusTrapOptions={{
           allowOutsideClick: true,
           escapeDeactivates: false, // We handle Escape in our own handler
-          initialFocus: false, // We handle initial focus manually to prevent carousel interference
-          returnFocusOnDeactivate: false, // We handle this manually for better control
+          // Use function-based initialFocus to ensure button is found
+          initialFocus: () =>
+            closeButtonRef.current ||
+            (document.querySelector('[aria-label="Exit"]') as HTMLElement),
+          returnFocusOnDeactivate: true,
           clickOutsideDeactivates: false, // Prevent clicks outside from breaking the trap
           preventScroll: true, // Prevent scroll when focusing elements
+          fallbackFocus: '[role="dialog"]', // Fallback to dialog if close button not found
         }}
       >
         <DialogBody>
@@ -101,6 +99,7 @@ export function PokemonDetailModal({
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
+              closeButtonRef={closeButtonRef}
             />
           ) : (
             <PokemonDetailCard
@@ -113,6 +112,7 @@ export function PokemonDetailModal({
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
+              closeButtonRef={closeButtonRef}
             />
           )}
         </DialogBody>

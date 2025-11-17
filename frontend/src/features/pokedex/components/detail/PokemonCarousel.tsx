@@ -25,6 +25,7 @@ interface PokemonCarouselProps {
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export function PokemonCarousel({
@@ -38,6 +39,7 @@ export function PokemonCarousel({
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: PokemonCarouselProps) {
   const initialIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
 
@@ -87,6 +89,7 @@ export function PokemonCarousel({
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
+              closeButtonRef={closeButtonRef}
             />
           </CarouselItem>
         ))}
@@ -112,6 +115,7 @@ function LazyPokemonCard({
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: {
   pokemon: PokedexPokemon;
   index: number;
@@ -123,6 +127,7 @@ function LazyPokemonCard({
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const {currentIndex} = useCarousel();
 
@@ -130,29 +135,38 @@ function LazyPokemonCard({
   // This prevents loading evolution chains for all Pokemon at once
   const renderWindow = 1;
   const shouldRender = Math.abs(currentIndex - index) <= renderWindow;
+  const isCurrentCard = currentIndex === index;
 
   if (!shouldRender) {
     return (
       <div
         className="flex flex-col gap-3 md:gap-4 items-center w-full max-w-[400px] mx-auto"
         style={{minHeight: '600px'}}
+        // Use proper React 19 inert attribute - boolean true for non-current cards
+        inert={!isCurrentCard ? true : undefined}
+        aria-hidden={!isCurrentCard}
       >
         {/* Placeholder - content loads when scrolled into view */}
       </div>
     );
   }
 
+  // Wrap in a div with inert to prevent tabbing to non-current cards
+  // In React 19, inert should be boolean true, not empty string
   return (
-    <PokemonDetailCard
-      pokemon={pokemon}
-      isDarkMode={isDarkMode}
-      onClose={onClose}
-      onSelectPokemon={onSelectPokemon}
-      onPurchaseComplete={onPurchaseComplete}
-      purchasePokemonMutation={purchasePokemonMutation}
-      updateUser={updateUser}
-      user={user}
-      ownedPokemonIds={ownedPokemonIds}
-    />
+    <div inert={!isCurrentCard ? true : undefined} aria-hidden={!isCurrentCard}>
+      <PokemonDetailCard
+        pokemon={pokemon}
+        isDarkMode={isDarkMode}
+        onClose={onClose}
+        onSelectPokemon={onSelectPokemon}
+        onPurchaseComplete={onPurchaseComplete}
+        purchasePokemonMutation={purchasePokemonMutation}
+        updateUser={updateUser}
+        user={user}
+        ownedPokemonIds={ownedPokemonIds}
+        closeButtonRef={closeButtonRef}
+      />
+    </div>
   );
 }

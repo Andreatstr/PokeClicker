@@ -243,6 +243,7 @@ export interface PurchasePokemonData {
 
 export interface PurchasePokemonVariables {
   pokemonId: number;
+  price?: string; // Optional price for optimistic response (not sent to backend)
 }
 
 export interface CatchPokemonData {

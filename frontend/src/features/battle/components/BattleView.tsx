@@ -71,6 +71,15 @@ export function BattleView({
   const [finalClickCount, setFinalClickCount] = useState(0);
   const [candyAwarded, setCandyAwarded] = useState(false);
 
+  // Animation states
+  const [playerAttacking, setPlayerAttacking] = useState(false);
+  const [opponentHit, setOpponentHit] = useState(false);
+  const [shieldActive, setShieldActive] = useState(false);
+  const [specialAttackActive, setSpecialAttackActive] = useState(false);
+  const [hitEffects, setHitEffects] = useState<
+    Array<{id: number; damage: string; x: number; y: number}>
+  >([]);
+
   const {
     playerHP,
     opponentHP,
@@ -95,9 +104,121 @@ export function BattleView({
     },
   });
 
+  // Wrap handleAttackClick to trigger animations
+  const handleAttackWithAnimation = () => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      handleAttackClick();
+      return;
+    }
+
+    // Only trigger new animation if not already animating (prevent animation reset)
+    if (!playerAttacking) {
+      setPlayerAttacking(true);
+      setTimeout(() => setPlayerAttacking(false), 200);
+    }
+
+    // Trigger opponent hit animation (shake) - only if not already shaking
+    if (!opponentHit) {
+      setOpponentHit(true);
+      setTimeout(() => setOpponentHit(false), 300);
+    }
+
+    // Calculate damage and show hit effect
+    const playerStats = playerPokemon.stats;
+    const opponentStats = opponentPokemon.stats;
+    if (playerStats && opponentStats) {
+      const baseDamage =
+        (playerStats.attack - opponentStats.defense * 0.4) *
+        (1 + playerStats.speed * 0.05);
+      const damage = Math.max(1, Math.floor(baseDamage));
+
+      // Create hit effect at randomized position above opponent
+      const hitId = Date.now();
+      // Randomize position above opponent (right side of screen, above sprite)
+      const baseX = 75; // More to the right (opponent is on right side)
+      const baseY = 10; // Above opponent sprite (higher up)
+      const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance horizontally
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically (only downward)
+
+      setHitEffects((prev) => [
+        ...prev,
+        {
+          id: hitId,
+          damage: damage.toString(),
+          x: randomX,
+          y: randomY,
+        },
+      ]);
+
+      // Remove hit effect after animation
+      setTimeout(() => {
+        setHitEffects((prev) => prev.filter((effect) => effect.id !== hitId));
+      }, 800);
+    }
+
+    // Call the actual attack handler
+    handleAttackClick();
+  };
+
+  // Wrap shield trigger with animation
+  const handleShieldWithAnimation = () => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      triggerShield();
+      return;
+    }
+
+    setShieldActive(true);
+    triggerShield();
+    // Shield animation lasts 2 seconds
+    setTimeout(() => setShieldActive(false), 2000);
+  };
+
+  // Wrap special attack trigger with animation
+  const handleSpecialAttackWithAnimation = () => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      triggerSpecialAttack();
+      return;
+    }
+
+    setSpecialAttackActive(true);
+    triggerSpecialAttack();
+
+    // Calculate special attack damage and show hit effect
+    const playerStats = playerPokemon.stats;
+    const opponentStats = opponentPokemon.stats;
+    if (playerStats && opponentStats) {
+      const spAttackDamage =
+        (playerStats.spAttack * 2 - opponentStats.spDefense * 0.5) *
+        (1 + playerStats.speed * 0.1);
+      const damage = Math.max(1, Math.floor(spAttackDamage));
+
+      // Create hit effect at randomized position above opponent
+      const hitId = Date.now();
+      const baseX = 75; // Opponent position
+      const baseY = 10; // Above opponent sprite
+      const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically
+
+      setHitEffects((prev) => [
+        ...prev,
+        {id: hitId, damage: damage.toString(), x: randomX, y: randomY},
+      ]);
+
+      setTimeout(() => {
+        setHitEffects((prev) => prev.filter((effect) => effect.id !== hitId));
+      }, 800);
+    }
+
+    // Special attack animation lasts 600ms
+    setTimeout(() => setSpecialAttackActive(false), 600);
+  };
+
   // Keep attack function ref up to date so the wrapper always calls the latest version
-  const attackFunctionRef = useRef(handleAttackClick);
-  attackFunctionRef.current = handleAttackClick;
+  const attackFunctionRef = useRef(handleAttackWithAnimation);
+  attackFunctionRef.current = handleAttackWithAnimation;
 
   // Create stable wrapper function that won't change between renders
   const attackWrapperRef = useRef<(() => void) | null>(null);
@@ -440,7 +561,7 @@ export function BattleView({
           linear-gradient(0deg, #d1fae5 0%, #a7f3d0 20%, #6ee7b7 40%, #34d399 60%, #6ee7b7 80%, #a7f3d0 100%)
         `,
       }}
-      onClick={handleAttackClick}
+      onClick={handleAttackWithAnimation}
     >
       <img
         src={getPlatformImage(opponentPokemon.types)}
@@ -466,9 +587,32 @@ export function BattleView({
           objectFit: 'contain',
           objectPosition: 'center bottom',
           ...createPositionStyle(layoutConfig.opponentSprite),
+          animation: opponentHit ? 'shake 0.3s ease-in-out' : 'none',
         }}
         aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
       />
+      {/* Special attack visual effect */}
+      {specialAttackActive && (
+        <div
+          className="absolute z-20 pointer-events-none"
+          style={{
+            ...createPositionStyle(layoutConfig.opponentSprite),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            className="text-6xl md:text-8xl"
+            style={{
+              animation: 'specialAttackBurst 0.6s ease-out',
+              filter: 'drop-shadow(0 0 15px rgba(234, 179, 8, 1))',
+            }}
+          >
+            ⚡
+          </div>
+        </div>
+      )}
       {/* Opponent health bar */}
       <aside
         className="absolute z-10"
@@ -501,19 +645,63 @@ export function BattleView({
         aria-hidden="true"
       />
       {/* Player Pokemon sprite */}
-      <img
-        src={playerPokemon.sprite}
-        alt={capitalizeName(playerPokemon.name)}
-        className="absolute image-pixelated z-10"
-        decoding="async"
+      <div
+        className="absolute z-10"
         style={{
-          imageRendering: 'pixelated',
-          objectFit: 'contain',
-          objectPosition: 'center bottom',
-          ...createPositionStyle(layoutConfig.playerSprite),
+          ...(() => {
+            const style = createPositionStyle(layoutConfig.playerSprite);
+            // Remove scaleX from transform and apply it to inner img instead
+            const transformWithoutScale = style.transform
+              ?.replace(/scaleX\([^)]*\)\s*/g, '')
+              .trim();
+            return {
+              ...style,
+              transform: transformWithoutScale || undefined,
+            };
+          })(),
+          animation: playerAttacking ? 'bounce 0.2s ease-in-out' : 'none',
         }}
-        aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
-      />
+      >
+        <img
+          src={playerPokemon.sprite}
+          alt={capitalizeName(playerPokemon.name)}
+          className="image-pixelated"
+          decoding="async"
+          style={{
+            imageRendering: 'pixelated',
+            objectFit: 'contain',
+            objectPosition: 'center bottom',
+            width: '100%',
+            height: '100%',
+            transform: 'scaleX(-1)',
+          }}
+          aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
+        />
+      </div>
+      {/* Shield visual effect */}
+      {shieldActive && (
+        <div
+          className="absolute z-20 pointer-events-none"
+          style={{
+            ...createPositionStyle(layoutConfig.playerSprite),
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            transform:
+              `${createPositionStyle(layoutConfig.playerSprite).transform || ''} translateY(-30%)`.trim(),
+          }}
+        >
+          <div
+            className="text-6xl md:text-8xl"
+            style={{
+              animation: 'shieldPulse 2s ease-in-out',
+              filter: 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))',
+            }}
+          >
+            🛡️
+          </div>
+        </div>
+      )}
       {/* Player health bar */}
       <aside
         className="absolute z-10"
@@ -643,7 +831,7 @@ export function BattleView({
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCharged) triggerSpecialAttack();
+                if (isCharged) handleSpecialAttackWithAnimation();
               }}
               disabled={!isCharged}
               tabIndex={0}
@@ -690,7 +878,7 @@ export function BattleView({
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCharged) triggerShield();
+                if (isCharged) handleShieldWithAnimation();
               }}
               disabled={!isCharged}
               tabIndex={0}
@@ -727,6 +915,90 @@ export function BattleView({
           </nav>
         </section>
       )}
+
+      {/* Hit effect damage numbers */}
+      {hitEffects.map((effect) => (
+        <div
+          key={effect.id}
+          className="absolute z-40 pixel-font text-lg md:text-xl font-bold text-white pointer-events-none"
+          style={{
+            left: `${effect.x}%`,
+            top: `${effect.y}%`,
+            animation: 'hitEffect 0.8s ease-out forwards',
+            textShadow:
+              '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 8px rgba(255,255,255,0.8)',
+          }}
+        >
+          -{effect.damage}
+        </div>
+      ))}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
+        }
+
+        @keyframes hitEffect {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-40px) scale(1.3);
+          }
+        }
+
+        @keyframes shieldPulse {
+          0% {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          20% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          80% {
+            opacity: 0.6;
+            transform: scale(1.1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+        }
+
+        @keyframes specialAttackBurst {
+          0% {
+            opacity: 0;
+            transform: scale(0.3) rotate(0deg);
+          }
+          30% {
+            opacity: 1;
+            transform: scale(1.5) rotate(90deg);
+          }
+          60% {
+            opacity: 0.8;
+            transform: scale(1.2) rotate(180deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(2) rotate(360deg);
+          }
+        }
+      `}</style>
     </main>
   );
 }

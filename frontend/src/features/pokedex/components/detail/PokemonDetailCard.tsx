@@ -26,6 +26,7 @@ interface PokemonDetailCardProps {
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export function PokemonDetailCard({
@@ -38,6 +39,7 @@ export function PokemonDetailCard({
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: PokemonDetailCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -74,7 +76,7 @@ export function PokemonDetailCard({
 
     try {
       const result = await purchasePokemonMutation({
-        variables: {pokemonId: pokemon.id},
+        variables: {pokemonId: pokemon.id, price: pokemon.price ?? undefined},
       });
 
       // Check for GraphQL errors first (Apollo's errorPolicy: 'all' returns both data and errors)
@@ -233,9 +235,11 @@ export function PokemonDetailCard({
 
         {/* Close Button */}
         <button
+          ref={closeButtonRef}
           className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 cursor-pointer text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
           onClick={onClose}
           aria-label="Exit"
+          data-autofocus="true"
         >
           X
         </button>

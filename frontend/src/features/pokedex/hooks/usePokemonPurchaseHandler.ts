@@ -43,7 +43,7 @@ export function usePokemonPurchaseHandler() {
 
     try {
       const result = await purchasePokemon({
-        variables: {pokemonId},
+        variables: {pokemonId, price: actualPrice},
       });
 
       // Update AuthContext with the server response

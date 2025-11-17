@@ -31,11 +31,26 @@ export function usePokemonModal() {
   const {pokemon: crossRegionData} = usePokemonById(crossRegionPokemonId);
 
   // Update selectedPokemon when cross-region Pokemon data loads
-  // This handles navigation to Pokemon outside current filtered list
+  // This handles navigation to Pokemon outside current filtered list (e.g., evolutions on different pages)
   useEffect(() => {
     if (crossRegionData) {
-      // crossRegionData is already a PokedexPokemon, so use it directly
-      setSelectedPokemon(crossRegionData);
+      // crossRegionData now includes price and bst from the backend (POKEMON_BY_ID_QUERY)
+      const pokemonData = crossRegionData as PokedexPokemon;
+
+      setSelectedPokemon(pokemonData);
+
+      // Add the cross-region Pokemon to allPokemon array temporarily
+      // This allows the carousel to navigate to it even if it's not on the current pagination page
+      // The array resets when modal closes/reopens, so this is temporary
+      setAllPokemon((prevAll) => {
+        // Check if Pokemon is already in the array to avoid duplicates
+        if (prevAll.find((p) => p.id === crossRegionData.id)) {
+          return prevAll;
+        }
+        // Add it to the end of the array so carousel can display it
+        return [...prevAll, pokemonData];
+      });
+
       setCrossRegionPokemonId(null);
     }
   }, [crossRegionData]);

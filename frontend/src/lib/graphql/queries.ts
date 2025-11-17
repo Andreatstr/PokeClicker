@@ -92,6 +92,8 @@ export const POKEMON_BY_ID_QUERY = gql`
       evolution
       isOwned
       pokedexNumber
+      price
+      bst
     }
   }
 `;
