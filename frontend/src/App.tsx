@@ -45,6 +45,7 @@ import {
   usePokemonModal,
   useOnboarding,
 } from '@/hooks';
+import {CandyProvider} from '@/contexts/CandyContext';
 
 // Lazy load heavy components to reduce initial bundle size
 const LoginScreen = lazy(() =>
@@ -257,7 +258,7 @@ function App() {
   };
 
   return (
-    <>
+    <CandyProvider isOnboarding={isActive}>
       <ErrorDisplay />
       {/* Hide navbar when map is in fullscreen */}
       {!isMapFullscreen && (
@@ -343,7 +344,7 @@ function App() {
           isDarkMode={isDarkMode}
         />
       )}
-    </>
+    </CandyProvider>
   );
 }
 

@@ -31,42 +31,42 @@ export function ClickerHelpModal({
       icon: '👆',
       effect: 'Increases candy earned per click',
       formula: 'Exponential (1.0954^level)',
-      color: isDarkMode ? '#ea580c' : '#f97316',
+      color: isDarkMode ? '#ff8b8bff' : '#c70101ff',
     },
     {
       name: 'Autoclicker',
       icon: '🤖',
       effect: 'Automatically clicks for you every second',
       formula: 'Exponential (1.0954^level)',
-      color: isDarkMode ? '#16a34a' : '#22c55e',
+      color: isDarkMode ? '#f96363ff' : '#940000ff',
     },
     {
       name: 'Lucky Chance',
       icon: '🍀',
       effect: 'Chance for a lucky hit that multiplies candy earned',
       formula: 'Logarithmic (caps ~8%)',
-      color: isDarkMode ? '#dc2626' : '#ef4444',
+      color: isDarkMode ? '#ff71e5ff' : '#9d1984ff',
     },
     {
       name: 'Lucky Power',
       icon: '⚡',
       effect: 'Multiplier applied when you get a lucky hit',
       formula: 'Exponential (1.2^level)',
-      color: isDarkMode ? '#b91c1c' : '#dc2626',
+      color: isDarkMode ? '#ca7fffff' : '#7b22baff',
     },
     {
       name: 'Click Boost',
       icon: '💪',
       effect: 'Multiplies ALL your income (clicks + autoclicker)',
       formula: 'Linear (15% per level)',
-      color: isDarkMode ? '#ca8a04' : '#eab308',
+      color: isDarkMode ? '#79cdcaff' : '#007672ff',
     },
     {
       name: 'Pokedex Bonus',
       icon: '📖',
       effect: 'Multiplies ALL income - stronger with more Pokemon caught',
       formula: 'Grows with Pokemon count',
-      color: isDarkMode ? '#0891b2' : '#06b6d4',
+      color: isDarkMode ? '#7ab2eeff' : '#00438bff',
     },
   ];
 
@@ -103,7 +103,7 @@ export function ClickerHelpModal({
         >
           {/* Close Button */}
           <button
-            className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+            className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white cursor-pointer font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
             onClick={onClose}
             aria-label="Close help"
           >

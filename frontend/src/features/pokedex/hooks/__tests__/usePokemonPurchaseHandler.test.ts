@@ -6,6 +6,8 @@ import type {User} from '@/lib/graphql/types';
 // Mock dependencies
 const mockPurchasePokemon = vi.fn();
 const mockUpdateUser = vi.fn();
+const mockFlushPendingCandy = vi.fn();
+let mockLocalRareCandy = '1000';
 let mockUser: User = {
   _id: '1',
   username: 'testuser',
@@ -32,6 +34,16 @@ vi.mock('@features/auth', () => ({
   useAuth: () => ({
     user: mockUser,
     updateUser: mockUpdateUser,
+  }),
+}));
+
+// Mock global candy context
+vi.mock('@/contexts/useCandyContext', () => ({
+  useCandyContext: () => ({
+    localRareCandy: mockLocalRareCandy,
+    flushPendingCandy: mockFlushPendingCandy,
+    addCandy: vi.fn(),
+    deductCandy: vi.fn(),
   }),
 }));
 
@@ -74,6 +86,8 @@ describe('usePokemonPurchaseHandler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    mockLocalRareCandy = '1000';
+    mockFlushPendingCandy.mockResolvedValue(undefined);
     mockUser = {
       _id: '1',
       username: 'testuser',
@@ -105,26 +119,28 @@ describe('usePokemonPurchaseHandler', () => {
   });
 
   it('should show error when user has insufficient candy', async () => {
-    mockUser.rare_candy = 50;
+    mockLocalRareCandy = '50';
     const {result} = renderHook(() => usePokemonPurchaseHandler());
     await act(async () => {
       await result.current.handlePurchase(25);
     });
     expect(result.current.error).toBe('Not enough Rare Candy!');
     expect(mockPurchasePokemon).not.toHaveBeenCalled();
+    expect(mockFlushPendingCandy).not.toHaveBeenCalled();
   });
 
   it('should not call mutation when user cannot afford Pokemon', async () => {
-    mockUser.rare_candy = 10;
+    mockLocalRareCandy = '10';
     const {result} = renderHook(() => usePokemonPurchaseHandler());
     await act(async () => {
       await result.current.handlePurchase(1);
     });
     expect(mockPurchasePokemon).not.toHaveBeenCalled();
+    expect(mockFlushPendingCandy).not.toHaveBeenCalled();
   });
 
   it('should proceed when user has exact amount of candy', async () => {
-    mockUser.rare_candy = 100;
+    mockLocalRareCandy = '100';
     mockPurchasePokemon.mockResolvedValue({
       data: {purchasePokemon: mockUser},
     });
@@ -132,6 +148,7 @@ describe('usePokemonPurchaseHandler', () => {
     await act(async () => {
       await result.current.handlePurchase(1);
     });
+    expect(mockFlushPendingCandy).toHaveBeenCalled();
     expect(mockPurchasePokemon).toHaveBeenCalled();
     expect(result.current.error).toBeNull();
   });
@@ -148,8 +165,33 @@ describe('usePokemonPurchaseHandler', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('should flush pending candy before purchase', async () => {
+    mockPurchasePokemon.mockResolvedValue({
+      data: {purchasePokemon: mockUser},
+    });
+    const {result} = renderHook(() => usePokemonPurchaseHandler());
+    await act(async () => {
+      await result.current.handlePurchase(25);
+    });
+    // Should flush BEFORE calling purchase mutation
+    expect(mockFlushPendingCandy).toHaveBeenCalled();
+    expect(mockPurchasePokemon).toHaveBeenCalled();
+  });
+
+  it('should show error when flush fails', async () => {
+    mockFlushPendingCandy.mockRejectedValue(new Error('Network error'));
+    const {result} = renderHook(() => usePokemonPurchaseHandler());
+    await act(async () => {
+      await result.current.handlePurchase(25);
+    });
+    expect(result.current.error).toBe(
+      'Failed to sync candy. Please try again.'
+    );
+    expect(mockPurchasePokemon).not.toHaveBeenCalled();
+  });
+
   it('should clear error after errorDisplayDuration', async () => {
-    mockUser.rare_candy = 50;
+    mockLocalRareCandy = '50';
     const {result} = renderHook(() => usePokemonPurchaseHandler());
     await act(async () => {
       await result.current.handlePurchase(25);
@@ -162,7 +204,7 @@ describe('usePokemonPurchaseHandler', () => {
   });
 
   it('should clear previous error timeout on new purchase', async () => {
-    mockUser.rare_candy = 50;
+    mockLocalRareCandy = '50';
     const {result} = renderHook(() => usePokemonPurchaseHandler());
     await act(async () => {
       await result.current.handlePurchase(25);
@@ -194,7 +236,7 @@ describe('usePokemonPurchaseHandler', () => {
       await result.current.handlePurchase(25);
     });
     expect(mockPurchasePokemon).toHaveBeenCalledWith({
-      variables: {pokemonId: 25},
+      variables: {pokemonId: 25, price: undefined},
     });
   });
 
@@ -319,7 +361,7 @@ describe('usePokemonPurchaseHandler', () => {
   });
 
   it('should handle different Pokemon IDs', async () => {
-    mockUser.rare_candy = 100000; // Ensure enough candy for both purchases
+    mockLocalRareCandy = '100000'; // Ensure enough candy for both purchases
     mockPurchasePokemon.mockResolvedValue({
       data: {purchasePokemon: mockUser},
     });
@@ -328,14 +370,14 @@ describe('usePokemonPurchaseHandler', () => {
       await result.current.handlePurchase(1);
     });
     expect(mockPurchasePokemon).toHaveBeenCalledWith({
-      variables: {pokemonId: 1},
+      variables: {pokemonId: 1, price: undefined},
     });
     mockPurchasePokemon.mockClear();
     await act(async () => {
       await result.current.handlePurchase(150);
     });
     expect(mockPurchasePokemon).toHaveBeenCalledWith({
-      variables: {pokemonId: 150},
+      variables: {pokemonId: 150, price: undefined},
     });
   });
 

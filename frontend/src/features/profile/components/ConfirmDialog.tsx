@@ -74,7 +74,7 @@ export function ConfirmDialog({
             <footer className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+                className="flex-1 px-4 py-2 font-bold border-4 transition-all cursor-pointer text-sm sm:text-base"
                 aria-label="Cancel"
                 style={{
                   borderColor: isDarkMode ? '#333333' : 'black',
@@ -103,7 +103,7 @@ export function ConfirmDialog({
               <button
                 ref={confirmButtonRef}
                 onClick={onConfirm}
-                className="flex-1 px-4 py-2 font-bold border-4 transition-all text-sm sm:text-base"
+                className="flex-1 px-4 py-2 font-bold border-4 transition-all cursor-pointer text-sm sm:text-base"
                 aria-label="Confirm"
                 style={{
                   borderColor: isDarkMode ? '#333333' : 'black',

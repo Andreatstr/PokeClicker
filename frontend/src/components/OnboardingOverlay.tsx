@@ -181,7 +181,7 @@ const STEPS: OnboardingStep[] = [
     highlight: true,
   },
   {
-    target: 'pokemon-selection',
+    target: 'pokemon-and-tutorial',
     title: 'Choose Your Pokemon',
     description:
       'Pick your Battle and Clicker Pokemon. Restart this tutorial anytime.',
@@ -762,7 +762,7 @@ export function OnboardingOverlay({
             </span>
             <button
               onClick={onSkip}
-              className="text-xs hover:opacity-70 transition-opacity"
+              className="text-xs hover:opacity-70 cursor-pointer transition-opacity"
               aria-label="Skip tutorial"
               style={{color: isDarkMode ? '#ef4444' : '#b91c1c'}}
             >

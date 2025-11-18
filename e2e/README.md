@@ -32,6 +32,11 @@ Comprehensive end-to-end testing suite for the Pokémon Clicker application.
 - Click mechanics and candy increment with batch sync
 - Mobile viewport compatibility
 
+### Map Tests ([map.spec.ts](map.spec.ts))
+- Map rendering and interactions
+- Zoom in/out functionality
+- Region selection and highlighting
+
 ## Running Tests
 
 ### Smoke Tests (Fast - runs on every PR)
@@ -75,7 +80,8 @@ e2e/
 ├── auth.spec.ts                  # Authentication tests (full suite)
 ├── navigation.spec.ts            # Navigation tests (full suite)
 ├── pokedex.spec.ts               # Pokédex tests (full suite)
-└── clicker.spec.ts               # Clicker game tests (full suite)
+├── clicker.spec.ts               # Clicker game tests (full suite)
+└── map.spec.ts                   # Map game tests (full suite)
 ```
 
 ## Browser Coverage

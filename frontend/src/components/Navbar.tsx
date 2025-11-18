@@ -92,7 +92,10 @@ export function Navbar({
             <Button
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Pokedex"
-              onClick={() => onPageChange('pokedex')}
+              onClick={(e) => {
+                onPageChange('pokedex');
+                e.currentTarget.blur();
+              }}
               isDarkMode={isDarkMode}
             >
               Pokedex
@@ -101,7 +104,10 @@ export function Navbar({
               data-onboarding="clicker-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Clicker"
-              onClick={() => onPageChange('clicker')}
+              onClick={(e) => {
+                onPageChange('clicker');
+                e.currentTarget.blur();
+              }}
               isDarkMode={isDarkMode}
             >
               Clicker
@@ -110,7 +116,10 @@ export function Navbar({
               data-onboarding="world-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Map"
-              onClick={() => onPageChange('map')}
+              onClick={(e) => {
+                onPageChange('map');
+                e.currentTarget.blur();
+              }}
               isDarkMode={isDarkMode}
             >
               World
@@ -119,14 +128,20 @@ export function Navbar({
               data-onboarding="ranks-nav"
               className="text-xs md:text-sm min-w-[44px] min-h-[44px]"
               aria-label="Ranks"
-              onClick={() => onPageChange('ranks')}
+              onClick={(e) => {
+                onPageChange('ranks');
+                e.currentTarget.blur();
+              }}
               isDarkMode={isDarkMode}
             >
               Ranks
             </Button>
 
             <Button
-              onClick={onToggleTheme}
+              onClick={(e) => {
+                onToggleTheme();
+                e.currentTarget.blur();
+              }}
               className="min-w-[44px] min-h-[44px] p-2"
               aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
               isDarkMode={isDarkMode}
@@ -142,7 +157,10 @@ export function Navbar({
               <Button
                 data-onboarding="profile-button"
                 className="min-w-[44px] min-h-[44px] p-2"
-                onClick={() => onPageChange('profile')}
+                onClick={(e) => {
+                  onPageChange('profile');
+                  e.currentTarget.blur();
+                }}
                 title={`Logged in as ${user?.username}`}
                 aria-label={`Profile for ${user?.username}`}
                 isDarkMode={isDarkMode}
@@ -153,7 +171,10 @@ export function Navbar({
               <Button
                 data-onboarding="profile-button"
                 className="min-w-[44px] min-h-[44px] p-2"
-                onClick={() => onPageChange('login')}
+                onClick={(e) => {
+                  onPageChange('login');
+                  e.currentTarget.blur();
+                }}
                 aria-label="Login"
                 isDarkMode={isDarkMode}
               >
@@ -204,7 +225,10 @@ export function Navbar({
               <Button
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Pokedex"
-                onClick={() => onPageChange('pokedex')}
+                onClick={(e) => {
+                  onPageChange('pokedex');
+                  e.currentTarget.blur();
+                }}
                 isDarkMode={isDarkMode}
               >
                 Pokedex
@@ -213,7 +237,10 @@ export function Navbar({
                 data-onboarding="clicker-nav"
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Clicker"
-                onClick={() => onPageChange('clicker')}
+                onClick={(e) => {
+                  onPageChange('clicker');
+                  e.currentTarget.blur();
+                }}
                 isDarkMode={isDarkMode}
               >
                 Clicker
@@ -222,7 +249,10 @@ export function Navbar({
                 data-onboarding="world-nav"
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Map"
-                onClick={() => onPageChange('map')}
+                onClick={(e) => {
+                  onPageChange('map');
+                  e.currentTarget.blur();
+                }}
                 isDarkMode={isDarkMode}
               >
                 World
@@ -231,7 +261,10 @@ export function Navbar({
                 data-onboarding="ranks-nav"
                 className="w-full text-sm min-h-[44px]"
                 aria-label="Ranks"
-                onClick={() => onPageChange('ranks')}
+                onClick={(e) => {
+                  onPageChange('ranks');
+                  e.currentTarget.blur();
+                }}
                 isDarkMode={isDarkMode}
               >
                 Ranks
@@ -245,7 +278,10 @@ export function Navbar({
             >
               <Button
                 className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
-                onClick={onToggleTheme}
+                onClick={(e) => {
+                  onToggleTheme();
+                  e.currentTarget.blur();
+                }}
                 aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                 isDarkMode={isDarkMode}
               >
@@ -266,7 +302,10 @@ export function Navbar({
                 <Button
                   data-onboarding="profile-button"
                   className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
-                  onClick={() => onPageChange('profile')}
+                  onClick={(e) => {
+                    onPageChange('profile');
+                    e.currentTarget.blur();
+                  }}
                   title={`Logged in as ${user?.username}`}
                   aria-label={`Profile for ${user?.username}`}
                   isDarkMode={isDarkMode}
@@ -278,7 +317,10 @@ export function Navbar({
                 <Button
                   data-onboarding="profile-button"
                   className="w-full text-sm min-h-[44px] flex items-center justify-center gap-2"
-                  onClick={() => onPageChange('login')}
+                  onClick={(e) => {
+                    onPageChange('login');
+                    e.currentTarget.blur();
+                  }}
                   aria-label="Login"
                   isDarkMode={isDarkMode}
                 >

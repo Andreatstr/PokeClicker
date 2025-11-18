@@ -17,6 +17,20 @@ test.describe("Navigation", () => {
       // Wait for search box to appear after registration
       await expect(page.getByPlaceholder(/search/i)).toBeVisible({ timeout: 5000 });
     }
+
+    // Check if the onboarding overlay is active and click "Skip"
+    const skipButton = page.locator('button[aria-label="Skip tutorial"]');
+    if (await skipButton.isVisible()) {
+      await skipButton.click({ force: true });
+    } else {
+      console.warn('Skip button not found or not visible, removing overlay...');
+      await page.evaluate(() => {
+        const overlay = document.querySelector('[role="dialog"]');
+        if (overlay) {
+          overlay.remove();
+        }
+      });
+    }
   });
 
   test("should load the application", async ({ page }) => {

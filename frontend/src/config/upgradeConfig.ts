@@ -42,8 +42,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.3416, // Moderate cost scaling
     unit: 'candy/click',
     color: {
-      dark: '#ea580c',
-      light: '#f97316',
+      dark: '#c70101ff',
+      light: '#ff8b8bff',
     },
   },
   autoclicker: {
@@ -53,8 +53,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.3038,
     unit: 'clicks/sec',
     color: {
-      dark: '#16a34a',
-      light: '#22c55e',
+      dark: '#940000ff',
+      light: '#f96363ff',
     },
   },
   luckyHitChance: {
@@ -66,8 +66,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.5, // More expensive due to multiplicative nature with luckyHitMultiplier
     unit: '% lucky chance',
     color: {
-      dark: '#dc2626',
-      light: '#ef4444',
+      dark: '#9d1984ff',
+      light: '#ff71e5ff',
     },
   },
   luckyHitMultiplier: {
@@ -77,8 +77,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.6,
     unit: 'x on lucky',
     color: {
-      dark: '#b91c1c',
-      light: '#dc2626',
+      dark: '#7b22baff',
+      light: '#ca7fffff',
     },
   },
   clickMultiplier: {
@@ -88,8 +88,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.7,
     unit: '% click power',
     color: {
-      dark: '#ca8a04',
-      light: '#eab308',
+      dark: '#007672ff',
+      light: '#79cdcaff',
     },
   },
   pokedexBonus: {
@@ -104,8 +104,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     unit: '% total bonus',
     perPokemonBonus: (level) => 0.5 * level, // 0.5% per level per Pokemon
     color: {
-      dark: '#0891b2',
-      light: '#06b6d4',
+      dark: '#00438bff',
+      light: '#7ab2eeff',
     },
   },
 };

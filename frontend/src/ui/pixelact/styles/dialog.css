@@ -17,11 +17,19 @@
   box-shadow: none;
   padding: 1.5rem;
   max-width: 960px;
+  max-height: 95vh;
   width: 90%;
   font-family: 'Press Start 2P', 'Courier New', 'Courier', monospace;
   font-display: swap;
   overflow-y: auto;
   animation: dialog-fade-in 0.3s ease-out;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dialog-content::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes dialog-fade-in {

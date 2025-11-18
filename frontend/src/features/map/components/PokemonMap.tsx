@@ -519,14 +519,14 @@ export function PokemonMap({
               e.preventDefault();
               toggleFullscreen();
             }}
-            className="absolute top-2 left-2 z-50 flex items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
+            className="absolute top-2 left-2 z-50 flex cursor-pointer items-center gap-1 active:bg-blue-700 border-2 border-black px-2 py-1 touch-manipulation"
             title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             aria-label={
               isFullscreen ? 'Exit fullscreen mode' : 'Enter fullscreen mode'
             }
             style={{
               WebkitTapHighlightColor: 'transparent',
-              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              backgroundColor: 'rgba(37, 99, 235, 0.95)',
               boxShadow: '4px 4px 0px rgba(0,0,0,1)',
               transform: 'translate(0, 0)',
               transition: 'all 0.15s ease-in-out',
@@ -534,12 +534,12 @@ export function PokemonMap({
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translate(-2px, -2px)';
               e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+              e.currentTarget.style.backgroundColor = 'rgba(29, 78, 216, 1)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translate(0, 0)';
               e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
             }}
           >
             <svg
@@ -563,7 +563,7 @@ export function PokemonMap({
             <button
               onClick={movement.teleportToRandomLocation}
               disabled={movement.isTeleporting || movement.teleportCooldown > 0}
-              className="absolute bottom-3 left-2 z-50 flex items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+              className="absolute bottom-3 left-2 z-50 flex cursor-pointer items-center gap-1 border-2 border-black px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               title={
                 movement.isTeleporting
                   ? 'Teleporting...'
@@ -582,8 +582,8 @@ export function PokemonMap({
                 WebkitTapHighlightColor: 'transparent',
                 backgroundColor:
                   movement.isTeleporting || movement.teleportCooldown > 0
-                    ? 'rgba(59, 130, 246, 0.85)'
-                    : 'rgba(59, 130, 246, 0.9)',
+                    ? 'rgba(37, 99, 235, 0.85)'
+                    : 'rgba(37, 99, 235, 0.95)',
                 boxShadow: '4px 4px 0px rgba(0,0,0,1)',
                 transform: 'translate(0, 0)',
                 transition: 'all 0.15s ease-in-out',
@@ -596,7 +596,7 @@ export function PokemonMap({
                   e.currentTarget.style.transform = 'translate(-2px, -2px)';
                   e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
                   e.currentTarget.style.backgroundColor =
-                    'rgba(37, 99, 235, 0.95)';
+                    'rgba(29, 78, 216, 1)';
                 }
               }}
               onMouseLeave={(e) => {
@@ -604,8 +604,8 @@ export function PokemonMap({
                 e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
                 e.currentTarget.style.backgroundColor =
                   movement.isTeleporting || movement.teleportCooldown > 0
-                    ? 'rgba(59, 130, 246, 0.85)'
-                    : 'rgba(59, 130, 246, 0.9)';
+                    ? 'rgba(37, 99, 235, 0.85)'
+                    : 'rgba(37, 99, 235, 0.95)';
               }}
             >
               <svg
@@ -637,11 +637,10 @@ export function PokemonMap({
               aria-live="polite"
             >
               <div
-                className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
-                  isDarkMode
-                    ? 'bg-blue-500 text-white border-black'
-                    : 'bg-blue-500 text-white border-black'
-                }`}
+                className={`pixel-font text-center px-4 py-2 rounded border-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white border-black`}
+                style={{
+                  backgroundColor: `rgb(37, 99, 235)`,
+                }}
               >
                 <div className="pixel-font text-xs font-bold text-white">
                   Teleported to {movement.teleportLocation}
@@ -681,7 +680,7 @@ export function PokemonMap({
                   </p>
                 </div>
                 <button
-                  className={`pixel-font text-xs md:text-sm border-2 px-2 py-1 md:px-3 md:py-1.5 font-bold whitespace-nowrap touch-manipulation ${
+                  className={`pixel-font text-xs md:text-sm cursor-pointer border-2 px-2 py-1 md:px-3 md:py-1.5 font-bold whitespace-nowrap touch-manipulation ${
                     isDarkMode
                       ? 'bg-red-700 border-gray-600 text-white'
                       : 'bg-red-600 border-black text-white'
@@ -734,12 +733,12 @@ export function PokemonMap({
                 e.preventDefault();
                 setShowHowToPlay(true);
               }}
-              className="absolute bottom-3 right-3 z-50 flex items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
+              className="absolute bottom-3 right-3 z-50 flex cursor-pointer items-center justify-center border-2 border-black w-10 h-10 touch-manipulation text-xs font-bold"
               title="How to play"
               aria-label="How to play"
               style={{
                 WebkitTapHighlightColor: 'transparent',
-                backgroundColor: 'rgba(59, 130, 246, 0.9)',
+                backgroundColor: 'rgba(37, 99, 235, 0.95)',
                 boxShadow: '4px 4px 0px rgba(0,0,0,1)',
                 transform: 'translate(0, 0)',
                 transition: 'all 0.15s ease-in-out',
@@ -747,14 +746,13 @@ export function PokemonMap({
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translate(-2px, -2px)';
                 e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-                e.currentTarget.style.backgroundColor =
-                  'rgba(37, 99, 235, 0.95)';
+                e.currentTarget.style.backgroundColor = 'rgba(29, 78, 216, 1)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translate(0, 0)';
                 e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
                 e.currentTarget.style.backgroundColor =
-                  'rgba(59, 130, 246, 0.9)';
+                  'rgba(37, 99, 235, 0.95)';
               }}
             >
               <svg

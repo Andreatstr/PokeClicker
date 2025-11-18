@@ -15,6 +15,16 @@ import {PokemonStatsDisplay} from '../shared/PokemonStatsDisplay';
 import {PokemonEvolutionSection} from '../shared/PokemonEvolutionSection';
 import {toDecimal} from '@/lib/decimal';
 import {useError} from '@/hooks/useError';
+import {useMutation} from '@apollo/client';
+import {
+  SET_FAVORITE_POKEMON_MUTATION,
+  SET_SELECTED_POKEMON_MUTATION,
+} from '@/lib/graphql/mutations';
+import type {
+  SetFavoritePokemonData,
+  SetSelectedPokemonData,
+  PokemonIdVariables,
+} from '@/lib/graphql/types';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -26,6 +36,7 @@ interface PokemonDetailCardProps {
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export function PokemonDetailCard({
@@ -38,6 +49,7 @@ export function PokemonDetailCard({
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: PokemonDetailCardProps) {
   const [error, setError] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -51,6 +63,16 @@ export function PokemonDetailCard({
   const {upgrade} = usePokemonUpgrade(isOwned ? pokemon.id : null);
   const [upgradePokemonMutation, {loading: upgrading}] =
     useUpgradePokemonMutation();
+
+  // Mutations for setting favorite/selected Pokemon
+  const [setFavoritePokemon] = useMutation<
+    SetFavoritePokemonData,
+    PokemonIdVariables
+  >(SET_FAVORITE_POKEMON_MUTATION);
+  const [setSelectedPokemon] = useMutation<
+    SetSelectedPokemonData,
+    PokemonIdVariables
+  >(SET_SELECTED_POKEMON_MUTATION);
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,7 +96,7 @@ export function PokemonDetailCard({
 
     try {
       const result = await purchasePokemonMutation({
-        variables: {pokemonId: pokemon.id},
+        variables: {pokemonId: pokemon.id, price: pokemon.price ?? undefined},
       });
 
       // Check for GraphQL errors first (Apollo's errorPolicy: 'all' returns both data and errors)
@@ -176,6 +198,46 @@ export function PokemonDetailCard({
     }
   };
 
+  // Handler for using Pokemon in Map
+  const handleUseInMap = async () => {
+    try {
+      const result = await setFavoritePokemon({
+        variables: {pokemonId: pokemon.id},
+      });
+      if (result.data?.setFavoritePokemon) {
+        updateUser(result.data.setFavoritePokemon);
+        addSuccess(`${pokemon.name} set for Map!`);
+      }
+    } catch (err) {
+      console.error('Failed to set favorite Pokemon:', err);
+      setError('Failed to set for Map');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
+    }
+  };
+
+  // Handler for using Pokemon in Clicker
+  const handleUseInClicker = async () => {
+    try {
+      const result = await setSelectedPokemon({
+        variables: {pokemonId: pokemon.id},
+      });
+      if (result.data?.setSelectedPokemon) {
+        updateUser(result.data.setSelectedPokemon);
+        addSuccess(`${pokemon.name} set for Clicker!`);
+      }
+    } catch (err) {
+      console.error('Failed to set selected Pokemon:', err);
+      setError('Failed to set for Clicker');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
+    }
+  };
+
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
@@ -231,11 +293,13 @@ export function PokemonDetailCard({
           </aside>
         )}
 
-        {/* Close Button */}
+        {/* Close Button - 44x44px min touch target */}
         <button
-          className="absolute top-2 right-2 z-10 py-1 px-2 text-xs bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+          ref={closeButtonRef}
+          className="absolute top-2 right-2 z-10 w-11 h-11 text-xs bg-red-600 cursor-pointer text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center"
           onClick={onClose}
           aria-label="Exit"
+          data-autofocus="true"
         >
           X
         </button>
@@ -290,58 +354,113 @@ export function PokemonDetailCard({
           />
         </section>
 
-        {/* Upgrade Button */}
-        {isOwned && upgrade && (
+        {/* Action Buttons Container */}
+        {isOwned && (
           <section
-            data-onboarding="pokemon-upgrade"
-            className="w-full mb-2 md:mb-3"
-            aria-label="Pokemon upgrade"
+            className="w-full flex flex-col gap-2"
+            aria-label="Pokemon actions"
           >
-            <Button
-              onClick={handleUpgrade}
-              disabled={
-                upgrading ||
-                !!(
-                  user && toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
-                )
-              }
-              className="w-full pixel-font text-xs md:text-sm font-bold py-6 px-4 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              bgColor={isDarkMode ? '#3472d7ff' : '#3c77b3ff'}
-              aria-label="Upgrade pokemon"
-              isDarkMode={isDarkMode}
-              style={{
-                color: 'white',
-                borderColor: 'black',
-              }}
-            >
-              {upgrading ? (
-                'Upgrading...'
-              ) : (
-                <span className="flex items-center justify-center gap-3">
-                  <ArrowUpIcon size={20} />
-                  <span>Upgrade</span>
-                  <span className="px-2 py-1 border border-white rounded bg-black/20 font-bold">
-                    {formatNumber(upgrade.cost)}
-                  </span>
-                  <img
-                    src={`${import.meta.env.BASE_URL}candy.webp`}
-                    alt="Candy"
-                    className="w-6 h-6"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-              )}
-            </Button>
-            {error && (
-              <p
-                className="text-xs text-red-500 mt-1 text-center font-bold"
-                role="alert"
-                aria-live="polite"
-              >
-                {error}
-              </p>
+            {/* Upgrade Button */}
+            {upgrade && (
+              <div data-onboarding="pokemon-upgrade" className="w-full">
+                <Button
+                  onClick={handleUpgrade}
+                  disabled={
+                    upgrading ||
+                    !!(
+                      user &&
+                      toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
+                    )
+                  }
+                  className="pixel-font text-xs md:text-sm font-bold border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  bgColor={isDarkMode ? '#3472d7ff' : '#3c77b3ff'}
+                  aria-label="Upgrade pokemon"
+                  isDarkMode={isDarkMode}
+                  style={{
+                    width: 'calc(100% - 8px)',
+                    boxSizing: 'border-box',
+                    paddingTop: '1.5rem',
+                    paddingBottom: '1.5rem',
+                    paddingLeft: '0.5rem',
+                    paddingRight: '0.5rem',
+                    color: 'white',
+                    borderColor: 'black',
+                  }}
+                >
+                  {upgrading ? (
+                    'Upgrading...'
+                  ) : (
+                    <span className="flex items-center justify-center gap-1 md:gap-2">
+                      <ArrowUpIcon size={16} className="md:w-5 md:h-5" />
+                      <span>Upgrade</span>
+                      <span className="px-1.5 py-0.5 md:px-2 md:py-1 border border-white rounded bg-black/20 font-bold text-[10px] md:text-xs">
+                        {formatNumber(upgrade.cost)}
+                      </span>
+                      <img
+                        src={`${import.meta.env.BASE_URL}candy.webp`}
+                        alt="Candy"
+                        className="w-5 h-5 md:w-6 md:h-6"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                  )}
+                </Button>
+                {error && (
+                  <p
+                    className="text-xs text-red-500 mt-1 text-center font-bold"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    {error}
+                  </p>
+                )}
+              </div>
             )}
+
+            {/* Use Pokemon in Clicker/Map Buttons */}
+            <div className="w-full flex gap-2">
+              <Button
+                onClick={handleUseInClicker}
+                disabled={user?.selected_pokemon_id === pokemon.id}
+                className="pixel-font text-[9px] md:text-[10px] font-bold border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all leading-tight"
+                bgColor={isDarkMode ? '#2d5a2e' : '#4a9d4f'}
+                aria-label="Use in Clicker"
+                isDarkMode={isDarkMode}
+                style={{
+                  flex: 1,
+                  width: 0,
+                  paddingTop: '1.5rem',
+                  paddingBottom: '1.5rem',
+                  paddingLeft: '0.5rem',
+                  paddingRight: '0.5rem',
+                  color: 'white',
+                  borderColor: 'black',
+                }}
+              >
+                Use in Clicker
+              </Button>
+              <Button
+                onClick={handleUseInMap}
+                disabled={user?.favorite_pokemon_id === pokemon.id}
+                className="pixel-font text-[9px] md:text-[10px] font-bold border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all leading-tight"
+                bgColor={isDarkMode ? '#5a2d2e' : '#9d4a4f'}
+                aria-label="Use in Map"
+                isDarkMode={isDarkMode}
+                style={{
+                  flex: 1,
+                  width: 0,
+                  paddingTop: '1.5rem',
+                  paddingBottom: '1.5rem',
+                  paddingLeft: '0.5rem',
+                  paddingRight: '0.5rem',
+                  color: 'white',
+                  borderColor: 'black',
+                }}
+              >
+                Use in Map
+              </Button>
+            </div>
           </section>
         )}
 

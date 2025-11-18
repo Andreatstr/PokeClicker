@@ -93,30 +93,45 @@ export function TiledMapView(props: TiledMapViewProps) {
       >
         {/* Wild Pokemon */}
         {visiblePokemon.map((visiblePoke, index) => (
-          <img
+          <div
             key={`${visiblePoke.pokemon.id}-${index}`}
-            src={visiblePoke.pokemon.sprite}
-            alt={visiblePoke.pokemon.name}
             className="absolute"
-            fetchPriority="high"
-            style={
-              {
-                left: `${visiblePoke.screenX - 24}px`,
-                top: `${visiblePoke.screenY - 24}px`,
+            style={{
+              left: `${visiblePoke.screenX - 24}px`,
+              top: `${visiblePoke.screenY - 24}px`,
+              width: '48px',
+              height: '48px',
+              pointerEvents: 'none',
+              zIndex: 5, // Above tiles but below character
+            }}
+            title={visiblePoke.pokemon.name}
+          >
+            {/* Glow layer */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(255, 224, 146, 0.6)',
+                filter: 'blur(12px)',
+                zIndex: -1,
+                borderRadius: '50%',
+              }}
+            />
+
+            {/* Crisp sprite */}
+            <img
+              src={visiblePoke.pokemon.sprite}
+              alt={visiblePoke.pokemon.name}
+              style={{
                 width: '48px',
                 height: '48px',
                 imageRendering: 'pixelated',
-                msInterpolationMode: 'nearest-neighbor',
-                WebkitFontSmoothing: 'none',
                 pointerEvents: 'none',
-                willChange: 'transform',
                 backfaceVisibility: 'hidden',
                 transform: 'translateZ(0)',
-                zIndex: 5, // Above tiles but below character
-              } as React.CSSProperties
-            }
-            title={visiblePoke.pokemon.name}
-          />
+              }}
+            />
+          </div>
         ))}
       </div>
 

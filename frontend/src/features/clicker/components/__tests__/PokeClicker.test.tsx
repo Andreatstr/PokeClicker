@@ -1,4 +1,5 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
+import '@testing-library/jest-dom';
 import {render, screen} from '../../../../test/utils';
 import {PokeClicker} from '../PokeClicker';
 import {createMockUser} from '../../../../test/factories';
@@ -33,10 +34,10 @@ vi.mock('../hooks/useGameMutations', () => ({
   }),
 }));
 
-// Mock candy sync hook
-vi.mock('../hooks/useCandySync', () => ({
-  useCandySync: () => ({
-    localRareCandy: 1000,
+// Mock global candy context (replaces useCandySync and useAutoclicker)
+vi.mock('@/contexts/useCandyContext', () => ({
+  useCandyContext: () => ({
+    localRareCandy: '1000',
     displayError: null,
     setDisplayError: vi.fn(),
     addCandy: vi.fn(),
@@ -55,16 +56,11 @@ vi.mock('../hooks/useClickerActions', () => ({
   }),
 }));
 
-// Mock autoclicker hook
-vi.mock('../hooks/useAutoclicker', () => ({
-  useAutoclicker: () => {},
-}));
-
 // Mock game assets cache
 vi.mock('@/lib/gameAssetsCache', () => ({
   gameAssetsCache: {
     preloadClickerAssets: vi.fn().mockResolvedValue(undefined),
-    getCharizardSprite: vi.fn().mockResolvedValue(''),
+    getWishiWashiSprite: vi.fn().mockResolvedValue(''),
     getCandyImage: vi.fn().mockResolvedValue(''),
     getRareCandyIcon: vi.fn().mockResolvedValue(''),
     getPokemonBackground: vi.fn().mockResolvedValue(''),
@@ -87,7 +83,7 @@ describe('PokeClicker component', () => {
 
     render(<PokeClicker />);
 
-    expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
+    expect(screen.getByText('CLICKER UPGRADES')).toBeInTheDocument();
   });
 
   it('should show unauthenticated message when not logged in', () => {
@@ -108,6 +104,6 @@ describe('PokeClicker component', () => {
 
     // Just verify it renders without errors in dark mode
     expect(container).toBeTruthy();
-    expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
+    expect(screen.getByText('CLICKER UPGRADES')).toBeInTheDocument();
   });
 });
