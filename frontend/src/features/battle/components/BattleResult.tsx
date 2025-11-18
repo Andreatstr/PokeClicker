@@ -26,6 +26,7 @@ import {formatNumber} from '@/lib/formatNumber';
 import {useState, useEffect} from 'react';
 import {useSetFavoritePokemon} from '@features/profile/hooks/useProfileMutations';
 import {useAuth} from '@features/auth';
+import {useCandyContext} from '@/contexts/useCandyContext';
 
 interface BattleResultProps {
   result: 'victory' | 'defeat';
@@ -49,7 +50,8 @@ export function BattleResult({
   const [countdown, setCountdown] = useState(3);
   const [isSettingPokemon, setIsSettingPokemon] = useState(false);
 
-  const {user, updateUser} = useAuth();
+  const {updateUser} = useAuth();
+  const {flushPendingCandy} = useCandyContext();
   const [setFavoritePokemon] = useSetFavoritePokemon();
 
   const isNewCatch = isVictory && !opponentPokemon.isOwned;
@@ -71,15 +73,22 @@ export function BattleResult({
 
   const handlePlayWithPokemon = async () => {
     setIsSettingPokemon(true);
+
+    // Flush pending candy before mutation to sync battle rewards to backend
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setFavoritePokemon({
         variables: {pokemonId: opponentPokemon.id},
       });
-      if (result.data?.setFavoritePokemon && user) {
-        updateUser({
-          ...user,
-          favorite_pokemon_id: opponentPokemon.id,
-        });
+      if (result.data?.setFavoritePokemon) {
+        // Use the complete user object from mutation response
+        // This includes the updated rare_candy after flush
+        updateUser(result.data.setFavoritePokemon);
       }
       onContinue();
     } catch (error) {

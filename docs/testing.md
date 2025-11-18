@@ -14,6 +14,7 @@ The project includes a comprehensive test suite with **417 passing unit tests + 
   - Utility functions and type utilities (calculateCandyPerClick, type colors, platform mapping)
   - Custom hooks (useAuth, useGameMutations, usePokedexQuery, useCandySync, etc.)
   - Component tests (LoginScreen, PokeClicker, Navbar)
+
   - Integration tests with Apollo Client mocking
 - **Backend tests**: 52 tests
   - GraphQL resolvers (Pokemon queries, mutations, user operations)

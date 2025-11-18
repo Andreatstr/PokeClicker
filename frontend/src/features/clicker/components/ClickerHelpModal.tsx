@@ -59,7 +59,7 @@ export function ClickerHelpModal({
       icon: '💪',
       effect: 'Multiplies ALL your income (clicks + autoclicker)',
       formula: 'Linear (15% per level)',
-      color: isDarkMode ? '#79cdcaff' : '#007672ff',
+      color: isDarkMode ? '#79cdcaff' : '#006f6bff',
     },
     {
       name: 'Pokedex Bonus',
