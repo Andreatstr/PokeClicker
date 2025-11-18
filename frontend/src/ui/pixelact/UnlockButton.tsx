@@ -60,7 +60,7 @@ export function UnlockButton({
           onClick(e as unknown as React.MouseEvent);
         }
       }}
-      className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:outline-none transition-all duration-150 relative overflow-hidden ${
+      className={`group w-full cursor-pointer min-h-[44px] ${sizeClasses} font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-3px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus-visible:outline-none transition-all duration-150 relative overflow-hidden flex items-center justify-center ${
         error
           ? 'bg-red-500 text-white animate-shake'
           : 'bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 text-black'
@@ -86,9 +86,9 @@ export function UnlockButton({
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
       )}
       {error ? (
-        <span className="relative z-10">{error}</span>
+        <span className="relative z-10 text-xs inline-block">{error}</span>
       ) : (
-        <span className="relative z-10 flex items-center justify-center gap-2">
+        <span className="relative z-10 inline-flex items-center justify-center gap-2">
           <span className="text-xs uppercase tracking-wider drop-shadow-[1px_1px_0px_rgba(51,51,51,0.5)]">
             Unlock
           </span>
