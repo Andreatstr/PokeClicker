@@ -39,7 +39,7 @@ Comprehensive end-to-end testing suite for the Pokémon Clicker application.
 
 ## Running Tests
 
-### Smoke Tests (Fast - runs on every PR)
+### Smoke Tests (Fast)
 ```bash
 npx playwright test smoke.spec.ts --project=chromium
 ```
@@ -61,6 +61,8 @@ pnpm test:e2e:debug
 # View test report
 pnpm test:e2e:report
 ```
+
+> **Note:** Both `pnpm` and `npm run` commands work in this project, but `pnpm` is preferred.
 
 ## Test Structure
 
@@ -95,24 +97,20 @@ Tests run against:
 
 ## CI/CD Integration
 
-### Smoke Tests (Fast - ~10s)
-Run automatically on every push and PR to catch critical issues quickly.
+**Workflow:** `.github/workflows/smoke-tests.yml` (CI Pipeline)
 
-**Workflow:** `.github/workflows/smoke-tests.yml`
-- Only runs on Chromium
-- Tests basic functionality (login, navigation)
-- Fails fast if core features are broken
+The CI pipeline runs on every push and PR to `main`, `develop`, and feature branches:
+- Prettier formatting checks
+- ESLint linting
+- Project build verification
+- Frontend and backend unit tests
+- Smoke tests (currently disabled - see note below)
 
-### Full E2E Suite (Comprehensive - ~5min)
-Run manually or weekly to catch regression issues.
+### Smoke Tests Status
+> **Note:** E2E smoke tests are currently disabled in CI due to onboarding modal blocking issues in the CI environment. They can still be run locally for manual testing.
 
-**Workflow:** `.github/workflows/playwright.yml`
-- Trigger manually via GitHub Actions UI
-- Runs automatically every Monday at 2 AM
-- Tests all browsers and features
-- Comprehensive coverage of all user flows
-
-Results and artifacts are uploaded to GitHub Actions for review.
+### Running Tests Locally
+For comprehensive E2E testing, run the full suite locally using the commands above. Test results and artifacts are uploaded to GitHub Actions on failure for debugging.
 
 ## Writing New Tests
 
