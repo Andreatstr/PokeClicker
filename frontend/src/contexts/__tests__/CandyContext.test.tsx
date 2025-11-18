@@ -1,6 +1,7 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {renderHook, act} from '@testing-library/react';
-import {CandyProvider, useCandyContext} from '../CandyContext';
+import {CandyProvider} from '../CandyContext';
+import {useCandyContext} from '../useCandyContext';
 import type {User} from '@features/auth';
 import type React from 'react';
 

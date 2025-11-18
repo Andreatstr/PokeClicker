@@ -4,7 +4,7 @@ import {usePurchasePokemon} from './usePurchasePokemon';
 import {useAuth} from '@features/auth';
 import {toDecimal} from '@/lib/decimal';
 import {useError} from '@/hooks/useError';
-import {useCandyContext} from '@/contexts/CandyContext';
+import {useCandyContext} from '@/contexts/useCandyContext';
 
 /**
  * Custom hook to handle Pokemon purchase logic with error handling and animations

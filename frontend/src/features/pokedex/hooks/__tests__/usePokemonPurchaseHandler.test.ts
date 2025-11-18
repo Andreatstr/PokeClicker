@@ -38,7 +38,7 @@ vi.mock('@features/auth', () => ({
 }));
 
 // Mock global candy context
-vi.mock('@/contexts/CandyContext', () => ({
+vi.mock('@/contexts/useCandyContext', () => ({
   useCandyContext: () => ({
     localRareCandy: mockLocalRareCandy,
     flushPendingCandy: mockFlushPendingCandy,

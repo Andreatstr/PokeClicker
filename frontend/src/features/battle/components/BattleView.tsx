@@ -19,7 +19,7 @@
  * State management:
  * - useBattle hook manages HP, attacks, and win/loss detection
  * - Candy calculations use player stats and click count
- * - Awards synced to backend via updateRareCandy mutation
+ * - Awards added to global candy context (auto-syncs to backend)
  *
  * Integration:
  * - Accepts attack function callback for external controls (map keyboard)
@@ -29,7 +29,7 @@
 import {useState, useEffect, useRef, useMemo} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
-import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
+import {useCandyContext} from '@/contexts/useCandyContext';
 import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
@@ -57,8 +57,8 @@ export function BattleView({
   onAttackFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
-  const {user, updateUser} = useAuth();
-  const {updateRareCandy} = useGameMutations();
+  const {user} = useAuth();
+  const {addCandy} = useCandyContext();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
 
@@ -236,21 +236,30 @@ export function BattleView({
     }
   }, [onAttackFunctionReady]);
 
-  // Calculate rare candy reward
-  const candyPerClick = user?.stats
-    ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
-    : '1';
+  // Calculate rare candy reward - memoized to prevent recalculation when user state updates
+  const rareCandyReward = useMemo(() => {
+    const candyPerClick = user?.stats
+      ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
+      : '1';
 
-  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 4)
-  const clickReward = toDecimal(finalClickCount).times(candyPerClick).times(2);
+    // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 4)
+    const clickReward = toDecimal(finalClickCount)
+      .times(candyPerClick)
+      .times(2);
 
-  const opponentPrice = opponentPokemon.price
-    ? toDecimal(opponentPokemon.price)
-    : toDecimal(0);
-  const priceBonus = opponentPrice.dividedBy(4);
+    const opponentPrice = opponentPokemon.price
+      ? toDecimal(opponentPokemon.price)
+      : toDecimal(0);
+    const priceBonus = opponentPrice.dividedBy(4);
 
-  const battleReward = clickReward.plus(priceBonus);
-  const rareCandyReward = battleReward.floor().toString();
+    const battleReward = clickReward.plus(priceBonus);
+    return battleReward.floor().toString();
+  }, [
+    finalClickCount,
+    opponentPokemon.price,
+    user?.stats,
+    user?.owned_pokemon_ids?.length,
+  ]);
 
   // Ready countdown state
   const [readyCount, setReadyCount] = useState(3);
@@ -281,21 +290,14 @@ export function BattleView({
       toDecimal(rareCandyReward).gt(0) &&
       !candyAwarded
     ) {
-      // Award candy immediately
-      updateRareCandy(rareCandyReward, updateUser);
+      // Award candy immediately to global context (will auto-sync to backend)
+      addCandy(rareCandyReward);
       setCandyAwarded(true);
 
       // Trigger immediate battle end callback (removes Pokemon from map)
       onBattleEnd?.(battleResult);
     }
-  }, [
-    battleResult,
-    rareCandyReward,
-    candyAwarded,
-    updateRareCandy,
-    updateUser,
-    onBattleEnd,
-  ]);
+  }, [battleResult, rareCandyReward, candyAwarded, addCandy, onBattleEnd]);
 
   type LayoutPosition = {
     width: string;

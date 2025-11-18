@@ -35,7 +35,7 @@ vi.mock('../hooks/useGameMutations', () => ({
 }));
 
 // Mock global candy context (replaces useCandySync and useAutoclicker)
-vi.mock('@/contexts/CandyContext', () => ({
+vi.mock('@/contexts/useCandyContext', () => ({
   useCandyContext: () => ({
     localRareCandy: '1000',
     displayError: null,

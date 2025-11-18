@@ -17,27 +17,11 @@
  * - Syncs to backend every 30 seconds or on unmount
  * - Before purchases/upgrades, flushes pending candy to ensure backend has accurate amount
  */
-import {createContext, useContext, type ReactNode} from 'react';
+import {type ReactNode} from 'react';
 import {useAuth} from '@features/auth';
 import {useCandySync} from '@features/clicker/hooks/useCandySync';
 import {useAutoclicker} from '@features/clicker/hooks/useAutoclicker';
-
-interface CandyContextType {
-  /** Current candy amount (includes unsynced candy) - what user sees */
-  localRareCandy: string;
-  /** Add candy to local state and unsynced buffer (optimistic) */
-  addCandy: (amount: string) => void;
-  /** Deduct candy from local state (for purchases/upgrades) */
-  deductCandy: (amount: string) => void;
-  /** Flush pending candy to backend - call before purchases/upgrades */
-  flushPendingCandy: () => Promise<void>;
-  /** Display error message (from sync failures) */
-  displayError: string | null;
-  /** Clear display error */
-  setDisplayError: (error: string | null) => void;
-}
-
-const CandyContext = createContext<CandyContextType | null>(null);
+import {CandyContext} from './CandyContextBase';
 
 interface CandyProviderProps {
   children: ReactNode;
@@ -101,17 +85,4 @@ export function CandyProvider({
       {children}
     </CandyContext.Provider>
   );
-}
-
-/**
- * Hook to access global candy state and actions
- * @throws Error if used outside CandyProvider
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export function useCandyContext() {
-  const context = useContext(CandyContext);
-  if (!context) {
-    throw new Error('useCandyContext must be used within CandyProvider');
-  }
-  return context;
 }

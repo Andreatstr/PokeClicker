@@ -30,7 +30,7 @@ import {useState, useEffect, useRef} from 'react';
 import {logger} from '@/lib/logger';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useGameMutations} from '../hooks/useGameMutations';
-import {useCandyContext} from '@/contexts/CandyContext';
+import {useCandyContext} from '@/contexts/useCandyContext';
 import {useClickerActions} from '../hooks/useClickerActions';
 import {gameAssetsCache} from '@/lib/gameAssetsCache';
 import {GameBoyConsole} from './GameBoyConsole';
