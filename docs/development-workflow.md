@@ -8,283 +8,106 @@ This document describes the development workflow, tools, and practices used in t
 
 ## Pre-commit Hooks
 
-The project uses automated code quality checks on every commit to maintain consistent code standards.
+The project uses automated code quality checks on every commit.
 
 ### Configuration
 
 - **Husky**: Git hooks management
-- **lint-staged**: Run linters on staged files only
-- **ESLint**: JavaScript/TypeScript linting with auto-fix
+- **ESLint**: Code quality checks with auto-fix
 - **Prettier**: Code formatting enforcement
+- **Tests**: Full test suite runs on commit
 
 ### What Runs on Commit
 
 When you run `git commit`, the following happens automatically:
 
-1. **ESLint** runs on all staged `.ts` and `.tsx` files
-   - Checks for code quality issues
-   - Fixes auto-fixable issues
-   - Fails commit if unfixable errors exist
+1. **Format check** - Prettier validates formatting
+2. **Lint** - ESLint checks code quality
+3. **Tests** - Full test suite (417 tests)
 
-2. **Prettier** formats all staged files
-   - Ensures consistent code formatting
-   - Automatically formats before commit
-   - No manual formatting needed
-
-### Setup
-
-Pre-commit hooks are installed automatically when you run:
-
-```bash
-pnpm install
-```
-
-Husky creates the `.husky/` directory with the necessary git hooks.
-
-### Configuration Files
+Pre-commit hooks are installed automatically with `npm install`.
 
 **`.husky/pre-commit`**:
 ```bash
-echo "Running pre-commit checks..."
-
 # Run frontend checks
-cd frontend || exit 1
-pnpm run format:check || exit 1
-pnpm run lint || exit 1
-pnpm run test:run || exit 1
-cd ..
+cd frontend
+npm run format:check || exit 1
+npm run lint || exit 1
+npm run test:run || exit 1
 
 # Run backend checks
-cd backend || exit 1
-pnpm run format:check || exit 1
-pnpm run lint || exit 1
-pnpm run test:run || exit 1
-cd ..
+cd backend
+npm run format:check || exit 1
+npm run lint || exit 1
+npm run test:run || exit 1
 ```
-
-**`frontend/package.json` - lint-staged configuration**:
-```json
-{
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css}": [
-      "prettier --write"
-    ]
-  }
-}
-```
-
-### Benefits
-
-- **Consistent code quality**: All commits meet minimum quality standards
-- **Automatic formatting**: No manual formatting needed
-- **Catch errors early**: Issues found before code review
-- **Prevent broken code**: Tests can run in pre-commit
-- **Team consistency**: Same standards for all developers
 
 ### Bypassing Hooks (Not Recommended)
-
-In rare cases where you need to bypass hooks:
 
 ```bash
 git commit --no-verify -m "Emergency fix"
 ```
 
-**Warning**: Only use this for emergency situations. Bypassing hooks can introduce code quality issues.
-
-## ESLint Configuration
-
-### Rules
-
-The project uses ESLint with TypeScript support:
-
-```json
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended"
-  ]
-}
-```
-
-### Key Rules Enforced
-
-- No unused variables
-- No console.log in production code
-- React hooks dependencies
-- TypeScript type safety
-- Consistent naming conventions
-
-### Running Manually
-
-```bash
-# Lint all files
-pnpm run lint
-
-# Fix auto-fixable issues
-pnpm run lint --fix
-
-# Lint specific file
-pnpm exec eslint src/path/to/file.ts
-```
-
-## Prettier Configuration
-
-### Code Style
-
-Prettier enforces consistent formatting:
-
-```json
-{
-  "trailingComma": "es5",
-  "tabWidth": 2,
-  "singleQuote": true,
-  "bracketSpacing": false,
-  "arrowParens": "always"
-}
-```
-
-### Running Manually
-
-```bash
-# Format all files
-pnpm run format
-
-# Check formatting without changing files
-pnpm run format:check
-```
+**Warning**: Only use for emergency situations.
 
 ## Git Workflow
 
-### Branch Strategy
+### Branch Naming
 
-**Main Branch**:
-- `main` - Production-ready code
-
-**Feature Branches**:
 - `feat/feature-name` - New features
 - `fix/bug-description` - Bug fixes
 - `refactor/description` - Code refactoring
 - `docs/description` - Documentation updates
-- `{issue-number}-description` - Issue-based branches
+- `chore/description` - Maintenance tasks
 
-### Commit Message Convention
+### Commit Convention
 
 Follow conventional commits format:
 
 ```
-<type>(<scope>): <subject>
+<type>: <subject>
 
-<body>
-
-<footer>
+<body (optional)>
 ```
 
-**Types**:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
+**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-**Examples**: (parentheses for domain optional)
+**Examples**:
 ```bash
-git commit -m "feat(auth): add JWT token refresh"
-git commit -m "fix(pokedex): resolve search debounce issue"
-git commit -m "docs(readme): update setup instructions"
+git commit -m "feat: add JWT token refresh"
+git commit -m "fix: resolve search debounce issue"
+git commit -m "docs: update setup instructions"
 ```
 
 ### Pull Request Process
 
-1. **Create feature branch** from `main`
-   ```bash
-   git checkout -b feat/my-feature
-   ```
-
-2. **Make changes** and commit regularly
-   ```bash
-   git add .
-   git commit -m "feat: implement feature"
-   ```
-
-3. **Push to remote**
-   ```bash
-   git push -u origin feat/my-feature
-   ```
-
-4. **Create Pull Request** on GitHub/GitLab
-   - Add descriptive title
-   - Fill out PR template
-   - Request reviews from team
-
-5. **Address feedback** from code review
-   ```bash
-   git add .
-   git commit -m "refactor: address PR feedback"
-   git push
-   ```
-
-6. **Merge** after approval
-   - Squash commits if needed
-   - Delete feature branch after merge
-
-## Code Review Guidelines
-
-### What to Look For
-
-**Code Quality**:
-- Follows project patterns
-- No code duplication
-- Proper error handling
-- Clear variable names
-
-**Security**:
-- No hardcoded secrets
-- Input validation
-- Proper authentication checks
-
-**Performance**:
-- Efficient algorithms
-- No unnecessary re-renders
-- Proper caching
-
-**Testing**:
-- Tests included for new features
-- Existing tests still pass
-- Good test coverage
-
-**Documentation**:
-- Complex logic commented
-- README updated if needed
-- API documentation current
-
-### Providing Feedback
-
-- Be constructive and respectful
-- Explain the "why" behind suggestions
-- Distinguish between "must fix" and "nice to have"
-- Approve when ready, request changes if needed
+1. Create feature branch from `main`
+2. Make changes and commit
+3. Push to remote
+4. Create Pull Request
+5. Address code review feedback
+6. Merge after approval
 
 ## Development Commands
+
+### Root Commands
+
+```bash
+npm run dev          # Start both frontend and backend
+npm install          # Install all dependencies
+```
 
 ### Frontend
 
 ```bash
 cd frontend
 
-pnpm run dev          # Start dev server
-pnpm run build        # Build for production
-pnpm run preview      # Preview production build
-pnpm run lint         # Run ESLint
-pnpm run format       # Format code with Prettier
-pnpm test             # Run tests
-pnpm test:coverage    # Run tests with coverage
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run format       # Format with Prettier
+npm test             # Run tests
 ```
 
 ### Backend
@@ -292,131 +115,69 @@ pnpm test:coverage    # Run tests with coverage
 ```bash
 cd backend
 
-pnpm run dev          # Start dev server with tsx watch
-pnpm run build        # Compile TypeScript
-pnpm start            # Start production server
-pnpm run lint         # Run ESLint
-pnpm test             # Run tests
-pnpm run seed         # Seed database with Pokemon
+npm run dev          # Start dev server
+npm run build        # Compile TypeScript
+npm start            # Start production server
+npm run lint         # Run ESLint
+npm test             # Run tests
+npm run seed         # Seed database
 ```
 
-### Root
+## Code Quality Tools
+
+### ESLint
 
 ```bash
-pnpm run dev          # Start both frontend and backend
-pnpm install          # Install all dependencies (root + workspaces)
+npm run lint         # Check all files
+npm run lint --fix   # Auto-fix issues
 ```
 
-## Continuous Integration
+**Key Rules**:
+- No unused variables
+- React hooks dependencies
+- TypeScript type safety
 
-### CI Pipeline
-
-Automated checks run on every push:
-
-1. **Linting** - ESLint checks
-2. **Type checking** - TypeScript compilation
-3. **Tests** - Full test suite
-4. **Build** - Production build verification
-
-### Local CI Simulation
-
-Run the same checks locally before pushing:
+### Prettier
 
 ```bash
-# Run all checks
-pnpm run lint && pnpm test && pnpm run build
+npm run format       # Format all files
+npm run format:check # Check without modifying
 ```
 
-## Debugging
-
-### Frontend Debugging
-
-**React DevTools**:
-- Install browser extension
-- Inspect component tree
-- View props and state
-- Profile performance
-
-**Console Logging**:
-```typescript
-console.log('Debug:', { variable, state });
-```
-
-**VS Code Debugger**:
-- Set breakpoints in VS Code
-- Use Chrome debugger integration
-- Step through code execution
-
-### Backend Debugging
-
-**VS Code Debugger**:
-
-`.vscode/launch.json`:
-```json
-{
-  "type": "node",
-  "request": "launch",
-  "name": "Debug Backend",
-  "program": "${workspaceFolder}/backend/src/index.ts",
-  "runtimeArgs": ["-r", "ts-node/register"]
-}
-```
-
-**Console Logging**:
-```typescript
-console.log('Request:', req.body);
-```
+**Configuration**: `singleQuote: true`, `tabWidth: 2`, `trailingComma: es5`
 
 ## Deployment
 
-See [deployment.md](./deployment.md) and [vm-deployment.md](./vm-deployment.md) for deployment instructions.
+See [deployment.md](./deployment.md) for production deployment instructions.
 
 ## Best Practices
 
 1. **Commit often** - Small, focused commits
 2. **Write tests** - For new features and bug fixes
 3. **Review your own code** - Before requesting review
-4. **Keep branches up to date** - Rebase or merge from main regularly
+4. **Keep branches updated** - Merge from main regularly
 5. **Clean up** - Delete merged branches
 6. **Document** - Update docs with significant changes
-7. **Communicate** - Discuss major changes with team first
 
 ## Troubleshooting
 
 ### Pre-commit hooks not running
 
 ```bash
-# Reinstall hooks
-pnpm install
-pnpm exec husky install
+npm install
+npx husky install
 ```
 
 ### ESLint errors blocking commit
 
 ```bash
-# See what's wrong
-pnpm run lint
-
-# Auto-fix issues
-pnpm run lint --fix
-
-# If unfixable, address manually
-```
-
-### Prettier conflicts with ESLint
-
-The project is configured so Prettier and ESLint work together. If conflicts occur:
-
-```bash
-# Format first, then lint
-pnpm run format
-pnpm run lint --fix
+npm run lint        # See errors
+npm run lint --fix  # Auto-fix
 ```
 
 ## Resources
 
 - [Husky Documentation](https://typicode.github.io/husky/)
-- [lint-staged Documentation](https://github.com/okonet/lint-staged)
 - [ESLint Rules](https://eslint.org/docs/rules/)
 - [Prettier Options](https://prettier.io/docs/en/options.html)
 - [Conventional Commits](https://www.conventionalcommits.org/)

@@ -114,24 +114,41 @@ See [Setup Guide](./docs/setup.md) for MongoDB installation and environment conf
 - **Styling**: Tailwind CSS + Radix UI components
 - **Backend**: GraphQL API (Node.js + TypeScript)
 - **Database**: MongoDB on VM
-- **Testing**: Vitest + React Testing Library + Playwright (403 unit tests + E2E)
+- **Testing**: Vitest + React Testing Library + Playwright (417 unit tests + E2E)
 
-## Key Features
+## Technical Highlights
 
-### Virtual Rendering (90% API Call Reduction)
-- Reduced API calls from ~500 to ~30 (90% reduction)
-- Only renders visible Pokemon in carousel
-- On-demand data loading
+### Virtual Rendering
+- Only renders 3 Pokemon at a time in carousel (current ± 1)
+- Evolution chains loaded on-demand when Pokemon becomes visible
+- Eliminates unnecessary API calls for off-screen content
+- Prevents rate limiting and reduces server load
 
-### Smart Caching
-- API-cache: 24 hour TTL (60x faster)
-- User-cache: 5 minute TTL
-- IndexedDB for persistent image caching
+### Smart Caching Strategy
+- **API-cache (24h TTL)**: Pokémon data from PokéAPI - long TTL because data is static
+- **User-cache (5min TTL)**: User data and owned Pokémon - short TTL because data changes frequently
+- **IndexedDB**: Persistent image caching across sessions for sprites and backgrounds
+- Appropriate TTLs balance freshness with performance
 
 ### Code Splitting and Lazy Loading
-- Route-based code splitting with React.lazy()
-- Components loaded on-demand
-- Improved initial load time
+- **Route-based splitting**: Each page (Pokédex, Clicker, Map, Profile) loaded only when accessed
+- **Component-level splitting**: Heavy components (SearchBar, Filters, PokemonCard) lazy-loaded with Suspense
+- Reduces initial bundle size and improves time-to-interactive
+
+### Handling Extremely Large Numbers
+**The Problem**: In idle clicker games, numbers grow exponentially. JavaScript's native numbers only go up to about 9 quadrillion (9,007,199,254,740,991) before losing precision. Legendary Pokémon in our game cost 49 decillion rare candy - a number so large it would break the game.
+
+**Our Solution**: We use a special number library (`break_infinity.js`) that handles numbers up to 10^100 (a googol). Every rare candy amount in the database is stored as text, processed with custom decimal arithmetic, and displayed with friendly suffixes like "4.9E34" or "49 Decillion". This allows unlimited exponential progression without mathematical errors.
+
+### Instant UI Feedback
+**The Problem**: When you buy a Pokémon, normally the app would show a loading spinner while waiting for the server to confirm. This feels slow and unresponsive.
+
+**Our Solution**: The UI updates instantly when you click "Purchase" - your rare candy decreases and the Pokémon is marked as owned immediately. Behind the scenes, we send the request to the server. If it fails, we automatically undo the change. This makes the app feel instant even on slow connections.
+
+### Efficient Map Collision Detection
+**The Problem**: Our game map is 10,560 × 6,080 pixels. To determine where the player can walk, we need to check each pixel - that's 64 million pixels to analyze, requiring 168MB of memory on mobile devices.
+
+**Our Solution**: We shrink the collision map to 1/4 size (2,640 × 1,520) and color-code it: magenta = walkable, cyan = partially walkable (see [walkable areas visualization](#before-and-after-photos-of-the-map)). This reduces memory usage to just 16MB. When checking if a position is walkable, we sample the color of nearby pixels and use fuzzy matching to handle image compression artifacts. The processing happens in the background so it doesn't freeze the UI.
 
 ### Security Hardening
 - No hardcoded secrets
@@ -159,8 +176,8 @@ Read more: [Architecture](./docs/architecture.md) | [Security](./docs/security.m
 
 ## Testing
 
-**403 unit tests** + E2E tests with Playwright:
-- 351 frontend tests (hooks, components, integration)
+**417 unit tests** + E2E tests with Playwright:
+- 365 frontend tests (hooks, components, integration)
 - 52 backend tests (resolvers, auth, database)
 
 ```bash

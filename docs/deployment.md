@@ -80,33 +80,23 @@ sudo systemctl reload apache2
 
 ### 5. Deploy Backend
 
-Copy backend files:
+Copy backend files (including `.env` which is already configured in the repo):
 
 ```bash
 mkdir -p ~/project2-backend
 cp -r backend/dist ~/project2-backend/
 cp -r backend/node_modules ~/project2-backend/
 cp backend/package.json ~/project2-backend/
-cp backend/.env.example ~/project2-backend/.env
+cp backend/.env ~/project2-backend/
 ```
 
-Configure environment variables:
+The backend `.env` file is already committed to the repository with production-ready values:
+- `PORT=3001`
+- `MONGODB_URI=mongodb://localhost:27017`
+- `MONGODB_DB_NAME=pokeclicker_db`
+- `JWT_SECRET=secure_jtw_secret_for_development_1761145880`
 
-```bash
-cd ~/project2-backend
-nano .env
-```
-
-Set the following variables in `.env`:
-
-```env
-PORT=3001
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DB_NAME=pokeclicker_db
-JWT_SECRET=your_secure_secret_here
-```
-
-See [Setup Guide](./setup.md#environment-variables) for details.
+No additional configuration is needed.
 
 ### 6. Start Backend Service
 
@@ -135,9 +125,11 @@ export default defineConfig({
 
 ### Apollo Client Configuration
 
-Apollo Client in `src/lib/apolloClient.ts` automatically uses:
-- Production: `/project2/graphql` (proxied by Apache)
-- Development: `http://localhost:3001/` (direct connection)
+Apollo Client in `src/lib/apolloClient.ts` reads the GraphQL URL from `VITE_GRAPHQL_URL`:
+- Production (`.env.production`): `/project2/graphql` (proxied by Apache)
+- Development (`.env`): `http://localhost:3001/` (direct connection)
+
+All `.env` files are committed to the repository - no configuration needed.
 
 ### Apache Configuration
 

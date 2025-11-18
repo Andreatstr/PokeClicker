@@ -8,17 +8,23 @@ This document describes the testing strategy, test suite, and how to run tests f
 
 ## Test Suite Overview
 
-The project includes a comprehensive test suite with **403 passing tests** covering:
+The project includes a comprehensive test suite with **417 passing unit tests + E2E tests** covering:
 
-- **Frontend tests**: 351 tests
-  - Utility functions and type utilities
-  - Custom hooks (useAuth, useGameMutations, usePokedexQuery, etc.)
-  - Component tests (LoginScreen, PokeClicker)
+- **Frontend tests**: 365 tests
+  - Utility functions and type utilities (calculateCandyPerClick, type colors, platform mapping)
+  - Custom hooks (useAuth, useGameMutations, usePokedexQuery, useCandySync, etc.)
+  - Component tests (LoginScreen, PokeClicker, Navbar)
   - Integration tests with Apollo Client mocking
 - **Backend tests**: 52 tests
-  - GraphQL resolvers
+  - GraphQL resolvers (Pokemon queries, mutations, user operations)
   - Authentication module (JWT and bcrypt)
   - Database operations
+- **E2E tests**: Playwright-based end-to-end tests
+  - Authentication flows (login, signup, guest)
+  - Pokédex interactions (search, filter, purchase)
+  - Clicker game mechanics
+  - Map navigation and battles
+  - See [E2E README](../e2e/README.md) for details
 
 ## Running Tests
 
@@ -55,6 +61,22 @@ pnpm test
 # Run tests in watch mode
 pnpm test:watch
 ```
+
+### E2E Tests
+
+```bash
+# From project root
+pnpm test:e2e          # Run all E2E tests
+pnpm test:e2e:ui       # Run with Playwright UI
+pnpm test:e2e:headed   # Run in headed mode (visible browser)
+pnpm test:e2e:debug    # Debug tests
+pnpm test:e2e:report   # View test report
+
+# Run smoke tests only (fast)
+npx playwright test smoke.spec.ts --project=chromium
+```
+
+See the [E2E README](../e2e/README.md) for detailed information about the E2E test suite.
 
 ## Test Configuration
 
