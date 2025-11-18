@@ -25,6 +25,7 @@ import type {
   SetSelectedPokemonData,
   PokemonIdVariables,
 } from '@/lib/graphql/types';
+import {useCandyContext} from '@/contexts/useCandyContext';
 
 interface PokemonDetailCardProps {
   pokemon: PokedexPokemon;
@@ -55,6 +56,7 @@ export function PokemonDetailCard({
   const [isAnimating, setIsAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
   const {addSuccess} = useError();
+  const {localRareCandy, flushPendingCandy} = useCandyContext();
 
   // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
   // This ensures the UI updates when the cache updates
@@ -155,13 +157,22 @@ export function PokemonDetailCard({
     setError(null);
 
     // Client-side validation: Check if user can afford the upgrade
-    // This prevents the optimistic response from causing UI inconsistencies
-    if (
-      user &&
-      upgrade &&
-      toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
-    ) {
+    // Use global candy context (includes unsynced passive income)
+    if (upgrade && toDecimal(localRareCandy).lt(toDecimal(upgrade.cost))) {
       setError('Not enough Rare Candy!');
+      errorTimeoutRef.current = setTimeout(() => {
+        setError(null);
+        errorTimeoutRef.current = null;
+      }, 1200);
+      return;
+    }
+
+    // CRITICAL: Flush pending candy to backend before upgrade
+    // This ensures backend has accurate candy count for validation
+    try {
+      await flushPendingCandy();
+    } catch {
+      setError('Failed to sync candy. Please try again.');
       errorTimeoutRef.current = setTimeout(() => {
         setError(null);
         errorTimeoutRef.current = null;
@@ -200,6 +211,13 @@ export function PokemonDetailCard({
 
   // Handler for using Pokemon in Map
   const handleUseInMap = async () => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setFavoritePokemon({
         variables: {pokemonId: pokemon.id},
@@ -220,6 +238,13 @@ export function PokemonDetailCard({
 
   // Handler for using Pokemon in Clicker
   const handleUseInClicker = async () => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setSelectedPokemon({
         variables: {pokemonId: pokemon.id},
@@ -367,10 +392,7 @@ export function PokemonDetailCard({
                   onClick={handleUpgrade}
                   disabled={
                     upgrading ||
-                    !!(
-                      user &&
-                      toDecimal(user.rare_candy).lt(toDecimal(upgrade.cost))
-                    )
+                    toDecimal(localRareCandy).lt(toDecimal(upgrade.cost))
                   }
                   className="pixel-font text-xs md:text-sm font-bold border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   bgColor={isDarkMode ? '#3472d7ff' : '#3c77b3ff'}

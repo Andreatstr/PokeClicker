@@ -8,9 +8,9 @@ This document describes the testing strategy, test suite, and how to run tests f
 
 ## Test Suite Overview
 
-The project includes a comprehensive test suite with **403 passing tests** covering:
+The project includes a comprehensive test suite with **417 passing tests** covering:
 
-- **Frontend tests**: 351 tests
+- **Frontend tests**: 365 tests
   - Utility functions and type utilities
   - Custom hooks (useAuth, useGameMutations, usePokedexQuery, etc.)
   - Component tests (LoginScreen, PokeClicker)
