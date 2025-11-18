@@ -83,7 +83,7 @@ describe('PokeClicker component', () => {
 
     render(<PokeClicker />);
 
-    expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
+    expect(screen.getByText('CLICKER UPGRADES')).toBeInTheDocument();
   });
 
   it('should show unauthenticated message when not logged in', () => {
@@ -104,6 +104,6 @@ describe('PokeClicker component', () => {
 
     // Just verify it renders without errors in dark mode
     expect(container).toBeTruthy();
-    expect(screen.getByText('POKEMON UPGRADES')).toBeInTheDocument();
+    expect(screen.getByText('CLICKER UPGRADES')).toBeInTheDocument();
   });
 });

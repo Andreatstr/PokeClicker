@@ -86,7 +86,7 @@ export function UpgradesPanel({
           className="pixel-font text-base font-bold text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] flex-1"
           style={{color: 'white'}}
         >
-          POKEMON UPGRADES
+          CLICKER UPGRADES
         </h2>
         {onShowHelp && (
           <button

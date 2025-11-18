@@ -97,8 +97,10 @@ export function PokemonCarousel({
 
       {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
       {/* These buttons come LAST in tab order, after all modal content */}
-      <CarouselPrevious className="cursor-pointer hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
-      <CarouselNext className="cursor-pointer hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      {/* 44x44px = w-11 h-11, but border-4 adds 8px to each dimension, so we need w-[52px]! h-[52px]! for true 44px clickable area */}
+      {/* Use ! important to override base carousel component's responsive classes */}
+      <CarouselPrevious className="cursor-pointer hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-60 w-[52px]! h-[52px]! border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      <CarouselNext className="cursor-pointer hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-60 w-[52px]! h-[52px]! border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
     </Carousel>
   );
 }
