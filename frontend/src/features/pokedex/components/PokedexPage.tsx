@@ -203,24 +203,18 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
 
   return (
     <PokedexFilterProvider value={filterState}>
-      {/* Search Bar */}
-      <Suspense
-        fallback={
-          <LoadingSpinner message="Loading search..." isDarkMode={isDarkMode} />
-        }
-      >
-        <SearchBar isDarkMode={isDarkMode} />
-      </Suspense>
-
-      {/* Filters and Count */}
       <Suspense
         fallback={
           <LoadingSpinner
-            message="Loading filters..."
+            message="Loading Pokédex..."
             isDarkMode={isDarkMode}
           />
         }
       >
+        {/* Search Bar */}
+        <SearchBar isDarkMode={isDarkMode} />
+
+        {/* Filters and Count */}
         <FiltersAndCount
           loading={loading}
           displayedPokemon={displayedPokemon}
@@ -230,18 +224,9 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
           facets={cachedFacets ?? null}
           isDarkMode={isDarkMode}
         />
-      </Suspense>
 
-      {/* Pokemon Grid */}
-      <section className="max-w-[2000px] mx-auto">
-        <Suspense
-          fallback={
-            <LoadingSpinner
-              message="Loading Pokemon..."
-              isDarkMode={isDarkMode}
-            />
-          }
-        >
+        {/* Pokemon Grid */}
+        <section className="max-w-[2000px] mx-auto">
           <PokemonGrid
             displayedPokemon={displayedPokemon}
             handlePokemonClick={onPokemonClick}
@@ -253,8 +238,8 @@ export function PokedexPage({isDarkMode, onPokemonClick}: PokedexPageProps) {
             loading={loading}
             ownedPokemonIds={meData?.me?.owned_pokemon_ids ?? []}
           />
-        </Suspense>
-      </section>
+        </section>
+      </Suspense>
     </PokedexFilterProvider>
   );
 }
