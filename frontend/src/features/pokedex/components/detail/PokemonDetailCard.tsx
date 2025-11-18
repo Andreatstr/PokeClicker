@@ -211,6 +211,13 @@ export function PokemonDetailCard({
 
   // Handler for using Pokemon in Map
   const handleUseInMap = async () => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setFavoritePokemon({
         variables: {pokemonId: pokemon.id},
@@ -231,6 +238,13 @@ export function PokemonDetailCard({
 
   // Handler for using Pokemon in Clicker
   const handleUseInClicker = async () => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setSelectedPokemon({
         variables: {pokemonId: pokemon.id},
