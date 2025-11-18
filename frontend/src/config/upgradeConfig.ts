@@ -88,7 +88,7 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
     costMultiplier: 1.7,
     unit: '% click power',
     color: {
-      dark: '#007672ff',
+      dark: '#006f6bff',
       light: '#79cdcaff',
     },
   },

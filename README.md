@@ -114,7 +114,7 @@ See [Setup Guide](./docs/setup.md) for MongoDB installation and environment conf
 - **Styling**: Tailwind CSS + Radix UI components
 - **Backend**: GraphQL API (Node.js + TypeScript)
 - **Database**: MongoDB on VM
-- **Testing**: Vitest + React Testing Library + Playwright (403 unit tests + E2E)
+- **Testing**: Vitest + React Testing Library + Playwright (417 unit tests + E2E)
 
 ## Key Features
 
@@ -159,8 +159,8 @@ Read more: [Architecture](./docs/architecture.md) | [Security](./docs/security.m
 
 ## Testing
 
-**403 unit tests** + E2E tests with Playwright:
-- 351 frontend tests (hooks, components, integration)
+**417 unit tests** + E2E tests with Playwright:
+- 365 frontend tests (hooks, components, integration)
 - 52 backend tests (resolvers, auth, database)
 
 ```bash
