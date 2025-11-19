@@ -28,14 +28,14 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
   clickPower: {
     key: 'clickPower',
     displayName: 'Click Power',
-    formula: (level) => Math.pow(1.0954, level),
+    formula: (level) => Math.pow(1.0954, level / (1 + 0.001 * level)),
     costMultiplier: 1.3416,
     unit: 'candy/click',
   },
   autoclicker: {
     key: 'autoclicker',
     displayName: 'Autoclicker',
-    formula: (level) => Math.pow(1.0954, level),
+    formula: (level) => Math.pow(1.0954, level / (1 + 0.01 * level)),
     costMultiplier: 1.3038,
     unit: 'clicks/sec',
   },
