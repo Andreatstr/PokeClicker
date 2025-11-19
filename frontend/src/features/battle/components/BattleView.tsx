@@ -26,7 +26,7 @@
  * - Fullscreen mode support for map integration
  * - Mobile-responsive layout
  */
-import {useState, useEffect, useRef, useMemo} from 'react';
+import {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
 import {useCandyContext} from '@/contexts/useCandyContext';
@@ -95,6 +95,8 @@ export function BattleView({
     chargeProgress,
     isCharged,
     triggerSpecialAttack,
+    shieldCharge,
+    isShieldCharged,
     triggerShield,
     isActive,
     startBattle,
@@ -166,18 +168,20 @@ export function BattleView({
   };
 
   // Wrap shield trigger with animation
-  const handleShieldWithAnimation = () => {
+  const handleShieldWithAnimation = useCallback(() => {
     // Don't trigger animations during countdown period
     if (!isActive) {
       triggerShield();
       return;
     }
 
+    if (!isShieldCharged) return;
+
     setShieldActive(true);
     triggerShield();
     // Shield animation lasts 2 seconds
     setTimeout(() => setShieldActive(false), 2000);
-  };
+  }, [isActive, isShieldCharged, triggerShield]);
 
   useEffect(() => {
     if (onShieldFunctionReady) {
@@ -186,12 +190,15 @@ export function BattleView({
   }, [onShieldFunctionReady, handleShieldWithAnimation]);
 
   // Wrap special attack trigger with animation
-  const handleSpecialAttackWithAnimation = () => {
+  const handleSpecialAttackWithAnimation = useCallback(() => {
     // Don't trigger animations during countdown period
     if (!isActive) {
       triggerSpecialAttack();
       return;
     }
+
+    // Don't trigger if not charged
+    if (!isCharged) return;
 
     setSpecialAttackActive(true);
     triggerSpecialAttack();
@@ -223,7 +230,7 @@ export function BattleView({
 
     // Special attack animation lasts 600ms
     setTimeout(() => setSpecialAttackActive(false), 600);
-  };
+  }, [isActive, isCharged, triggerSpecialAttack, playerPokemon, opponentMaxHP]);
 
   useEffect(() => {
     if (onSpecialAttackFunctionReady) {
@@ -888,16 +895,16 @@ export function BattleView({
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
-              } ${!isCharged ? 'cursor-not-allowed' : ''} ${
-                isCharged
+              } ${!isShieldCharged ? 'cursor-not-allowed' : ''} ${
+                isShieldCharged
                   ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50'
                   : ''
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCharged) handleShieldWithAnimation();
+                if (isShieldCharged) handleShieldWithAnimation();
               }}
-              disabled={!isCharged}
+              disabled={!isShieldCharged}
               tabIndex={0}
               aria-label="Shield ability to reduce incoming damage"
             >
@@ -907,10 +914,10 @@ export function BattleView({
                   isDarkMode
                     ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400'
                     : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
-                } ${isCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
-                style={{height: `${chargeProgress}%`}}
+                } ${isShieldCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
+                style={{height: `${shieldCharge}%`}}
                 role="progressbar"
-                aria-valuenow={chargeProgress}
+                aria-valuenow={shieldCharge}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-hidden="true"
@@ -918,10 +925,10 @@ export function BattleView({
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
                   isDarkMode
-                    ? !isCharged
+                    ? !isShieldCharged
                       ? 'text-gray-300'
                       : 'text-white drop-shadow-lg'
-                    : !isCharged
+                    : !isShieldCharged
                       ? 'text-gray-700'
                       : 'text-black drop-shadow-lg'
                 }`}

@@ -12,6 +12,7 @@ interface BattleState {
   totalDamageDealt: number;
   chargeProgress: number; // 0..100
   isCharged: boolean;
+  isShieldCharged: boolean;
   shieldActiveUntil: number; // epoch ms, 0 when inactive
 }
 
@@ -65,6 +66,7 @@ export function useBattle({
       totalDamageDealt: 0,
       chargeProgress: 0,
       isCharged: false,
+      isShieldCharged: false,
       shieldActiveUntil: 0,
     };
   });
@@ -140,6 +142,7 @@ export function useBattle({
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
       const newCharge = Math.min(100, prev.chargeProgress + 2);
+      const newShieldCharge = Math.min(100, prev.chargeProgress + 2);
 
       return {
         ...prev,
@@ -148,10 +151,16 @@ export function useBattle({
         totalDamageDealt: newTotalDamage,
         chargeProgress: newCharge,
         isCharged: prev.isCharged || newCharge >= 100,
+        isShieldCharged: prev.isShieldCharged || newShieldCharge >= 100,
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
   }, [calculateClickDamage]);
+
+  // Sp. Def charge
+  const [shieldCharge, setShieldCharge] = useState(0); // 0..100
+  const [lastPlayerHP, setLastPlayerHP] = useState(battleState.playerMaxHP);
+  const isShieldCharged = shieldCharge >= 100;
 
   // Passive charge meter buildup over time (2.5% per second + 2% per click)
   useEffect(() => {
@@ -215,6 +224,24 @@ export function useBattle({
     getAttackInterval,
   ]);
 
+  // Sp. Def meter
+  useEffect(() => {
+    // Gradually fill shield meter as HP is lost
+    if (battleState.playerHP < lastPlayerHP) {
+      const hpLost = lastPlayerHP - battleState.playerHP;
+      const percentLost = (hpLost / battleState.playerMaxHP) * 100;
+      setShieldCharge((prev) => {
+        // 15% HP lost fills shield to 100%
+        const newCharge = prev + percentLost * (100 / 15);
+        return Math.min(100, newCharge);
+      });
+      setLastPlayerHP(battleState.playerHP);
+    }
+    // Reset lastPlayerHP if healed
+    if (battleState.playerHP > lastPlayerHP)
+      setLastPlayerHP(battleState.playerHP);
+  }, [battleState.playerHP, battleState.playerMaxHP, lastPlayerHP]);
+
   useEffect(() => {
     if (battleState.result !== 'ongoing') {
       if (passiveDamageTimerRef.current) {
@@ -259,22 +286,36 @@ export function useBattle({
    * Blocks all incoming damage for duration based on player's spDefense (0.8-3.5s)
    * Consumes full charge meter
    */
+
+  // TODO: delete this if okay
+  // const triggerShield = useCallback(() => {
+  //   setBattleState((prev) => {
+  //     if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
+  //     const spD = playerPokemon.stats?.spDefense || 0;
+  //     // Toned down: shorter base and gentler scaling with a tighter cap
+  //     // Old: Math.min(6000, 1500 + spD * 20)
+  //     const duration = Math.min(3500, 800 + spD * 10); // cap 3.5s
+  //     const until = Date.now() + duration;
+  //     return {
+  //       ...prev,
+  //       shieldActiveUntil: until,
+  //       chargeProgress: 0,
+  //       isCharged: false,
+  //     };
+  //   });
+  // }, [playerPokemon]);
+
   const triggerShield = useCallback(() => {
-    setBattleState((prev) => {
-      if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
-      const spD = playerPokemon.stats?.spDefense || 0;
-      // Toned down: shorter base and gentler scaling with a tighter cap
-      // Old: Math.min(6000, 1500 + spD * 20)
-      const duration = Math.min(3500, 800 + spD * 10); // cap 3.5s
-      const until = Date.now() + duration;
-      return {
-        ...prev,
-        shieldActiveUntil: until,
-        chargeProgress: 0,
-        isCharged: false,
-      };
-    });
-  }, [playerPokemon]);
+    if (battleState.result !== 'ongoing' || !isShieldCharged) return;
+    const spD = playerPokemon.stats?.spDefense || 0;
+    const duration = Math.min(3500, 800 + spD * 10);
+    const until = Date.now() + duration;
+    setBattleState((prev) => ({
+      ...prev,
+      shieldActiveUntil: until,
+    }));
+    setShieldCharge(0); // Reset shield meter after use
+  }, [battleState.result, isShieldCharged, playerPokemon]);
 
   return {
     playerHP: battleState.playerHP,
@@ -288,6 +329,8 @@ export function useBattle({
     isCharged: battleState.isCharged,
     shieldActiveUntil: battleState.shieldActiveUntil,
     triggerSpecialAttack,
+    shieldCharge,
+    isShieldCharged,
     triggerShield,
     isActive: battleState.isActive,
     startBattle,
