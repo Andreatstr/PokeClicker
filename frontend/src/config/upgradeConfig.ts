@@ -73,7 +73,7 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
   luckyHitMultiplier: {
     key: 'luckyHitMultiplier',
     displayName: 'Lucky Power',
-    formula: (level) => Math.pow(1.2, level),
+    formula: (level) => Math.pow(1.2, level / (1 + 0.01 * level)),
     costMultiplier: 1.6,
     unit: 'x on lucky',
     color: {
