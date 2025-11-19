@@ -66,7 +66,7 @@ export function GameBoy({
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col lg:flex-row gap-6 items-start justify-center ${
+      className={`flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center ${
         isFullscreen
           ? 'fixed inset-0 w-full h-full items-center justify-center bg-[#9FA0A0] z-[9999] p-0 m-0'
           : ''

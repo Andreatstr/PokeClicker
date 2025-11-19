@@ -180,8 +180,12 @@ Read more: [Architecture](./docs/architecture.md) | [Security](./docs/security.m
 - 365 frontend tests (hooks, components, integration)
 - 52 backend tests (resolvers, auth, database)
 
+> [!IMPORTANT]
+> Make sure to complete the [Setup Guide](./docs/setup.md) before running tests to ensure the environment is correctly configured.
+
 ```bash
 # Run all tests
+npx playwright install  # Install browsers (required first time)
 npm run test:e2e        # E2E tests
 cd frontend && npm test # Frontend unit tests
 cd backend && npm test  # Backend unit tests
