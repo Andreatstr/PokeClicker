@@ -10,7 +10,6 @@ import {useCollisionMap} from '../hooks/useCollisionMap';
 import {useMapMovement} from '../hooks/useMapMovement';
 import {usePokemonSpawning} from '../hooks/usePokemonSpawning';
 import {usePokemonById} from '@features/pokedex/hooks/usePokemonById';
-import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useMobileDetection} from '@/hooks';
 
@@ -76,9 +75,6 @@ export function PokemonMap({
   const {pokemon: favoritePokemon, refreshStats} = usePokemonById(
     user?.favorite_pokemon_id || null
   );
-
-  // Mutations for awarding battle rewards
-  const [catchPokemon] = useCatchPokemon();
 
   // Battle state
   const [inBattle, setInBattle] = useState(false);
@@ -290,29 +286,15 @@ export function PokemonMap({
   // Handle battle end (immediately when battle result is determined)
   const handleBattleEnd = useCallback(
     async (result: 'victory' | 'defeat') => {
-      if (result === 'victory' && battleOpponent && battleSpawnId) {
-        try {
-          // Add Pokemon to collection if not already owned
-          if (!battleOpponent.isOwned) {
-            await catchPokemon({
-              variables: {pokemonId: battleOpponent.id},
-            });
-          }
-
-          // Remove the caught Pokemon from the map immediately
-          // This ensures Pokemon is removed even if user switches views before clicking Continue
-          pokemon.removePokemon(battleSpawnId);
-        } catch (error) {
-          logger.logError(error, 'AwardBattleRewards');
-        }
+      if (result === 'victory' && battleSpawnId) {
+        pokemon.removePokemon(battleSpawnId);
       }
     },
-    [battleOpponent, battleSpawnId, catchPokemon, pokemon]
+    [battleSpawnId, pokemon]
   );
 
   // Battle complete handler (called when user clicks "Continue" on result screen)
   const handleBattleComplete = useCallback(() => {
-    // Clean up battle state
     setInBattle(false);
     setBattleOpponent(null);
     setPlayerPokemon(null);

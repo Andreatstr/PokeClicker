@@ -1,6 +1,5 @@
 import {Dialog, DialogBody} from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePurchasePokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth';
 import {useQuery, gql} from '@apollo/client';
 import {FocusTrap} from 'focus-trap-react';
@@ -39,7 +38,6 @@ export function PokemonDetailModal({
   isDarkMode = false,
   disableFocusTrap = false,
 }: Props) {
-  const [purchasePokemon] = usePurchasePokemon();
   const {updateUser, user} = useAuth();
   const {data: userData} = useQuery(ME_QUERY);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -95,7 +93,6 @@ export function PokemonDetailModal({
               onClose={onClose}
               onSelectPokemon={onSelectPokemon}
               onPurchaseComplete={onPurchase}
-              purchasePokemonMutation={purchasePokemon}
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
@@ -108,7 +105,6 @@ export function PokemonDetailModal({
               onClose={onClose}
               onSelectPokemon={onSelectPokemon}
               onPurchaseComplete={onPurchase}
-              purchasePokemonMutation={purchasePokemon}
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}

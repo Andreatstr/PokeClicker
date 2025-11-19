@@ -27,6 +27,17 @@ import {useState, useEffect} from 'react';
 import {useSetFavoritePokemon} from '@features/profile/hooks/useProfileMutations';
 import {useAuth} from '@features/auth';
 import {useCandyContext} from '@/contexts/useCandyContext';
+import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
+import {useQuery, gql} from '@apollo/client';
+
+const ME_QUERY = gql`
+  query MeOwnership {
+    me {
+      _id
+      owned_pokemon_ids
+    }
+  }
+`;
 
 interface BattleResultProps {
   result: 'victory' | 'defeat';
@@ -53,8 +64,12 @@ export function BattleResult({
   const {updateUser} = useAuth();
   const {flushPendingCandy} = useCandyContext();
   const [setFavoritePokemon] = useSetFavoritePokemon();
+  const [catchPokemon] = useCatchPokemon();
 
-  const isNewCatch = isVictory && !opponentPokemon.isOwned;
+  const {data: userData} = useQuery(ME_QUERY);
+  const wasAlreadyOwned =
+    userData?.me?.owned_pokemon_ids?.includes(opponentPokemon.id) ?? false;
+  const isNewCatch = isVictory && !wasAlreadyOwned;
 
   useEffect(() => {
     const countdownInterval = setInterval(() => {
@@ -70,6 +85,19 @@ export function BattleResult({
 
     return () => clearInterval(countdownInterval);
   }, []);
+
+  const [catchError, setCatchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isNewCatch) {
+      catchPokemon({
+        variables: {pokemonId: opponentPokemon.id},
+      }).catch((error) => {
+        console.error('Failed to catch Pokemon:', error);
+        setCatchError('Failed to add Pokemon to Pokedex');
+      });
+    }
+  }, [isNewCatch, opponentPokemon.id, catchPokemon]);
 
   const handlePlayWithPokemon = async () => {
     setIsSettingPokemon(true);
@@ -190,20 +218,27 @@ export function BattleResult({
             {isNewCatch && (
               <div
                 className={`mt-1 p-1 md:p-1.5 border-2 rounded ${
-                  isDarkMode
-                    ? 'border-green-500 bg-green-900/30'
-                    : 'border-green-500 bg-green-100'
+                  catchError
+                    ? isDarkMode
+                      ? 'border-red-500 bg-red-900/30'
+                      : 'border-red-500 bg-red-100'
+                    : isDarkMode
+                      ? 'border-green-500 bg-green-900/30'
+                      : 'border-green-500 bg-green-100'
                 }`}
               >
-                <div className="pixel-font text-[9px] md:text-[10px] font-bold text-green-600 mb-0.5">
-                  New Pokemon Caught!
+                <div
+                  className={`pixel-font text-[9px] md:text-[10px] font-bold mb-0.5 ${catchError ? 'text-red-600' : 'text-green-600'}`}
+                >
+                  {catchError ? 'Error!' : 'New Pokemon Caught!'}
                 </div>
                 <div
                   className={`pixel-font text-[7px] md:text-[8px] ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}
                 >
-                  {opponentPokemon.name} added to your Pokedex!
+                  {catchError ||
+                    `${opponentPokemon.name} added to your Pokedex!`}
                 </div>
               </div>
             )}
