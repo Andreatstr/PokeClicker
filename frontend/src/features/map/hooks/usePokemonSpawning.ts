@@ -179,13 +179,12 @@ function normalizeBasicToPokedex(p: PokemonBasic): PokedexPokemon {
     name: p.name,
     types: p.types,
     sprite: p.sprite,
-    pokedexNumber: p.id, // fallback: use id as pokedexNumber
+    pokedexNumber: p.id,
     stats: p.stats ?? null,
     height: null,
     weight: null,
     abilities: null,
     evolution: null,
-    isOwned: false,
     bst: null,
     price: null,
   };
