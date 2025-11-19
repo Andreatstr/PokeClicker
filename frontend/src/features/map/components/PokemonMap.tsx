@@ -216,6 +216,7 @@ export function PokemonMap({
     };
   }, []);
 
+  //Battle Attack, Sp. Atk and Sp. Def
   const [battleAttackFunction, setBattleAttackFunction] = useState<
     (() => void) | null
   >(null);
@@ -230,6 +231,33 @@ export function PokemonMap({
       // Wrap in arrow function because setState interprets functions as updaters
       setBattleAttackFunction(() => fn);
     },
+    []
+  );
+
+  const [battleSpecialAttackFunction, setBattleSpecialAttackFunction] =
+    useState<(() => void) | null>(null);
+  const battleSpecialAttackFunctionRef = useRef<(() => void) | null>(null);
+
+  const [battleShieldFunction, setBattleShieldFunction] = useState<
+    (() => void) | null
+  >(null);
+  const battleShieldFunctionRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    battleSpecialAttackFunctionRef.current = battleSpecialAttackFunction;
+  }, [battleSpecialAttackFunction]);
+
+  useEffect(() => {
+    battleShieldFunctionRef.current = battleShieldFunction;
+  }, [battleShieldFunction]);
+
+  // Wrappers for BattleView to set these functions
+  const setBattleSpecialAttackFunctionWrapper = useCallback(
+    (fn: (() => void) | null) => setBattleSpecialAttackFunction(() => fn),
+    []
+  );
+  const setBattleShieldFunctionWrapper = useCallback(
+    (fn: (() => void) | null) => setBattleShieldFunction(() => fn),
     []
   );
 
@@ -418,11 +446,31 @@ export function PokemonMap({
           handleAButtonClick();
         }
       }
+
+      // Special attack with S key
+      if (inBattle && key === 's') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pressedKeys.has(key) && battleSpecialAttackFunctionRef.current) {
+          pressedKeys.add(key);
+          battleSpecialAttackFunctionRef.current();
+        }
+      }
+
+      // Shield with D key
+      if (inBattle && key === 'd') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!pressedKeys.has(key) && battleShieldFunctionRef.current) {
+          pressedKeys.add(key);
+          battleShieldFunctionRef.current();
+        }
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (key === 'a' || key === 'b') {
+      if (key === 'a' || key === 'b' || key === 's' || key === 'd') {
         pressedKeys.delete(key);
       }
     };
@@ -436,7 +484,14 @@ export function PokemonMap({
       window.removeEventListener('keydown', handleKeyDown, {capture: true});
       window.removeEventListener('keyup', handleKeyUp, {capture: true});
     };
-  }, [inBattle, pokemon.nearbyPokemon, handleAButtonClick, startBattle]);
+  }, [
+    inBattle,
+    pokemon.nearbyPokemon,
+    handleAButtonClick,
+    startBattle,
+    battleSpecialAttackFunctionRef,
+    battleShieldFunctionRef,
+  ]);
 
   return (
     <div
@@ -759,6 +814,10 @@ export function PokemonMap({
               onBattleEnd={handleBattleEnd}
               isDarkMode={isDarkMode}
               onAttackFunctionReady={setBattleAttackFunctionWrapper}
+              onSpecialAttackFunctionReady={
+                setBattleSpecialAttackFunctionWrapper
+              }
+              onShieldFunctionReady={setBattleShieldFunctionWrapper}
               isFullscreen={isFullscreen}
             />
           ) : (

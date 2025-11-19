@@ -45,6 +45,8 @@ interface BattleViewProps {
   onBattleEnd?: (result: 'victory' | 'defeat') => void;
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
+  onSpecialAttackFunctionReady?: (fn: () => void) => void;
+  onShieldFunctionReady?: (fn: () => void) => void;
   isFullscreen?: boolean;
 }
 
@@ -55,6 +57,8 @@ export function BattleView({
   onBattleEnd,
   isDarkMode = false,
   onAttackFunctionReady,
+  onSpecialAttackFunctionReady,
+  onShieldFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
   const {user} = useAuth();
@@ -175,6 +179,12 @@ export function BattleView({
     setTimeout(() => setShieldActive(false), 2000);
   };
 
+  useEffect(() => {
+    if (onShieldFunctionReady) {
+      onShieldFunctionReady(handleShieldWithAnimation);
+    }
+  }, [onShieldFunctionReady, handleShieldWithAnimation]);
+
   // Wrap special attack trigger with animation
   const handleSpecialAttackWithAnimation = () => {
     // Don't trigger animations during countdown period
@@ -214,6 +224,12 @@ export function BattleView({
     // Special attack animation lasts 600ms
     setTimeout(() => setSpecialAttackActive(false), 600);
   };
+
+  useEffect(() => {
+    if (onSpecialAttackFunctionReady) {
+      onSpecialAttackFunctionReady(handleSpecialAttackWithAnimation);
+    }
+  }, [onSpecialAttackFunctionReady, handleSpecialAttackWithAnimation]);
 
   // Keep attack function ref up to date so the wrapper always calls the latest version
   const attackFunctionRef = useRef(handleAttackWithAnimation);
