@@ -8,7 +8,6 @@ import {
   useCarousel,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePurchasePokemon} from '@features/pokedex';
 import type {User} from '@features/auth';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {logger} from '@/lib/logger';
@@ -21,7 +20,6 @@ interface PokemonCarouselProps {
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchaseComplete?: (id: number) => void;
-  purchasePokemonMutation: ReturnType<typeof usePurchasePokemon>[0];
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
@@ -35,7 +33,6 @@ export function PokemonCarousel({
   onClose,
   onSelectPokemon,
   onPurchaseComplete,
-  purchasePokemonMutation,
   updateUser,
   user,
   ownedPokemonIds,
@@ -85,7 +82,6 @@ export function PokemonCarousel({
               onClose={onClose}
               onSelectPokemon={onSelectPokemon}
               onPurchaseComplete={onPurchaseComplete}
-              purchasePokemonMutation={purchasePokemonMutation}
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
@@ -113,7 +109,6 @@ function LazyPokemonCard({
   onClose,
   onSelectPokemon,
   onPurchaseComplete,
-  purchasePokemonMutation,
   updateUser,
   user,
   ownedPokemonIds,
@@ -125,7 +120,6 @@ function LazyPokemonCard({
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchaseComplete?: (id: number) => void;
-  purchasePokemonMutation: ReturnType<typeof usePurchasePokemon>[0];
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
@@ -163,7 +157,6 @@ function LazyPokemonCard({
         onClose={onClose}
         onSelectPokemon={onSelectPokemon}
         onPurchaseComplete={onPurchaseComplete}
-        purchasePokemonMutation={purchasePokemonMutation}
         updateUser={updateUser}
         user={user}
         ownedPokemonIds={ownedPokemonIds}
