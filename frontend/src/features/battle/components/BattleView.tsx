@@ -4,7 +4,7 @@
  * Features:
  * - Click-based attack system (player clicks to deal damage)
  * - Charge meter fills with clicks, enables special attack
- * - Shield ability to reduce incoming damage
+ * - Special Defense ability to reduce incoming damage
  * - Responsive battle animations and visual feedback
  * - Platform sprites based on Pokemon type
  * - Victory rewards: rare candy based on clicks and opponent stats
@@ -14,7 +14,7 @@
  * - Player attacks on click based on their Pokemon's attack stat
  * - Opponent auto-attacks at intervals based on speed stat
  * - Charge attack: deals 3x damage when meter full
- * - Shield: reduces damage by 75% temporarily
+ * - Special Defense: reduces damage by 75% temporarily
  *
  * State management:
  * - useBattle hook manages HP, attacks, and win/loss detection
@@ -46,7 +46,7 @@ interface BattleViewProps {
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
   onSpecialAttackFunctionReady?: (fn: () => void) => void;
-  onShieldFunctionReady?: (fn: () => void) => void;
+  onSpecialDefenseFunctionReady?: (fn: () => void) => void;
   isFullscreen?: boolean;
 }
 
@@ -58,7 +58,7 @@ export function BattleView({
   isDarkMode = false,
   onAttackFunctionReady,
   onSpecialAttackFunctionReady,
-  onShieldFunctionReady,
+  onSpecialDefenseFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
   const {user} = useAuth();
@@ -78,7 +78,7 @@ export function BattleView({
   // Animation states
   const [playerAttacking, setPlayerAttacking] = useState(false);
   const [opponentHit, setOpponentHit] = useState(false);
-  const [shieldActive, setShieldActive] = useState(false);
+  const [specialDefenseActive, setSpecialDefenseActive] = useState(false);
   const [specialAttackActive, setSpecialAttackActive] = useState(false);
   const [hitEffects, setHitEffects] = useState<
     Array<{id: number; damage: string; x: number; y: number}>
@@ -95,9 +95,9 @@ export function BattleView({
     chargeProgress,
     isCharged,
     triggerSpecialAttack,
-    shieldCharge,
-    isShieldCharged,
-    triggerShield,
+    specialDefenseCharge,
+    isSpecialDefenseCharged,
+    triggerSpecialDefense,
     isActive,
     startBattle,
   } = useBattle({
@@ -167,27 +167,27 @@ export function BattleView({
     handleAttackClick();
   };
 
-  // Wrap shield trigger with animation
-  const handleShieldWithAnimation = useCallback(() => {
+  // Wrap specialDefense trigger with animation
+  const handleSpecialDefenseWithAnimation = useCallback(() => {
     // Don't trigger animations during countdown period
     if (!isActive) {
-      triggerShield();
+      triggerSpecialDefense();
       return;
     }
 
-    if (!isShieldCharged) return;
+    if (!isSpecialDefenseCharged) return;
 
-    setShieldActive(true);
-    triggerShield();
-    // Shield animation lasts 2 seconds
-    setTimeout(() => setShieldActive(false), 2000);
-  }, [isActive, isShieldCharged, triggerShield]);
+    setSpecialDefenseActive(true);
+    triggerSpecialDefense();
+    // Special Defense animation lasts 2 seconds
+    setTimeout(() => setSpecialDefenseActive(false), 2000);
+  }, [isActive, isSpecialDefenseCharged, triggerSpecialDefense]);
 
   useEffect(() => {
-    if (onShieldFunctionReady) {
-      onShieldFunctionReady(handleShieldWithAnimation);
+    if (onSpecialDefenseFunctionReady) {
+      onSpecialDefenseFunctionReady(handleSpecialDefenseWithAnimation);
     }
-  }, [onShieldFunctionReady, handleShieldWithAnimation]);
+  }, [onSpecialDefenseFunctionReady, handleSpecialDefenseWithAnimation]);
 
   // Wrap special attack trigger with animation
   const handleSpecialAttackWithAnimation = useCallback(() => {
@@ -228,7 +228,7 @@ export function BattleView({
       }, 800);
     }
 
-    // Special attack animation lasts 600ms
+    // Special Attack animation lasts 600ms
     setTimeout(() => setSpecialAttackActive(false), 600);
   }, [isActive, isCharged, triggerSpecialAttack, playerPokemon, opponentMaxHP]);
 
@@ -615,7 +615,7 @@ export function BattleView({
         }}
         aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
       />
-      {/* Special attack visual effect */}
+      {/* Special Attack visual effect */}
       {specialAttackActive && (
         <div
           className="absolute z-20 pointer-events-none"
@@ -702,8 +702,8 @@ export function BattleView({
           aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
         />
       </div>
-      {/* Shield visual effect */}
-      {shieldActive && (
+      {/* Special Defense visual effect */}
+      {specialDefenseActive && (
         <div
           className="absolute z-20 pointer-events-none"
           style={{
@@ -718,7 +718,7 @@ export function BattleView({
           <div
             className="text-6xl md:text-8xl"
             style={{
-              animation: 'shieldPulse 2s ease-in-out',
+              animation: 'specialDefensePulse 2s ease-in-out',
               filter: 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))',
             }}
           >
@@ -895,18 +895,19 @@ export function BattleView({
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
-              } ${!isShieldCharged ? 'cursor-not-allowed' : ''} ${
-                isShieldCharged
+              } ${!isSpecialDefenseCharged ? 'cursor-not-allowed' : ''} ${
+                isSpecialDefenseCharged
                   ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50'
                   : ''
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isShieldCharged) handleShieldWithAnimation();
+                if (isSpecialDefenseCharged)
+                  handleSpecialDefenseWithAnimation();
               }}
-              disabled={!isShieldCharged}
+              disabled={!isSpecialDefenseCharged}
               tabIndex={0}
-              aria-label="Shield ability to reduce incoming damage"
+              aria-label="Special defense ability to reduce incoming damage"
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -914,10 +915,10 @@ export function BattleView({
                   isDarkMode
                     ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400'
                     : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
-                } ${isShieldCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
-                style={{height: `${shieldCharge}%`}}
+                } ${isSpecialDefenseCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
+                style={{height: `${specialDefenseCharge}%`}}
                 role="progressbar"
-                aria-valuenow={shieldCharge}
+                aria-valuenow={specialDefenseCharge}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-hidden="true"
@@ -925,15 +926,16 @@ export function BattleView({
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
                   isDarkMode
-                    ? !isShieldCharged
+                    ? !isSpecialDefenseCharged
                       ? 'text-gray-300'
                       : 'text-white drop-shadow-lg'
-                    : !isShieldCharged
+                    : !isSpecialDefenseCharged
                       ? 'text-gray-700'
                       : 'text-black drop-shadow-lg'
                 }`}
               >
-                Shield
+                <span className="md:hidden">Sp.Def</span>
+                <span className="hidden md:inline">Special Defense</span>
               </span>
             </button>
           </nav>
@@ -981,7 +983,7 @@ export function BattleView({
           }
         }
 
-        @keyframes shieldPulse {
+        @keyframes specialDefensePulse {
           0% {
             opacity: 0;
             transform: scale(0.5);

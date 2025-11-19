@@ -238,26 +238,25 @@ export function PokemonMap({
     useState<(() => void) | null>(null);
   const battleSpecialAttackFunctionRef = useRef<(() => void) | null>(null);
 
-  const [battleShieldFunction, setBattleShieldFunction] = useState<
-    (() => void) | null
-  >(null);
-  const battleShieldFunctionRef = useRef<(() => void) | null>(null);
+  const [battleSpecialDefenseFunction, setBattleSpecialDefenseFunction] =
+    useState<(() => void) | null>(null);
+  const battleSpecialDefenseFunctionRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     battleSpecialAttackFunctionRef.current = battleSpecialAttackFunction;
   }, [battleSpecialAttackFunction]);
 
   useEffect(() => {
-    battleShieldFunctionRef.current = battleShieldFunction;
-  }, [battleShieldFunction]);
+    battleSpecialDefenseFunctionRef.current = battleSpecialDefenseFunction;
+  }, [battleSpecialDefenseFunction]);
 
   // Wrappers for BattleView to set these functions
   const setBattleSpecialAttackFunctionWrapper = useCallback(
     (fn: (() => void) | null) => setBattleSpecialAttackFunction(() => fn),
     []
   );
-  const setBattleShieldFunctionWrapper = useCallback(
-    (fn: (() => void) | null) => setBattleShieldFunction(() => fn),
+  const setBattleSpecialDefenseFunctionWrapper = useCallback(
+    (fn: (() => void) | null) => setBattleSpecialDefenseFunction(() => fn),
     []
   );
 
@@ -447,7 +446,7 @@ export function PokemonMap({
         }
       }
 
-      // Special attack with S key
+      // Special Attack with S key
       if (inBattle && key === 's') {
         e.preventDefault();
         e.stopPropagation();
@@ -457,13 +456,13 @@ export function PokemonMap({
         }
       }
 
-      // Shield with D key
+      // Special Defense with D key
       if (inBattle && key === 'd') {
         e.preventDefault();
         e.stopPropagation();
-        if (!pressedKeys.has(key) && battleShieldFunctionRef.current) {
+        if (!pressedKeys.has(key) && battleSpecialDefenseFunctionRef.current) {
           pressedKeys.add(key);
-          battleShieldFunctionRef.current();
+          battleSpecialDefenseFunctionRef.current();
         }
       }
     };
@@ -490,7 +489,7 @@ export function PokemonMap({
     handleAButtonClick,
     startBattle,
     battleSpecialAttackFunctionRef,
-    battleShieldFunctionRef,
+    battleSpecialDefenseFunctionRef,
   ]);
 
   return (
@@ -817,7 +816,9 @@ export function PokemonMap({
               onSpecialAttackFunctionReady={
                 setBattleSpecialAttackFunctionWrapper
               }
-              onShieldFunctionReady={setBattleShieldFunctionWrapper}
+              onSpecialDefenseFunctionReady={
+                setBattleSpecialDefenseFunctionWrapper
+              }
               isFullscreen={isFullscreen}
             />
           ) : (
