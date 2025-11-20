@@ -29,6 +29,9 @@ The project includes a comprehensive test suite with **417 passing unit tests + 
 
 ## Running Tests
 
+> [!IMPORTANT]
+> Make sure to complete the [Setup Guide](setup.md) before running tests to ensure the environment is correctly configured.
+
 ### Frontend Tests
 
 ```bash
