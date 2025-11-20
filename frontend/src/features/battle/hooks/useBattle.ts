@@ -12,7 +12,8 @@ interface BattleState {
   totalDamageDealt: number;
   chargeProgress: number; // 0..100
   isCharged: boolean;
-  shieldActiveUntil: number; // epoch ms, 0 when inactive
+  isSpecialDefenseCharged: boolean;
+  specialDefenseActiveUntil: number; // epoch ms, 0 when inactive
 }
 
 interface UseBattleProps {
@@ -28,8 +29,8 @@ interface UseBattleProps {
  * - Click-based player attacks with damage calculations based on stats
  * - Passive opponent attacks at intervals based on opponent speed
  * - Charge meter system (builds passively + on click) for special abilities
- * - Special attack: burst damage based on spAttack (4%-30% of opponent max HP)
- * - Shield ability: blocks damage for duration based on spDefense (0.8-3.5s)
+ * - Special Attack: burst damage based on spAttack (4%-30% of opponent max HP)
+ * - Special Defense ability: blocks damage for duration based on spDefense (0.8-3.5s)
  * - Scaled HP values for 30-45 second battles with active clicking
  *
  * Battle mechanics:
@@ -65,7 +66,8 @@ export function useBattle({
       totalDamageDealt: 0,
       chargeProgress: 0,
       isCharged: false,
-      shieldActiveUntil: 0,
+      isSpecialDefenseCharged: false,
+      specialDefenseActiveUntil: 0,
     };
   });
 
@@ -140,6 +142,7 @@ export function useBattle({
       const newOpponentHP = Math.max(0, prev.opponentHP - damage);
       const newTotalDamage = prev.totalDamageDealt + damage;
       const newCharge = Math.min(100, prev.chargeProgress + 2);
+      const newSpecialDefenseCharge = Math.min(100, prev.chargeProgress + 2);
 
       return {
         ...prev,
@@ -148,10 +151,17 @@ export function useBattle({
         totalDamageDealt: newTotalDamage,
         chargeProgress: newCharge,
         isCharged: prev.isCharged || newCharge >= 100,
+        isSpecialDefenseCharged:
+          prev.isSpecialDefenseCharged || newSpecialDefenseCharge >= 100,
         result: newOpponentHP <= 0 ? 'victory' : prev.result,
       };
     });
   }, [calculateClickDamage]);
+
+  // Sp. Def charge
+  const [specialDefenseCharge, setSpecialDefenseCharge] = useState(0); // 0..100
+  const [lastPlayerHP, setLastPlayerHP] = useState(battleState.playerMaxHP);
+  const isSpecialDefenseCharged = specialDefenseCharge >= 100;
 
   // Passive charge meter buildup over time (2.5% per second + 2% per click)
   useEffect(() => {
@@ -188,8 +198,11 @@ export function useBattle({
       setBattleState((prev) => {
         if (prev.result !== 'ongoing') return prev;
 
-        // Shield blocks all incoming damage until expiration
-        if (prev.shieldActiveUntil && Date.now() < prev.shieldActiveUntil) {
+        // Special Defense blocks all incoming damage until expiration
+        if (
+          prev.specialDefenseActiveUntil &&
+          Date.now() < prev.specialDefenseActiveUntil
+        ) {
           return prev;
         }
 
@@ -214,6 +227,24 @@ export function useBattle({
     calculatePassiveDamage,
     getAttackInterval,
   ]);
+
+  // Sp. Def meter
+  useEffect(() => {
+    // Gradually fill specialDefense meter as HP is lost
+    if (battleState.playerHP < lastPlayerHP) {
+      const hpLost = lastPlayerHP - battleState.playerHP;
+      const percentLost = (hpLost / battleState.playerMaxHP) * 100;
+      setSpecialDefenseCharge((prev) => {
+        // 15% HP lost fills specialDefense to 100%
+        const newCharge = prev + percentLost * (100 / 15);
+        return Math.min(100, newCharge);
+      });
+      setLastPlayerHP(battleState.playerHP);
+    }
+    // Reset lastPlayerHP if healed
+    if (battleState.playerHP > lastPlayerHP)
+      setLastPlayerHP(battleState.playerHP);
+  }, [battleState.playerHP, battleState.playerMaxHP, lastPlayerHP]);
 
   useEffect(() => {
     if (battleState.result !== 'ongoing') {
@@ -255,26 +286,21 @@ export function useBattle({
   }, [playerPokemon]);
 
   /**
-   * Trigger shield ability when charge meter is full
+   * Trigger specialDefense ability when charge meter is full
    * Blocks all incoming damage for duration based on player's spDefense (0.8-3.5s)
    * Consumes full charge meter
    */
-  const triggerShield = useCallback(() => {
-    setBattleState((prev) => {
-      if (prev.result !== 'ongoing' || !prev.isCharged) return prev;
-      const spD = playerPokemon.stats?.spDefense || 0;
-      // Toned down: shorter base and gentler scaling with a tighter cap
-      // Old: Math.min(6000, 1500 + spD * 20)
-      const duration = Math.min(3500, 800 + spD * 10); // cap 3.5s
-      const until = Date.now() + duration;
-      return {
-        ...prev,
-        shieldActiveUntil: until,
-        chargeProgress: 0,
-        isCharged: false,
-      };
-    });
-  }, [playerPokemon]);
+  const triggerSpecialDefense = useCallback(() => {
+    if (battleState.result !== 'ongoing' || !isSpecialDefenseCharged) return;
+    const spD = playerPokemon.stats?.spDefense || 0;
+    const duration = Math.min(3500, 800 + spD * 10);
+    const until = Date.now() + duration;
+    setBattleState((prev) => ({
+      ...prev,
+      specialDefenseActiveUntil: until,
+    }));
+    setSpecialDefenseCharge(0); // Reset specialDefense meter after use
+  }, [battleState.result, isSpecialDefenseCharged, playerPokemon]);
 
   return {
     playerHP: battleState.playerHP,
@@ -286,9 +312,11 @@ export function useBattle({
     handleAttackClick,
     chargeProgress: battleState.chargeProgress,
     isCharged: battleState.isCharged,
-    shieldActiveUntil: battleState.shieldActiveUntil,
+    specialDefenseActiveUntil: battleState.specialDefenseActiveUntil,
     triggerSpecialAttack,
-    triggerShield,
+    specialDefenseCharge,
+    isSpecialDefenseCharged,
+    triggerSpecialDefense,
     isActive: battleState.isActive,
     startBattle,
   };
