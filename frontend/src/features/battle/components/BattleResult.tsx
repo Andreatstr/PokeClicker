@@ -4,7 +4,7 @@
  * Features:
  * - Victory: displays rare candy rewards and Pokemon caught
  * - Defeat: shows encouraging message
- * - 3-second countdown before continue button appears
+ * - 1-second countdown before continue button appears
  * - Battle stats display (click count)
  * - Responsive mobile and desktop layouts
  * - "Play with Pokemon" button to set newly caught Pokemon as battle Pokemon
@@ -58,8 +58,11 @@ export function BattleResult({
 }: BattleResultProps) {
   const isVictory = result === 'victory';
   const [showButton, setShowButton] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(1);
   const [isSettingPokemon, setIsSettingPokemon] = useState(false);
+  const [selectedButton, setSelectedButton] = useState<'play' | 'continue'>(
+    'continue'
+  );
 
   const {updateUser} = useAuth();
   const {flushPendingCandy} = useCandyContext();
@@ -95,12 +98,19 @@ export function BattleResult({
     if (isNewCatch) {
       catchPokemon({
         variables: {pokemonId: opponentPokemon.id},
-      }).catch((error) => {
-        console.error('Failed to catch Pokemon:', error);
-        setCatchError('Failed to add Pokemon to Pokedex');
-      });
+      })
+        .then((result) => {
+          // Update auth context with new owned_pokemon_ids to ensure Pokedex Bonus updates
+          if (result.data?.catchPokemon) {
+            updateUser(result.data.catchPokemon);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to catch Pokemon:', error);
+          setCatchError('Failed to add Pokemon to Pokedex');
+        });
     }
-  }, [isNewCatch, opponentPokemon.id, catchPokemon]);
+  }, [isNewCatch, opponentPokemon.id, catchPokemon, updateUser]);
 
   const handlePlayWithPokemon = async () => {
     setIsSettingPokemon(true);
@@ -127,6 +137,58 @@ export function BattleResult({
       setIsSettingPokemon(false);
     }
   };
+
+  // Keyboard support: Arrow keys/A/D to navigate, Space to confirm
+  useEffect(() => {
+    if (!showButton) return;
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Navigation: Arrow keys or A/D
+      if (
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key.toLowerCase() === 'a' ||
+        e.key.toLowerCase() === 'd'
+      ) {
+        e.preventDefault();
+        // Only allow navigation when there are multiple buttons (new catch scenario)
+        if (isNewCatch) {
+          setSelectedButton((prev) => (prev === 'play' ? 'continue' : 'play'));
+        }
+      }
+
+      // Confirm: Space key
+      if (e.key === ' ') {
+        e.preventDefault();
+        if (isSettingPokemon) return;
+
+        if (isNewCatch) {
+          // Two buttons available - execute the selected one
+          if (selectedButton === 'play') {
+            handlePlayWithPokemon();
+          } else {
+            onContinue();
+          }
+        } else {
+          // Single button - just continue
+          onContinue();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [showButton, isNewCatch, isSettingPokemon, selectedButton, onContinue]);
 
   return (
     <section
@@ -280,6 +342,11 @@ export function BattleResult({
                 className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
                 disabled={isSettingPokemon}
                 isDarkMode={isDarkMode}
+                style={{
+                  filter:
+                    selectedButton === 'play' ? 'brightness(1.3)' : 'none',
+                  transition: 'filter 0.15s ease',
+                }}
               >
                 {isSettingPokemon
                   ? 'Setting...'
@@ -290,6 +357,11 @@ export function BattleResult({
                 className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
                 variant="secondary"
                 isDarkMode={isDarkMode}
+                style={{
+                  filter:
+                    selectedButton === 'continue' ? 'brightness(1.3)' : 'none',
+                  transition: 'filter 0.15s ease',
+                }}
               >
                 Continue
               </Button>

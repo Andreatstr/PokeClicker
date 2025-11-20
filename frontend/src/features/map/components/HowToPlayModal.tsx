@@ -422,7 +422,7 @@ export function HowToPlayModal({
                 >
                   Controls
                 </h3>
-                <div className="flex items-start justify-center gap-8 md:gap-24 flex-wrap">
+                <div className="flex items-start justify-center gap-4 md:gap-12 flex-wrap">
                   <div className="flex flex-col gap-2 items-center">
                     <span
                       className="pixel-font text-[11px] font-bold text-center"
@@ -529,6 +529,69 @@ export function HowToPlayModal({
                         className="w-8 h-8"
                       />
                     </div>
+                  </div>
+                  <div className="flex flex-col gap-2 items-center">
+                    <span
+                      className="pixel-font text-[11px] font-bold text-center"
+                      style={{color: accentColor}}
+                    >
+                      Battle results
+                    </span>
+                    <div className="flex items-center justify-center gap-2">
+                      {!isMobile && (
+                        <>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ◀ ▶
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            A/D
+                          </span>
+                        </>
+                      )}
+                      <span
+                        className="pixel-font text-[10px]"
+                        style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                      >
+                        {isMobile ? 'Tap buttons to select' : 'to switch'}
+                      </span>
+                    </div>
+                    {!isMobile && (
+                      <div className="flex items-center justify-center gap-2 mt-1">
+                        <span
+                          className="pixel-font text-xs border-2 px-2 py-1"
+                          style={{
+                            background: isDarkMode ? '#f9fafb' : '#ffffff',
+                            color: '#111827',
+                            borderColor: 'black',
+                            boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                          }}
+                        >
+                          Space
+                        </span>
+                        <span
+                          className="pixel-font text-[10px]"
+                          style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                        >
+                          to confirm
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
