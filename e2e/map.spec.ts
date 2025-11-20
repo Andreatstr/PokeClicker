@@ -18,6 +18,11 @@ test.describe('World Map Functionality', () => {
       await page.waitForTimeout(2000);
     }
 
+    // Check if the onboarding overlay is active and click "Skip"
+    const skipButton = page.locator('button[aria-label="Skip tutorial"]');
+    console.log('Is Skip button visible:', await skipButton.isVisible());
+    await skipButton.click({ force: true });
+
     // Ensure we're on the map page
     const isOnMap = await navbar.isOnMap();
     if (!isOnMap) {

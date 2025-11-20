@@ -42,9 +42,13 @@ export function EvolutionPokemon({
     return (
       <article className="evolutionItem flex items-center gap-1 md:gap-2">
         <div
-          className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 animate-pulse"
+          className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"
           aria-hidden="true"
-        />
+        >
+          <span className="text-3xl md:text-4xl font-bold animate-pulse text-gray-400">
+            ?
+          </span>
+        </div>
         {showArrow && (
           <span className="evolutionArrow" aria-hidden="true">
             <ArrowRightIcon className="w-4 h-4 md:w-6 md:h-6" />
@@ -81,7 +85,10 @@ export function EvolutionPokemon({
             className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"
             aria-label="Locked evolution"
           >
-            <span className="text-3xl md:text-4xl font-bold" aria-hidden="true">
+            <span
+              className="text-3xl md:text-4xl font-bold animate-pulse"
+              aria-hidden="true"
+            >
               ?
             </span>
           </div>

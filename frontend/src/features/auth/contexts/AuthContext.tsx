@@ -67,19 +67,23 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setUser(newUser);
 
     // Clear onboarding flags for guest users to restart tutorial on new login
-    // sessionStorage ensures tutorial doesn't replay on page reload during same session
+    // Guest users always see tutorial on each new login session
     if (newUser.isGuestUser || newUser.username?.toLowerCase() === 'guest') {
       sessionStorage.removeItem('onboarding_completed_session');
-      localStorage.removeItem('onboarding_completed');
     }
 
     // Reset Apollo cache to prevent data from previous session leaking
     await apolloClient.resetStore();
   };
 
-  const logout = async () => {
+  const logout = async (clearOnboarding = false) => {
+    // Store username before clearing user state (needed to clear onboarding flag)
+    const username = user?.username;
+    const isGuest =
+      user?.isGuestUser ?? user?.username?.toLowerCase() === 'guest';
+
     // Delete guest users from backend to clean up temporary accounts
-    if (user?.isGuestUser ?? user?.username?.toLowerCase() === 'guest') {
+    if (isGuest) {
       try {
         await apolloClient.mutate({
           mutation: DELETE_USER_MUTATION,
@@ -93,6 +97,13 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setUser(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+
+    // Clear onboarding flag if user is being deleted or is a guest
+    // This allows new users with the same username to see the tutorial
+    if (username && (clearOnboarding || isGuest)) {
+      localStorage.removeItem(`onboarding_completed_${username}`);
+      sessionStorage.removeItem('onboarding_completed_session');
+    }
 
     // Clear Apollo cache to remove all cached query data
     apolloClient.cache.evict({id: 'ROOT_QUERY'});

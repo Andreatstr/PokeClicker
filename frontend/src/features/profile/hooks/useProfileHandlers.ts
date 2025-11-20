@@ -25,7 +25,7 @@ export function useProfileHandlers(
   const handleDeleteAccount = async () => {
     try {
       await deleteUser();
-      await logout();
+      await logout(true); // Pass true to clear onboarding flag
       onNavigate?.('login');
     } catch (error) {
       logger.logError(error, 'DeleteAccount');

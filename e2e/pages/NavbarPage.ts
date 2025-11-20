@@ -139,11 +139,11 @@ export class NavbarPage extends BasePage {
       .getByText("Rare Candy")
       .isVisible()
       .catch(() => false);
-    const charizardVisible = await this.page
-      .locator('img[alt="Charizard"]')
+    const wishiwashiVisible = await this.page
+      .locator('img[alt="Wishiwashi-solo"]')
       .isVisible()
       .catch(() => false);
-    return rareCandyVisible || charizardVisible;
+    return rareCandyVisible || wishiwashiVisible;
   }
 
   async isOnMap(): Promise<boolean> {

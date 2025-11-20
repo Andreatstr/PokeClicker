@@ -86,7 +86,7 @@ export function UpgradesPanel({
           className="pixel-font text-base font-bold text-center drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)] flex-1"
           style={{color: 'white'}}
         >
-          POKEMON UPGRADES
+          CLICKER UPGRADES
         </h2>
         {onShowHelp && (
           <button
@@ -95,12 +95,12 @@ export function UpgradesPanel({
               e.preventDefault();
               onShowHelp();
             }}
-            className="flex items-center justify-center border-2 border-black w-11 h-11 touch-manipulation flex-shrink-0"
+            className="flex items-center cursor-pointer justify-center border-2 border-black w-11 h-11 touch-manipulation flex-shrink-0"
             title="Upgrade guide"
             aria-label="Show upgrade guide"
             style={{
               WebkitTapHighlightColor: 'transparent',
-              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              backgroundColor: 'rgba(37, 99, 235, 0.95)',
               boxShadow: '4px 4px 0px rgba(0,0,0,1)',
               transform: 'translate(0, 0)',
               transition: 'all 0.15s ease-in-out',
@@ -108,12 +108,12 @@ export function UpgradesPanel({
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translate(-2px, -2px)';
               e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
+              e.currentTarget.style.backgroundColor = 'rgba(29, 78, 216, 1)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translate(0, 0)';
               e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.9)';
+              e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.95)';
             }}
           >
             <svg

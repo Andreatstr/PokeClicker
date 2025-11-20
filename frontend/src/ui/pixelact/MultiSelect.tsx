@@ -141,7 +141,7 @@ export function MultiSelect({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px] outline-none transition-all hover:opacity-80 transition-opacity focus-visible:ring-3 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--background)]"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm rounded-none cursor-pointer border-0 select-none shadow-[var(--pixel-box-shadow)] min-h-[44px] outline-none transition-all hover:opacity-80 transition-opacity focus-visible:ring-3 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--background)]"
         style={
           {
             backgroundColor: 'var(--input)',

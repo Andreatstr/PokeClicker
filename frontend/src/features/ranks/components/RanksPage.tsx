@@ -6,7 +6,7 @@
  * - Tabbed interface to switch between leagues
  * - Top 10 rankings by default (expandable to top 100)
  * - Auto-refresh every 60 seconds
- * - Manual refresh with 10-second cooldown
+ * - Manual refresh with 10-second cooldown (flushes pending candy first)
  * - Opt-in checkbox for appearing in ranks
  * - Current user's rank highlighted
  *
@@ -33,6 +33,7 @@ import {RanksTable} from './RanksTable';
 import {LoadingSpinner} from '@/components';
 import {Checkbox, Button} from '@ui/pixelact';
 import {useAuth} from '@features/auth';
+import {useCandyContext} from '@/contexts/useCandyContext';
 import type {CheckedState} from '@radix-ui/react-checkbox';
 
 // Constants for ranks configuration
@@ -53,6 +54,7 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
   const [refreshTimer, setRefreshTimer] = useState(0);
 
   const {user, updateUser} = useAuth();
+  const {flushPendingCandy} = useCandyContext();
   const [checked, setChecked] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const {data, loading, error, refetch, stopPolling} = useQuery(GET_RANKS, {
@@ -61,15 +63,16 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
     fetchPolicy: 'network-only', // Always fetch fresh data from the server
   });
 
-  // Refetch data when component mounts with small delay
-  // Delay allows candy flush from PokeClicker to complete (race condition fix)
+  // Flush pending candy and refetch data when component mounts
+  // Ensures leaderboard shows most up-to-date candy totals (including passive income)
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const initializeRanks = async () => {
+      await flushPendingCandy();
       refetch();
-    }, 300); // 300ms delay to let async flush complete
-
-    return () => clearTimeout(timer);
-  }, [refetch]);
+    };
+    initializeRanks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Cleanup: Stop polling when component unmounts
   useEffect(() => {
@@ -80,8 +83,10 @@ export function RanksPage({isDarkMode}: RanksPageProps) {
     };
   }, [stopPolling]);
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     if (canRefresh) {
+      // Flush pending candy to backend before refreshing ranks
+      await flushPendingCandy();
       refetch();
       setCanRefresh(false);
       setRefreshTimer(REFRESH_COOLDOWN_SECONDS);

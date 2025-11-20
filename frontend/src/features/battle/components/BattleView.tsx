@@ -4,7 +4,7 @@
  * Features:
  * - Click-based attack system (player clicks to deal damage)
  * - Charge meter fills with clicks, enables special attack
- * - Shield ability to reduce incoming damage
+ * - Special Defense ability to reduce incoming damage
  * - Responsive battle animations and visual feedback
  * - Platform sprites based on Pokemon type
  * - Victory rewards: rare candy based on clicks and opponent stats
@@ -14,22 +14,22 @@
  * - Player attacks on click based on their Pokemon's attack stat
  * - Opponent auto-attacks at intervals based on speed stat
  * - Charge attack: deals 3x damage when meter full
- * - Shield: reduces damage by 75% temporarily
+ * - Special Defense: reduces damage by 75% temporarily
  *
  * State management:
  * - useBattle hook manages HP, attacks, and win/loss detection
  * - Candy calculations use player stats and click count
- * - Awards synced to backend via updateRareCandy mutation
+ * - Awards added to global candy context (auto-syncs to backend)
  *
  * Integration:
  * - Accepts attack function callback for external controls (map keyboard)
  * - Fullscreen mode support for map integration
  * - Mobile-responsive layout
  */
-import {useState, useEffect, useRef, useMemo} from 'react';
+import {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import type {PokedexPokemon} from '@features/pokedex';
 import {useAuth} from '@features/auth/hooks/useAuth';
-import {useGameMutations} from '@features/clicker/hooks/useGameMutations';
+import {useCandyContext} from '@/contexts/useCandyContext';
 import {useMobileDetection} from '@/hooks';
 import {HealthBar} from './HealthBar';
 import {BattleResult} from './BattleResult';
@@ -45,6 +45,8 @@ interface BattleViewProps {
   onBattleEnd?: (result: 'victory' | 'defeat') => void;
   isDarkMode?: boolean;
   onAttackFunctionReady?: (attackFunction: () => void) => void;
+  onSpecialAttackFunctionReady?: (fn: () => void) => void;
+  onSpecialDefenseFunctionReady?: (fn: () => void) => void;
   isFullscreen?: boolean;
 }
 
@@ -55,10 +57,12 @@ export function BattleView({
   onBattleEnd,
   isDarkMode = false,
   onAttackFunctionReady,
+  onSpecialAttackFunctionReady,
+  onSpecialDefenseFunctionReady,
   isFullscreen = false,
 }: BattleViewProps) {
-  const {user, updateUser} = useAuth();
-  const {updateRareCandy} = useGameMutations();
+  const {user} = useAuth();
+  const {addCandy} = useCandyContext();
   const isMobile = useMobileDetection(768);
   const [showResult, setShowResult] = useState(false);
 
@@ -71,6 +75,15 @@ export function BattleView({
   const [finalClickCount, setFinalClickCount] = useState(0);
   const [candyAwarded, setCandyAwarded] = useState(false);
 
+  // Animation states
+  const [playerAttacking, setPlayerAttacking] = useState(false);
+  const [opponentHit, setOpponentHit] = useState(false);
+  const [specialDefenseActive, setSpecialDefenseActive] = useState(false);
+  const [specialAttackActive, setSpecialAttackActive] = useState(false);
+  const [hitEffects, setHitEffects] = useState<
+    Array<{id: number; damage: string; x: number; y: number}>
+  >([]);
+
   const {
     playerHP,
     opponentHP,
@@ -82,7 +95,9 @@ export function BattleView({
     chargeProgress,
     isCharged,
     triggerSpecialAttack,
-    triggerShield,
+    specialDefenseCharge,
+    isSpecialDefenseCharged,
+    triggerSpecialDefense,
     isActive,
     startBattle,
   } = useBattle({
@@ -95,9 +110,137 @@ export function BattleView({
     },
   });
 
+  // Wrap handleAttackClick to trigger animations
+  const handleAttackWithAnimation = () => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      handleAttackClick();
+      return;
+    }
+
+    // Only trigger new animation if not already animating (prevent animation reset)
+    if (!playerAttacking) {
+      setPlayerAttacking(true);
+      setTimeout(() => setPlayerAttacking(false), 200);
+    }
+
+    // Trigger opponent hit animation (shake) - only if not already shaking
+    if (!opponentHit) {
+      setOpponentHit(true);
+      setTimeout(() => setOpponentHit(false), 300);
+    }
+
+    // Calculate damage and show hit effect using same formula as useBattle.ts (lines 119-129)
+    const playerStats = playerPokemon.stats;
+    const opponentStats = opponentPokemon.stats;
+    if (playerStats && opponentStats) {
+      const baseDamage =
+        (playerStats.attack - opponentStats.defense * 0.4) *
+        (1 + playerStats.speed * 0.05);
+      const damage = Math.max(2, Math.floor(baseDamage));
+
+      // Create hit effect at randomized position above opponent
+      const hitId = Date.now();
+      // Randomize position above opponent (right side of screen, above sprite)
+      const baseX = 75; // More to the right (opponent is on right side)
+      const baseY = 10; // Above opponent sprite (higher up)
+      const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance horizontally
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically (only downward)
+
+      setHitEffects((prev) => [
+        ...prev,
+        {
+          id: hitId,
+          damage: damage.toString(),
+          x: randomX,
+          y: randomY,
+        },
+      ]);
+
+      // Remove hit effect after animation
+      setTimeout(() => {
+        setHitEffects((prev) => prev.filter((effect) => effect.id !== hitId));
+      }, 800);
+    }
+
+    // Call the actual attack handler
+    handleAttackClick();
+  };
+
+  // Wrap specialDefense trigger with animation
+  const handleSpecialDefenseWithAnimation = useCallback(() => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      triggerSpecialDefense();
+      return;
+    }
+
+    if (!isSpecialDefenseCharged) return;
+
+    setSpecialDefenseActive(true);
+    triggerSpecialDefense();
+    // Special Defense animation lasts 2 seconds
+    setTimeout(() => setSpecialDefenseActive(false), 2000);
+  }, [isActive, isSpecialDefenseCharged, triggerSpecialDefense]);
+
+  useEffect(() => {
+    if (onSpecialDefenseFunctionReady) {
+      onSpecialDefenseFunctionReady(handleSpecialDefenseWithAnimation);
+    }
+  }, [onSpecialDefenseFunctionReady, handleSpecialDefenseWithAnimation]);
+
+  // Wrap special attack trigger with animation
+  const handleSpecialAttackWithAnimation = useCallback(() => {
+    // Don't trigger animations during countdown period
+    if (!isActive) {
+      triggerSpecialAttack();
+      return;
+    }
+
+    // Don't trigger if not charged
+    if (!isCharged) return;
+
+    setSpecialAttackActive(true);
+    triggerSpecialAttack();
+
+    // Calculate special attack damage using same formula as useBattle.ts (lines 239-244)
+    // Deals 4%-30% of opponent's max HP based on player's spAttack stat
+    const playerStats = playerPokemon.stats;
+    if (playerStats && opponentMaxHP) {
+      const spA = playerStats.spAttack || 0;
+      const scale = Math.min(0.3, 0.04 + spA / 2500); // 4%..30%
+      const burst = Math.max(1, Math.floor(opponentMaxHP * scale));
+
+      // Create hit effect at randomized position above opponent
+      const hitId = Date.now();
+      const baseX = 75; // Opponent position
+      const baseY = 10; // Above opponent sprite
+      const randomX = baseX + (Math.random() * 15 - 7.5); // ±7.5% variance
+      const randomY = baseY + Math.random() * 10; // 0-10% variance vertically
+
+      setHitEffects((prev) => [
+        ...prev,
+        {id: hitId, damage: burst.toString(), x: randomX, y: randomY},
+      ]);
+
+      setTimeout(() => {
+        setHitEffects((prev) => prev.filter((effect) => effect.id !== hitId));
+      }, 800);
+    }
+
+    // Special Attack animation lasts 600ms
+    setTimeout(() => setSpecialAttackActive(false), 600);
+  }, [isActive, isCharged, triggerSpecialAttack, playerPokemon, opponentMaxHP]);
+
+  useEffect(() => {
+    if (onSpecialAttackFunctionReady) {
+      onSpecialAttackFunctionReady(handleSpecialAttackWithAnimation);
+    }
+  }, [onSpecialAttackFunctionReady, handleSpecialAttackWithAnimation]);
+
   // Keep attack function ref up to date so the wrapper always calls the latest version
-  const attackFunctionRef = useRef(handleAttackClick);
-  attackFunctionRef.current = handleAttackClick;
+  const attackFunctionRef = useRef(handleAttackWithAnimation);
+  attackFunctionRef.current = handleAttackWithAnimation;
 
   // Create stable wrapper function that won't change between renders
   const attackWrapperRef = useRef<(() => void) | null>(null);
@@ -116,21 +259,30 @@ export function BattleView({
     }
   }, [onAttackFunctionReady]);
 
-  // Calculate rare candy reward
-  const candyPerClick = user?.stats
-    ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
-    : '1';
+  // Calculate rare candy reward - memoized to prevent recalculation when user state updates
+  const rareCandyReward = useMemo(() => {
+    const candyPerClick = user?.stats
+      ? calculateCandyPerClick(user.stats, user.owned_pokemon_ids?.length || 0)
+      : '1';
 
-  // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 4)
-  const clickReward = toDecimal(finalClickCount).times(candyPerClick).times(2);
+    // New reward formula: (clicks × candyPerClick × 2) + (opponent price / 4)
+    const clickReward = toDecimal(finalClickCount)
+      .times(candyPerClick)
+      .times(2);
 
-  const opponentPrice = opponentPokemon.price
-    ? toDecimal(opponentPokemon.price)
-    : toDecimal(0);
-  const priceBonus = opponentPrice.dividedBy(4);
+    const opponentPrice = opponentPokemon.price
+      ? toDecimal(opponentPokemon.price)
+      : toDecimal(0);
+    const priceBonus = opponentPrice.dividedBy(4);
 
-  const battleReward = clickReward.plus(priceBonus);
-  const rareCandyReward = battleReward.floor().toString();
+    const battleReward = clickReward.plus(priceBonus);
+    return battleReward.floor().toString();
+  }, [
+    finalClickCount,
+    opponentPokemon.price,
+    user?.stats,
+    user?.owned_pokemon_ids?.length,
+  ]);
 
   // Ready countdown state
   const [readyCount, setReadyCount] = useState(3);
@@ -161,21 +313,14 @@ export function BattleView({
       toDecimal(rareCandyReward).gt(0) &&
       !candyAwarded
     ) {
-      // Award candy immediately
-      updateRareCandy(rareCandyReward, updateUser);
+      // Award candy immediately to global context (will auto-sync to backend)
+      addCandy(rareCandyReward);
       setCandyAwarded(true);
 
       // Trigger immediate battle end callback (removes Pokemon from map)
       onBattleEnd?.(battleResult);
     }
-  }, [
-    battleResult,
-    rareCandyReward,
-    candyAwarded,
-    updateRareCandy,
-    updateUser,
-    onBattleEnd,
-  ]);
+  }, [battleResult, rareCandyReward, candyAwarded, addCandy, onBattleEnd]);
 
   type LayoutPosition = {
     width: string;
@@ -440,7 +585,7 @@ export function BattleView({
           linear-gradient(0deg, #d1fae5 0%, #a7f3d0 20%, #6ee7b7 40%, #34d399 60%, #6ee7b7 80%, #a7f3d0 100%)
         `,
       }}
-      onClick={handleAttackClick}
+      onClick={handleAttackWithAnimation}
     >
       <img
         src={getPlatformImage(opponentPokemon.types)}
@@ -466,9 +611,32 @@ export function BattleView({
           objectFit: 'contain',
           objectPosition: 'center bottom',
           ...createPositionStyle(layoutConfig.opponentSprite),
+          animation: opponentHit ? 'shake 0.3s ease-in-out' : 'none',
         }}
         aria-label={`Opponent: ${capitalizeName(opponentPokemon.name)}`}
       />
+      {/* Special Attack visual effect */}
+      {specialAttackActive && (
+        <div
+          className="absolute z-20 pointer-events-none"
+          style={{
+            ...createPositionStyle(layoutConfig.opponentSprite),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            className="text-6xl md:text-8xl"
+            style={{
+              animation: 'specialAttackBurst 0.6s ease-out',
+              filter: 'drop-shadow(0 0 15px rgba(234, 179, 8, 1))',
+            }}
+          >
+            ⚡
+          </div>
+        </div>
+      )}
       {/* Opponent health bar */}
       <aside
         className="absolute z-10"
@@ -501,19 +669,63 @@ export function BattleView({
         aria-hidden="true"
       />
       {/* Player Pokemon sprite */}
-      <img
-        src={playerPokemon.sprite}
-        alt={capitalizeName(playerPokemon.name)}
-        className="absolute image-pixelated z-10"
-        decoding="async"
+      <div
+        className="absolute z-10"
         style={{
-          imageRendering: 'pixelated',
-          objectFit: 'contain',
-          objectPosition: 'center bottom',
-          ...createPositionStyle(layoutConfig.playerSprite),
+          ...(() => {
+            const style = createPositionStyle(layoutConfig.playerSprite);
+            // Remove scaleX from transform and apply it to inner img instead
+            const transformWithoutScale = style.transform
+              ?.replace(/scaleX\([^)]*\)\s*/g, '')
+              .trim();
+            return {
+              ...style,
+              transform: transformWithoutScale || undefined,
+            };
+          })(),
+          animation: playerAttacking ? 'bounce 0.2s ease-in-out' : 'none',
         }}
-        aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
-      />
+      >
+        <img
+          src={playerPokemon.sprite}
+          alt={capitalizeName(playerPokemon.name)}
+          className="image-pixelated"
+          decoding="async"
+          style={{
+            imageRendering: 'pixelated',
+            objectFit: 'contain',
+            objectPosition: 'center bottom',
+            width: '100%',
+            height: '100%',
+            transform: 'scaleX(-1)',
+          }}
+          aria-label={`Click to attack with ${capitalizeName(playerPokemon.name)}`}
+        />
+      </div>
+      {/* Special Defense visual effect */}
+      {specialDefenseActive && (
+        <div
+          className="absolute z-20 pointer-events-none"
+          style={{
+            ...createPositionStyle(layoutConfig.playerSprite),
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            transform:
+              `${createPositionStyle(layoutConfig.playerSprite).transform || ''} translateY(-30%)`.trim(),
+          }}
+        >
+          <div
+            className="text-6xl md:text-8xl"
+            style={{
+              animation: 'specialDefensePulse 2s ease-in-out',
+              filter: 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.8))',
+            }}
+          >
+            🛡️
+          </div>
+        </div>
+      )}
       {/* Player health bar */}
       <aside
         className="absolute z-10"
@@ -542,12 +754,12 @@ export function BattleView({
             e.stopPropagation();
             onBattleComplete();
           }}
-          className="absolute top-11 md:top-12 left-2 z-30 flex items-center gap-1 active:bg-red-700 border-2 border-black px-2 py-1 touch-manipulation"
+          className="absolute top-11 md:top-12 left-2 z-30 flex cursor-pointer items-center gap-1 active:bg-red-700 border-2 border-black px-2 py-1 touch-manipulation"
           title="Run from battle"
           aria-label="Run from battle"
           style={{
             WebkitTapHighlightColor: 'transparent',
-            backgroundColor: 'rgba(239, 68, 68, 0.9)',
+            backgroundColor: '#b91c1c',
             boxShadow: '4px 4px 0px rgba(0,0,0,1)',
             transform: 'translate(0, 0)',
             transition: 'all 0.15s ease-in-out',
@@ -555,12 +767,12 @@ export function BattleView({
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translate(-2px, -2px)';
             e.currentTarget.style.boxShadow = '6px 6px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(220, 38, 38, 0.95)';
+            e.currentTarget.style.backgroundColor = '#991b1b';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translate(0, 0)';
             e.currentTarget.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.9)';
+            e.currentTarget.style.backgroundColor = '#b91c1c';
           }}
         >
           <svg
@@ -632,7 +844,7 @@ export function BattleView({
             aria-label="Battle special moves"
           >
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs cursor-pointer border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
@@ -643,10 +855,11 @@ export function BattleView({
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCharged) triggerSpecialAttack();
+                if (isCharged) handleSpecialAttackWithAnimation();
               }}
               disabled={!isCharged}
               tabIndex={0}
+              aria-label="Special attack ability"
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -664,31 +877,37 @@ export function BattleView({
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
-                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                  isDarkMode
+                    ? !isCharged
+                      ? 'text-gray-300'
+                      : 'text-white drop-shadow-lg'
+                    : !isCharged
+                      ? 'text-gray-700'
+                      : 'text-black drop-shadow-lg'
                 }`}
               >
-                <span className="md:hidden" aria-label="Special attack">
-                  Sp.Att
-                </span>
+                <span className="md:hidden">Sp.Atk</span>
                 <span className="hidden md:inline">Special Attack</span>
               </span>
             </button>
             <button
-              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+              className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs cursor-pointer border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
                 isDarkMode
                   ? 'bg-gray-800 hover:bg-gray-700 text-white border-gray-600'
                   : 'bg-gray-200 hover:bg-gray-300 text-black border-black'
-              } ${!isCharged ? 'cursor-not-allowed' : ''} ${
-                isCharged
+              } ${!isSpecialDefenseCharged ? 'cursor-not-allowed' : ''} ${
+                isSpecialDefenseCharged
                   ? 'ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50'
                   : ''
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCharged) triggerShield();
+                if (isSpecialDefenseCharged)
+                  handleSpecialDefenseWithAnimation();
               }}
-              disabled={!isCharged}
+              disabled={!isSpecialDefenseCharged}
               tabIndex={0}
+              aria-label="Special defense ability to reduce incoming damage"
             >
               {/* Charge progress bar with glow effect */}
               <div
@@ -696,26 +915,116 @@ export function BattleView({
                   isDarkMode
                     ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400'
                     : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
-                } ${isCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
-                style={{height: `${chargeProgress}%`}}
+                } ${isSpecialDefenseCharged ? 'shadow-lg shadow-blue-500/50' : ''}`}
+                style={{height: `${specialDefenseCharge}%`}}
                 role="progressbar"
-                aria-valuenow={chargeProgress}
+                aria-valuenow={specialDefenseCharge}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-hidden="true"
               />
               <span
                 className={`relative z-10 font-bold transition-colors duration-300 ${
-                  !isCharged ? 'text-gray-800' : 'text-white drop-shadow-lg'
+                  isDarkMode
+                    ? !isSpecialDefenseCharged
+                      ? 'text-gray-300'
+                      : 'text-white drop-shadow-lg'
+                    : !isSpecialDefenseCharged
+                      ? 'text-gray-700'
+                      : 'text-black drop-shadow-lg'
                 }`}
-                aria-label="Shield"
               >
-                Shield
+                <span className="md:hidden">Sp.Def</span>
+                <span className="hidden md:inline">Special Defense</span>
               </span>
             </button>
           </nav>
         </section>
       )}
+
+      {/* Hit effect damage numbers */}
+      {hitEffects.map((effect) => (
+        <div
+          key={effect.id}
+          className="absolute z-40 pixel-font text-lg md:text-xl font-bold text-white pointer-events-none"
+          style={{
+            left: `${effect.x}%`,
+            top: `${effect.y}%`,
+            animation: 'hitEffect 0.8s ease-out forwards',
+            textShadow:
+              '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 8px rgba(255,255,255,0.8)',
+          }}
+        >
+          -{effect.damage}
+        </div>
+      ))}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
+        }
+
+        @keyframes hitEffect {
+          0% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-40px) scale(1.3);
+          }
+        }
+
+        @keyframes specialDefensePulse {
+          0% {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          20% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          80% {
+            opacity: 0.6;
+            transform: scale(1.1);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+        }
+
+        @keyframes specialAttackBurst {
+          0% {
+            opacity: 0;
+            transform: scale(0.3) rotate(0deg);
+          }
+          30% {
+            opacity: 1;
+            transform: scale(1.5) rotate(90deg);
+          }
+          60% {
+            opacity: 0.8;
+            transform: scale(1.2) rotate(180deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(2) rotate(360deg);
+          }
+        }
+      `}</style>
     </main>
   );
 }

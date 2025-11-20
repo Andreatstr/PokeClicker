@@ -217,7 +217,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
         >
           <button
             onClick={toggleMinimize}
-            className="relative w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            className="relative cursor-pointer w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -255,7 +255,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           <button
             onClick={() => prevTrack()}
             disabled={tracks.length === 0}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -279,7 +279,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={togglePlay}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -307,7 +307,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={nextTrack}
-            className="w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-8 h-8 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -332,7 +332,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           <button
             onClick={decreaseVolume}
             disabled={volume === 0}
-            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -357,7 +357,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
           <button
             onClick={increaseVolume}
             disabled={volume === 1}
-            className="w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-7 h-7 hover:opacity-70 disabled:opacity-30 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}
@@ -396,7 +396,7 @@ export function BackgroundMusic({isDarkMode = false}: BackgroundMusicProps) {
 
           <button
             onClick={toggleMinimize}
-            className="w-7 h-7 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
+            className="cursor-pointer w-7 h-7 hover:opacity-70 transition-opacity border-0 focus-visible:outline-none"
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = `0 0 0 2px ${focusOffsetColor}, 0 0 0 6px ${focusRingColor}`;
             }}

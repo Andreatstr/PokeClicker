@@ -30,11 +30,12 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
 
     const isGuest = user.username.toLowerCase() === 'guest';
 
-    // Guest users use sessionStorage to show tutorial on each new login but not on page reloads
-    // Regular users use localStorage to show tutorial only once ever
+    // Use per-user keys to track completion separately for each user
+    // Guest users: sessionStorage (tutorial shows on each new login, not on page reload)
+    // Regular users: localStorage with username (tutorial shows once per user)
     const storageKey = isGuest
       ? 'onboarding_completed_session'
-      : 'onboarding_completed';
+      : `onboarding_completed_${user.username}`;
     const storage = isGuest ? sessionStorage : localStorage;
     const hasSeenTutorial = storage.getItem(storageKey);
 
@@ -59,11 +60,11 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
     setIsActive(false);
     const isGuest = user?.username.toLowerCase() === 'guest';
 
-    // Persist completion status using appropriate storage for user type
+    // Persist completion status using per-user key
     if (isGuest) {
       sessionStorage.setItem('onboarding_completed_session', 'true');
-    } else {
-      localStorage.setItem('onboarding_completed', 'true');
+    } else if (user) {
+      localStorage.setItem(`onboarding_completed_${user.username}`, 'true');
     }
   };
 
@@ -73,8 +74,8 @@ export function OnboardingProvider({children}: OnboardingProviderProps) {
     // Clear completion flags to allow tutorial replay
     if (isGuest) {
       sessionStorage.removeItem('onboarding_completed_session');
-    } else {
-      localStorage.removeItem('onboarding_completed');
+    } else if (user) {
+      localStorage.removeItem(`onboarding_completed_${user.username}`);
     }
     setStep(0);
     setIsActive(true);

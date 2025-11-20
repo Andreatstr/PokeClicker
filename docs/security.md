@@ -10,148 +10,54 @@ This document describes the security measures and implementations in the PokéCl
 
 ### Issue #64: JWT Secret Security Vulnerability
 
-**Problem**: Hardcoded fallback value `'change_me'` was a critical security risk.
+**Problem**: Hardcoded fallback value `'change_me'` was a critical security risk. If `JWT_SECRET` environment variable was not set, the application would use the hardcoded value, making all JWT tokens easily hackable.
 
-```typescript
-// INSECURE - before fix
-const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
-```
+**Fix**: Implemented validation in resolvers.ts to throw error if JWT_SECRET is not set. Note: auth.ts still has fallback and should be updated.
 
-If `JWT_SECRET` environment variable was not set, the application would use the hardcoded value, making all JWT tokens easily hackable.
-
-**Fix**: Partially fixed - resolvers.ts validates, but auth.ts still has fallback.
-
-```typescript
-// In resolvers.ts - SECURE
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET must be set in environment variables');
-}
-
-// In auth.ts - STILL INSECURE (line 4)
-const JWT_SECRET = process.env.JWT_SECRET || 'change_me';
-```
-
-**Result**: Application fails at startup if JWT_SECRET is not set (due to resolvers.ts), but auth.ts code should be updated to match.
+**Result**: Application fails at startup if JWT_SECRET is not set (due to resolvers.ts), preventing deployment with insecure configuration.
 
 ### Issue #65: Environment Variable Configuration
 
-**Problem**: Hardcoded URLs and configuration values throughout the codebase.
+**Problem**: Hardcoded URLs and configuration values throughout the codebase made it difficult to deploy to different environments and exposed internal infrastructure details.
 
-```typescript
-// INSECURE - before fix
-const API_URL = 'http://localhost:3001/graphql';
-```
+**Fix**: Implemented proper environment variable configuration in backend/.env (PORT, MONGODB_URI, JWT_SECRET) and frontend/.env (VITE_GRAPHQL_URL).
 
-This made it difficult to deploy to different environments and exposed internal infrastructure details.
-
-**Fix**: Implemented proper environment variable configuration.
-
-**Backend** (`backend/.env`):
-```env
-PORT=3001
-MONGODB_URI=mongodb://localhost:27017
-JWT_SECRET=your_secure_jwt_secret_here
-```
-
-**Frontend** (`frontend/.env`):
-```env
-VITE_GRAPHQL_URL=http://localhost:3001/
-```
-
-**Result**:
-- Better deployment flexibility
-- Environment-specific configuration
-- No hardcoded secrets in codebase
-- Easier to manage different environments (dev, staging, prod)
+**Result**: Better deployment flexibility, environment-specific configuration, no hardcoded secrets in codebase, easier to manage different environments.
 
 ### Issue #66: Rate Limiting Implementation
 
 **Problem**: No protection against API abuse or DoS attacks.
 
-**Fix**: Implemented custom rate limiting optimized for clicker game.
+**Fix**: Implemented custom rate limiting with 1000 requests per 15 minutes per IP using in-memory store. High limit chosen specifically for clicker game's high request frequency.
 
-**Configuration**:
-- **1000 requests per 15 minutes** per IP
-- Custom in-memory rate limiting store
-- Per-IP tracking
-
-**Why 1000 requests?**
-- Clicker games require high request frequency
-- Balance between security and usability
-
-**Result**:
-- Protection against API abuse
-- Normal gameplay unaffected
+**Result**: Protection against API abuse while allowing normal gameplay to continue unaffected.
 
 ## Authentication and Authorization
 
 ### JWT Token Authentication
 
-**Token Generation**:
-```typescript
-const token = jwt.sign(
-  { userId: user._id },
-  JWT_SECRET,
-  { expiresIn: '7d' }
-);
-```
-
-**Token Validation**:
+- Tokens signed with JWT_SECRET and expire after 7 days
 - All protected routes require valid JWT token
-- Tokens expire after 7 days
-- Token verified on every request
-- Invalid tokens rejected with 401 Unauthorized
-
-**Security Features**:
-- Tokens signed with secure secret
-- Automatic expiration (7 days)
-- No sensitive data in token payload (only user ID)
+- Token verified on every request, invalid tokens rejected with 401
+- Token payload contains only user ID (no sensitive data)
 
 ### Password Security
 
-**Hashing with bcrypt**:
-```typescript
-const BCRYPT_SALT_ROUNDS = 10;
-const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
-```
-
-**Security Features**:
-- Passwords never stored in plaintext
-- Salt rounds: 10 (good balance of security and performance)
-- Rainbow table attacks prevented
-- Brute force attacks significantly slowed
-
-**Password Verification**:
-```typescript
-const isValid = await bcrypt.compare(password, user.password_hash);
-```
+- Passwords hashed with bcrypt using 10 salt rounds
+- Never stored in plaintext
+- Prevents rainbow table and brute force attacks
+- Secure verification on login using bcrypt.compare()
 
 ## Environment Variable Security
 
 ### Gitignore Configuration
 
-All environment files are gitignored:
-```
-.env
-.env.local
-.env.production
-backend/.env
-frontend/.env
-```
-
-**Why this matters**:
-- Prevents accidental commit of secrets
-- Protects API keys and passwords
-- Prevents exposure in version control
-- Reduces risk of credential leaks
+All environment files (.env, .env.local, .env.production, backend/.env, frontend/.env) are gitignored to prevent accidental commit of secrets and credential leaks.
 
 ### Required Environment Variables
 
-The application validates required environment variables at startup:
-
 **Backend**:
-- `JWT_SECRET` - REQUIRED (no fallback)
+- `JWT_SECRET` - REQUIRED (no fallback, application fails at startup if not set)
 - `MONGODB_URI` - Optional (defaults to localhost)
 - `PORT` - Optional (defaults to 3001)
 
@@ -162,78 +68,23 @@ The application validates required environment variables at startup:
 
 ### MongoDB Security
 
-**Connection Security**:
-- Connection string in environment variables
-- No credentials in code
-- Database name configurable
-
-**Data Validation**:
+- Connection string in environment variables (no credentials in code)
 - Input validation on all mutations
-- Type checking with TypeScript
-- GraphQL schema validation
+- Type checking with TypeScript and GraphQL schema validation
 
 ### GraphQL Security
 
-**Input Sanitization**:
-- User inputs validated in resolvers
+- User inputs validated in resolvers (username length, password requirements)
 - Type safety through TypeScript
 - XSS protection through React (escapes output automatically)
 
 ## Input Validation
 
-### GraphQL Input Validation
-
-All mutations validate inputs:
-```typescript
-// Username validation
-if (username.length < 3 || username.length > 20) {
-  throw new Error('Username must be between 3 and 20 characters');
-}
-
-// Password validation
-if (password.length < 6) {
-  throw new Error('Password must be at least 6 characters');
-}
-```
-
-### MongoDB Query Validation
-
-- Use parameterized queries
-- No string concatenation in queries
-- Type safety through TypeScript
-
-## Error Handling
-
-**Secure Error Messages**:
-- Don't expose stack traces in production
-- Generic error messages to clients
-- Detailed errors logged server-side only
-
-**Example**:
-```typescript
-// Production error response
-{ error: 'Authentication failed' }
-
-// NOT: { error: 'User not found in database mongodb://...' }
-```
-
-## Dependency Security
-
-### Regular Updates
-
-- Dependencies updated regularly
-- Security patches applied promptly
-- Automated vulnerability scanning
-
-### Audit Commands
-
-```bash
-# Check for vulnerabilities
-pnpm audit
-
-# Check outdated packages
-pnpm outdated
-```
+All GraphQL mutations implement input validation:
+- Username: 3-20 characters
+- Password: minimum 6 characters
+- MongoDB queries use parameterized queries (no string concatenation)
+- Type safety enforced through TypeScript
 
 ## Security Best Practices Applied
 

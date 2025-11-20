@@ -1,4 +1,4 @@
-TI# Architecture
+# Architecture
 
 **[Home](../README.md)** | **[Setup](./setup.md)** | **[Architecture](./architecture.md)** | **[Testing](./testing.md)** | **[Security](./security.md)** | **[Sustainability](./sustainability.md)** | **[Development Workflow](./development-workflow.md)** | **[AI Usage](./ai-usage.md)**
 
@@ -141,110 +141,28 @@ Caching significantly improves response times:
 
 ### The Problem
 
-When we implemented the Pokédex with search, filtering and sorting, we encountered a fundamental scalability issue:
-
-#### 1. PokéAPI REST limitations
-- No server-side filtering or sorting
-- Only individual lookups (one Pokémon per API call)
-- To sort 151 Kanto Pokémon alphabetically: Fetch all 151 (151 API calls) → sort in memory → show 20
-- **Result**: 151+ API calls to display 20 Pokémon
-
-#### 2. PokéAPI GraphQL
-- Supports server-side filtering/sorting
-- **But**: 100 calls/time rate limit (free tier)
-- **Problem**: With multiple users and developers we would quickly hit the limit
-
-#### 3. Naive solution (our first implementation)
-
-```javascript
-// Fetch ALL Pokémon → filter → sort → return 20
-const allPokemon = await fetchPokemon({limit: 1025});
-const filtered = allPokemon.filter(...);
-const sorted = filtered.sort(...);
-return sorted.slice(0, 20);
-```
-
-- **Works with 1025 Pokémon**, but...
-- **Does NOT scale**: With 1 million Pokémon → Out of Memory
-- **Inefficient**: Fetches 1005 Pokémon we never display
-- **Slow**: Requires fetching all Pokemon before filtering
+PokéAPI's REST API doesn't support server-side filtering or sorting, requiring us to fetch all Pokémon (1025+ API calls) to display 20 filtered results. PokéAPI's GraphQL has a 100 calls/hour rate limit unsuitable for multiple users.
 
 ### Our Solution: MongoDB Metadata + PokéAPI Details
 
+We store lightweight Pokemon metadata (id, name, types, generation) in MongoDB for filtering/sorting, then fetch full data only for the 20 displayed results from PokéAPI.
+
+**Flow**:
 ```
 User → MongoDB (filter/sort/paginate) → 20 Pokemon IDs
-     → PokéAPI (fetch full data) → 20 Pokémon to user
+     → PokéAPI (fetch details) → 20 Pokémon displayed
 ```
 
-#### Implementation
-
-**1. Seed Pokemon metadata to MongoDB** (`pnpm run seed` in backend/):
-- Basic info: id, name, types, generation, sprite URL
-- Run once to populate the database
-- Minimal storage per Pokemon (just metadata, not full data)
-
-**2. MongoDB handles querying:**
-
-```javascript
-const pokemonMeta = await collection
-  .find({generation: 'kanto', types: 'fire'})
-  .sort({name: 1})
-  .skip(0)
-  .limit(20)
-  .toArray();
-```
-
-- Indexed for fast search
-- Supports regex search, multi-field filtering
-- **Works equally fast with 1 billion records** (with proper indexes)
-
-**3. Fetch full data only for the 20:**
-
-```javascript
-const fullPokemon = await Promise.all(
-  pokemonMeta.map((meta) => fetchPokemonById(meta.id))
-);
-```
-
-- 20 API calls instead of 1025+
-- With caching: Subsequent requests served from memory
-
-#### Why This Scales
-
-- **O(log n) queries**: MongoDB uses B-tree indexes
-- **Constant API usage**: Always only 20 API calls per page (limit parameter)
-- **Low memory usage**: Only 20 Pokémon in memory, not all 1025
-- **Fast response**: Database queries are fast, API calls parallelized
-- **Scales well**: Architecture doesn't change with data volume
-
-## Security Architecture
-
-### Issue #64: JWT Secret Security Vulnerability
-- **Fixed**: Removed hardcoded fallback `'change_me'` which was a security risk
-- **Implemented**: Proper environment variable validation with error handling
-- **Result**: Application fails gracefully if JWT_SECRET is not set
-
-### Issue #65: Environment Variable Configuration
-- **Fixed**: Replaced hardcoded URLs with `VITE_GRAPHQL_URL` environment variable
-- **Implemented**: Frontend and backend environment configuration
-- **Result**: Better deployment flexibility and environment-specific config
-
-### Issue #66: Rate Limiting Implementation
-- **Fixed**: Implemented rate limiting optimized for clicker game
-- **Configured**: 1000 requests per 15 minutes (much higher than typical web apps)
-- **Result**: Protection against abuse while allowing normal game activity
-
-### Security Improvements
-- **Environment files**: All `.env` files are gitignored to prevent accidental commit of sensitive data
-- **Rate limiting**: Game-optimized limits that allow high-frequency clicking
-- **JWT security**: No hardcoded secrets, proper validation
+**Benefits**:
+- **Scalable**: MongoDB indexed queries are O(log n), works with millions of records
+- **Efficient**: 20 API calls per page instead of 1025+
+- **Fast**: Database queries + parallelized API calls with caching
+- **Low memory**: Only 20 Pokémon in memory at once
 
 ## External API: PokéAPI
 
-Pokémon information (name, types, stats, sprites) is fetched from [PokéAPI](https://pokeapi.co/) instead of being stored in our own database. This reduces duplication and keeps data up-to-date.
+Pokémon information (sprites, stats, evolutions) is fetched from [PokéAPI](https://pokeapi.co/), keeping data up-to-date without duplicating their database.
 
-**Why use external API?**
-- Always up-to-date Pokemon data
-- Reduces database storage needs
-- No need to maintain Pokemon data ourselves
-- Rich dataset with sprites, stats, evolutions, etc.
+## Security
+
+See [security.md](./security.md) for detailed security measures including JWT authentication, rate limiting, and environment variable handling.

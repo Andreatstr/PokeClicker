@@ -128,6 +128,8 @@ const authMutations = {
       rare_candy: DEFAULT_USER_STATS.rare_candy ?? '0',
       stats: DEFAULT_USER_STATS.stats,
       owned_pokemon_ids: [746], // Wishiwashi-solo - cheapest Pokemon
+      favorite_pokemon_id: 746, // Default battle Pokemon
+      selected_pokemon_id: 746, // Default clicker Pokemon
       showInRanks: true,
       isGuestUser: isGuestUser ?? false,
     };
@@ -317,9 +319,26 @@ export const resolvers = {
       if (!pokemon) return null;
 
       let isOwned = false;
+      let bst: number | undefined;
+      let price: string | undefined;
+
+      const db = getDatabase();
+
+      // Fetch metadata for bst and price
+      try {
+        const metadataCollection = db.collection('pokemon_metadata');
+        const metadata = await metadataCollection.findOne({id});
+        if (metadata) {
+          bst = metadata.bst;
+          price = metadata.price;
+        }
+      } catch (error) {
+        console.error('Error fetching Pokemon metadata:', error);
+      }
+
+      // Check ownership
       if (context.user?.id) {
         try {
-          const db = getDatabase();
           const users = db.collection('users');
           const user = await users.findOne({
             _id: new ObjectId(context.user.id),
@@ -336,6 +355,8 @@ export const resolvers = {
         ...pokemon,
         isOwned,
         pokedexNumber: pokemon.id,
+        bst,
+        price,
       };
     },
     pokemonByIds: async (
@@ -347,9 +368,25 @@ export const resolvers = {
       const pokemon = await Promise.all(pokemonPromises);
 
       let ownedPokemonIds: number[] = [];
+      const db = getDatabase();
+
+      // Fetch metadata for all Pokemon
+      let metadataMap = new Map<number, {bst?: number; price?: string}>();
+      try {
+        const metadataCollection = db.collection('pokemon_metadata');
+        const metadataList = await metadataCollection
+          .find({id: {$in: ids}})
+          .toArray();
+        metadataMap = new Map(
+          metadataList.map((m) => [m.id, {bst: m.bst, price: m.price}])
+        );
+      } catch (error) {
+        console.error('Error fetching Pokemon metadata:', error);
+      }
+
+      // Check ownership
       if (context.user?.id) {
         try {
-          const db = getDatabase();
           const users = db.collection('users');
           const user = await users.findOne({
             _id: new ObjectId(context.user.id),
@@ -362,11 +399,80 @@ export const resolvers = {
         }
       }
 
-      return pokemon.filter(Boolean).map((p) => ({
-        ...p,
-        isOwned: ownedPokemonIds.includes(p.id),
-        pokedexNumber: p.id,
-      }));
+      return pokemon.filter(Boolean).map((p) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          isOwned: ownedPokemonIds.includes(p.id),
+          pokedexNumber: p.id,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
+    },
+    pokemonByBSTRange: async (
+      _: unknown,
+      {
+        minBST,
+        maxBST,
+        limit = 100,
+      }: {minBST: number; maxBST: number; limit?: number},
+      context: AuthContext
+    ) => {
+      const db = getDatabase();
+
+      // Query metadata collection for Pokemon in BST range
+      const metadataCollection =
+        db.collection<PokemonMetadata>('pokemon_metadata');
+      const pokemonMetadata = await metadataCollection
+        .find({
+          bst: {$gte: minBST, $lte: maxBST},
+        })
+        .limit(limit)
+        .toArray();
+
+      // Extract Pokemon IDs
+      const pokemonIds = pokemonMetadata.map((m) => m.id);
+
+      if (pokemonIds.length === 0) {
+        return [];
+      }
+
+      // Fetch full Pokemon data from PokeAPI
+      const pokemonPromises = pokemonIds.map((id) => fetchPokemonById(id));
+      const pokemon = await Promise.all(pokemonPromises);
+
+      // Create metadata map for quick lookup
+      const metadataMap = new Map(
+        pokemonMetadata.map((m) => [m.id, {bst: m.bst, price: m.price}])
+      );
+
+      // Check ownership
+      let ownedPokemonIds: number[] = [];
+      if (context.user?.id) {
+        try {
+          const users = db.collection('users');
+          const user = await users.findOne({
+            _id: new ObjectId(context.user.id),
+          });
+          if (user && user.owned_pokemon_ids) {
+            ownedPokemonIds = user.owned_pokemon_ids;
+          }
+        } catch (error) {
+          console.error('Error fetching user owned Pokemon:', error);
+        }
+      }
+
+      return pokemon.filter(Boolean).map((p) => {
+        const meta = metadataMap.get(p.id);
+        return {
+          ...p,
+          isOwned: ownedPokemonIds.includes(p.id),
+          pokedexNumber: p.id,
+          bst: meta?.bst,
+          price: meta?.price,
+        };
+      });
     },
     pokedex: async (
       _: unknown,

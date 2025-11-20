@@ -167,7 +167,10 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
   }
 
   return (
-    <main className="fixed inset-0 bg-cover bg-center flex items-center justify-center">
+    <main
+      className="fixed inset-0 bg-cover bg-center flex items-center justify-center"
+      aria-label="Login and signup screen"
+    >
       {/* Video Background */}
       <video
         autoPlay
@@ -176,6 +179,8 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
         poster="/project2/loginBackground.webp"
+        onError={() => console.error('Video failed to load')}
+        aria-label="Background video"
       >
         <source src="/project2/loginBackgroundVideo.mp4" type="video/mp4" />
         Your browser does not support the video tag.
@@ -185,11 +190,13 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
       <section
         className={`z-20 flex flex-col items-center text-center mx-auto ${isMobile ? 'max-w-xs gap-2 px-3' : 'max-w-md gap-6 px-6'}`}
         aria-labelledby="login-heading"
+        aria-label="Authentication options"
       >
         <h1
           id="login-heading"
           className={`pixel-font text-white ${isMobile ? 'text-3xl' : 'text-4xl md:text-5xl'} mb-3 drop-shadow-lg`}
           style={{WebkitTextStroke: '2px black', color: 'white'}}
+          aria-label="PokeClicker application title"
         >
           PokeClicker
         </h1>
@@ -234,6 +241,7 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
               }}
               aria-modal="true"
               role="dialog"
+              aria-label={`${modalType === 'login' ? 'Login' : 'Signup'} modal`}
             >
               <div
                 id="auth-modal"
@@ -243,11 +251,12 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
                   borderColor: 'var(--border)',
                 }}
                 onClick={(e) => e.stopPropagation()}
+                aria-label="Authentication form container"
               >
                 <button
                   onClick={() => setModalType(null)}
                   onKeyDown={handleCloseButtonKey}
-                  className="absolute top-3 right-4 text-xl font-bold text-red-600 focus:outline-red"
+                  className="absolute top-3 right-4 text-xl font-bold cursor-pointer text-red-600 focus:outline-red"
                   aria-label="Close modal"
                 >
                   x
@@ -255,6 +264,9 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
                 <h2
                   className="pixel-font text-xl mb-4"
                   style={{color: 'var(--foreground)'}}
+                  aria-label={
+                    modalType === 'login' ? 'Login form' : 'Signup form'
+                  }
                 >
                   {modalType === 'login' ? 'Log in' : 'Sign up'}
                 </h2>
@@ -290,7 +302,8 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
                     {errors.username && (
                       <p
                         className="text-xs mt-1"
-                        style={{color: 'var(--destructive)'}}
+                        style={{color: isDarkMode ? '#ff5050ff' : '#d40000ff'}}
+                        aria-label="Username error message"
                       >
                         {errors.username.message}
                       </p>
@@ -319,7 +332,8 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
                     {errors.password && (
                       <p
                         className="text-xs mt-1"
-                        style={{color: 'var(--destructive)'}}
+                        style={{color: isDarkMode ? '#ff5050ff' : '#d40000ff'}}
+                        aria-label="Password error message"
                       >
                         {errors.password.message}
                       </p>
@@ -349,11 +363,16 @@ export function LoginScreen({onNavigate, isDarkMode}: Props) {
 
                   <button
                     type="button"
-                    className="text-xs text-blue-700 underline mt-2"
-                    aria-label={`${modalType === 'login' ? "Don't have a user? Sign up here" : 'Already have an account? Log in here'}`}
+                    className="text-xs underline mt-2 cursor-pointer"
+                    aria-label={
+                      modalType === 'login'
+                        ? 'Switch to signup form'
+                        : 'Switch to login form'
+                    }
                     onClick={() =>
                       setModalType(modalType === 'login' ? 'signup' : 'login')
                     }
+                    style={{color: isDarkMode ? '#509cffff' : '#0000ffff'}}
                   >
                     {modalType === 'login'
                       ? "Don't have a user? Sign up here"

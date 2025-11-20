@@ -136,7 +136,9 @@ export function usePurchasePokemon() {
         }
 
         // Calculate optimistic rare_candy after purchase
-        const pokemonCost = getPokemonCost(variables.pokemonId);
+        // Use provided price if available (from database), otherwise fall back to client calculation
+        const pokemonCost =
+          variables.price ?? getPokemonCost(variables.pokemonId).toString();
         const optimisticRareCandy = toDecimal(user.rare_candy)
           .minus(pokemonCost)
           .toString();

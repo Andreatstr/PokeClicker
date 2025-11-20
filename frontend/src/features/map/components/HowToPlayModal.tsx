@@ -64,7 +64,7 @@ export function HowToPlayModal({
         >
           {/* Close Button */}
           <button
-            className="absolute top-2 right-2 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center text-sm bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+            className="absolute top-2 right-2 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center cursor-pointer justify-center text-sm bg-red-600 text-white font-bold border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
             onClick={onClose}
             aria-label="Exit"
           >
@@ -172,6 +172,7 @@ export function HowToPlayModal({
                     }}
                     onClick={(e) => e.preventDefault()}
                     aria-label="Battle button - demo only"
+                    tabIndex={-1}
                   >
                     Battle!
                   </button>
@@ -422,7 +423,7 @@ export function HowToPlayModal({
                 >
                   Controls
                 </h3>
-                <div className="flex items-start justify-center gap-8 md:gap-24 flex-wrap">
+                <div className="flex items-start justify-center gap-8 md:gap-14 flex-wrap">
                   <div className="flex flex-col gap-2 items-center">
                     <span
                       className="pixel-font text-[11px] font-bold text-center"
@@ -436,6 +437,7 @@ export function HowToPlayModal({
                         bgColor="#8B3A62"
                         className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
                         aria-label="B button - demo only"
+                        tabIndex={-1}
                         style={DEMO_BUTTON_STYLE}
                       >
                         B
@@ -484,6 +486,7 @@ export function HowToPlayModal({
                         bgColor="#8B3A62"
                         className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
                         aria-label="A button - demo only"
+                        tabIndex={-1}
                         style={DEMO_BUTTON_STYLE}
                       >
                         A
@@ -493,6 +496,7 @@ export function HowToPlayModal({
                         bgColor="#8B3A62"
                         className="w-10 h-10 rounded-full border-2 shadow-lg pixel-font text-xs text-white font-bold p-0"
                         aria-label="B button - demo only"
+                        tabIndex={-1}
                         style={DEMO_BUTTON_STYLE}
                       >
                         B
@@ -530,6 +534,112 @@ export function HowToPlayModal({
                       />
                     </div>
                   </div>
+                  <div className="flex flex-col gap-2 items-center">
+                    <span
+                      className="pixel-font text-[11px] font-bold text-center"
+                      style={{color: accentColor}}
+                    >
+                      Abilities
+                    </span>
+                    <div className="flex items-center justify-center gap-2">
+                      {!isMobile && (
+                        <>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            S
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-2 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            D
+                          </span>
+                        </>
+                      )}
+                      <div className="flex items-center justify-center gap-2">
+                        {/* Sp.Def demo button */}
+                        <button
+                          type="button"
+                          className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+                            isDarkMode
+                              ? 'bg-gray-800 text-white border-gray-600'
+                              : 'bg-gray-200 text-black border-black'
+                          }`}
+                          style={{pointerEvents: 'none'}}
+                          aria-label="Special attack demo button"
+                          tabIndex={-1}
+                        >
+                          <div
+                            className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
+                              isDarkMode
+                                ? 'bg-gradient-to-t from-purple-900 via-purple-600 to-purple-400'
+                                : 'bg-gradient-to-t from-purple-800 via-purple-500 to-purple-300'
+                            } shadow-lg shadow-purple-500/50`}
+                            style={{height: '100%'}}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={`relative z-10 font-bold transition-colors duration-300 ${
+                              isDarkMode
+                                ? 'text-white drop-shadow-lg'
+                                : 'text-black drop-shadow-lg'
+                            }`}
+                          >
+                            <span className="md:hidden">Sp.Atk</span>
+                            <span className="hidden md:inline">
+                              Special Attack
+                            </span>
+                          </span>
+                        </button>
+                        {/* Sp.Def demo button */}
+                        <button
+                          type="button"
+                          className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
+                            isDarkMode
+                              ? 'bg-gray-800 text-white border-gray-600'
+                              : 'bg-gray-200 text-black border-black'
+                          }`}
+                          style={{pointerEvents: 'none'}}
+                          aria-label="Special defense demo button"
+                          tabIndex={-1}
+                        >
+                          <div
+                            className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${
+                              isDarkMode
+                                ? 'bg-gradient-to-t from-blue-900 via-blue-600 to-blue-400'
+                                : 'bg-gradient-to-t from-blue-800 via-blue-500 to-blue-300'
+                            } shadow-lg shadow-blue-500/50`}
+                            style={{height: '100%'}}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={`relative z-10 font-bold transition-colors duration-300 ${
+                              isDarkMode
+                                ? 'text-white drop-shadow-lg'
+                                : 'text-black drop-shadow-lg'
+                            }`}
+                          >
+                            <span className="md:hidden">Sp.Def</span>
+                            <span className="hidden md:inline">
+                              Special Defense
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
@@ -551,7 +661,13 @@ export function HowToPlayModal({
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <span>
-                      Pick Pokémon in Profile wisely to beat hard Pokémon
+                      Pick your Pokémon in wisely to beat hard Pokémon
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>
+                      Use the abilities to survive battles and beat hard Pokémon
                     </span>
                   </li>
                 </ul>
@@ -561,7 +677,7 @@ export function HowToPlayModal({
             {/* Got it! Button */}
             <div className="mt-4 md:mt-5 flex justify-end">
               <button
-                className="pixel-font text-xs font-bold border-2 px-4 min-h-[44px] shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
+                className="pixel-font text-xs font-bold cursor-pointer border-2 px-4 min-h-[44px] shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all"
                 onClick={onClose}
                 style={{
                   backgroundColor: '#11873cff',

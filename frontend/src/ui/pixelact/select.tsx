@@ -82,7 +82,7 @@ function SelectTrigger({
     >
       <ShadcnSelectTrigger
         {...props}
-        className={`rounded-none ring-0 w-full border-0 select-none min-h-[44px] focus-visible:ring-3 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--card)] ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}`}
+        className={`rounded-none cursor-pointer ring-0 w-full border-0 select-none min-h-[44px] focus-visible:ring-3 focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--card)] ${isDarkMode ? 'focus-visible:ring-white' : 'focus-visible:ring-[#0066ff]'}`}
         style={
           {
             backgroundColor: 'var(--input)',
@@ -175,7 +175,7 @@ function SelectItem({
     <ShadcnSelectItem
       className={cn(
         className,
-        'rounded-none border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring select-none min-h-[44px]'
+        'rounded-none cursor-pointer border-y-3 border-dashed border-ring/0 hover:border-foreground dark:hover:border-ring select-none min-h-[44px]'
       )}
       style={
         {

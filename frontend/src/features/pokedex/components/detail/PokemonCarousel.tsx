@@ -8,7 +8,6 @@ import {
   useCarousel,
 } from '@ui/pixelact';
 import type {PokedexPokemon} from '@features/pokedex';
-import {usePurchasePokemon} from '@features/pokedex';
 import type {User} from '@features/auth';
 import {pokemonSpriteCache} from '@/lib/pokemonSpriteCache';
 import {logger} from '@/lib/logger';
@@ -21,10 +20,10 @@ interface PokemonCarouselProps {
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchaseComplete?: (id: number) => void;
-  purchasePokemonMutation: ReturnType<typeof usePurchasePokemon>[0];
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export function PokemonCarousel({
@@ -34,10 +33,10 @@ export function PokemonCarousel({
   onClose,
   onSelectPokemon,
   onPurchaseComplete,
-  purchasePokemonMutation,
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: PokemonCarouselProps) {
   const initialIndex = allPokemon.findIndex((p) => p.id === currentPokemon.id);
 
@@ -83,10 +82,10 @@ export function PokemonCarousel({
               onClose={onClose}
               onSelectPokemon={onSelectPokemon}
               onPurchaseComplete={onPurchaseComplete}
-              purchasePokemonMutation={purchasePokemonMutation}
               updateUser={updateUser}
               user={user}
               ownedPokemonIds={ownedPokemonIds}
+              closeButtonRef={closeButtonRef}
             />
           </CarouselItem>
         ))}
@@ -94,8 +93,10 @@ export function PokemonCarousel({
 
       {/* Position carousel buttons outside the content - hidden on mobile (swipe instead) */}
       {/* These buttons come LAST in tab order, after all modal content */}
-      <CarouselPrevious className="hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
-      <CarouselNext className="hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-[60] w-14 h-14 border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      {/* 44x44px = w-11 h-11, but border-4 adds 8px to each dimension, so we need w-[52px]! h-[52px]! for true 44px clickable area */}
+      {/* Use ! important to override base carousel component's responsive classes */}
+      <CarouselPrevious className="cursor-pointer hidden md:block fixed left-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-60 w-[52px]! h-[52px]! border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
+      <CarouselNext className="cursor-pointer hidden md:block fixed right-[calc(50%-300px)] top-1/2 -translate-y-1/2 z-60 w-[52px]! h-[52px]! border-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_rgba(0,0,0,1)] active:shadow-[2px_2px_0px_rgba(0,0,0,1)] text-2xl" />
     </Carousel>
   );
 }
@@ -108,10 +109,10 @@ function LazyPokemonCard({
   onClose,
   onSelectPokemon,
   onPurchaseComplete,
-  purchasePokemonMutation,
   updateUser,
   user,
   ownedPokemonIds,
+  closeButtonRef,
 }: {
   pokemon: PokedexPokemon;
   index: number;
@@ -119,10 +120,10 @@ function LazyPokemonCard({
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchaseComplete?: (id: number) => void;
-  purchasePokemonMutation: ReturnType<typeof usePurchasePokemon>[0];
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
+  closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const {currentIndex} = useCarousel();
 
@@ -130,29 +131,37 @@ function LazyPokemonCard({
   // This prevents loading evolution chains for all Pokemon at once
   const renderWindow = 1;
   const shouldRender = Math.abs(currentIndex - index) <= renderWindow;
+  const isCurrentCard = currentIndex === index;
 
   if (!shouldRender) {
     return (
       <div
         className="flex flex-col gap-3 md:gap-4 items-center w-full max-w-[400px] mx-auto"
         style={{minHeight: '600px'}}
+        // Use proper React 19 inert attribute - boolean true for non-current cards
+        inert={!isCurrentCard ? true : undefined}
+        aria-hidden={!isCurrentCard}
       >
         {/* Placeholder - content loads when scrolled into view */}
       </div>
     );
   }
 
+  // Wrap in a div with inert to prevent tabbing to non-current cards
+  // In React 19, inert should be boolean true, not empty string
   return (
-    <PokemonDetailCard
-      pokemon={pokemon}
-      isDarkMode={isDarkMode}
-      onClose={onClose}
-      onSelectPokemon={onSelectPokemon}
-      onPurchaseComplete={onPurchaseComplete}
-      purchasePokemonMutation={purchasePokemonMutation}
-      updateUser={updateUser}
-      user={user}
-      ownedPokemonIds={ownedPokemonIds}
-    />
+    <div inert={!isCurrentCard ? true : undefined} aria-hidden={!isCurrentCard}>
+      <PokemonDetailCard
+        pokemon={pokemon}
+        isDarkMode={isDarkMode}
+        onClose={onClose}
+        onSelectPokemon={onSelectPokemon}
+        onPurchaseComplete={onPurchaseComplete}
+        updateUser={updateUser}
+        user={user}
+        ownedPokemonIds={ownedPokemonIds}
+        closeButtonRef={closeButtonRef}
+      />
+    </div>
   );
 }
