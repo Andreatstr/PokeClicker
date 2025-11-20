@@ -886,7 +886,7 @@ export function BattleView({
                       : 'text-black drop-shadow-lg'
                 }`}
               >
-                <span className="md:hidden">Sp.Att</span>
+                <span className="md:hidden">Sp.Atk</span>
                 <span className="hidden md:inline">Special Attack</span>
               </span>
             </button>
