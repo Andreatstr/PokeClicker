@@ -67,8 +67,11 @@ export function BattleResult({
   const [catchPokemon] = useCatchPokemon();
 
   const {data: userData} = useQuery(ME_QUERY);
-  const wasAlreadyOwned =
-    userData?.me?.owned_pokemon_ids?.includes(opponentPokemon.id) ?? false;
+
+  // Store the initial ownership status to prevent Apollo cache updates from changing it
+  const [wasAlreadyOwned] = useState(
+    () => userData?.me?.owned_pokemon_ids?.includes(opponentPokemon.id) ?? false
+  );
   const isNewCatch = isVictory && !wasAlreadyOwned;
 
   useEffect(() => {
