@@ -23,7 +23,7 @@
 import type {PokedexPokemon} from '@features/pokedex';
 import {Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {useSetFavoritePokemon} from '@features/profile/hooks/useProfileMutations';
 import {useAuth} from '@features/auth';
 import {useCandyContext} from '@/contexts/useCandyContext';
@@ -112,7 +112,7 @@ export function BattleResult({
     }
   }, [isNewCatch, opponentPokemon.id, catchPokemon, updateUser]);
 
-  const handlePlayWithPokemon = async () => {
+  const handlePlayWithPokemon = useCallback(async () => {
     setIsSettingPokemon(true);
 
     // Flush pending candy before mutation to sync battle rewards to backend
@@ -136,7 +136,13 @@ export function BattleResult({
       console.error('Failed to set favorite Pokemon:', error);
       setIsSettingPokemon(false);
     }
-  };
+  }, [
+    flushPendingCandy,
+    setFavoritePokemon,
+    opponentPokemon.id,
+    updateUser,
+    onContinue,
+  ]);
 
   // Keyboard support: Arrow keys/A/D to navigate, Space to confirm
   useEffect(() => {
