@@ -30,42 +30,42 @@ export function ClickerHelpModal({
       name: 'Click Power',
       icon: '👆',
       effect: 'Increases candy earned per click',
-      formula: 'Exponential (1.0954^level)',
+      formula: '1.0954^(level/(1+0.001*level))',
       color: isDarkMode ? '#ff8b8bff' : '#c70101ff',
     },
     {
       name: 'Autoclicker',
       icon: '🤖',
       effect: 'Automatically clicks for you every second',
-      formula: 'Exponential (1.0954^level)',
+      formula: '1.0954^(level/(1+0.01*level))',
       color: isDarkMode ? '#f96363ff' : '#940000ff',
     },
     {
       name: 'Lucky Chance',
       icon: '🍀',
       effect: 'Chance for a lucky hit that multiplies candy earned',
-      formula: 'Logarithmic (caps ~8%)',
+      formula: '2*log(1+0.5*level) (caps ~8%)',
       color: isDarkMode ? '#ff71e5ff' : '#9d1984ff',
     },
     {
       name: 'Lucky Power',
       icon: '⚡',
       effect: 'Multiplier applied when you get a lucky hit',
-      formula: 'Exponential (1.2^level)',
+      formula: '1.2^(level/(1+0.01*level))',
       color: isDarkMode ? '#ca7fffff' : '#7b22baff',
     },
     {
       name: 'Click Boost',
       icon: '💪',
       effect: 'Multiplies ALL your income (clicks + autoclicker)',
-      formula: 'Linear (15% per level)',
+      formula: '1 + level*0.15',
       color: isDarkMode ? '#79cdcaff' : '#006f6bff',
     },
     {
       name: 'Pokedex Bonus',
       icon: '📖',
       effect: 'Multiplies ALL income - stronger with more Pokemon caught',
-      formula: 'Grows with Pokemon count',
+      formula: '1.005^(level*√pokemonCount)',
       color: isDarkMode ? '#7ab2eeff' : '#00438bff',
     },
   ];
@@ -99,6 +99,8 @@ export function ClickerHelpModal({
               ? 'rgba(20, 20, 20, 0.98)'
               : 'rgba(245, 241, 232, 1)',
             outline: 'none',
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none', // IE/Edge
           }}
         >
           {/* Close Button */}
@@ -222,8 +224,8 @@ export function ClickerHelpModal({
                 >
                   <span className="flex-shrink-0">•</span>
                   <span>
-                    <strong>Click Boost</strong> is a multiplier that scales
-                    everything up
+                    <strong>Click Boost</strong> is strong early game but scales
+                    linearly - other upgrades outpace it later
                   </span>
                 </li>
                 <li
@@ -232,8 +234,9 @@ export function ClickerHelpModal({
                 >
                   <span className="flex-shrink-0">•</span>
                   <span>
-                    <strong>Pokedex Bonus</strong> is weak early but becomes
-                    very powerful with 10+ Pokemon
+                    <strong>Pokedex Bonus</strong> is weak early but scales
+                    exponentially - becomes very strong at 50+ Pokemon and high
+                    levels
                   </span>
                 </li>
                 <li
@@ -242,14 +245,22 @@ export function ClickerHelpModal({
                 >
                   <span className="flex-shrink-0">•</span>
                   <span>
-                    <strong>Lucky</strong> upgrades add variance - pair them
-                    together for best results
+                    <strong>Lucky Power</strong> becomes extremely powerful at
+                    high levels - pair with <strong>Lucky Chance</strong> for
+                    massive income multipliers
                   </span>
                 </li>
               </ul>
             </section>
           </div>
         </div>
+        <style>
+          {`
+            #clicker-help-modal::-webkit-scrollbar {
+              display: none;
+            }
+          `}
+        </style>
       </DialogBody>
     </Dialog>
   );

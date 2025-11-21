@@ -3,7 +3,7 @@ import type {PokedexPokemon} from '@features/pokedex';
 import {
   usePokemonUpgrade,
   useUpgradePokemonMutation,
-  usePurchasePokemon,
+  usePokemonPurchaseHandler,
 } from '@features/pokedex';
 import {type User} from '@features/auth';
 import {useState, useRef, useEffect} from 'react';
@@ -33,7 +33,6 @@ interface PokemonDetailCardProps {
   onClose: () => void;
   onSelectPokemon?: (id: number) => void;
   onPurchaseComplete?: (id: number) => void;
-  purchasePokemonMutation: ReturnType<typeof usePurchasePokemon>[0];
   updateUser: (user: User) => void;
   user: User | null;
   ownedPokemonIds: number[];
@@ -46,17 +45,21 @@ export function PokemonDetailCard({
   onClose,
   onSelectPokemon,
   onPurchaseComplete,
-  purchasePokemonMutation,
   updateUser,
   user,
   ownedPokemonIds,
   closeButtonRef,
 }: PokemonDetailCardProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+  const [upgradeAnimating, setUpgradeAnimating] = useState(false);
   const errorTimeoutRef = useRef<number | null>(null);
   const {addSuccess} = useError();
   const {localRareCandy, flushPendingCandy} = useCandyContext();
+  const {
+    handlePurchase: purchaseFromHook,
+    error: purchaseError,
+    isAnimating: purchaseAnimating,
+  } = usePokemonPurchaseHandler();
 
   // Derive isOwned from the live ownedPokemonIds array (from ME_QUERY)
   // This ensures the UI updates when the cache updates
@@ -78,73 +81,12 @@ export function PokemonDetailCard({
 
   const handlePurchase = async (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // Clear any existing error timeout to prevent race conditions
-    if (errorTimeoutRef.current) {
-      clearTimeout(errorTimeoutRef.current);
-    }
-    setError(null);
-
-    // Client-side validation: Check if user can afford the Pokemon
-    // This prevents the optimistic response from flashing the unlocked state
-    if (user && toDecimal(user.rare_candy).lt(toDecimal(cost))) {
-      setError('Not enough Rare Candy!');
-      errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
-        errorTimeoutRef.current = null;
-      }, 1200);
-      return;
-    }
-
-    try {
-      const result = await purchasePokemonMutation({
-        variables: {pokemonId: pokemon.id, price: pokemon.price ?? undefined},
-      });
-
-      // Check for GraphQL errors first (Apollo's errorPolicy: 'all' returns both data and errors)
-      // This handles cases where server rejects the purchase (e.g., not enough candy)
-      if (result.errors && result.errors.length > 0) {
-        const errorMessage =
-          result.errors[0]?.message || 'Failed to purchase Pokémon';
-        setError(errorMessage);
-        errorTimeoutRef.current = setTimeout(() => {
-          setError(null);
-          errorTimeoutRef.current = null;
-        }, 1200);
-        return; // Don't show success or update UI if there are errors
-      }
-
-      // Only proceed if there are no errors and server confirmed the purchase
-      if (result.data?.purchasePokemon && user) {
-        updateUser({
-          ...user, // Keep existing user data (stats, etc.)
-          ...result.data.purchasePokemon, // Only update fields that changed (rare_candy, owned_pokemon_ids)
-          created_at: user.created_at,
-        });
-
-        // Show success toast notification only after server confirmation
-        const capitalizedName =
-          pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
-        console.log(
-          'About to call addSuccess with:',
-          `Successfully bought ${capitalizedName}!`
-        );
-        addSuccess(`Successfully bought ${capitalizedName}!`);
-        console.log('addSuccess called');
-
-        onPurchaseComplete?.(pokemon.id);
-        setIsAnimating(true);
-        setTimeout(() => setIsAnimating(false), 800);
-      }
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to purchase Pokémon';
-      setError(errorMessage);
-      errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
-        errorTimeoutRef.current = null;
-      }, 1200);
-    }
+    await purchaseFromHook(
+      pokemon.id,
+      onPurchaseComplete,
+      pokemon.price ?? undefined,
+      pokemon.name
+    );
   };
 
   const handleUpgrade = async (e: React.MouseEvent) => {
@@ -154,14 +96,14 @@ export function PokemonDetailCard({
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
     }
-    setError(null);
+    setUpgradeError(null);
 
     // Client-side validation: Check if user can afford the upgrade
     // Use global candy context (includes unsynced passive income)
     if (upgrade && toDecimal(localRareCandy).lt(toDecimal(upgrade.cost))) {
-      setError('Not enough Rare Candy!');
+      setUpgradeError('Not enough Rare Candy!');
       errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
+        setUpgradeError(null);
         errorTimeoutRef.current = null;
       }, 1200);
       return;
@@ -172,9 +114,9 @@ export function PokemonDetailCard({
     try {
       await flushPendingCandy();
     } catch {
-      setError('Failed to sync candy. Please try again.');
+      setUpgradeError('Failed to sync candy. Please try again.');
       errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
+        setUpgradeError(null);
         errorTimeoutRef.current = null;
       }, 1200);
       return;
@@ -196,14 +138,14 @@ export function PokemonDetailCard({
 
       // No need to manually refetch - mutation handles it via refetchQueries
 
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 800);
+      setUpgradeAnimating(true);
+      setTimeout(() => setUpgradeAnimating(false), 800);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to upgrade Pokémon';
-      setError(errorMessage);
+      setUpgradeError(errorMessage);
       errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
+        setUpgradeError(null);
         errorTimeoutRef.current = null;
       }, 1200);
     }
@@ -228,9 +170,9 @@ export function PokemonDetailCard({
       }
     } catch (err) {
       console.error('Failed to set favorite Pokemon:', err);
-      setError('Failed to set for Map');
+      setUpgradeError('Failed to set for Map');
       errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
+        setUpgradeError(null);
         errorTimeoutRef.current = null;
       }, 1200);
     }
@@ -255,9 +197,9 @@ export function PokemonDetailCard({
       }
     } catch (err) {
       console.error('Failed to set selected Pokemon:', err);
-      setError('Failed to set for Clicker');
+      setUpgradeError('Failed to set for Clicker');
       errorTimeoutRef.current = setTimeout(() => {
-        setError(null);
+        setUpgradeError(null);
         errorTimeoutRef.current = null;
       }, 1200);
     }
@@ -292,7 +234,7 @@ export function PokemonDetailCard({
     >
       {/* Pokemon Card */}
       <aside
-        className={`leftBox border-4 p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${isAnimating ? 'animate-dopamine-release' : ''}`}
+        className={`leftBox border-4 p-3 md:p-4 w-full max-w-[400px] font-press-start flex flex-col items-center relative overflow-hidden backdrop-blur-md ${typeColors.cardBg} ${purchaseAnimating || upgradeAnimating ? 'animate-dopamine-release' : ''}`}
         style={{
           borderColor: isDarkMode ? '#333333' : 'black',
           boxShadow: isDarkMode
@@ -428,13 +370,13 @@ export function PokemonDetailCard({
                     </span>
                   )}
                 </Button>
-                {error && (
+                {upgradeError && (
                   <p
                     className="text-xs text-red-500 mt-1 text-center font-bold"
                     role="alert"
                     aria-live="polite"
                   >
-                    {error}
+                    {upgradeError}
                   </p>
                 )}
               </div>
@@ -491,7 +433,7 @@ export function PokemonDetailCard({
           <UnlockButton
             onClick={handlePurchase}
             cost={cost}
-            error={error}
+            error={purchaseError}
             pokemonName={pokemon.name}
             size="small"
             isDarkMode={isDarkMode}

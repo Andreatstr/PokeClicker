@@ -4,6 +4,8 @@ IT2810 Web Development - Group 26
 
 [Live Demo](http://it2810-26.idi.ntnu.no/project2/) (Requires eduroam VPN outside NTNU)
 
+([Backup](https://pokeclicker.no/) if the server is down)
+
 ## Documentation
 
 **[Setup Guide](./docs/setup.md)** | **[Architecture](./docs/architecture.md)** | **[Testing](./docs/testing.md)** | **[Security](./docs/security.md)** | **[Sustainability](./docs/sustainability.md)** | **[Development Workflow](./docs/development-workflow.md)** | **[AI Usage](./docs/ai-usage.md)**
@@ -53,10 +55,15 @@ The game mechanics provide a natural motivation for users to explore the Pokéde
 ## Before and After Photos of the Map
 
 <div>
+  <h3>The original map</h3>
+  <img src="docs/images/JohtoMap.webp" width="600">
+  <h4>The original map from Pokémon Gold and Silver (1999). Showing the Johto region</h4>
+</div>
+
+<div>
   <h3>The map we started with</h3>
   <img src="docs/images/startMap.webp" width="600">
-  <h4>The initial map contained many missing or corrupted tiles, visual artifacts, and inconsistent layering, making navigation and gameplay testing difficult. This version served as the baseline for our cleanup,
-  collision mapping, and redesign.</h4>
+  <h4>We found a modern version. The initial map contained many missing or corrupted tiles, visual artifacts, and inconsistent layering, making navigation and gameplay testing difficult. This version served as the baseline for our cleanup, collision mapping, and redesign.</h4>
 </div>
 
 <div>
@@ -180,8 +187,12 @@ Read more: [Architecture](./docs/architecture.md) | [Security](./docs/security.m
 - 365 frontend tests (hooks, components, integration)
 - 52 backend tests (resolvers, auth, database)
 
+> [!IMPORTANT]
+> Make sure to complete the [Setup Guide](./docs/setup.md) before running tests to ensure the environment is correctly configured.
+
 ```bash
 # Run all tests
+npx playwright install  # Install browsers (required first time)
 npm run test:e2e        # E2E tests
 cd frontend && npm test # Frontend unit tests
 cd backend && npm test  # Backend unit tests

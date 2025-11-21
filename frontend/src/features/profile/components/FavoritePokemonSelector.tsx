@@ -1,57 +1,82 @@
-import {Dialog, DialogBody} from '@ui/pixelact';
+import {Button, Dialog, DialogBody} from '@ui/pixelact';
+import {useEffect, useState} from 'react';
 import {usePokemonBasicBulk} from '../hooks/usePokemonBasic';
+import {useOwnedPokemonIdsSortedByBST} from '../hooks/useOwnedPokemonIdsSortedByBST';
 
 /**
- * Modal dialog for selecting a Pokemon from owned collection
+ * Modal dialog for selecting a Pokemon from the user's owned collection
  *
  * Features:
- * - Efficient bulk query (fetches all owned Pokemon in single request)
- * - Sorted by total stats (BST) in descending order (strongest first)
+ * - Efficient bulk query: fetches only owned Pokemon IDs from backend, sorted by BST (descending)
+ * - Paginated grid: displays a page of Pokemon at a time for performance
  * - Grid layout with responsive columns
- * - Loading state handling
+ * - Loading state handling for both ID and data fetches
  * - Dark mode support
  */
 interface FavoritePokemonSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (pokemonId: number) => void;
-  ownedPokemonIds: number[];
+  userId: string;
   isDarkMode?: boolean;
 }
+
+/**
+ * Number of Pokemon to show per page in the selector dialog
+ * Used for paginated display of owned Pokemon
+ */
+const PAGE_SIZE = 20;
 
 export function FavoritePokemonSelector({
   isOpen,
   onClose,
   onSelect,
-  ownedPokemonIds,
+  userId,
   isDarkMode = false,
 }: FavoritePokemonSelectorProps) {
-  // Fetch all owned Pokemon in a single query (only when dialog is open)
-  const {data, loading} = usePokemonBasicBulk(isOpen ? ownedPokemonIds : []);
+  // Current page index for pagination (reset when dialog opens)
+  const [page, setPage] = useState(0);
 
-  // Sort Pokemon by total stats (BST) in descending order
-  const ownedPokemon = (data?.pokemonByIds || []).slice().sort((a, b) => {
-    // Calculate BST from stats
-    const bstA = a.stats
-      ? a.stats.hp +
-        a.stats.attack +
-        a.stats.defense +
-        a.stats.spAttack +
-        a.stats.spDefense +
-        a.stats.speed
-      : 0;
-    const bstB = b.stats
-      ? b.stats.hp +
-        b.stats.attack +
-        b.stats.defense +
-        b.stats.spAttack +
-        b.stats.spDefense +
-        b.stats.speed
-      : 0;
-    return bstB - bstA; // Descending order (highest stats first)
-  });
+  // Fetch owned Pokemon IDs sorted by BST (descending) from backend
+  // Only fetches IDs, not full Pokemon data, for performance
+  const {
+    data: idsData,
+    loading: loadingIds,
+    refetch,
+  } = useOwnedPokemonIdsSortedByBST(userId);
+  const sortedIds = idsData?.ownedPokemonIdsSortedByBST ?? [];
 
-  // Helper to calculate total stats for display
+  // Paginate the sorted IDs for current page
+  const startIdx = page * PAGE_SIZE;
+  const endIdx = startIdx + PAGE_SIZE;
+  const pageIds = sortedIds.slice(startIdx, endIdx);
+
+  // Fetch basic data for only the current page's Pokemon
+  // Uses bulk query for efficiency
+  const {data: pageData, loading: loadingPage} = usePokemonBasicBulk(
+    isOpen ? pageIds : []
+  );
+  const pagePokemon = pageData?.pokemonByIds ?? [];
+  // Total number of pages for pagination controls
+  const totalPages = Math.ceil(sortedIds.length / PAGE_SIZE);
+
+  // Reset to first page whenever dialog is opened or owned Pokemon count changes
+  useEffect(() => {
+    if (isOpen) setPage(0);
+  }, [isOpen, sortedIds.length]);
+
+  // Refetch owned Pokemon IDs from backend every time the modal opens
+  // Ensures the selector always shows the latest collection without page refresh
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, refetch]);
+
+  /**
+   * Helper to calculate total base stats (BST) for a Pokemon
+   * Used for display purposes if needed
+   */
   const calculateTotalStat = (stats?: {
     hp: number;
     attack: number;
@@ -79,6 +104,8 @@ export function FavoritePokemonSelector({
           style={{
             backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f1e8',
             border: `4px solid ${isDarkMode ? '#333333' : 'black'}`,
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none', // IE/Edge
             boxShadow: isDarkMode
               ? '8px 8px 0px rgba(51,51,51,1)'
               : '8px 8px 0px rgba(0,0,0,1)',
@@ -94,11 +121,13 @@ export function FavoritePokemonSelector({
             </h2>
           </header>
 
-          {loading ? (
-            <p className="text-center py-8">Loading Pokemon...</p>
+          {loadingIds ? (
+            <p className="text-center py-8">Loading Pokémon list...</p>
+          ) : loadingPage ? (
+            <p className="text-center py-8">Loading Pokémon...</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {ownedPokemon?.map((pokemon) => {
+              {pagePokemon.map((pokemon) => {
                 const totalStat = calculateTotalStat(pokemon.stats);
                 return (
                   <button
@@ -158,6 +187,41 @@ export function FavoritePokemonSelector({
             </div>
           )}
 
+          {/* Pagination controls */}
+          <div className="flex justify-between items-center mt-6">
+            <Button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="px-4 py-2 border-1 font-bold"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: isDarkMode ? '#2a2a2a' : '#e5e5e5',
+                color: isDarkMode ? '#e5e5e5' : '#000',
+                opacity: page === 0 ? 0.5 : 1,
+                cursor: page === 0 ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {'<'}
+            </Button>
+            <span className="text-xs sm:text-sm">
+              Page {page + 1} of {totalPages}
+            </span>
+            <Button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="px-4 py-2 border-1 font-bold"
+              style={{
+                borderColor: isDarkMode ? '#333333' : 'black',
+                backgroundColor: isDarkMode ? '#2a2a2a' : '#e5e5e5',
+                color: isDarkMode ? '#e5e5e5' : '#000',
+                opacity: page >= totalPages - 1 ? 0.5 : 1,
+                cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {'>'}
+            </Button>
+          </div>
+
           <button
             onClick={onClose}
             className="mt-4 w-full px-4 py-2 font-bold border-4 text-sm sm:text-base"
@@ -188,6 +252,13 @@ export function FavoritePokemonSelector({
             CANCEL
           </button>
         </section>
+        <style>
+          {`
+          section.pixel-font::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+        </style>
       </DialogBody>
     </Dialog>
   );

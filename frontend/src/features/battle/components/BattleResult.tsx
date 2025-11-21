@@ -4,7 +4,7 @@
  * Features:
  * - Victory: displays rare candy rewards and Pokemon caught
  * - Defeat: shows encouraging message
- * - 3-second countdown before continue button appears
+ * - 1-second countdown before continue button appears
  * - Battle stats display (click count)
  * - Responsive mobile and desktop layouts
  * - "Play with Pokemon" button to set newly caught Pokemon as battle Pokemon
@@ -23,10 +23,21 @@
 import type {PokedexPokemon} from '@features/pokedex';
 import {Button} from '@ui/pixelact';
 import {formatNumber} from '@/lib/formatNumber';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {useSetFavoritePokemon} from '@features/profile/hooks/useProfileMutations';
 import {useAuth} from '@features/auth';
 import {useCandyContext} from '@/contexts/useCandyContext';
+import {useCatchPokemon} from '@features/pokedex/hooks/useCatchPokemon';
+import {useQuery, gql} from '@apollo/client';
+
+const ME_QUERY = gql`
+  query MeOwnership {
+    me {
+      _id
+      owned_pokemon_ids
+    }
+  }
+`;
 
 interface BattleResultProps {
   result: 'victory' | 'defeat';
@@ -47,14 +58,24 @@ export function BattleResult({
 }: BattleResultProps) {
   const isVictory = result === 'victory';
   const [showButton, setShowButton] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(1);
   const [isSettingPokemon, setIsSettingPokemon] = useState(false);
+  const [selectedButton, setSelectedButton] = useState<'play' | 'continue'>(
+    'continue'
+  );
 
   const {updateUser} = useAuth();
   const {flushPendingCandy} = useCandyContext();
   const [setFavoritePokemon] = useSetFavoritePokemon();
+  const [catchPokemon] = useCatchPokemon();
 
-  const isNewCatch = isVictory && !opponentPokemon.isOwned;
+  const {data: userData} = useQuery(ME_QUERY);
+
+  // Store the initial ownership status to prevent Apollo cache updates from changing it
+  const [wasAlreadyOwned] = useState(
+    () => userData?.me?.owned_pokemon_ids?.includes(opponentPokemon.id) ?? false
+  );
+  const isNewCatch = isVictory && !wasAlreadyOwned;
 
   useEffect(() => {
     const countdownInterval = setInterval(() => {
@@ -71,7 +92,27 @@ export function BattleResult({
     return () => clearInterval(countdownInterval);
   }, []);
 
-  const handlePlayWithPokemon = async () => {
+  const [catchError, setCatchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isNewCatch) {
+      catchPokemon({
+        variables: {pokemonId: opponentPokemon.id},
+      })
+        .then((result) => {
+          // Update auth context with new owned_pokemon_ids to ensure Pokedex Bonus updates
+          if (result.data?.catchPokemon) {
+            updateUser(result.data.catchPokemon);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to catch Pokemon:', error);
+          setCatchError('Failed to add Pokemon to Pokedex');
+        });
+    }
+  }, [isNewCatch, opponentPokemon.id, catchPokemon, updateUser]);
+
+  const handlePlayWithPokemon = useCallback(async () => {
     setIsSettingPokemon(true);
 
     // Flush pending candy before mutation to sync battle rewards to backend
@@ -95,7 +136,67 @@ export function BattleResult({
       console.error('Failed to set favorite Pokemon:', error);
       setIsSettingPokemon(false);
     }
-  };
+  }, [
+    flushPendingCandy,
+    setFavoritePokemon,
+    opponentPokemon.id,
+    updateUser,
+    onContinue,
+  ]);
+
+  // Keyboard support: Arrow keys/A/D to navigate, Space to confirm
+  useEffect(() => {
+    if (!showButton) return;
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Navigation: Arrow keys
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        // Only allow navigation when there are multiple buttons (new catch scenario)
+        if (isNewCatch) {
+          setSelectedButton((prev) => (prev === 'play' ? 'continue' : 'play'));
+        }
+      }
+
+      // Confirm: Space key
+      if (e.key === ' ') {
+        e.preventDefault();
+        if (isSettingPokemon) return;
+
+        if (isNewCatch) {
+          // Two buttons available - execute the selected one
+          if (selectedButton === 'play') {
+            handlePlayWithPokemon();
+          } else {
+            onContinue();
+          }
+        } else {
+          // Single button - just continue
+          onContinue();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [
+    showButton,
+    isNewCatch,
+    isSettingPokemon,
+    selectedButton,
+    onContinue,
+    handlePlayWithPokemon,
+  ]);
 
   return (
     <section
@@ -190,20 +291,27 @@ export function BattleResult({
             {isNewCatch && (
               <div
                 className={`mt-1 p-1 md:p-1.5 border-2 rounded ${
-                  isDarkMode
-                    ? 'border-green-500 bg-green-900/30'
-                    : 'border-green-500 bg-green-100'
+                  catchError
+                    ? isDarkMode
+                      ? 'border-red-500 bg-red-900/30'
+                      : 'border-red-500 bg-red-100'
+                    : isDarkMode
+                      ? 'border-green-500 bg-green-900/30'
+                      : 'border-green-500 bg-green-100'
                 }`}
               >
-                <div className="pixel-font text-[9px] md:text-[10px] font-bold text-green-600 mb-0.5">
-                  New Pokemon Caught!
+                <div
+                  className={`pixel-font text-[9px] md:text-[10px] font-bold mb-0.5 ${catchError ? 'text-red-600' : 'text-green-600'}`}
+                >
+                  {catchError ? 'Error!' : 'New Pokemon Caught!'}
                 </div>
                 <div
                   className={`pixel-font text-[7px] md:text-[8px] ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
                   }`}
                 >
-                  {opponentPokemon.name} added to your Pokedex!
+                  {catchError ||
+                    `${opponentPokemon.name} added to your Pokedex!`}
                 </div>
               </div>
             )}
@@ -242,6 +350,11 @@ export function BattleResult({
                 className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
                 disabled={isSettingPokemon}
                 isDarkMode={isDarkMode}
+                style={{
+                  filter:
+                    selectedButton === 'play' ? 'brightness(1.3)' : 'none',
+                  transition: 'filter 0.15s ease',
+                }}
               >
                 {isSettingPokemon
                   ? 'Setting...'
@@ -252,6 +365,11 @@ export function BattleResult({
                 className="w-full md:flex-1 text-[10px] md:text-xs py-1 md:py-1.5"
                 variant="secondary"
                 isDarkMode={isDarkMode}
+                style={{
+                  filter:
+                    selectedButton === 'continue' ? 'brightness(1.3)' : 'none',
+                  transition: 'filter 0.15s ease',
+                }}
               >
                 Continue
               </Button>

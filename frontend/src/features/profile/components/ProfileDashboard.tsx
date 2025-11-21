@@ -470,7 +470,7 @@ export function ProfileDashboard({
         isOpen={showFavoriteSelector}
         onClose={() => setShowFavoriteSelector(false)}
         onSelect={onFavoriteSelect}
-        ownedPokemonIds={user.owned_pokemon_ids}
+        userId={user._id}
         isDarkMode={isDarkMode}
       />
 
@@ -478,7 +478,7 @@ export function ProfileDashboard({
         isOpen={showSelectedSelector}
         onClose={() => setShowSelectedSelector(false)}
         onSelect={onSelectedSelect}
-        ownedPokemonIds={user.owned_pokemon_ids}
+        userId={user._id}
         isDarkMode={isDarkMode}
       />
     </main>

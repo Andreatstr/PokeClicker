@@ -38,8 +38,8 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
   clickPower: {
     key: 'clickPower',
     displayName: 'Click Power',
-    formula: (level) => Math.pow(1.0954, level), // ~9.5% growth per level
-    costMultiplier: 1.3416, // Moderate cost scaling
+    formula: (level) => Math.pow(1.0954, level / (1 + 0.001 * level)),
+    costMultiplier: 1.3416,
     unit: 'candy/click',
     color: {
       dark: '#c70101ff',
@@ -49,7 +49,7 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
   autoclicker: {
     key: 'autoclicker',
     displayName: 'Autoclicker',
-    formula: (level) => Math.pow(1.0954, level),
+    formula: (level) => Math.pow(1.0954, level / (1 + 0.01 * level)),
     costMultiplier: 1.3038,
     unit: 'clicks/sec',
     color: {
@@ -73,7 +73,7 @@ export const UPGRADES: Record<string, UpgradeConfig> = {
   luckyHitMultiplier: {
     key: 'luckyHitMultiplier',
     displayName: 'Lucky Power',
-    formula: (level) => Math.pow(1.2, level),
+    formula: (level) => Math.pow(1.2, level / (1 + 0.01 * level)),
     costMultiplier: 1.6,
     unit: 'x on lucky',
     color: {

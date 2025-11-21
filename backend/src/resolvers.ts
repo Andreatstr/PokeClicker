@@ -474,6 +474,36 @@ export const resolvers = {
         };
       });
     },
+    ownedPokemonIdsSortedByBST: async (
+      _: unknown,
+      {userId}: {userId: string}
+    ) => {
+      const db = getDatabase();
+      const users = db.collection('users');
+      const metadataCollection = db.collection('pokemon_metadata');
+
+      // Fetch user's owned Pokémon IDs
+      const user = await users.findOne({_id: new ObjectId(userId)});
+      const ownedIds: number[] = user?.owned_pokemon_ids ?? [];
+
+      if (ownedIds.length === 0) {
+        console.log(
+          '[ownedPokemonIdsSortedByBST] No owned Pokémon found for user.'
+        );
+        return [];
+      }
+
+      // Fetch metadata for those Pokémon
+      const metas = await metadataCollection
+        .find({id: {$in: ownedIds}})
+        .toArray();
+
+      // Sort by BST descending
+      metas.sort((a, b) => (b.bst ?? 0) - (a.bst ?? 0));
+
+      const sortedIds = metas.map((meta) => meta.id);
+      return sortedIds;
+    },
     pokedex: async (
       _: unknown,
       args: {
