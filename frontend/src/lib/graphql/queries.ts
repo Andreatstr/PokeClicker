@@ -126,6 +126,7 @@ export const POKEMON_BY_IDS = gql`
       stats {
         ...PokemonStatsFields
       }
+      bst
     }
   }
 `;
