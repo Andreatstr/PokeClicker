@@ -99,6 +99,8 @@ export function ClickerHelpModal({
               ? 'rgba(20, 20, 20, 0.98)'
               : 'rgba(245, 241, 232, 1)',
             outline: 'none',
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none', // IE/Edge
           }}
         >
           {/* Close Button */}
@@ -250,6 +252,13 @@ export function ClickerHelpModal({
             </section>
           </div>
         </div>
+        <style>
+          {`
+            #clicker-help-modal::-webkit-scrollbar {
+              display: none;
+            }
+          `}
+        </style>
       </DialogBody>
     </Dialog>
   );
