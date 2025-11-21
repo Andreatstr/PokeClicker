@@ -4,6 +4,8 @@ IT2810 Web Development - Group 26
 
 [Live Demo](http://it2810-26.idi.ntnu.no/project2/) (Requires eduroam VPN outside NTNU)
 
+[Backup](https://pokeclicker.no/) if the server is down
+
 ## Documentation
 
 **[Setup Guide](./docs/setup.md)** | **[Architecture](./docs/architecture.md)** | **[Testing](./docs/testing.md)** | **[Security](./docs/security.md)** | **[Sustainability](./docs/sustainability.md)** | **[Development Workflow](./docs/development-workflow.md)** | **[AI Usage](./docs/ai-usage.md)**
