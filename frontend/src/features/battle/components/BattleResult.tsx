@@ -153,13 +153,8 @@ export function BattleResult({
         return;
       }
 
-      // Navigation: Arrow keys or A/D
-      if (
-        e.key === 'ArrowLeft' ||
-        e.key === 'ArrowRight' ||
-        e.key.toLowerCase() === 'a' ||
-        e.key.toLowerCase() === 'd'
-      ) {
+      // Navigation: Arrow keys
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault();
         // Only allow navigation when there are multiple buttons (new catch scenario)
         if (isNewCatch) {
@@ -188,7 +183,14 @@ export function BattleResult({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [showButton, isNewCatch, isSettingPokemon, selectedButton, onContinue]);
+  }, [
+    showButton,
+    isNewCatch,
+    isSettingPokemon,
+    selectedButton,
+    onContinue,
+    handlePlayWithPokemon,
+  ]);
 
   return (
     <section
