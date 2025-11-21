@@ -1,4 +1,4 @@
-import {Dialog, DialogBody} from '@ui/pixelact';
+import {Button, Dialog, DialogBody} from '@ui/pixelact';
 import {useEffect, useState} from 'react';
 import {usePokemonBasicBulk} from '../hooks/usePokemonBasic';
 import {useOwnedPokemonIdsSortedByBST} from '../hooks/useOwnedPokemonIdsSortedByBST';
@@ -189,10 +189,10 @@ export function FavoritePokemonSelector({
 
           {/* Pagination controls */}
           <div className="flex justify-between items-center mt-6">
-            <button
+            <Button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
-              className="px-4 py-2 border-2 font-bold"
+              className="px-4 py-2 border-1 font-bold"
               style={{
                 borderColor: isDarkMode ? '#333333' : 'black',
                 backgroundColor: isDarkMode ? '#2a2a2a' : '#e5e5e5',
@@ -201,15 +201,15 @@ export function FavoritePokemonSelector({
                 cursor: page === 0 ? 'not-allowed' : 'pointer',
               }}
             >
-              Previous
-            </button>
+              {'<'}
+            </Button>
             <span className="text-xs sm:text-sm">
               Page {page + 1} of {totalPages}
             </span>
-            <button
+            <Button
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className="px-4 py-2 border-2 font-bold"
+              className="px-4 py-2 border-1 font-bold"
               style={{
                 borderColor: isDarkMode ? '#333333' : 'black',
                 backgroundColor: isDarkMode ? '#2a2a2a' : '#e5e5e5',
@@ -218,8 +218,8 @@ export function FavoritePokemonSelector({
                 cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
               }}
             >
-              Next
-            </button>
+              {'>'}
+            </Button>
           </div>
 
           <button
