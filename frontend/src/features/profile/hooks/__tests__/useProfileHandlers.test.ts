@@ -8,12 +8,19 @@ const mockUpdateUser = vi.fn();
 const mockDeleteUser = vi.fn();
 const mockSetFavoritePokemon = vi.fn();
 const mockSetSelectedPokemon = vi.fn();
+const mockFlushPendingCandy = vi.fn();
 let mockDeleting = false;
 
 vi.mock('@features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     logout: mockLogout,
     updateUser: mockUpdateUser,
+  }),
+}));
+
+vi.mock('@/contexts/useCandyContext', () => ({
+  useCandyContext: () => ({
+    flushPendingCandy: mockFlushPendingCandy,
   }),
 }));
 
@@ -38,6 +45,7 @@ describe('useProfileHandlers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDeleting = false;
+    mockFlushPendingCandy.mockResolvedValue(undefined);
   });
 
   it('should return all handler functions', () => {
@@ -149,6 +157,19 @@ describe('useProfileHandlers', () => {
   });
 
   describe('handleSetFavorite', () => {
+    it('should flush pending candy before mutation', async () => {
+      mockSetFavoritePokemon.mockResolvedValue({
+        data: {setFavoritePokemon: {_id: '1'}},
+      });
+      const {result} = renderHook(() => useProfileHandlers());
+      await act(async () => {
+        await result.current.handleSetFavorite(25);
+      });
+      expect(mockFlushPendingCandy).toHaveBeenCalledBefore(
+        mockSetFavoritePokemon
+      );
+    });
+
     it('should call mutation with pokemonId', async () => {
       mockSetFavoritePokemon.mockResolvedValue({
         data: {setFavoritePokemon: {_id: '1'}},
@@ -231,6 +252,19 @@ describe('useProfileHandlers', () => {
   });
 
   describe('handleSetSelected', () => {
+    it('should flush pending candy before mutation', async () => {
+      mockSetSelectedPokemon.mockResolvedValue({
+        data: {setSelectedPokemon: {_id: '1'}},
+      });
+      const {result} = renderHook(() => useProfileHandlers());
+      await act(async () => {
+        await result.current.handleSetSelected(25);
+      });
+      expect(mockFlushPendingCandy).toHaveBeenCalledBefore(
+        mockSetSelectedPokemon
+      );
+    });
+
     it('should call mutation with pokemonId', async () => {
       mockSetSelectedPokemon.mockResolvedValue({
         data: {setSelectedPokemon: {_id: '1'}},

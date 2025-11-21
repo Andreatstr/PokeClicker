@@ -5,6 +5,7 @@ import {
   useSetSelectedPokemon,
 } from './useProfileMutations';
 import {logger} from '@/lib/logger';
+import {useCandyContext} from '@/contexts/useCandyContext';
 
 /**
  * Custom hook that encapsulates all profile-related action handlers
@@ -13,6 +14,7 @@ export function useProfileHandlers(
   onNavigate?: (page: 'clicker' | 'pokedex' | 'login' | 'profile') => void
 ) {
   const {logout, updateUser} = useAuth();
+  const {flushPendingCandy} = useCandyContext();
   const [deleteUser, {loading: deleting}] = useDeleteUser();
   const [setFavoritePokemon] = useSetFavoritePokemon();
   const [setSelectedPokemon] = useSetSelectedPokemon();
@@ -35,6 +37,13 @@ export function useProfileHandlers(
   };
 
   const handleSetFavorite = async (pokemonId: number | null) => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setFavoritePokemon({variables: {pokemonId}});
       if (result.data?.setFavoritePokemon) {
@@ -49,6 +58,13 @@ export function useProfileHandlers(
   };
 
   const handleSetSelected = async (pokemonId: number | null) => {
+    // Flush pending candy before mutation to prevent candy reset
+    try {
+      await flushPendingCandy();
+    } catch {
+      // Silent fail - not critical for this operation
+    }
+
     try {
       const result = await setSelectedPokemon({variables: {pokemonId}});
       if (result.data?.setSelectedPokemon) {
