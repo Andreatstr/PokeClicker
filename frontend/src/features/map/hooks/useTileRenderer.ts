@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {TILE_SIZE} from '@/config/gameConfig';
 
 // Tile configuration
@@ -79,7 +79,10 @@ export function useTileRenderer(
 ): TileRendererState & {tileCacheRef: React.RefObject<TileCache>} {
   const [visibleTiles, setVisibleTiles] = useState<VisibleTile[]>([]);
   const [visiblePokemon, setVisiblePokemon] = useState<VisiblePokemon[]>([]);
-  const [isLoading] = useState(false);
+  // isLoading: true if any visible tile is not loaded
+  const isLoading = React.useMemo(() => {
+    return visibleTiles.some((tile) => !tile.loaded);
+  }, [visibleTiles]);
   const cacheRef = useRef<TileCache>({});
   const loadingTilesRef = useRef<Set<string>>(new Set());
 
