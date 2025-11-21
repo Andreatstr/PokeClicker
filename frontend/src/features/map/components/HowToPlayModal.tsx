@@ -423,7 +423,7 @@ export function HowToPlayModal({
                 >
                   Controls
                 </h3>
-                <div className="flex items-start justify-center gap-8 md:gap-14 flex-wrap">
+                <div className="flex items-start justify-center gap-4 md:gap-12 flex-wrap">
                   <div className="flex flex-col gap-2 items-center">
                     <span
                       className="pixel-font text-[11px] font-bold text-center"
@@ -569,7 +569,7 @@ export function HowToPlayModal({
                         </>
                       )}
                       <div className="flex items-center justify-center gap-2">
-                        {/* Sp.Def demo button */}
+                        {/* Sp.Atk demo button */}
                         <button
                           type="button"
                           className={`relative px-1 py-0.5 md:px-3 md:py-2 pixel-font text-[9px] md:text-xs border-2 rounded shadow-[2px_2px_0_rgba(0,0,0,1)] overflow-hidden ring-2 ring-yellow-400 ring-opacity-75 shadow-lg shadow-yellow-400/50 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#0066ff] focus-visible:outline-offset-2 ${
@@ -639,6 +639,69 @@ export function HowToPlayModal({
                         </button>
                       </div>
                     </div>
+                  </div>
+                  <div className="flex flex-col gap-2 items-center">
+                    <span
+                      className="pixel-font text-[11px] font-bold text-center"
+                      style={{color: accentColor}}
+                    >
+                      Battle results
+                    </span>
+                    <div className="flex items-center justify-center gap-2">
+                      {!isMobile && (
+                        <>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ◀
+                          </span>
+                          <span
+                            className="pixel-font text-xs border-2 px-3 py-1"
+                            style={{
+                              background: isDarkMode ? '#f9fafb' : '#ffffff',
+                              color: '#111827',
+                              borderColor: 'black',
+                              boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                            }}
+                          >
+                            ▶
+                          </span>
+                        </>
+                      )}
+                      <span
+                        className="pixel-font text-[10px]"
+                        style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                      >
+                        {isMobile ? 'Tap buttons to select' : 'to switch'}
+                      </span>
+                    </div>
+                    {!isMobile && (
+                      <div className="flex items-center justify-center gap-2 mt-1">
+                        <span
+                          className="pixel-font text-xs border-2 px-2 py-1"
+                          style={{
+                            background: isDarkMode ? '#f9fafb' : '#ffffff',
+                            color: '#111827',
+                            borderColor: 'black',
+                            boxShadow: '2px 2px 0 rgba(0,0,0,1)',
+                          }}
+                        >
+                          Space
+                        </span>
+                        <span
+                          className="pixel-font text-[10px]"
+                          style={{color: isDarkMode ? '#e5e7eb' : '#111827'}}
+                        >
+                          to confirm
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
