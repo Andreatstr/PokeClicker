@@ -6,6 +6,17 @@
 
 This document describes the development workflow, tools, and practices used in the PokéClicker project.
 
+## Planing
+
+We started by defining both functional goals and visual guidelines for the project on a [tlDraw page](https://www.tldraw.com/f/049xgkMdn-zNk9VtsBNze?d=v3831.1148.11094.8086.qnYLpx4YdWKrmg5_n2_n0).
+Here, we sketched out user flows, page layouts, and color schemes, which provided a clear framework for both development and design. This visual plan was especially valuable in the early stages and has remained a central reference point throughout the project.
+
+<div>
+  <h3>tlDraw Overview</h3>
+  <img src="images/tlDraw.webp" width="600">
+  <h4>For a detailed view, use the link above.</h4>
+</div>
+
 ## Pre-commit Hooks
 
 The project uses automated code quality checks on every commit.
