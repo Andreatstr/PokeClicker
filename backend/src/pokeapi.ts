@@ -179,7 +179,10 @@ async function fetchEvolutionChain(speciesUrl: string): Promise<number[]> {
 
     return evolutionIds;
   } catch (error) {
-    console.error('Error fetching evolution chain:', error);
+    console.warn(
+      'Evolution chain fetch failed (PokéAPI issue):',
+      error instanceof Error ? error.message : error
+    );
     return [];
   }
 }
