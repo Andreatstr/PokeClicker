@@ -541,7 +541,7 @@ export function HowToPlayModal({
                       {!isMobile && (
                         <>
                           <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
+                            className="pixel-font text-xs border-2 px-3 py-1"
                             style={{
                               background: isDarkMode ? '#f9fafb' : '#ffffff',
                               color: '#111827',
@@ -549,10 +549,10 @@ export function HowToPlayModal({
                               boxShadow: '2px 2px 0 rgba(0,0,0,1)',
                             }}
                           >
-                            ◀ ▶
+                            ◀
                           </span>
                           <span
-                            className="pixel-font text-xs border-2 px-2 py-1"
+                            className="pixel-font text-xs border-2 px-3 py-1"
                             style={{
                               background: isDarkMode ? '#f9fafb' : '#ffffff',
                               color: '#111827',
@@ -560,7 +560,7 @@ export function HowToPlayModal({
                               boxShadow: '2px 2px 0 rgba(0,0,0,1)',
                             }}
                           >
-                            A/D
+                            ▶
                           </span>
                         </>
                       )}
