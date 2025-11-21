@@ -22,12 +22,14 @@ const MAP_HEIGHT = 6080; // Total map height in pixels (based on tilemap dimensi
 
 // Define multiple teleport points (safe spawn locations)
 const TELEPORT_POINTS = [
-  {x: 4746, y: 4210, name: 'Central Town'},
-  {x: 1650, y: 4500, name: 'Western Beach'},
-  {x: 3270, y: 2200, name: 'Western Plains'},
-  {x: 5270, y: 2110, name: 'Northern Town'},
-  {x: 7800, y: 4900, name: 'Eastern Beach'},
-  {x: 9600, y: 2150, name: 'North Eastern Mountains'},
+  {x: 4746, y: 4270, name: 'Goldenrod City'},
+  {x: 5270, y: 2110, name: 'Ecruteak City'},
+  {x: 3470, y: 3250, name: 'Olivine City'},
+  {x: 1650, y: 4500, name: 'Cianwood City'},
+  {x: 7470, y: 2200, name: 'Mahogany Town'},
+  {x: 9600, y: 2150, name: 'Blackthorn City'},
+  {x: 8030, y: 5000, name: 'Cherrygrove City'},
+  {x: 6590, y: 3290, name: 'Violet City'},
 ] as const;
 
 // Sprite sheet layout: 4 rows (down, left, right, up) x 3 columns (animation frames)
@@ -109,17 +111,24 @@ export function useMapMovement(
     ? `${PLAYER_POSITION_KEY}_${user._id}`
     : PLAYER_POSITION_KEY;
 
+  const getRandomInt = (max: number) => {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] % max;
+  };
+
   // Helper for random teleport position - select from predefined points (excludes last location)
   const getRandomTeleportPoint = (excludeIndex?: number | null) => {
     // Filter out the last teleported location if provided
-    const availablePoints =
+    const points =
       excludeIndex !== null && excludeIndex !== undefined
-        ? TELEPORT_POINTS.filter((_, index) => index !== excludeIndex)
+        ? TELEPORT_POINTS.filter((_, i) => i !== excludeIndex)
         : TELEPORT_POINTS;
 
-    const randomPoint =
-      availablePoints[Math.floor(Math.random() * availablePoints.length)];
-    return {x: randomPoint.x, y: randomPoint.y};
+    // Pick a random index from availablePoints
+    const idx = getRandomInt(points.length);
+    const p = points[idx];
+    return {x: p.x, y: p.y};
   };
 
   // Character position in world coordinates - restore from user-specific localStorage
