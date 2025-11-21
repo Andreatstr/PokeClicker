@@ -596,16 +596,19 @@ export const resolvers = {
 
       if (sortBy === 'name') {
         sort.name = sortOrder === 'asc' ? 1 : -1;
+        sort.id = 1; // Tiebreaker for consistent pagination
       } else if (sortBy === 'type') {
         sort.types = sortOrder === 'asc' ? 1 : -1;
-        sort.id = 1;
+        sort.id = 1; // Tiebreaker for consistent pagination
       } else if (sortBy === 'price') {
         // Sort by priceNumeric (log10 scale) for correct numeric ordering
         // String-based sorting would incorrectly place "1000" before "200"
         sort.priceNumeric = sortOrder === 'asc' ? 1 : -1;
+        sort.id = 1; // Tiebreaker for Pokemon with same price
       } else if (sortBy === 'stats') {
         // Sort by BST (Base Stat Total) stored in database
         sort.bst = sortOrder === 'asc' ? 1 : -1;
+        sort.id = 1; // Tiebreaker for Pokemon with same BST
       } else {
         sort.id = sortOrder === 'asc' ? 1 : -1;
       }
