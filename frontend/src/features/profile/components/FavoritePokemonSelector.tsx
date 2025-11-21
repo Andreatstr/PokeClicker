@@ -39,8 +39,11 @@ export function FavoritePokemonSelector({
 
   // Fetch owned Pokemon IDs sorted by BST (descending) from backend
   // Only fetches IDs, not full Pokemon data, for performance
-  const {data: idsData, loading: loadingIds} =
-    useOwnedPokemonIdsSortedByBST(userId);
+  const {
+    data: idsData,
+    loading: loadingIds,
+    refetch,
+  } = useOwnedPokemonIdsSortedByBST(userId);
   const sortedIds = idsData?.ownedPokemonIdsSortedByBST ?? [];
 
   // Paginate the sorted IDs for current page
@@ -61,6 +64,14 @@ export function FavoritePokemonSelector({
   useEffect(() => {
     if (isOpen) setPage(0);
   }, [isOpen, sortedIds.length]);
+
+  // Refetch owned Pokemon IDs from backend every time the modal opens
+  // Ensures the selector always shows the latest collection without page refresh
+  useEffect(() => {
+    if (isOpen) {
+      refetch();
+    }
+  }, [isOpen, refetch]);
 
   /**
    * Helper to calculate total base stats (BST) for a Pokemon

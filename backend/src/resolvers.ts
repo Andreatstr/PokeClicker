@@ -485,8 +485,6 @@ export const resolvers = {
       // Fetch user's owned Pokémon IDs
       const user = await users.findOne({_id: new ObjectId(userId)});
       const ownedIds: number[] = user?.owned_pokemon_ids ?? [];
-      console.log('[ownedPokemonIdsSortedByBST] userId:', userId);
-      console.log('[ownedPokemonIdsSortedByBST] ownedIds:', ownedIds);
 
       if (ownedIds.length === 0) {
         console.log(
@@ -499,13 +497,11 @@ export const resolvers = {
       const metas = await metadataCollection
         .find({id: {$in: ownedIds}})
         .toArray();
-      console.log('[ownedPokemonIdsSortedByBST] metas:', metas);
 
       // Sort by BST descending
       metas.sort((a, b) => (b.bst ?? 0) - (a.bst ?? 0));
 
       const sortedIds = metas.map((meta) => meta.id);
-      console.log('[ownedPokemonIdsSortedByBST] sortedIds:', sortedIds);
       return sortedIds;
     },
     pokedex: async (
