@@ -1,6 +1,6 @@
 # Security
 
-**[Home](../README.md)** | **[Setup](./setup.md)** | **[Architecture](./architecture.md)** | **[Testing](./testing.md)** | **[Security](./security.md)** | **[Sustainability](./sustainability.md)** | **[Development Workflow](./development-workflow.md)** | **[AI Usage](./ai-usage.md)**
+**[Home](/README.md)** | **[Setup](/docs/setup.md)** | **[Architecture](/docs/architecture.md)** | **[Testing](/docs/testing.md)** | **[Security](/docs/security.md)** | **[Sustainability](/docs/sustainability.md)** | **[Development Workflow](/docs/development-workflow.md)** | **[AI Usage](/docs/ai-usage.md)**
 
 ---
 
