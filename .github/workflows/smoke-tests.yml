@@ -10,6 +10,7 @@ jobs:
   quality-checks:
     timeout-minutes: 15
     runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,64 +20,108 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        shell: pwsh
 
       - name: Check Prettier formatting
         run: |
-          cd frontend && npm run format:check
-          cd ../backend && npm run format:check
+          cd frontend
+          npm run format:check
+          cd ../backend
+          npm run format:check
+        shell: pwsh
 
       - name: Run ESLint
         run: npm run lint
+        shell: pwsh
 
       - name: Build project
         run: npm run build
+        shell: pwsh
 
       - name: Run frontend unit tests
         run: npm run test:run
         working-directory: ./frontend
+        shell: pwsh
 
       - name: Run backend unit tests
         run: npm run test:run
         working-directory: ./backend
+        shell: pwsh
 
       - name: Install Playwright Browsers
         run: npx playwright install chromium
+        shell: pwsh
 
-      - name: Check MongoDB status
+      - name: Check MongoDB status (Windows)
+        shell: pwsh
         run: |
-          # Check if MongoDB is already running
-          if systemctl is-active --quiet mongodb || systemctl is-active --quiet mongod; then
-            echo "MongoDB is already running"
-          else
-            echo "MongoDB is not running, attempting to start..."
-            systemctl start mongodb 2>/dev/null || systemctl start mongod 2>/dev/null || echo "Could not start MongoDB with systemctl, assuming it's already available"
-          fi
-          sleep 2
+          $serviceNames = @("MongoDB", "mongod")
 
-      - name: Find available port and start backend server
-        run: |
-          # Find an available port between 3000-4000
-          PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
-          echo "Using port: $PORT"
-          echo "BACKEND_PORT=$PORT" >> $GITHUB_ENV
+          $isRunning = $false
+          foreach ($svc in $serviceNames) {
+            if (Get-Service -Name $svc -ErrorAction SilentlyContinue) {
+              if ((Get-Service -Name $svc).Status -eq "Running") {
+                Write-Host "MongoDB is running ($svc)"
+                $isRunning = $true
+              } else {
+                Write-Host "MongoDB is not running. Starting service $svc..."
+                Start-Service $svc
+                Start-Sleep -Seconds 2
+                $isRunning = $true
+              }
+            }
+          }
 
-          cd backend
-          PORT=$PORT npm run start &
-          sleep 5
-          curl --retry 10 --retry-delay 1 --retry-connrefused "http://localhost:$PORT/?query=%7Bhealth%7Bstatus%7D%7D"
+          if (-not $isRunning) {
+            Write-Host "MongoDB service not found. Assuming external MongoDB available."
+          }
+
+      - name: Find available port & start backend (Windows)
+        shell: pwsh
         env:
           MONGODB_URI: mongodb://localhost:27017/pokeclicker_test
-
-      - name: Create .env file for frontend
         run: |
-          echo "VITE_GRAPHQL_URL=http://localhost:${{ env.BACKEND_PORT }}/" > frontend/.env.local
+          # Find free port (Windows-safe)
+          $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, 0)
+          $listener.Start()
+          $port = $listener.LocalEndpoint.Port
+          $listener.Stop()
 
-      # Smoke tests temporarily disabled due to CI environment issues with onboarding modal
-      # TODO: Re-enable once onboarding modal blocking issue is resolved in CI
-      # - name: Run smoke tests
-      #   run: npx playwright test smoke.spec.ts --project=chromium
+          Write-Host "Using port: $port"
+          Add-Content -Path $env:GITHUB_ENV -Value "BACKEND_PORT=$port"
 
-      - uses: actions/upload-artifact@v3
+          # Start backend in background
+          Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow
+
+          # Wait for service to boot
+          Start-Sleep -Seconds 5
+
+          # Retry health check
+          $success = $false
+          for ($i = 1; $i -le 10; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:$port/?query=%7Bhealth%7Bstatus%7D%7D" -UseBasicParsing
+              if ($response.StatusCode -eq 200) {
+                Write-Host "Backend healthy!"
+                $success = $true
+                break
+              }
+            } catch {
+              Write-Host "Health check failed. Retry $i/10..."
+            }
+            Start-Sleep -Seconds 1
+          }
+
+          if (-not $success) {
+            Write-Error "Backend failed to start."
+          }
+
+      - name: Create .env file for frontend (Windows)
+        shell: pwsh
+        run: |
+          "VITE_GRAPHQL_URL=http://localhost:$env:BACKEND_PORT/" | Out-File -FilePath "frontend/.env.local" -Encoding utf8
+
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-results
