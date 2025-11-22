@@ -86,6 +86,9 @@ jobs:
           # Start backend in background
           $backendProcess = Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow -PassThru
 
+          # Initial wait for server to boot and connect to MongoDB
+          Start-Sleep -Seconds 20
+
           # Retry health check with exponential backoff
           $success = $false
           $waitTime = 2
