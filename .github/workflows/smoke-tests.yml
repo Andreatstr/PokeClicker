@@ -83,10 +83,10 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "BACKEND_PORT=$port"
 
           # Start backend in background
-          Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow
+          Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow -Environment @{ "PORT" = $port }
 
           # Wait for service to boot
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 15
 
           # Retry health check
           $success = $false
