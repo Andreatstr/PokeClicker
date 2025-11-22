@@ -83,18 +83,26 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "BACKEND_PORT=$port"
           $env:PORT = $port
 
-          # Start backend in background
-          $backendProcess = Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow -PassThru
+          # Start backend in background and redirect logs
+          $backendProcess = Start-Process -FilePath "npm" `
+                                          -ArgumentList "run","start" `
+                                          -WorkingDirectory "backend" `
+                                          -NoNewWindow `
+                                          -PassThru `
+                                          -RedirectStandardOutput "backend.log" `
+                                          -RedirectStandardError "backend.err"
 
-          # Initial wait for server to boot and connect to MongoDB
-          Start-Sleep -Seconds 20
+          Write-Host "Backend started in background. Waiting for initialization..."
+
+          # Wait longer initially for slow runners
+          Start-Sleep -Seconds 30
 
           # Retry health check with exponential backoff
           $success = $false
-          $waitTime = 2
-          for ($i = 1; $i -le 10; $i++) {
+          $waitTime = 5
+          for ($i = 1; $i -le 20; $i++) {  # more retries for slow runner
               try {
-                  $response = Invoke-WebRequest -Uri "http://localhost:$port/?query=%7Bhealth%7Bstatus%7D%7D" -UseBasicParsing -TimeoutSec 2
+                  $response = Invoke-WebRequest -Uri "http://127.0.0.1:$port/?query=%7Bhealth%7Bstatus%7D%7D" -UseBasicParsing -TimeoutSec 5
                   if ($response.StatusCode -eq 200) {
                       Write-Host "Backend healthy after $i attempt(s)!"
                       $success = $true
@@ -104,12 +112,16 @@ jobs:
                   Write-Host "Health check failed on attempt $i, retrying in $waitTime seconds..."
               }
               Start-Sleep -Seconds $waitTime
-              $waitTime = [Math]::Min($waitTime * 2, 10)  # exponential backoff capped at 10s
+              $waitTime = [Math]::Min($waitTime * 2, 20)  # exponential backoff capped at 20s
           }
 
           if (-not $success) {
-              Write-Error "Backend failed to start."
-              # Kill backend if it’s still running
+              Write-Error "Backend failed to start after multiple attempts."
+              Write-Host "---- Backend Logs ----"
+              Get-Content backend.log -Raw
+              Get-Content backend.err -Raw
+
+              # Kill backend if still running
               if (!$backendProcess.HasExited) {
                   $backendProcess.Kill()
               }
