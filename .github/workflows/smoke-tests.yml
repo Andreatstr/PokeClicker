@@ -21,12 +21,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Check Prettier formatting
-        run: |
-          cd frontend
-          npm run format:check
-          cd ../backend
-          npm run format:check
+      - name: Check frontend Prettier formatting
+        run: npm run format:check
+        working-directory: ./frontend
+
+      - name: Check backend Prettier formatting
+        run: npm run format:check
+        working-directory: ./backend
 
       - name: Run ESLint
         run: npm run lint
