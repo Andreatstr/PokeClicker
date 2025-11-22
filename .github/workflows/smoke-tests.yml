@@ -73,7 +73,7 @@ jobs:
         env:
           MONGODB_URI: mongodb://localhost:27017/pokeclicker_test
         run: |
-          # Find free port (Windows-safe)
+          # Find free port
           $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, 0)
           $listener.Start()
           $port = $listener.LocalEndpoint.Port
@@ -81,31 +81,35 @@ jobs:
 
           Write-Host "Using port: $port"
           Add-Content -Path $env:GITHUB_ENV -Value "BACKEND_PORT=$port"
+          $env:PORT = $port
 
           # Start backend in background
-          Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow -Environment @{ "PORT" = $port }
+          $backendProcess = Start-Process -FilePath "npm" -ArgumentList "run","start" -WorkingDirectory "backend" -NoNewWindow -PassThru
 
-          # Wait for service to boot
-          Start-Sleep -Seconds 15
-
-          # Retry health check
+          # Retry health check with exponential backoff
           $success = $false
+          $waitTime = 2
           for ($i = 1; $i -le 10; $i++) {
-            try {
-              $response = Invoke-WebRequest -Uri "http://localhost:$port/?query=%7Bhealth%7Bstatus%7D%7D" -UseBasicParsing
-              if ($response.StatusCode -eq 200) {
-                Write-Host "Backend healthy!"
-                $success = $true
-                break
+              try {
+                  $response = Invoke-WebRequest -Uri "http://localhost:$port/?query=%7Bhealth%7Bstatus%7D%7D" -UseBasicParsing -TimeoutSec 2
+                  if ($response.StatusCode -eq 200) {
+                      Write-Host "Backend healthy after $i attempt(s)!"
+                      $success = $true
+                      break
+                  }
+              } catch {
+                  Write-Host "Health check failed on attempt $i, retrying in $waitTime seconds..."
               }
-            } catch {
-              Write-Host "Health check failed. Retry $i/10..."
-            }
-            Start-Sleep -Seconds 1
+              Start-Sleep -Seconds $waitTime
+              $waitTime = [Math]::Min($waitTime * 2, 10)  # exponential backoff capped at 10s
           }
 
           if (-not $success) {
-            Write-Error "Backend failed to start."
+              Write-Error "Backend failed to start."
+              # Kill backend if it’s still running
+              if (!$backendProcess.HasExited) {
+                  $backendProcess.Kill()
+              }
           }
 
       - name: Create .env file for frontend (Windows)
