@@ -75,10 +75,11 @@ export function useCandySync({
    * Called automatically by triggers or manually before upgrades
    */
   const flushPendingCandy = useCallback(async () => {
-    if (toDecimal(unsyncedAmount).eq(0) || !isAuthenticated) return;
+    const currentUnsynced = unsyncedAmountRef.current;
+    if (toDecimal(currentUnsynced).eq(0) || !isAuthenticated) return;
 
     // Snapshot the amount to sync and clear buffer immediately
-    const amountToSync = unsyncedAmount;
+    const amountToSync = currentUnsynced;
     setUnsyncedAmount('0');
     unsyncedAmountRef.current = '0';
     lastSyncRef.current = Date.now();
@@ -105,7 +106,7 @@ export function useCandySync({
         GameConfig.clicker.errorDisplayDuration
       );
     }
-  }, [unsyncedAmount, isAuthenticated, updateRareCandy, updateUser]);
+  }, [isAuthenticated, updateRareCandy, updateUser]);
 
   // Auto-flush effect: Time-based batching only (no click threshold)
   // Timer starts when first candy is added, flushes after time threshold

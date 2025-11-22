@@ -95,22 +95,44 @@ export function BattleResult({
   const [catchError, setCatchError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isNewCatch) {
-      catchPokemon({
-        variables: {pokemonId: opponentPokemon.id},
-      })
-        .then((result) => {
-          // Update auth context with new owned_pokemon_ids to ensure Pokedex Bonus updates
-          if (result.data?.catchPokemon) {
-            updateUser(result.data.catchPokemon);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to catch Pokemon:', error);
-          setCatchError('Failed to add Pokemon to Pokedex');
+    if (!isNewCatch) return;
+
+    let mounted = true;
+
+    (async () => {
+      try {
+        // Ensure any optimistic candy is flushed so the server-side user
+        // returned by the catch mutation includes the newly-awarded candy.
+        await flushPendingCandy();
+      } catch (err) {
+        console.log(err);
+        // Non-fatal: proceed to attempt catch even if flush fails
+      }
+
+      try {
+        const result = await catchPokemon({
+          variables: {pokemonId: opponentPokemon.id},
         });
-    }
-  }, [isNewCatch, opponentPokemon.id, catchPokemon, updateUser]);
+        // Update auth context with new owned_pokemon_ids to ensure Pokedex Bonus updates
+        if (mounted && result.data?.catchPokemon) {
+          updateUser(result.data.catchPokemon);
+        }
+      } catch (error) {
+        console.error('Failed to catch Pokemon:', error);
+        setCatchError('Failed to add Pokemon to Pokedex');
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [
+    isNewCatch,
+    opponentPokemon.id,
+    catchPokemon,
+    updateUser,
+    flushPendingCandy,
+  ]);
 
   const handlePlayWithPokemon = useCallback(async () => {
     setIsSettingPokemon(true);

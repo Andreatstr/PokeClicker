@@ -32,6 +32,12 @@ const TELEPORT_POINTS = [
   {x: 6590, y: 3290, name: 'Violet City'},
 ] as const;
 
+const getRandomInt = (max: number) => {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0] % max;
+};
+
 // Sprite sheet layout: 4 rows (down, left, right, up) x 3 columns (animation frames)
 type Direction = 'down' | 'left' | 'right' | 'up';
 
@@ -111,14 +117,8 @@ export function useMapMovement(
     ? `${PLAYER_POSITION_KEY}_${user._id}`
     : PLAYER_POSITION_KEY;
 
-  const getRandomInt = (max: number) => {
-    const arr = new Uint32Array(1);
-    crypto.getRandomValues(arr);
-    return arr[0] % max;
-  };
-
   // Helper for random teleport position - select from predefined points (excludes last location)
-  const getRandomTeleportPoint = (excludeIndex?: number | null) => {
+  const getRandomTeleportPoint = useCallback((excludeIndex?: number | null) => {
     // Filter out the last teleported location if provided
     const points =
       excludeIndex !== null && excludeIndex !== undefined
@@ -129,7 +129,7 @@ export function useMapMovement(
     const idx = getRandomInt(points.length);
     const p = points[idx];
     return {x: p.x, y: p.y};
-  };
+  }, []);
 
   // Character position in world coordinates - restore from user-specific localStorage
   const [worldPosition, setWorldPosition] = useState(() => {
@@ -304,7 +304,7 @@ export function useMapMovement(
         setWorldPosition(getRandomTeleportPoint());
       }
     }
-  }, [user?._id, userPositionKey]);
+  }, [user?._id, userPositionKey, getRandomTeleportPoint]);
 
   // Once the collision map is loaded, validate current position and snap to nearest walkable
   useEffect(() => {
@@ -776,6 +776,7 @@ export function useMapMovement(
     collisionChecker.collisionMapLoaded,
     findNearestWalkable,
     lastTeleportIndex,
+    getRandomTeleportPoint,
   ]);
 
   return {
