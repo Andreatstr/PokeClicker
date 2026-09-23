@@ -12,6 +12,7 @@
  * 3. Creates indexes for efficient querying
  * 4. Precomputes static filter counts for type and generation filters
  */
+import 'dotenv/config';
 import {connectToDatabase} from './db.js';
 import fetch from 'node-fetch';
 import {ObjectId} from 'mongodb';
